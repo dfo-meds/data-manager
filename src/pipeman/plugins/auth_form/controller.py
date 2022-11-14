@@ -3,20 +3,22 @@ import flask_login as fl
 from flask_wtf import FlaskForm
 import wtforms as wtf
 import wtforms.validators as wtfv
+from pipeman.i18n import DelayedTranslationString as Dts
+from pipeman.i18n import gettext
 import flask
 
 
 class LoginForm(FlaskForm):
 
-    username = wtf.StringField()
-    password = wtf.PasswordField()
+    username = wtf.StringField(Dts("pipeman.plugins.auth_form.username"))
+    password = wtf.PasswordField(Dts("pipeman.plugins.auth_form.password"))
 
 
 class FormAuthenticationManager(AuthenticationManager):
 
-    def __init__(self):
+    def __init__(self, form_template_name="form.html"):
         super().__init__()
-        self.template = self.config.as_str(("pipeman", "authentication", "form_template"), default="form.html")
+        self.template = form_template_name
 
     def login_handler(self):
         form = LoginForm()
@@ -26,14 +28,12 @@ class FormAuthenticationManager(AuthenticationManager):
                 fl.login_user(user)
                 return self.login_success()
             else:
-                #TODO: Translate
-                flask.flash("Invalid username or password")
+                flask.flash(gettext("pipeman.plugins.auth_form.login_error"), "error")
         return flask.render_template(self.template, form=form)
 
     def logout_handler(self):
         fl.logout_user()
-        #TODO: Translate
-        flask.flash("User logged out successfully")
+        flask.flash(gettext("pipeman.plugins.auth_form.login_success"), "success")
         return self.logout_success()
 
     def load_user(self, username):

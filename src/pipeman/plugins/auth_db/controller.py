@@ -1,4 +1,4 @@
-from pipeman.plugins.pipeman_form_auth.controller import FormAuthenticationManager
+from pipeman.plugins.auth_form.controller import FormAuthenticationManager
 from pipeman.auth.auth import AuthenticatedUser, hash_password
 from pipeman.db.db import Database
 from autoinject import injector
@@ -11,8 +11,8 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
     db: Database = None
 
     @injector.construct
-    def __init__(self):
-        super().__init__()
+    def __init__(self, form_template_name):
+        super().__init__(form_template_name)
 
     def load_user(self, username):
         with self.db as session:
