@@ -45,7 +45,6 @@ class FieldCreator:
     def __init__(self):
         self._factories = {}
         self.register_factory(_BuiltInFactory())
-        # TODO: plugin pattern for registry here
 
     def register_factory(self, factory: GenericFactory):
         self._factories[factory.factory_name] = factory

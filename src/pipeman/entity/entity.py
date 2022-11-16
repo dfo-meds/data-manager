@@ -1,5 +1,8 @@
 from pipeman.entity.field_factory import FieldCreator
 from autoinject import injector
+from wtforms.form import BaseForm
+import flask
+from pipeman.i18n import gettext
 
 
 class Entity:
@@ -26,3 +29,22 @@ class Entity:
     def process_form_data(self, form_data):
         for fn in self._fields:
             self._fields[fn].value = form_data[fn]
+
+
+class EntityForm(BaseForm):
+
+    def __init__(self, entity, *args, **kwargs):
+        self.entity = entity
+        super().__init__(self.entity.controls(), *args, **kwargs)
+
+    def handle_form(self):
+        if flask.request.method == "POST":
+            self.process(flask.request.form)
+            if self.validate():
+                self.entity.process_form_data(self.data)
+                return True
+            else:
+                for key in self.errors:
+                    for m in self.errors[key]:
+                        flask.flash(gettext("pipeman.entity.form_error") % (self._fields[key].label.text, m), "error")
+        return False
