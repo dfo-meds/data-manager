@@ -2,7 +2,12 @@ from pipeman.i18n import TranslationManager
 from autoinject import injector
 
 
-class TranslatableError(Exception):
+class PipemanError(Exception):
+
+    pass
+
+
+class TranslatableError(PipemanError):
 
     tm: TranslationManager = None
 
@@ -12,4 +17,8 @@ class TranslatableError(Exception):
 
 
 class UserInputError(TranslatableError):
+    pass
+
+
+class DataTypeNotSupportedError(PipemanError):
     pass
