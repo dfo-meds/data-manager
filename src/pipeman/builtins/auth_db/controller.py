@@ -1,4 +1,4 @@
-from pipeman.plugins.auth_form.controller import FormAuthenticationManager
+from pipeman.builtins.auth_form.controller import FormAuthenticationManager
 from pipeman.auth import AuthenticatedUser, SecurityHelper
 from pipeman.db.db import Database
 from autoinject import injector

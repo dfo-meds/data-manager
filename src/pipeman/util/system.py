@@ -68,6 +68,13 @@ class System:
                 if hasattr(mod, "init_plugin"):
                     getattr(mod, "init_plugin")()
                 self.plugins.add(name)
+        import pipeman.builtins as int_plg
+        for _, name, _ in pkgutil.iter_modules(int_plg.__path__, "pipeman.builtins."):
+            if name not in self.plugins:
+                mod = importlib.import_module(name)
+                if hasattr(mod, "init_plugin"):
+                    getattr(mod, "init_plugin")()
+                self.plugins.add(name)
 
     def init_app(self, app):
         if "flask" in self.config:
