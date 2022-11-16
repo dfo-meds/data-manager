@@ -16,12 +16,14 @@ def configure_pipeman(config: zr.ApplicationConfig):
 def init():
     from pipeman.util.system import System
     from pipeman.auth import init as auth_init
+    from pipeman.core import init as core_init
     from pipeman.i18n import init as i18n_init
 
     @injector.inject
     def _do_init(system: System = None):
         i18n_init(system)
         auth_init(system)
+        core_init(system)
         system.init()
         return system
 

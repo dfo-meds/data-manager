@@ -1,5 +1,6 @@
 import click
 
+
 class CommandLineInterface(click.MultiCommand):
 
     def __init__(self, commands: dict, *args, **kwargs):

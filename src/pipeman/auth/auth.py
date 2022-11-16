@@ -53,8 +53,9 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
-        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_route"), default="/")
-        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_route"), default="/")
+        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="/")
+        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="/")
+        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="/")
 
     def login_handler(self):
         raise NotImplementedError()
@@ -76,3 +77,6 @@ class AuthenticationManager:
 
     def logout_success(self):
         return flask.redirect(self.logout_success_route)
+
+    def unauthorized_handler(self):
+        return flask.redirect(self.unauthorized_route)

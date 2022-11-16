@@ -57,11 +57,16 @@ def create(username, email, display="", password=None, password_entry="", no_err
             raise ex
 
 
-@user.command
+@user.group
+def group():
+    pass
+
+
+@group.command
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("group_name")
-def assign_to(username, group_name, no_error=False):
+def assign(username, group_name, no_error=False):
     from .util import assign_to_group
     try:
         assign_to_group(group_name, username)
@@ -72,14 +77,49 @@ def assign_to(username, group_name, no_error=False):
             raise ex
 
 
-@user.command
+@group.command
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("group_name")
-def remove_from(username, group_name, no_error=False):
+def remove(username, group_name, no_error=False):
     from .util import remove_from_group
     try:
         remove_from_group(group_name, username)
+    except UserInputError as ex:
+        if no_error:
+            print(str(ex))
+        else:
+            raise ex
+
+
+@user.group
+def org():
+    pass
+
+
+@org.command("assign")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@click.argument("username")
+@click.argument("org_name")
+def assign_org(username, org_name, no_error=False):
+    from .util import assign_to_organization
+    try:
+        assign_to_organization(org_name, username)
+    except UserInputError as ex:
+        if no_error:
+            print(str(ex))
+        else:
+            raise ex
+
+
+@org.command("remove")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@click.argument("username")
+@click.argument("org_name")
+def remove_org(username, org_name, no_error=False):
+    from .util import remove_from_organization
+    try:
+        remove_from_organization(org_name, username)
     except UserInputError as ex:
         if no_error:
             print(str(ex))

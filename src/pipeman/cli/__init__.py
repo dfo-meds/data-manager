@@ -1,1 +1,2 @@
-from .cli import CommandLineInterface
+from .base import CommandLineInterface
+

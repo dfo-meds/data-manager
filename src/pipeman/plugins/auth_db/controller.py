@@ -26,6 +26,8 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
                 return None
+            if user.phash is None:
+                return None
             pw_hash = self.sh.hash_password(password, user.salt)
             if not self.sh.compare_digest(pw_hash, user.phash):
                 return None

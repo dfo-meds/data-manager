@@ -13,6 +13,7 @@ def auth_init_app(app, am: AuthenticationManager):
     lm.login_view = "auth.login"
     lm.user_loader(am.load_user)
     lm.request_loader(am.login_from_request)
+    lm.unauthorized_handler(am.unauthorized_handler)
     lm.anonymous_user = am.anonymous_user
 
     @app.before_request
