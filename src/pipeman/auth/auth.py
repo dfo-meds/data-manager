@@ -3,6 +3,24 @@ import flask
 import zirconium as zr
 from autoinject import injector
 import hashlib
+import typing as t
+from functools import wraps
+
+
+def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
+    if isinstance(perm_names, str):
+        perm_names = [perm_names]
+
+    def _decorator(func: t.Callable) -> t.Callable:
+        @wraps(func)
+        def _decorated(*args, **kwargs):
+            if not fl.current_user.is_authenticated:
+                return flask.current_app.login_manager.unauthorized()
+            if not any(fl.current_user.has_permission(x) for x in perm_names):
+                return flask.current_app.login_manager.unauthorized()
+            return flask.current_app.ensure_sync(func)(*args, **kwargs)
+        return _decorated
+    return _decorator
 
 
 class AuthenticatedUser(fl.UserMixin):

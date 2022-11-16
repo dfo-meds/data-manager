@@ -1,7 +1,7 @@
 import flask_login
 from autoinject import injector
 from pipeman.util import System
-from .auth import AuthenticationManager, AuthenticatedUser
+from .auth import AuthenticationManager, AuthenticatedUser, require_permission
 from .secure import SecurityHelper
 import flask
 
