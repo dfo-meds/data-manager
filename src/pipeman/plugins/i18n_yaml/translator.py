@@ -16,6 +16,9 @@ class YamlTranslationManager:
             if file.name.endswith(".yaml") or file.name.endswith(".yml"):
                 self._dictionary_lookup[file.name[:file.name.rfind(".")]] = file.path
 
+    def supported_languages(self):
+        return self._dictionary_lookup.keys()
+
     def _ensure_dictionary(self, lang):
         if lang not in self._dictionaries:
             with open(self._dictionary_lookup[lang], "r") as h:
@@ -24,7 +27,7 @@ class YamlTranslationManager:
                     self._dictionaries[lang] = {}
 
     def get_text(self, text_key: str, default: str = None) -> str:
-        lang = self.ld.detect_language(self._dictionary_lookup.keys())
+        lang = self.ld.detect_language(self.supported_languages())
         if not lang:
             raise ValueError("Could not agree on a language")
         self._ensure_dictionary(lang)

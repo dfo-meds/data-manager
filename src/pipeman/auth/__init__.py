@@ -3,6 +3,7 @@ from autoinject import injector
 from pipeman.util import System
 from .auth import AuthenticationManager, AuthenticatedUser
 from .secure import SecurityHelper
+import flask
 
 
 @injector.inject
@@ -13,6 +14,11 @@ def auth_init_app(app, am: AuthenticationManager):
     lm.user_loader(am.load_user)
     lm.request_loader(am.login_from_request)
     lm.anonymous_user = am.anonymous_user
+
+    @app.before_request
+    def set_session_vars():
+        flask.session.permanent = True
+        flask.session.modified = True
 
 
 def init(system: System):
