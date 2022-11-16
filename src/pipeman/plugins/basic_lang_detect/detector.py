@@ -12,7 +12,7 @@ class BasicRequestLanguageDetector:
         if flask.has_request_context():
             if "languages" not in flask.g:
                 opts = []
-                # The query string option is highest priority, if supported
+                # The query string option is highest priority, if available
                 qs = flask.request.args.get("lang")
                 if qs:
                     opts.append((qs, 2))
@@ -35,5 +35,3 @@ class BasicRequestLanguageDetector:
         if self._default_lang in supported_languages:
             return self._default_lang
         return supported_languages[0]
-
-

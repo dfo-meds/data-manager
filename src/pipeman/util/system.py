@@ -25,6 +25,7 @@ class System:
         self._flask_init_cb = []
         self._cli_init_cb = []
         self._flask_blueprints = []
+        self._click_groups = []
 
     def init(self):
         zrlog.init_logging()
@@ -32,15 +33,18 @@ class System:
         self._init_overrides()
 
     def _init_overrides(self):
-        for cls_name in self.config["injections"]:
-            cls_def = self.config["injections"][cls_name]
-            if isinstance(cls_def, str):
-                injector.override(cls_name, cls_def, weight=1)
-            else:
-                a = cls_def.pop("args") if "args" in cls_def else []
-                if "weight" not in cls_def:
-                    cls_def["weight"] = 1
-                injector.override(cls_name, cls_def.pop("constructor"), *a, **cls_def)
+        injections = self.config.get("autoinject", default=None)
+
+        if injections:
+            for cls_name in injections:
+                cls_def = injections[cls_name]
+                if isinstance(cls_def, str):
+                    injector.override(cls_name, cls_def, weight=1)
+                else:
+                    a = cls_def.pop("args") if "args" in cls_def else []
+                    if "weight" not in cls_def:
+                        cls_def["weight"] = 1
+                    injector.override(cls_name, cls_def.pop("constructor"), *a, **cls_def)
 
     def register_init_app(self, init_app_cb):
         self._flask_init_cb.append(init_app_cb)
@@ -50,6 +54,11 @@ class System:
 
     def register_blueprint(self, module, blueprint_name, prefix=""):
         self._flask_blueprints.append((module, blueprint_name, prefix))
+
+    def register_cli(self, module, group_name, register_as=None):
+        if register_as is None:
+            register_as = group_name
+        self._click_groups.append((module, group_name, register_as))
 
     def init_plugins(self):
         import pipeman.plugins as plg
@@ -72,7 +81,12 @@ class System:
         return app
 
     def init_cli(self):
-        from pipeman.cli import base
+        from pipeman.cli import CommandLineInterface
+        commands = {}
+        for bp_mod, bp_obj, reg_name in self._click_groups:
+            mod = importlib.import_module(bp_mod)
+            commands[reg_name] = getattr(mod, bp_obj)
+        cli = CommandLineInterface(commands)
         for cb in self._cli_init_cb:
-            cb(base)
-        return base
+            cb(cli)
+        return cli

@@ -58,7 +58,3 @@ class AuthenticationManager:
 
     def logout_success(self):
         return flask.redirect(self.logout_success_route)
-
-
-def hash_password(pw, salt):
-    return hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), salt.encode("utf-8"), 251931).hex()

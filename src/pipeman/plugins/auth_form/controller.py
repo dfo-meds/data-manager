@@ -12,6 +12,7 @@ class LoginForm(FlaskForm):
 
     username = wtf.StringField(Dts("pipeman.plugins.auth_form.username"))
     password = wtf.PasswordField(Dts("pipeman.plugins.auth_form.password"))
+    submit = wtf.SubmitField(Dts("pipeman.plugins.auth_form.submit"))
 
 
 class FormAuthenticationManager(AuthenticationManager):

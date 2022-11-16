@@ -1,7 +1,7 @@
 from autoinject import injector
 
 
-@injector.injectable
+@injector.injectable_global
 class LanguageDetector:
 
     def detect_language(self, supported_languages) -> str:

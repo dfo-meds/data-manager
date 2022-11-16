@@ -1,0 +1,107 @@
+{% macro showmenu(menu_items) -%}
+    <ul class="menu">
+        {% for txt, pth, subitems in menu_items %}
+            <li class="menu-item">
+                <a href="{{url_for(pth)}}">txt</a>
+                {% if subitems %}
+                {{ showmenu(subitems) }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{%- endmacro %}
+{% macro showformcontrol(control) %}
+    {% if control.__class__.__name__ == "CSRFTokenField" or control.__class__.__name__ == "HiddenField" %}
+        {{control}}
+    {% elif control.__class__.__name__ == "BooleanField" %}
+        <div class="form-field">
+            <div class="form-label">
+                &nbsp;
+            </div>
+            <div class="form-control">
+                {{control}} {{control.label}}
+            </div>
+        </div>
+    {% elif control.__class__.__name__ == "SubmitField" %}
+        <div class="form-field">
+            <div class="form-label">
+                &nbsp;
+            </div>
+            <div class="form-control">
+                {{control}}
+            </div>
+        </div>
+    {% elif control.__class__.__name__ == "FieldCollectionField" %}
+        <fieldset class="form-field">
+            <legend class="form-label">{{control.label.text}}</legend>
+            {% for subctl in control %}
+                {{ showformcontrol(subctl) }}
+            {% endfor %}
+        </fieldset>
+    {% else %}
+        <div class="form-field">
+            <div class="form-label">
+                {{control.label}}
+            </div>
+            <div class="form-control">
+                {{control}}
+            </div>
+        </div>
+    {% endif %}
+{%- endmacro %}
+{% macro showform(form) -%}
+    <form action="" method="POST"{% if with_file_upload %} enctype="multipart/form-data"{% endif %}>
+        {% for control in form %}
+            {{ showformcontrol(control) }}
+        {% endfor %}
+    </form>
+{%- endmacro %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{title}}</title>
+        {% block scripts %}
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+            <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+        {% endblock %}
+        {% block style %}
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+        {% endblock %}
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <div class="container">
+            {% block container %}
+            <div class="body">
+                {% block full_body %}
+                <div class="nav">
+                </div>
+                {% block body %}
+                    <div class="content">
+
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <ul class="messages">
+                                    {% for category, message in messages %}
+                                        <li class="{{category}}">{{message}}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
+                        {% endwith %}
+                        <h1>{{title}}</h1>
+                        {% block content %}
+                        {{ content }}
+                        {% endblock %}
+                    </div>
+                {% endblock %}
+                {% endblock %}
+            </div>
+            <hr style="clear: both" />
+            <div class="footer">
+                <p class="copyright">test</p>
+
+            </div>
+            {% endblock %}
+        </div>
+    </body>
+</html>

@@ -1,2 +1,12 @@
 [database]
 url = "sqlite:///./test.db"
+
+[autoinject]
+"pipeman.auth.auth.AuthenticationManager" = "pipeman.plugins.auth_db.DatabaseEntityAuthenticationManager"
+
+[pipeman.authentication]
+login_route = "home"
+logout_route = "logged_out"
+
+[flask]
+SECRET_KEY = "VeryModernMajorGeneral"

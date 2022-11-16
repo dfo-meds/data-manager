@@ -1,7 +1,8 @@
 import flask_login
 from autoinject import injector
 from pipeman.util import System
-from pipeman.auth.auth import AuthenticationManager
+from .auth import AuthenticationManager, AuthenticatedUser
+from .secure import SecurityHelper
 
 
 @injector.inject
@@ -17,3 +18,4 @@ def auth_init_app(app, am: AuthenticationManager):
 def init(system: System):
     system.register_init_app(auth_init_app)
     system.register_blueprint("pipeman.auth.app", "auth")
+    system.register_cli("pipeman.auth.cli", "group")

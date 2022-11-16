@@ -21,5 +21,6 @@ def init():
     def _do_init(system: System = None):
         auth_init(system)
         system.init()
+        return system
 
     return _do_init()
