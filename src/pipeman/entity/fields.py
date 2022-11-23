@@ -2,13 +2,14 @@ import typing as t
 import decimal
 import wtforms as wtf
 import wtforms.validators as wtfv
-from pipeman.i18n import MultiLanguageString
+from pipeman.i18n import MultiLanguageString, DelayedTranslationString
 from pipeman.db import Database
 from autoinject import injector
 from pipeman.util.flask import TranslatableField
 import json
 import pipeman.db.orm as orm
 from pipeman.vocab import VocabularyTermController
+
 
 class Field:
 
@@ -21,15 +22,25 @@ class Field:
     def control(self) -> wtf.Field:
         c = self._control()
         if "multilingual" in self.field_config and self.field_config["multilingual"]:
-            #c = TranslatableField(type(c), field_kwargs=self._wtf_arguments(), label=self.label())
-            pass
-            #TODO: need to figure out how to make this work!
+            split_on = self._top_level_arguments()
+            top_args = {}
+            bottom_args = {}
+            args = self._wtf_arguments()
+            for arg in args:
+                if arg in split_on:
+                    top_args[arg] = args[arg]
+                else:
+                    bottom_args[arg] = args[arg]
+            c = TranslatableField(self._control_class(), field_kwargs=bottom_args, **top_args)
         if "repeatable" in self.field_config and self.field_config["repeatable"] and self._use_default_repeatable:
             c = wtf.FieldList(c, label=self.label())
         return c
 
+    def _control_class(self) -> t.Callable:
+        raise NotImplementedError
+
     def _control(self) -> wtf.Field:
-        raise NotImplementedError()
+        return self._control_class()(**self._wtf_arguments())
 
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
@@ -63,6 +74,9 @@ class Field:
         }
         args.update(self._extra_wtf_arguments())
         return args
+
+    def _top_level_arguments(self) -> set:
+        return set(["label", "description", "default"])
 
     def _extra_wtf_arguments(self) -> dict:
         return {}
@@ -118,8 +132,8 @@ class DateField(Field):
             "format": self.field_config["storage_format"]
         }
 
-    def _control(self) -> wtf.Field:
-        return wtf.DateField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.DateField
 
 
 class DateTimeField(DateField):
@@ -129,8 +143,8 @@ class DateTimeField(DateField):
     def __init__(self, field_name, field_config):
         super().__init__(field_name, field_config, "%Y-%m-%d %H:%M:%S")
 
-    def _control(self) -> wtf.Field:
-        return wtf.DateTimeField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.DateTimeField
 
 
 class DecimalField(NumberValidationMixin, Field):
@@ -145,32 +159,32 @@ class DecimalField(NumberValidationMixin, Field):
             args["rounding"] = getattr(decimal, self.field_config["rounding"])
         return args
 
-    def _control(self) -> wtf.Field:
-        return wtf.DecimalField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.DecimalField
 
 
 class EmailField(LengthValidationMixin, Field):
 
     DATA_TYPE = "email"
 
-    def _control(self) -> wtf.Field:
-        return wtf.EmailField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.EmailField
 
 
 class FloatField(NumberValidationMixin, Field):
 
     DATA_TYPE = "float"
 
-    def _control(self) -> wtf.Field:
-        return wtf.FloatField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.FloatField
 
 
 class IntegerField(NumberValidationMixin, Field):
 
     DATA_TYPE = "integer"
 
-    def _control(self) -> wtf.Field:
-        return wtf.IntegerField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.IntegerField
 
 
 class ChoiceField(Field):
@@ -181,7 +195,9 @@ class ChoiceField(Field):
         super().__init__(*args, **kwargs)
 
     def choices(self):
-        return [(x, self.field_config["values"][x]) for x in self.field_config["values"]]
+        values = [("", DelayedTranslationString("pipeman.empty_select"))]
+        values.extend([(x, self.field_config["values"][x]) for x in self.field_config["values"]])
+        return values
 
     def _extra_wtf_arguments(self) -> dict:
         args = {
@@ -192,34 +208,32 @@ class ChoiceField(Field):
             args["coerce"] = int
         return args
 
-    def _control(self) -> wtf.Field:
-        if "repeatable" in self.field_config and self.field_config["repeatable"]:
-            return wtf.SelectMultipleField(**self._wtf_arguments())
-        return wtf.SelectField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.SelectMultipleField if "repeatable" in self.field_config and self.field_config["repeatable"] else wtf.SelectField
 
 
 class TextField(LengthValidationMixin, Field):
 
     DATA_TYPE = "text"
 
-    def _control(self) -> wtf.Field:
-        return wtf.StringField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.StringField
 
 
 class MultiLineTextField(TextField):
 
     DATA_TYPE = "multitext"
 
-    def _control(self) -> wtf.Field:
-        return wtf.TextAreaField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.TextAreaField
 
 
 class TelephoneField(Field):
 
     DATA_TYPE = "telephone"
 
-    def _control(self) -> wtf.Field:
-        return wtf.TelField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.TelField
 
 
 class TimeField(Field):
@@ -236,16 +250,16 @@ class TimeField(Field):
             "format": self.field_config["storage_format"]
         }
 
-    def _control(self) -> wtf.Field:
-        return wtf.TimeField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.TimeField
 
 
 class URLField(LengthValidationMixin, Field):
 
     DATA_TYPE = "url"
 
-    def _control(self) -> wtf.Field:
-        return wtf.URLField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.URLField
 
 
 class EntityReferenceField(ChoiceField):
@@ -265,7 +279,7 @@ class EntityReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = []
+        values = [("", DelayedTranslationString("pipeman.empty_select"))]
         with self.db as session:
             for entity in session.query(orm.Entity).filter_by(entity_type=self.field_config['entity_type']):
                 values.append((entity.id, MultiLanguageString(json.loads(entity.display_names))))
@@ -289,7 +303,7 @@ class VocabularyReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = []
+        values = [("", DelayedTranslationString("pipeman.empty_select"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
                 values.append((term.short_name, MultiLanguageString(json.loads(term.display_names))))

@@ -5,20 +5,32 @@ resource:
   fields:
     url:
       data_type: url
+      label:
+        en: URL
     protocol:
       data_type: vocabulary
       vocabulary_name: iso19115_link_protocols
+      label:
+        en: Protocol
     app_profile:
       data_type: text
+      label:
+        en: Application Profile
     name:
       data_type: text
       multilingual: yes
+      label:
+        en: Name
     description:
       data_type: multitext
       multilingual: yes
+      label:
+        en: Description
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
+      label:
+        en: Function
 
 contact:
   display:
@@ -37,33 +49,48 @@ contact:
       data_type: text
       label:
         en: Position Name
-    test:
-      data_type: vocabulary
-      label:
-        en: Test
-      vocabulary_name: iso19115_md_topic_category_code
     phone:
       data_type: telephone
+      label:
+        en: Phone Number
     delivery_point:
       data_type: text
       allow_multiple: yes
+      label:
+        en: Delivery Point
     city:
       data_type: text
+      label:
+        en: City
     admin_area:
       data_type: text
+      label:
+        en: Administrative Area
     postal_code:
       data_type: text
+      label:
+        en: Postal Code
     country:
       data_type: text
+      label:
+        en: Country
     email:
       data_type: email
       allow_multiple: yes
+      label:
+        en: E-Mail
     web_resource:
       data_type: entity_ref
       entity_type: resource
+      label:
+        en: Web Resource
     service_hours:
       data_type: multitext
       multilingual: yes
+      label:
+        en: Service Hours
     instructions:
       data_type: multitext
       multilingual: yes
+      label:
+        en: Additional Instructions
