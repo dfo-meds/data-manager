@@ -2,7 +2,6 @@ import flask_login as fl
 import flask
 import zirconium as zr
 from autoinject import injector
-import hashlib
 import typing as t
 from functools import wraps
 
@@ -53,9 +52,9 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
-        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="/")
-        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="/")
-        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="/")
+        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="/home")
+        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="/home")
+        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="/home")
 
     def login_handler(self):
         raise NotImplementedError()
@@ -79,4 +78,5 @@ class AuthenticationManager:
         return flask.redirect(self.logout_success_route)
 
     def unauthorized_handler(self):
+        flask.flash("Request not authorized", "error")
         return flask.redirect(self.unauthorized_route)

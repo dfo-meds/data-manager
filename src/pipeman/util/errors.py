@@ -22,3 +22,7 @@ class UserInputError(TranslatableError):
 
 class DataTypeNotSupportedError(PipemanError):
     pass
+
+
+class EntityNotFoundError(PipemanError):
+    pass

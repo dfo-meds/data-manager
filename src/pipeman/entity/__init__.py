@@ -1,3 +1,3 @@
 from .field_factory import FieldCreator, GenericFactory
-from .entity import Entity, EntityForm
+from .entity import Entity, EntityForm, EntityController, EntityRegistry
 

@@ -63,10 +63,6 @@ class Database:
         self.engine = sa.engine_from_config(self.config["database"], prefix="")
         self._session = None
         self._transaction_stack = []
-        self._orm_model_files = set()
-
-    def register_orm_models(self, module):
-        self._orm_model_files.add(module)
 
     def __enter__(self) -> SessionWrapper:
         """Implement __enter__().
@@ -139,5 +135,3 @@ class Database:
         if recreate:
             Base.metadata.drop_all(self.engine)
         Base.metadata.create_all(self.engine)
-
-

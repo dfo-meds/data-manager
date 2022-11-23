@@ -31,6 +31,21 @@ def create_user(username, display_name, email, password, db: Database = None, sh
 
 
 @injector.inject
+def set_password(username, password, db: Database = None, sh: SecurityHelper = None):
+    with db as session:
+        u = session.query(orm.User).filter_by(username=username).first()
+        if not u:
+            raise UserInputError("pipeman.plugins.auth_db.username_does_not_exist")
+        sh.check_password_strength(password)
+        salt = sh.generate_salt()
+        pw_hash = sh.hash_password(password, salt)
+        u.phash = pw_hash
+        u.salt = salt
+        session.commit()
+        logging.getLogger("pipeman.plugins.auth_db").out(f"User {username} created")
+
+
+@injector.inject
 def assign_to_group(group_name, username, db: Database = None):
     with db as session:
         user = session.query(orm.User).filter_by(username=username).first()

@@ -3,7 +3,12 @@ import decimal
 import wtforms as wtf
 import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString
-
+from pipeman.db import Database
+from autoinject import injector
+from pipeman.util.flask import TranslatableField
+import json
+import pipeman.db.orm as orm
+from pipeman.vocab import VocabularyTermController
 
 class Field:
 
@@ -11,8 +16,19 @@ class Field:
         self.field_name = field_name
         self.field_config = field_config
         self.value = None
+        self._use_default_repeatable = True
 
     def control(self) -> wtf.Field:
+        c = self._control()
+        if "multilingual" in self.field_config and self.field_config["multilingual"]:
+            #c = TranslatableField(type(c), field_kwargs=self._wtf_arguments(), label=self.label())
+            pass
+            #TODO: need to figure out how to make this work!
+        if "repeatable" in self.field_config and self.field_config["repeatable"] and self._use_default_repeatable:
+            c = wtf.FieldList(c, label=self.label())
+        return c
+
+    def _control(self) -> wtf.Field:
         raise NotImplementedError()
 
     def label(self) -> t.Union[str, MultiLanguageString]:
@@ -84,7 +100,7 @@ class BooleanField(Field):
 
     DATA_TYPE = "boolean"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.BooleanField(**self._wtf_arguments())
 
 
@@ -102,7 +118,7 @@ class DateField(Field):
             "format": self.field_config["storage_format"]
         }
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.DateField(**self._wtf_arguments())
 
 
@@ -113,7 +129,7 @@ class DateTimeField(DateField):
     def __init__(self, field_name, field_config):
         super().__init__(field_name, field_config, "%Y-%m-%d %H:%M:%S")
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.DateTimeField(**self._wtf_arguments())
 
 
@@ -129,7 +145,7 @@ class DecimalField(NumberValidationMixin, Field):
             args["rounding"] = getattr(decimal, self.field_config["rounding"])
         return args
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.DecimalField(**self._wtf_arguments())
 
 
@@ -137,7 +153,7 @@ class EmailField(LengthValidationMixin, Field):
 
     DATA_TYPE = "email"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.EmailField(**self._wtf_arguments())
 
 
@@ -145,7 +161,7 @@ class FloatField(NumberValidationMixin, Field):
 
     DATA_TYPE = "float"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.FloatField(**self._wtf_arguments())
 
 
@@ -153,7 +169,7 @@ class IntegerField(NumberValidationMixin, Field):
 
     DATA_TYPE = "integer"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.IntegerField(**self._wtf_arguments())
 
 
@@ -161,8 +177,11 @@ class ChoiceField(Field):
 
     DATA_TYPE = "choice"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def choices(self):
-        return []
+        return [(x, self.field_config["values"][x]) for x in self.field_config["values"]]
 
     def _extra_wtf_arguments(self) -> dict:
         args = {
@@ -173,31 +192,25 @@ class ChoiceField(Field):
             args["coerce"] = int
         return args
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
+        if "repeatable" in self.field_config and self.field_config["repeatable"]:
+            return wtf.SelectMultipleField(**self._wtf_arguments())
         return wtf.SelectField(**self._wtf_arguments())
-
-
-class MultiChoiceField(ChoiceField):
-
-    DATA_TYPE = "multichoice"
-
-    def control(self) -> wtf.Field:
-        return wtf.SelectMultipleField(**self._wtf_arguments())
 
 
 class TextField(LengthValidationMixin, Field):
 
     DATA_TYPE = "text"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.StringField(**self._wtf_arguments())
 
 
-class MultiLineTextField(LengthValidationMixin, TextField):
+class MultiLineTextField(TextField):
 
     DATA_TYPE = "multitext"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.TextAreaField(**self._wtf_arguments())
 
 
@@ -205,7 +218,7 @@ class TelephoneField(Field):
 
     DATA_TYPE = "telephone"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.TelField(**self._wtf_arguments())
 
 
@@ -223,7 +236,7 @@ class TimeField(Field):
             "format": self.field_config["storage_format"]
         }
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.TimeField(**self._wtf_arguments())
 
 
@@ -231,5 +244,53 @@ class URLField(LengthValidationMixin, Field):
 
     DATA_TYPE = "url"
 
-    def control(self) -> wtf.Field:
+    def _control(self) -> wtf.Field:
         return wtf.URLField(**self._wtf_arguments())
+
+
+class EntityReferenceField(ChoiceField):
+
+    DATA_TYPE = "entity_ref"
+
+    db: Database = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._value_cache = None
+
+    def choices(self):
+        if self._value_cache is None:
+            self._value_cache = self._load_values()
+        return self._value_cache
+
+    def _load_values(self):
+        values = []
+        with self.db as session:
+            for entity in session.query(orm.Entity).filter_by(entity_type=self.field_config['entity_type']):
+                values.append((entity.id, MultiLanguageString(json.loads(entity.display_names))))
+        return values
+
+
+class VocabularyReferenceField(ChoiceField):
+
+    DATA_TYPE = "vocabulary"
+
+    db: Database = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._value_cache = None
+
+    def choices(self):
+        if self._value_cache is None:
+            self._value_cache = self._load_values()
+        return self._value_cache
+
+    def _load_values(self):
+        values = []
+        with self.db as session:
+            for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
+                values.append((term.short_name, MultiLanguageString(json.loads(term.display_names))))
+        return values

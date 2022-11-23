@@ -15,7 +15,7 @@ class TranslationManager:
         return default if default is not None else text_key
 
     def supported_languages(self):
-        return ['en']
+        return ['en', 'fr']
 
 
 class DelayedTranslationString:

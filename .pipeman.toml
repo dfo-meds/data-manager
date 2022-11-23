@@ -2,7 +2,7 @@
 url = "sqlite:///./test.db"
 
 [autoinject]
-"pipeman.auth.auth.AuthenticationManager" = "pipeman.plugins.auth_db.DatabaseEntityAuthenticationManager"
+"pipeman.auth.auth.AuthenticationManager" = "pipeman.builtins.auth_db.DatabaseEntityAuthenticationManager"
 
 [pipeman.authentication]
 login_route = "home"

@@ -57,6 +57,23 @@ def create(username, email, display="", password=None, password_entry="", no_err
             raise ex
 
 
+@user.command
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@click.option("--password-entry", default="argument")
+@click.option("--password", default=None)
+@click.argument("username")
+def set_password(username, password=None, password_entry="", no_error=False):
+    """Create a user account."""
+    from .util import set_password
+    try:
+        set_password(username, _get_password(password_entry, password))
+    except UserInputError as ex:
+        if no_error:
+            print(str(ex))
+        else:
+            raise ex
+
+
 @user.group
 def group():
     pass

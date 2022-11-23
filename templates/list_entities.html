@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="real_content">
+    {% if create_link %}
+    <p><a href="{{create_link}}">{{'pipeman.create_entity' | gettext}}</a></p>
+    {% endif %}
+
+</div>
+{% endblock %}

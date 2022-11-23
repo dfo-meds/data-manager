@@ -1,0 +1,69 @@
+resource:
+  display:
+    en: Resource
+    fr: Resource
+  fields:
+    url:
+      data_type: url
+    protocol:
+      data_type: vocabulary
+      vocabulary_name: iso19115_link_protocols
+    app_profile:
+      data_type: text
+    name:
+      data_type: text
+      multilingual: yes
+    description:
+      data_type: multitext
+      multilingual: yes
+    function:
+      data_type: vocabulary
+      vocabulary_name: iso19115_ci_on_line_function_code
+
+contact:
+  display:
+    en: Contact
+    fr: Contacte
+  fields:
+    individual_name:
+      data_type: text
+      label:
+        en: Individual Name
+    organization_name:
+      data_type: text
+      label:
+        en: Organization Name
+    position_name:
+      data_type: text
+      label:
+        en: Position Name
+    test:
+      data_type: vocabulary
+      label:
+        en: Test
+      vocabulary_name: iso19115_md_topic_category_code
+    phone:
+      data_type: telephone
+    delivery_point:
+      data_type: text
+      allow_multiple: yes
+    city:
+      data_type: text
+    admin_area:
+      data_type: text
+    postal_code:
+      data_type: text
+    country:
+      data_type: text
+    email:
+      data_type: email
+      allow_multiple: yes
+    web_resource:
+      data_type: entity_ref
+      entity_type: resource
+    service_hours:
+      data_type: multitext
+      multilingual: yes
+    instructions:
+      data_type: multitext
+      multilingual: yes

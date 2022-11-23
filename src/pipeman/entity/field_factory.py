@@ -30,12 +30,13 @@ class _BuiltInFactory(GenericFactory):
             fields.FloatField,
             fields.IntegerField,
             fields.ChoiceField,
-            fields.MultiChoiceField,
             fields.TextField,
             fields.MultiLineTextField,
             fields.TelephoneField,
             fields.TimeField,
-            fields.URLField
+            fields.URLField,
+            fields.EntityReferenceField,
+            fields.VocabularyReferenceField
         ])
 
 
@@ -50,7 +51,7 @@ class FieldCreator:
         self._factories[factory.factory_name] = factory
 
     def build_field(self, field_name: str, data_type: str, field_config: dict) -> fields.Field:
-        for _, fact in self._factories:
+        for fact in self._factories.values():
             field = fact.build_field(field_name, data_type, field_config)
             if field:
                 return field

@@ -100,3 +100,58 @@ class Group(_DisplayNameModel, Base):
         if perm_name in p:
             p.remove(perm_name)
         self.permissions = ";".join(p)
+
+
+class Entity(_BaseModel, Base):
+
+    entity_type = sa.Column(sa.String(255), nullable=False, index=True)
+    data = sa.Column(sa.Text)
+    created_date = sa.Column(sa.DateTime)
+    modified_date = sa.Column(sa.DateTime)
+    display_names = sa.Column(sa.Text, default=None, nullable=True)
+
+    def set_display_name(self, language, display_name):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        dns[language] = display_name
+        self.display_names = json.dumps(dns)
+
+    def display_name(self, language, fallback_language='en'):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        if language in self.display_names:
+            return dns[language]
+        if fallback_language in self.display_names:
+            return dns[fallback_language]
+        return f"{self.entity_type}_{self.id}"
+
+
+class VocabularyTerm(_BaseModel, Base):
+
+    vocabulary_name = sa.Column(sa.String(255), nullable=False, index=True)
+    short_name = sa.Column(sa.String(255), nullable=False)
+    display_names = sa.Column(sa.Text, default=None, nullable=True)
+    descriptions = sa.Column(sa.Text, default=None, nullable=True)
+    __table_args__ = (sa.UniqueConstraint("vocabulary_name", "short_name", name="unique_vocab_short_term"),)
+
+    def set_display_name(self, language, display_name):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        dns[language] = display_name
+        self.display_names = json.dumps(dns)
+
+    def display_name(self, language, fallback_language='en'):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        if language in self.display_names:
+            return dns[language]
+        if fallback_language in self.display_names:
+            return dns[fallback_language]
+        return self.short_name
+
+
+
