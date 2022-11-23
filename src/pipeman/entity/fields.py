@@ -20,27 +20,41 @@ class Field:
         self._use_default_repeatable = True
 
     def control(self) -> wtf.Field:
-        c = self._control()
-        if "multilingual" in self.field_config and self.field_config["multilingual"]:
-            split_on = self._top_level_arguments()
-            top_args = {}
-            bottom_args = {}
-            args = self._wtf_arguments()
-            for arg in args:
-                if arg in split_on:
-                    top_args[arg] = args[arg]
-                else:
-                    bottom_args[arg] = args[arg]
-            c = TranslatableField(self._control_class(), field_kwargs=bottom_args, **top_args)
-        if "repeatable" in self.field_config and self.field_config["repeatable"] and self._use_default_repeatable:
-            c = wtf.FieldList(c, label=self.label())
-        return c
+        ctl_class = self._control_class()
+        parent_args, field_args = self._split_args()
+        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
+        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"] and self._use_default_repeatable
+        if use_repeatable and self.value is None:
+            self.value = []
+        if use_multilingual and use_repeatable:
+            min_entries = max(len(self.value) if self.value else 0, 1)
+            return wtf.FieldList(
+                TranslatableField(ctl_class, field_kwargs=field_args, label=""),
+                **parent_args
+            )
+        elif use_multilingual:
+            return TranslatableField(ctl_class, field_kwargs=field_args, **parent_args)
+        elif use_repeatable:
+            min_entries = max(len(self.value) if self.value else 0, 1)
+            return wtf.FieldList(ctl_class(label="", **field_args), **parent_args, min_entries=min_entries)
+            pass
+        else:
+            return ctl_class(**parent_args, **field_args)
+
+    def _split_args(self) -> (dict, dict):
+        parent_args = self._parent_arguments()
+        actual_args = self._wtf_arguments()
+        parent_list = {}
+        field_list = {}
+        for k in actual_args:
+            if k in parent_args:
+                parent_list[k] = actual_args[k]
+            else:
+                field_list[k] = actual_args[k]
+        return parent_list, field_list
 
     def _control_class(self) -> t.Callable:
         raise NotImplementedError
-
-    def _control(self) -> wtf.Field:
-        return self._control_class()(**self._wtf_arguments())
 
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
@@ -75,7 +89,7 @@ class Field:
         args.update(self._extra_wtf_arguments())
         return args
 
-    def _top_level_arguments(self) -> set:
+    def _parent_arguments(self) -> set:
         return set(["label", "description", "default"])
 
     def _extra_wtf_arguments(self) -> dict:

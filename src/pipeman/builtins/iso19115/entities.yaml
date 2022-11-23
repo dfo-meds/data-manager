@@ -55,7 +55,7 @@ contact:
         en: Phone Number
     delivery_point:
       data_type: text
-      allow_multiple: yes
+      repeatable: yes
       label:
         en: Delivery Point
     city:
@@ -76,7 +76,7 @@ contact:
         en: Country
     email:
       data_type: email
-      allow_multiple: yes
+      repeatable: yes
       label:
         en: E-Mail
     web_resource:
