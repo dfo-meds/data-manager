@@ -33,6 +33,7 @@ class DelayedTranslationString:
 
 class MultiLanguageString:
 
+    tm: TranslationManager = None
     ld: LanguageDetector = None
 
     @injector.construct
@@ -42,10 +43,13 @@ class MultiLanguageString:
 
     def __str__(self):
         lang = self.ld.detect_language(self.language_map.keys())
-        if lang in self.language_map:
+        use_blank = lang in self.language_map
+        if lang in self.language_map and self.language_map[lang]:
             return self.language_map[lang]
-        if "und" in self.language_map:
+        if "und" in self.language_map and self.language_map["und"]:
             return self.language_map["und"]
+        if use_blank:
+            return ""
         if self.default_lang in self.language_map:
             return self.language_map[self.default_lang]
-        return "UNKNOWN"
+        return self.tm.get_text("pipeman.general.unknown")

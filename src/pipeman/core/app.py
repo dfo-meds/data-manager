@@ -65,3 +65,25 @@ def edit_entity(obj_type, obj_id, con: EntityController = None):
     if not con.has_access(obj_type, "edit"):
         return flask.abort(403)
     return con.edit_entity_form(obj_type, obj_id)
+
+
+@core.route("/objects/<obj_type>/<obj_id>/delete", methods=["POST", "GET"])
+@require_permission("entities.edit")
+@injector.inject
+def delete_entity(obj_type, obj_id, con: EntityController = None):
+    if not con.reg.type_exists(obj_type):
+        return flask.abort(404)
+    if not con.has_access(obj_type, "delete"):
+        return flask.abort(403)
+    return con.delete_entity_form(obj_type, obj_id)
+
+
+@core.route("/objects/<obj_type>/<obj_id>/references", methods=["POST", "GET"])
+@require_permission("entities.view")
+@injector.inject
+def entity_references(obj_type, obj_id, con: EntityController = None):
+    if not con.reg.type_exists(obj_type):
+        return flask.abort(404)
+    if not con.has_access(obj_type, "view"):
+        return flask.abort(403)
+    return con.entity_references_page(obj_type, obj_id)

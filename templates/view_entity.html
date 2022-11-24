@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="real_content">
+    <h1>{{entity.get_display()}}</h1>
+    <table cellpadding="0" cellspacing="0" border="0">
+        <tbody>
+            <tr>
+                <th>{{'pipeman.entity.id' | gettext}}</th>
+                <td>{{entity.db_id}}</td>
+            </tr>
+            <tr>
+                <th>{{'pipeman.entity.display' | gettext}}</th>
+                <td>{{entity.get_display()}}</td>
+            </tr>
+            {% for label, value in entity.display_values() %}
+            <tr>
+                <th>{{label}}</th>
+                <td>{{value}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

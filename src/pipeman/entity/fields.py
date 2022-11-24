@@ -9,6 +9,20 @@ from pipeman.util.flask import TranslatableField
 import json
 import pipeman.db.orm as orm
 from pipeman.vocab import VocabularyTermController
+from pipeman.i18n import gettext, format_date, format_datetime
+import markupsafe
+
+
+class HtmlList:
+
+    def __init__(self, items):
+        self.items = items
+
+    def __str__(self):
+        h = '<ul>'
+        h += ''.join(f'<li>{item}</li>' for item in self.items)
+        h += '</ul>'
+        return markupsafe.Markup(h)
 
 
 class Field:
@@ -95,6 +109,34 @@ class Field:
     def _extra_wtf_arguments(self) -> dict:
         return {}
 
+    def display(self):
+        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
+        use_repeatable = "repeatable" in self.field_config and self.field_config[
+            "repeatable"] and self._use_default_repeatable
+        if use_repeatable and use_multilingual:
+            items = [
+                MultiLanguageString({
+                    y: self._format_for_ui(self.value[x][y])
+                    for y in x
+                })
+                for x in self.value
+            ]
+            return str(HtmlList(items))
+        elif use_repeatable:
+            items = [self._format_for_ui(x) for x in self.value]
+            return str(HtmlList(items))
+        elif use_multilingual:
+            return MultiLanguageString({
+                x: self._format_for_ui(self.value[x]) for x in self.value
+            })
+        else:
+            return self._format_for_ui(self.value)
+
+    def _format_for_ui(self, val):
+        if val is None:
+            return ""
+        return str(val)
+
 
 class LengthValidationMixin:
 
@@ -131,6 +173,14 @@ class BooleanField(Field):
     def _control(self) -> wtf.Field:
         return wtf.BooleanField(**self._wtf_arguments())
 
+    def _format_for_ui(self, val):
+        if val is None:
+            return gettext("pipeman.general.na")
+        elif not val:
+            return gettext("pipeman.general.no")
+        else:
+            return gettext("pipeman.general.yes")
+
 
 class DateField(Field):
 
@@ -149,6 +199,9 @@ class DateField(Field):
     def _control_class(self) -> t.Callable:
         return wtf.DateField
 
+    def _format_for_ui(self, val):
+        return format_date(val)
+
 
 class DateTimeField(DateField):
 
@@ -159,6 +212,9 @@ class DateTimeField(DateField):
 
     def _control_class(self) -> t.Callable:
         return wtf.DateTimeField
+
+    def _format_for_ui(self, val):
+        return format_datetime(val)
 
 
 class DecimalField(NumberValidationMixin, Field):
@@ -207,11 +263,18 @@ class ChoiceField(Field):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._values = None
 
     def choices(self):
-        values = [("", DelayedTranslationString("pipeman.empty_select"))]
-        values.extend([(x, self.field_config["values"][x]) for x in self.field_config["values"]])
-        return values
+        if self._values is None:
+            self._values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+            for x in self.field_config["values"]:
+                disp = self.field_config["values"][x]
+                if isinstance(disp, dict):
+                    self._values.append((x, MultiLanguageString(disp)))
+                else:
+                    self._values.append((x, disp))
+        return self._values
 
     def _extra_wtf_arguments(self) -> dict:
         args = {
@@ -224,6 +287,15 @@ class ChoiceField(Field):
 
     def _control_class(self) -> t.Callable:
         return wtf.SelectMultipleField if "repeatable" in self.field_config and self.field_config["repeatable"] else wtf.SelectField
+
+    def _format_for_ui(self, val):
+        if val is None or val == "":
+            return ""
+        lst = self.choices()
+        for key, disp in lst:
+            if key == val:
+                return disp
+        return gettext("pipeman.general.unknown")
 
 
 class TextField(LengthValidationMixin, Field):
@@ -293,7 +365,7 @@ class EntityReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = [("", DelayedTranslationString("pipeman.empty_select"))]
+        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
         with self.db as session:
             for entity in session.query(orm.Entity).filter_by(entity_type=self.field_config['entity_type']):
                 values.append((entity.id, MultiLanguageString(json.loads(entity.display_names))))
@@ -317,7 +389,7 @@ class VocabularyReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = [("", DelayedTranslationString("pipeman.empty_select"))]
+        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
                 values.append((term.short_name, MultiLanguageString(json.loads(term.display_names))))

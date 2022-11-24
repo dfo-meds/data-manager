@@ -14,7 +14,7 @@
     {% if control.__class__.__name__ == "CSRFTokenField" or control.__class__.__name__ == "HiddenField" %}
         {{control}}
     {% elif control.__class__.__name__ == "BooleanField" %}
-        <div class="form-field">
+        <div class="form-field form-field-boolean-field">
             <div class="form-label">
                 &nbsp;
             </div>
@@ -23,7 +23,7 @@
             </div>
         </div>
     {% elif control.__class__.__name__ == "SubmitField" %}
-        <div class="form-field">
+        <div class="form-field form-field-submit-field">
             <div class="form-label">
                 &nbsp;
             </div>
@@ -31,17 +31,8 @@
                 {{control}}
             </div>
         </div>
-    {% elif control.__class__.__name__ == "FieldList" %}
-        <div class="form-field form-field-list">
-            <div class="form-label">
-                {{control.label}}
-            </div>
-            <div class="form-control">
-                {{control}}
-            </div>
-        </div>
     {% else %}
-        <div class="form-field">
+        <div class="form-field form-field-{{control.__class__.__name__ | caps_to_snake('-')}}">
             <div class="form-label">
                 {{control.label}}
             </div>

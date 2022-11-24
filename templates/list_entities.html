@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="real_content">
+    <h1>{{'pipeman.entity.list' | gettext}}</h1>
     {% if create_link %}
     <p><a href="{{create_link}}">{{'pipeman.create_entity' | gettext}}</a></p>
     {% endif %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="real_content">
-    bar
+    <h1>{{'pipeman.entity_type.list' | gettext}}</h1>
     <ul>
         {% for key, display, view, create in entity_types %}
         <li><a href="{{view}}">{{display}}</a></li>

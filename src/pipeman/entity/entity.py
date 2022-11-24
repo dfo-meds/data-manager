@@ -13,7 +13,7 @@ import datetime
 import copy
 import math
 from pipeman.util import deep_update
-from pipeman.util.flask import TranslatableField
+from pipeman.util.flask import TranslatableField, ConfirmationForm
 
 
 @injector.injectable_global
@@ -57,7 +57,7 @@ class EntityController:
     reg: EntityRegistry = None
 
     @injector.construct
-    def __init__(self, view_template="form.html", edit_template="form.html"):
+    def __init__(self, view_template="view_entity.html", edit_template="form.html"):
         self.view_template = view_template
         self.edit_template = edit_template
 
@@ -72,6 +72,14 @@ class EntityController:
             self.save_entity(ent)
             return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=ent.db_id))
         return flask.render_template(self.edit_template, form=form)
+
+    def delete_entity_form(self, entity_type, entity_id):
+        ent = self.load_entity(entity_type, entity_id)
+        form = ConfirmationForm()
+        if form.validate_on_submit():
+            self.delete_entity(ent)
+            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=entity_type))
+        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.delete_confirmation"))
 
     def create_entity_form(self, entity_type):
         new_ent = self.reg.new_entity(entity_type)
@@ -92,6 +100,9 @@ class EntityController:
 
     def list_entities(self, entity_type, page=None, page_size=None):
         return EntityIterator(entity_type, page, page_size)
+
+    def entity_references_page(self, entity_type, entity_id):
+        pass
 
     def list_entities_page(self, entity_type):
         with self.db as session:
@@ -176,10 +187,15 @@ class EntityIterator:
                 }
                 actions = [
                     (flask.url_for("core.view_entity", **action_args), "pipeman.general.view"),
+                    (flask.url_for("core.entity_references", **action_args), "pipeman.entity.view_references")
                 ]
                 if self.cntrl.has_access(ent.entity_type, 'edit'):
                     actions.append((
                         flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
+                    ))
+                if self.cntrl.has_access(ent.entity_type, 'delete'):
+                    actions.append((
+                        flask.url_for("core.delete_entity", **action_args), "pipeman.general.delete"
                     ))
                 yield ent, MultiLanguageString(dn), actions
 
@@ -211,6 +227,11 @@ class Entity:
             self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config)
             if field_values and field_name in field_values:
                 self._fields[field_name].value = field_values[field_name]
+
+    def display_values(self):
+        for fn in self._fields:
+            field = self._fields[fn]
+            yield field.label(), field.display()
 
     def values(self) -> dict:
         return {fn: self._fields[fn].value for fn in self._fields}
