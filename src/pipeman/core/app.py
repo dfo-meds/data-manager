@@ -56,7 +56,7 @@ def view_entity(obj_type, obj_id, con: EntityController = None):
     return con.view_entity_page(obj_type, obj_id)
 
 
-@core.route("/objects/<obj_type>/<obj_id>/edit")
+@core.route("/objects/<obj_type>/<obj_id>/edit", methods=["POST", "GET"])
 @require_permission("entities.edit")
 @injector.inject
 def edit_entity(obj_type, obj_id, con: EntityController = None):

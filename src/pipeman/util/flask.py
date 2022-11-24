@@ -11,8 +11,12 @@ class DynamicFormField(wtf.FormField):
         super().__init__(self._generate_form, *args, **kwargs)
 
     def _generate_form(self, formdata=None, obj=None,  **kwargs):
-        form = BaseForm(self.field_list, *kwargs)
-        form.process(formdata, obj)
+        defaults = {}
+        for key in self.field_list:
+            if key in kwargs:
+                defaults[key] = kwargs.pop(key)
+        form = BaseForm(self.field_list, **kwargs)
+        form.process(formdata, obj, data=defaults)
         return form
 
 

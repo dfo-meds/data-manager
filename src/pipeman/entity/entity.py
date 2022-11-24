@@ -46,8 +46,8 @@ class EntityRegistry:
     def display(self, key):
         return MultiLanguageString(self._entity_types[key]["display"])
 
-    def new_entity(self, key, values=None):
-        return Entity(key, self._entity_types[key]["fields"], values)
+    def new_entity(self, key, values=None, display_names=None, db_id=None):
+        return Entity(key, self._entity_types[key]["fields"], values, display_names=display_names, db_id=db_id)
 
 
 @injector.injectable
@@ -77,7 +77,6 @@ class EntityController:
         new_ent = self.reg.new_entity(entity_type)
         form = EntityForm(new_ent)
         if form.handle_form():
-            print(new_ent)
             self.save_entity(new_ent)
             return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.db_id))
         return flask.render_template(self.edit_template, form=form)
@@ -129,7 +128,7 @@ class EntityController:
             e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
             if not e:
                 raise EntityNotFoundError(entity_id)
-            return self.reg.new_entity(entity_type, json.loads(e.data))
+            return self.reg.new_entity(entity_type, json.loads(e.data), json.loads(e.display_names) if e.display_names else None, e.id)
 
     def save_entity(self, entity):
         with self.db as session:
@@ -154,6 +153,7 @@ class EntityController:
 class EntityIterator:
 
     db: Database = None
+    cntrl: EntityController = None
 
     @injector.construct
     def __init__(self, entity_type, page=None, page_size=None):
@@ -167,7 +167,21 @@ class EntityIterator:
             if self.page_size is not None:
                 q = q.limit(self.page_size).offset((self.page - 1)*self.page_size)
             for ent in q:
-                yield ent
+                dn = {}
+                if ent.display_names:
+                    dn = json.loads(ent.display_names)
+                action_args = {
+                    "obj_type": ent.entity_type,
+                    "obj_id": ent.id
+                }
+                actions = [
+                    (flask.url_for("core.view_entity", **action_args), "pipeman.general.view"),
+                ]
+                if self.cntrl.has_access(ent.entity_type, 'edit'):
+                    actions.append((
+                        flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
+                    ))
+                yield ent, MultiLanguageString(dn), actions
 
 
 class Entity:
@@ -178,7 +192,7 @@ class Entity:
     def __init__(self, entity_type, field_list: dict, field_values: dict = None, display_names: dict = None, db_id: int = None):
         self.entity_type = entity_type
         self._fields = {}
-        self._display = {}
+        self._display = display_names if display_names else {}
         self._load_fields(field_list, field_values)
         self.db_id = db_id
 
@@ -214,7 +228,11 @@ class EntityForm(BaseForm):
     def __init__(self, entity, *args, **kwargs):
         self.entity = entity
         cntrls = {
-            "_name": TranslatableField(wtf.StringField, label=DelayedTranslationString("pipeman.entity_form.display_name"))
+            "_name": TranslatableField(
+                wtf.StringField,
+                label=DelayedTranslationString("pipeman.entity_form.display_name"),
+                default=self.entity.get_displays()
+            )
         }
         cntrls.update(self.entity.controls())
         cntrls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.entity_form.submit"))

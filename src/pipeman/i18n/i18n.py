@@ -36,9 +36,16 @@ class MultiLanguageString:
     ld: LanguageDetector = None
 
     @injector.construct
-    def __init__(self, language_map: dict):
+    def __init__(self, language_map: dict, default_lang="en"):
         self.language_map = language_map
+        self.default_lang = default_lang
 
     def __str__(self):
         lang = self.ld.detect_language(self.language_map.keys())
-        return self.language_map[lang]
+        if lang in self.language_map:
+            return self.language_map[lang]
+        if "und" in self.language_map:
+            return self.language_map["und"]
+        if self.default_lang in self.language_map:
+            return self.language_map[self.default_lang]
+        return "UNKNOWN"
