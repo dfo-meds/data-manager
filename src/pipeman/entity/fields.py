@@ -8,7 +8,7 @@ from autoinject import injector
 from pipeman.util.flask import TranslatableField
 import json
 import pipeman.db.orm as orm
-from pipeman.vocab import VocabularyTermController
+from pipeman.entity import EntityController
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 
@@ -44,6 +44,7 @@ class Field:
             min_entries = max(len(self.value) if self.value else 0, 1)
             return wtf.FieldList(
                 TranslatableField(ctl_class, field_kwargs=field_args, label=""),
+                min_entries=min_entries,
                 **parent_args
             )
         elif use_multilingual:
@@ -111,8 +112,7 @@ class Field:
 
     def display(self):
         use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
-        use_repeatable = "repeatable" in self.field_config and self.field_config[
-            "repeatable"] and self._use_default_repeatable
+        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
         if use_repeatable and use_multilingual:
             items = [
                 MultiLanguageString({
@@ -131,6 +131,38 @@ class Field:
             })
         else:
             return self._format_for_ui(self.value)
+
+    def data(self, lang=None, index=None, **kwargs):
+        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
+        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
+        value = self.value
+        if index is not None and use_repeatable:
+            if index >= len(self.value):
+                return None
+            value = self.value[index]
+            use_repeatable = False
+        if lang is not None and use_multilingual:
+            value = self.value[lang]
+            use_multilingual = False
+        if use_repeatable and use_multilingual:
+            return [
+                {
+                    y: self._process_value(value[x][y], **kwargs)
+                    for y in x
+                }
+                for x in value
+            ]
+        elif use_repeatable:
+            return [self._process_value(x, **kwargs) for x in value]
+        elif use_multilingual:
+            return {
+                x: self._process_value(value[x], **kwargs) for x in value
+            }
+        else:
+            return self._process_value(value, **kwargs)
+
+    def _process_value(self, val, **kwargs):
+        return val
 
     def _format_for_ui(self, val):
         if val is None:
@@ -170,8 +202,8 @@ class BooleanField(Field):
 
     DATA_TYPE = "boolean"
 
-    def _control(self) -> wtf.Field:
-        return wtf.BooleanField(**self._wtf_arguments())
+    def _control_class(self) -> t.Callable:
+        return wtf.BooleanField
 
     def _format_for_ui(self, val):
         if val is None:
@@ -297,6 +329,15 @@ class ChoiceField(Field):
                 return disp
         return gettext("pipeman.general.unknown")
 
+    def _process_value(self, val, **kwargs):
+        if val is None:
+            return None
+        if "use_label" in kwargs and kwargs["use_label"]:
+            choices = self.choices()
+            if val in choices:
+                return choices[val]
+        return val
+
 
 class TextField(LengthValidationMixin, Field):
 
@@ -353,6 +394,7 @@ class EntityReferenceField(ChoiceField):
     DATA_TYPE = "entity_ref"
 
     db: Database = None
+    ec: EntityController = None
 
     @injector.construct
     def __init__(self, *args, **kwargs):
@@ -364,12 +406,52 @@ class EntityReferenceField(ChoiceField):
             self._value_cache = self._load_values()
         return self._value_cache
 
+    def entity_revisions(self):
+        refs = []
+        if self.value and isinstance(self.value, list):
+            for ref in self.value:
+                refs.append([int(x) for x in ref.split("-", maxsplit=1)])
+        elif self.value:
+            refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
+        return refs
+
     def _load_values(self):
         values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+        revisions = self.entity_revisions()
+        old_rev_text = gettext("pipeman.general.outdated")
+        dep_rev_text = gettext("pipeman.general.deprecated")
         with self.db as session:
             for entity in session.query(orm.Entity).filter_by(entity_type=self.field_config['entity_type']):
-                values.append((entity.id, MultiLanguageString(json.loads(entity.display_names))))
+                dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
+                latest_rev = entity.latest_revision()
+                val_key = f"{entity.id}-{latest_rev.id}"
+                dn = json.loads(entity.display_names)
+                if not entity.is_deprecated:
+                    values.append((val_key, dn))
+                for rev in revisions:
+                    if rev[0] == entity.id and not rev[1] == latest_rev.id:
+                        specific_rev = entity.specific_revision(rev[1])
+                        if specific_rev:
+                            dep_val_key = f"{entity.id}-{specific_rev.id}"
+                            dn_dep = {
+                                key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
+                                for key in dn
+                            }
+                            values.append((dep_val_key, MultiLanguageString(dn_dep)))
+                    elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
+                        dep_dn = {
+                            key: dn[key] + f"[{dep_text[:-1]}" for key in dn
+                        }
+                        values.append((val_key, MultiLanguageString(dep_dn)))
         return values
+
+    def _process_value(self, val, **kwargs):
+        entity_id, rev_no = val.split("-", maxsplit=1)
+        return self.ec.load_entity(
+            self.field_config['entity_type'],
+            int(entity_id),
+            int(rev_no)
+        )
 
 
 class VocabularyReferenceField(ChoiceField):
@@ -394,3 +476,11 @@ class VocabularyReferenceField(ChoiceField):
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
                 values.append((term.short_name, MultiLanguageString(json.loads(term.display_names))))
         return values
+
+    def _process_value(self, val, **kwargs):
+        with self.db as session:
+            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config["vocabulary_name"], short_name=val).first()
+            return {
+                "short_name": term.short_name,
+                "display": MultiLanguageString(json.loads(term.display_names))
+            }

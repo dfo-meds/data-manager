@@ -9,6 +9,10 @@
                 <td>{{entity.db_id}}</td>
             </tr>
             <tr>
+                <th>{{'pipeman.entity.is_deprecated' | gettext }}</th>
+                <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
+            </tr>
+            <tr>
                 <th>{{'pipeman.entity.display' | gettext}}</th>
                 <td>{{entity.get_display()}}</td>
             </tr>

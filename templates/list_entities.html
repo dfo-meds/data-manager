@@ -9,18 +9,20 @@
         <thead>
             <tr>
                 <th>{{'pipeman.entity.id' | gettext}}</th>
+                <th>{{'pipeman.entity.state' | gettext}}</th>
                 <th>{{'pipeman.entity.display' | gettext}}</th>
                 <th>{{'pipeman.general.actions' | gettext}}</th>
             </tr>
         </thead>
         <tbody>
-            {% for entity, label, actions in entities.list_entities() %}
+            {% for entity, label in entities.list_entities() %}
             <tr>
                 <td>{{entity.id}}</td>
+                <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
                 <td>{{label}}</td>
                 <td>
                     <ul class="table-actions">
-                        {% for path, text in actions %}
+                        {% for path, text in ent.actions() %}
                         <li><a href="{{path}}">{{text | gettext}}</a></li>
                         {% endfor %}
                     </ul>
@@ -29,5 +31,11 @@
             {% endfor %}
         </tbody>
     </table>
+    <p>Page {{current_page}} of {{page_count}}</p>
+    <ul>
+        {% for i in range(0, page_count) %}
+        <li><a href="?page={{i+1}}">{{i+1}}</a></li>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}

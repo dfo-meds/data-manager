@@ -105,10 +105,25 @@ class Group(_DisplayNameModel, Base):
 class Entity(_BaseModel, Base):
 
     entity_type = sa.Column(sa.String(255), nullable=False, index=True)
-    data = sa.Column(sa.Text)
+
     created_date = sa.Column(sa.DateTime)
     modified_date = sa.Column(sa.DateTime)
+    is_deprecated = sa.Column(sa.Boolean)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
+
+    data = orm.relationship("EntityData", back_populates="entity")
+
+    def latest_revision(self):
+        latest = None
+        for ed in self.data:
+            if latest is None or latest.revision_no < ed.revision_no:
+                latest = ed
+        return latest
+
+    def specific_revision(self, rev_no):
+        for ed in self.data:
+            if ed.revision_no == rev_no:
+                return ed
 
     def set_display_name(self, language, display_name):
         dns = {}
@@ -126,6 +141,20 @@ class Entity(_BaseModel, Base):
         if fallback_language in self.display_names:
             return dns[fallback_language]
         return f"{self.entity_type}_{self.id}"
+
+
+class EntityData(_BaseModel, Base):
+
+    __table_args__ = (
+        sa.UniqueConstraint("entity_id", "revision_no", name="unique_entity_revision_data"),
+    )
+
+    entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False)
+    revision_no = sa.Column(sa.Integer, nullable=False)
+    data = sa.Column(sa.Text)
+    created_date = sa.Column(sa.DateTime)
+
+    entity = orm.relationship("Entity", back_populates="data")
 
 
 class VocabularyTerm(_BaseModel, Base):

@@ -13,6 +13,7 @@ import datetime
 import copy
 import math
 from pipeman.util import deep_update
+from sqlalchemy.exc import IntegrityError
 from pipeman.util.flask import TranslatableField, ConfirmationForm
 
 
@@ -46,8 +47,8 @@ class EntityRegistry:
     def display(self, key):
         return MultiLanguageString(self._entity_types[key]["display"])
 
-    def new_entity(self, key, values=None, display_names=None, db_id=None):
-        return Entity(key, self._entity_types[key]["fields"], values, display_names=display_names, db_id=db_id)
+    def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False):
+        return Entity(key, self._entity_types[key]["fields"], values, display_names=display_names, db_id=db_id, ed_id=data_id, is_deprecated=is_deprecated)
 
 
 @injector.injectable
@@ -73,13 +74,21 @@ class EntityController:
             return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=ent.db_id))
         return flask.render_template(self.edit_template, form=form)
 
-    def delete_entity_form(self, entity_type, entity_id):
+    def remove_entity_form(self, entity_type, entity_id):
         ent = self.load_entity(entity_type, entity_id)
         form = ConfirmationForm()
         if form.validate_on_submit():
-            self.delete_entity(ent)
+            self.remove_entity(ent)
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=entity_type))
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.delete_confirmation"))
+        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.remove_confirmation"))
+
+    def restore_entity_form(self, entity_type, entity_id):
+        ent = self.load_entity(entity_type, entity_id)
+        form = ConfirmationForm()
+        if form.validate_on_submit():
+            self.restore_entity(ent)
+            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=entity_type))
+        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.restore_confirmation"))
 
     def create_entity_form(self, entity_type):
         new_ent = self.reg.new_entity(entity_type)
@@ -106,8 +115,9 @@ class EntityController:
 
     def list_entities_page(self, entity_type):
         with self.db as session:
-            page, page_size = self.get_pagination()
             count = session.query(orm.Entity.id).filter_by(entity_type=entity_type).count()
+            page, page_size = self.get_pagination(count)
+            max_pages = max(1,math.ceil(count / page_size))
             create_link = ""
             if self.has_access(entity_type, "create"):
                 create_link = flask.url_for("core.create_entity", obj_type=entity_type)
@@ -117,12 +127,11 @@ class EntityController:
                 create_link=create_link,
                 current_page=page,
                 page_size=page_size,
+                page_count=max_pages,
                 item_count=count,
-                max_pages=math.ceil(count / page_size)
             )
 
-    def get_pagination(self):
-        page = flask.request.args.get("page", 1)
+    def get_pagination(self, count):
         page_size = flask.request.args.get("size", "")
         if not page_size.isdigit():
             page_size = 25
@@ -132,26 +141,52 @@ class EntityController:
                 page_size = 250
             elif page_size < 10:
                 page_size = 10
+        page = flask.request.args.get("page", 1)
+        if not page.isdigit():
+            page = 1
+        else:
+            page = int(page)
+            max_pages = math.ceil(count / page_size)
+            if page > 1 and page > max_pages:
+                page = max_pages
         return page, page_size
 
-    def load_entity(self, entity_type, entity_id):
+    def remove_entity(self, entity):
+        with self.db as session:
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent.is_deprecated = True
+            session.commit()
+
+    def restore_entity(self, entity):
+        with self.db as session:
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent.is_deprecated = False
+            session.commit()
+
+    def load_entity(self, entity_type, entity_id, revision_no=None):
         with self.db as session:
             e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
             if not e:
                 raise EntityNotFoundError(entity_id)
-            return self.reg.new_entity(entity_type, json.loads(e.data), json.loads(e.display_names) if e.display_names else None, e.id)
+            entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
+            return self.reg.new_entity(
+                entity_type,
+                json.loads(entity_data.data) if entity_data else {},
+                json.loads(e.display_names) if e.display_names else None,
+                e.id,
+                entity_data.id if entity_data else None,
+                e.is_deprecated
+            )
 
     def save_entity(self, entity):
         with self.db as session:
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
-                e.data = json.dumps(entity.values())
                 e.modified_date = datetime.datetime.now()
                 e.display_names = json.dumps(entity.get_displays())
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
-                    data=json.dumps(entity.values()),
                     modified_date=datetime.datetime.now(),
                     created_date=datetime.datetime.now(),
                     display_names=json.dumps(entity.get_displays())
@@ -159,12 +194,29 @@ class EntityController:
                 session.add(e)
             session.commit()
             entity.db_id = e.id
+            retries = 5
+            while retries > 0:
+                retries -= 1
+                try:
+                    rev_nos = [ed.revision_no for ed in session.query(orm.EntityData).filter_by(entity_id=e.id)]
+                    next_rev = 1 if not rev_nos else max(rev_nos) + 1
+                    ed = orm.EntityData(
+                        entity_id=e.id,
+                        revision_no=next_rev,
+                        data=json.dumps(entity.values()),
+                        created_date=datetime.datetime.now()
+                    )
+                    session.add(ed)
+                    session.commit()
+                    break
+                # Trap an error in case two people try to insert at the same time
+                except IntegrityError:
+                    continue
 
 
 class EntityIterator:
 
     db: Database = None
-    cntrl: EntityController = None
 
     @injector.construct
     def __init__(self, entity_type, page=None, page_size=None):
@@ -181,36 +233,46 @@ class EntityIterator:
                 dn = {}
                 if ent.display_names:
                     dn = json.loads(ent.display_names)
-                action_args = {
-                    "obj_type": ent.entity_type,
-                    "obj_id": ent.id
-                }
-                actions = [
-                    (flask.url_for("core.view_entity", **action_args), "pipeman.general.view"),
-                    (flask.url_for("core.entity_references", **action_args), "pipeman.entity.view_references")
-                ]
-                if self.cntrl.has_access(ent.entity_type, 'edit'):
-                    actions.append((
-                        flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
-                    ))
-                if self.cntrl.has_access(ent.entity_type, 'delete'):
-                    actions.append((
-                        flask.url_for("core.delete_entity", **action_args), "pipeman.general.delete"
-                    ))
-                yield ent, MultiLanguageString(dn), actions
+                yield ent, MultiLanguageString(dn)
 
 
 class Entity:
 
     creator: FieldCreator = None
+    controller: EntityController = None
 
     @injector.construct
-    def __init__(self, entity_type, field_list: dict, field_values: dict = None, display_names: dict = None, db_id: int = None):
+    def __init__(self, entity_type, field_list: dict, field_values: dict = None,
+                 display_names: dict = None, db_id: int = None, ed_id: int = None, is_deprecated: bool = False):
         self.entity_type = entity_type
         self._fields = {}
         self._display = display_names if display_names else {}
         self._load_fields(field_list, field_values)
         self.db_id = db_id
+        self.entity_data_id = ed_id
+        self.is_deprecated = is_deprecated
+
+    def actions(self, for_view: bool = False):
+        action_args = {
+            "obj_type": self.entity_type,
+            "obj_id": self.db_id
+        }
+        actions = []
+        if not for_view:
+            actions.append((flask.url_for("core.view_entity", **action_args), "pipeman.general.view"))
+        if self.controller.has_access(self.entity_type, 'edit'):
+            actions.append((
+                flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
+            ))
+        if (not self.is_deprecated) and self.controller.has_access(self.entity_type, 'remove'):
+            actions.append((
+                flask.url_for("core.remove_entity", **action_args), "pipeman.general.remove"
+            ))
+        if self.is_deprecated and self.controller.has_access(self.entity_type, 'restore'):
+            actions.append((
+                flask.url_for("core.restore_entity", **action_args), "pipeman.general.restore"
+            ))
+        return actions
 
     def set_display(self, lang, name):
         self._display[lang] = name
