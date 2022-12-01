@@ -8,7 +8,7 @@ from autoinject import injector
 from pipeman.util.flask import TranslatableField
 import json
 import pipeman.db.orm as orm
-from pipeman.entity import EntityController
+from pipeman.entity.controller import EntityController
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 
@@ -393,7 +393,6 @@ class EntityReferenceField(ChoiceField):
 
     DATA_TYPE = "entity_ref"
 
-    db: Database = None
     ec: EntityController = None
 
     @injector.construct
@@ -420,29 +419,28 @@ class EntityReferenceField(ChoiceField):
         revisions = self.entity_revisions()
         old_rev_text = gettext("pipeman.general.outdated")
         dep_rev_text = gettext("pipeman.general.deprecated")
-        with self.db as session:
-            for entity in session.query(orm.Entity).filter_by(entity_type=self.field_config['entity_type']):
-                dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
-                latest_rev = entity.latest_revision()
-                val_key = f"{entity.id}-{latest_rev.id}"
-                dn = json.loads(entity.display_names)
-                if not entity.is_deprecated:
-                    values.append((val_key, dn))
-                for rev in revisions:
-                    if rev[0] == entity.id and not rev[1] == latest_rev.id:
-                        specific_rev = entity.specific_revision(rev[1])
-                        if specific_rev:
-                            dep_val_key = f"{entity.id}-{specific_rev.id}"
-                            dn_dep = {
-                                key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
-                                for key in dn
-                            }
-                            values.append((dep_val_key, MultiLanguageString(dn_dep)))
-                    elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
-                        dep_dn = {
-                            key: dn[key] + f"[{dep_text[:-1]}" for key in dn
+        for entity, display in self.ec.list_entities(self.field_config['entity_type']):
+            dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
+            latest_rev = entity.latest_revision()
+            val_key = f"{entity.id}-{latest_rev.id}"
+            dn = json.loads(entity.display_names) if entity.display_names else {}
+            if not entity.is_deprecated:
+                values.append((val_key, dn))
+            for rev in revisions:
+                if rev[0] == entity.id and not rev[1] == latest_rev.id:
+                    specific_rev = entity.specific_revision(rev[1])
+                    if specific_rev:
+                        dep_val_key = f"{entity.id}-{specific_rev.id}"
+                        dn_dep = {
+                            key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
+                            for key in dn
                         }
-                        values.append((val_key, MultiLanguageString(dep_dn)))
+                        values.append((dep_val_key, MultiLanguageString(dn_dep)))
+                elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
+                    dep_dn = {
+                        key: dn[key] + f"[{dep_text[:-1]}" for key in dn
+                    }
+                    values.append((val_key, MultiLanguageString(dep_dn)))
         return values
 
     def _process_value(self, val, **kwargs):
@@ -452,6 +450,30 @@ class EntityReferenceField(ChoiceField):
             int(entity_id),
             int(rev_no)
         )
+
+
+class DatasetReferenceField(ChoiceField):
+
+    DATA_TYPE = "dataset_ref"
+
+    db: Database = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._value_cache = None
+
+    def choices(self):
+        if self._value_cache is None:
+            self._value_cache = self._load_values()
+        return self._value_cache
+
+    def _load_values(self):
+        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+        with self.db as session:
+            for entity in session.query(orm.Dataset).filter_by(is_deprecated=False):
+                values.append((entity.id, MultiLanguageString(json.loads(entity.display_names) if entity.display_names else {})))
+        return values
 
 
 class VocabularyReferenceField(ChoiceField):

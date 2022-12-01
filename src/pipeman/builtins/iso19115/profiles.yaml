@@ -1,0 +1,15 @@
+iso19115:
+  label:
+    en: Core ISO-19115
+  fields:
+    title: yes
+    abstract: no
+    publisher: yes
+    owner: yes
+    contributors: no
+    doi: no
+  formatters:
+    iso19115xml:
+      label:
+        en: ISO-19115 XML
+      template: iso19115.xml

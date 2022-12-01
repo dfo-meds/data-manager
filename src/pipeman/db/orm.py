@@ -70,6 +70,7 @@ class _DisplayNameModel(_BaseModel):
 class Organization(_DisplayNameModel, Base):
 
     users = orm.relationship("User", secondary=user_organization, back_populates="organizations")
+    entities = orm.relationship("Entity", back_populates="organization")
 
 
 class User(_BaseModel, Base):
@@ -109,9 +110,11 @@ class Entity(_BaseModel, Base):
     created_date = sa.Column(sa.DateTime)
     modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
+    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
+    organization = orm.relationship("Organization", back_populates="entities")
 
     def latest_revision(self):
         latest = None
@@ -183,4 +186,56 @@ class VocabularyTerm(_BaseModel, Base):
         return self.short_name
 
 
+class Dataset(_BaseModel, Base):
+
+    created_date = sa.Column(sa.DateTime)
+    modified_date = sa.Column(sa.DateTime)
+    is_deprecated = sa.Column(sa.Boolean)
+    display_names = sa.Column(sa.Text, default=None, nullable=True)
+    profiles = sa.Column(sa.Text)
+
+    data = orm.relationship("DatasetData", back_populates="dataset")
+
+    def latest_revision(self):
+        latest = None
+        for ed in self.data:
+            if latest is None or latest.revision_no < ed.revision_no:
+                latest = ed
+        return latest
+
+    def specific_revision(self, rev_no):
+        for ed in self.data:
+            if ed.revision_no == rev_no:
+                return ed
+
+    def set_display_name(self, language, display_name):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        dns[language] = display_name
+        self.display_names = json.dumps(dns)
+
+    def display_name(self, language, fallback_language='en'):
+        dns = {}
+        if self.display_names:
+            dns = json.loads(self.display_names)
+        if language in self.display_names:
+            return dns[language]
+        if fallback_language in self.display_names:
+            return dns[fallback_language]
+        return f"{self.entity_type}_{self.id}"
+
+
+class DatasetData(_BaseModel, Base):
+
+    __table_args__ = (
+        sa.UniqueConstraint("dataset_id", "revision_no", name="unique_dataset_revision_data"),
+    )
+
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False)
+    revision_no = sa.Column(sa.Integer, nullable=False)
+    data = sa.Column(sa.Text)
+    created_date = sa.Column(sa.DateTime)
+
+    dataset = orm.relationship("Dataset", back_populates="data")
 

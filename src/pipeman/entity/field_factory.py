@@ -36,7 +36,8 @@ class _BuiltInFactory(GenericFactory):
             fields.TimeField,
             fields.URLField,
             fields.EntityReferenceField,
-            fields.VocabularyReferenceField
+            fields.VocabularyReferenceField,
+            fields.DatasetReferenceField
         ])
 
 

@@ -26,3 +26,7 @@ class DataTypeNotSupportedError(PipemanError):
 
 class EntityNotFoundError(PipemanError):
     pass
+
+
+class DatasetNotFoundError(PipemanError):
+    pass

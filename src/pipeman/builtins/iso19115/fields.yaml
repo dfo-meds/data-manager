@@ -1,0 +1,33 @@
+data_info:
+  label:
+    en: Data Identification
+  fields:
+    title:
+      data_type: text
+      label:
+        en: Title
+    abstract:
+      data_type: multitext
+      label:
+        en: Abstract
+    publisher:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Publisher
+    owner:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Owner
+    contributors:
+      data_type: entity_ref
+      entity_type: contact
+      repeatable: yes
+      label:
+        en: Contributors
+    doi:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: DOI

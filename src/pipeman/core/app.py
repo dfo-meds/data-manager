@@ -2,6 +2,7 @@ import flask
 import flask_login
 from autoinject import injector
 from pipeman.entity import EntityController, EntityRegistry
+from pipeman.dataset import DatasetController
 from pipeman.auth import require_permission
 
 core = flask.Blueprint("core", __name__)
@@ -87,3 +88,59 @@ def restore_entity(obj_type, obj_id, con: EntityController = None):
     if not con.has_access(obj_type, "restore"):
         return flask.abort(403)
     return con.restore_entity_form(obj_type, obj_id)
+
+
+@core.route("/datasets")
+@require_permission("datasets.view")
+@injector.inject
+def list_datasets(con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/new", methods=["POST", "GET"])
+@require_permission("datasets.create")
+@injector.inject
+def create_dataset(con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>")
+@require_permission("datasets.view")
+@injector.inject
+def view_dataset(dataset_id, con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>/edit", methods=["POST", "GET"])
+@require_permission("datasets.edit")
+@injector.inject
+def edit_dataset(dataset_id, con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>/metadata", methods=["POST", "GET"])
+@require_permission("datasets.edit")
+@injector.inject
+def edit_dataset_metadata(dataset_id, con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>/publish", methods=["POST", "GET"])
+@require_permission("datasets.publish")
+@injector.inject
+def publish_dataset(dataset_id, con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>/<revision_no>")
+@require_permission("datasets.view")
+@injector.inject
+def view_dataset_revision(dataset_id, revision_no, con: DatasetController = None):
+    pass
+
+
+@core.route("/datasets/<dataset_id>/<revision_no>/<profile_name>/<format_name>")
+@require_permission("datasets.view")
+@injector.inject
+def generate_metadata_format(dataset_id, revision_no, profile_name, format_name):
+    pass
