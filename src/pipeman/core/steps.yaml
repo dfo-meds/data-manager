@@ -1,0 +1,15 @@
+publish_dataset:
+  label:
+    en: Publish Dataset
+  step_type: action
+  action: pipeman.dataset.workflow.publish_dataset
+activate_dataset:
+  label:
+    en: Activate Dataset
+  step_type: action
+  action: pipeman.dataset.workflow.activate_dataset
+flag_dataset_for_review:
+  label:
+    en: Block Dataset Edits
+  step_type: action
+  action: pipeman.dataset.workflow.flag_dataset_for_review

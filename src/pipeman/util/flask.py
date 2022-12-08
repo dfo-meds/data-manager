@@ -3,6 +3,38 @@ from wtforms.form import BaseForm
 from pipeman.i18n import TranslationManager, DelayedTranslationString
 from autoinject import injector
 from flask_wtf import FlaskForm
+import flask
+import math
+
+
+def paginate_query(query, min_page_size=10, max_page_size=250, default_page_size=50):
+    count = query.count()
+    page_size = flask.request.args.get("size", "")
+    if not page_size.isdigit():
+        page_size = default_page_size
+    else:
+        page_size = int(page_size)
+        if page_size > max_page_size:
+            page_size = max_page_size
+        elif page_size < min_page_size:
+            page_size = min_page_size
+    max_pages = math.ceil(count / page_size)
+    page = flask.request.args.get("page", 1)
+    if not page.isdigit():
+        page = 1
+    else:
+        page = int(page)
+        if page > 1 and page > max_pages:
+            page = max_pages
+    return (
+        query.limit(page_size).offset((page - 1) * page_size),
+        {
+            "current_page": page,
+            "page_size": page_size,
+            "page_count": max_pages,
+            "item_count": count
+        }
+    )
 
 
 class ConfirmationForm(FlaskForm):

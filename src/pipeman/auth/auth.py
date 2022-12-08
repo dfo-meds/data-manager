@@ -24,11 +24,12 @@ def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
 
 class AuthenticatedUser(fl.UserMixin):
 
-    def __init__(self, username, display_name, permissions, organization_ids):
+    def __init__(self, username, display_name, permissions, organization_ids, dataset_ids):
         self.permissions = permissions
         self.display = display_name
         self.username = username
         self.organizations = organization_ids
+        self.datasets = dataset_ids
 
     def get_id(self):
         return self.username
@@ -39,17 +40,24 @@ class AuthenticatedUser(fl.UserMixin):
     def belongs_to(self, organization_id):
         return organization_id in self.organizations
 
+    def works_on(self, dataset_id):
+        return dataset_id in self.datasets
+
 
 class AnonymousUser(fl.AnonymousUserMixin):
 
     def __init__(self):
         self.display = "N/A"
         self.organizations = []
+        self.datasets = []
 
     def belongs_to(self, organization_id):
         return False
 
     def has_permission(self, permission_name):
+        return False
+
+    def works_on(self, dataset_id):
         return False
 
 

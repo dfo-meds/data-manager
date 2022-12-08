@@ -40,7 +40,17 @@ class MetadataRegistry:
         if d:
             deep_update(self._profiles, d)
 
-    def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, display_names=None):
+    def metadata_format_exists(self, profile_name, format_name):
+        if profile_name not in self._profiles:
+            return False
+        if format_name not in self._profiles[profile_name]['formatters']:
+            return False
+        return True
+
+    def metadata_format_template(self, profile_name, format_name):
+        return self._profiles[profile_name]["formatters"][format_name]["template"]
+
+    def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, display_names=None, is_deprecated=False, org_id=None, extras=None, users=None):
         fields = set()
         mandatory = set()
         for profile in profiles:
@@ -50,14 +60,19 @@ class MetadataRegistry:
         field_list = {
             fn: self._fields[fn] for fn in fields
         }
-        return Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, profiles, ds_data_id)
+        return Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, profiles, ds_data_id, is_deprecated, org_id, extras, users)
 
 
 class Dataset(FieldContainer):
 
-    def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id):
-        super().__init__(field_list, field_values, display_names)
+    def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
+        super().__init__(field_list, field_values, display_names, is_deprecated, org_id)
         self.required_fields = required_fields
         self.profiles = profiles
         self.dataset_id = dataset_id
-        self.ds_data_id = ds_data_id
+        self.metadata_id = ds_data_id
+        self.extras = extras or {}
+        self.users = []
+
+    def status(self):
+        return self.extras["status"] if "status" in self.extras else None

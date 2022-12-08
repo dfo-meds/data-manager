@@ -30,3 +30,19 @@ class EntityNotFoundError(PipemanError):
 
 class DatasetNotFoundError(PipemanError):
     pass
+
+
+class StepNotFoundError(PipemanError):
+    pass
+
+
+class StepConfigurationError(PipemanError):
+    pass
+
+
+class WorkflowNotFoundError(PipemanError):
+    pass
+
+
+class WorkflowItemNotFoundError(PipemanError):
+    pass

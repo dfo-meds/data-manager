@@ -38,4 +38,5 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
         for group in user.groups:
             permissions.update(group.permissions.split(";"))
         organizations = [x.id for x in user.organizations]
-        return AuthenticatedUser(user.username, user.display, permissions, organizations)
+        datasets = [x.id for x in user.datasets]
+        return AuthenticatedUser(user.username, user.display, permissions, organizations, datasets)

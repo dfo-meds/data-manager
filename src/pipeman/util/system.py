@@ -62,19 +62,26 @@ class System:
 
     def init_plugins(self):
         import pipeman.plugins as plg
-        for _, name, _ in pkgutil.iter_modules(plg.__path__, "pipeman.plugins."):
-            if name not in self.plugins:
-                mod = importlib.import_module(name)
-                if hasattr(mod, "init_plugin"):
-                    getattr(mod, "init_plugin")()
-                self.plugins.add(name)
         import pipeman.builtins as int_plg
+        delayed_load = self.config.get(("pipeman", "plugins", "last"), default=[])
+        for name in self.config.get(("pipeman", "plugins", "first"), default=[]):
+            if name not in delayed_load:
+                self._load_plugin(name)
         for _, name, _ in pkgutil.iter_modules(int_plg.__path__, "pipeman.builtins."):
-            if name not in self.plugins:
-                mod = importlib.import_module(name)
-                if hasattr(mod, "init_plugin"):
-                    getattr(mod, "init_plugin")()
-                self.plugins.add(name)
+            if name not in delayed_load:
+                self._load_plugin(name)
+        for _, name, _ in pkgutil.iter_modules(plg.__path__, "pipeman.plugins."):
+            if name not in delayed_load:
+                self._load_plugin(name)
+        for name in delayed_load:
+            self._load_plugin(name)
+
+    def _load_plugin(self, name):
+        if name not in self.plugins:
+            mod = importlib.import_module(name)
+            if hasattr(mod, "init_plugin"):
+                getattr(mod, "init_plugin")()
+            self.plugins.add(name)
 
     def init_app(self, app):
         if "flask" in self.config:

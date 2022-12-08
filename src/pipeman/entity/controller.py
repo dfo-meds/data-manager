@@ -3,7 +3,7 @@ from autoinject import injector
 import wtforms as wtf
 from wtforms.form import BaseForm
 import flask
-from .entity import entity_access
+from .entity import entity_access, specific_entity_access
 from pipeman.i18n import gettext, MultiLanguageString, DelayedTranslationString
 from pipeman.db import Database
 from pipeman.util.flask import TranslatableField
@@ -14,7 +14,7 @@ import datetime
 import sqlalchemy as sa
 import math
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm
+from pipeman.util.flask import ConfirmationForm, paginate_query
 import flask_login
 
 
@@ -29,32 +29,28 @@ class EntityController:
         self.view_template = view_template
         self.edit_template = edit_template
 
-    def view_entity_page(self, entity_type, entity_id):
-        ent = self.load_entity(entity_type, entity_id)
+    def view_entity_page(self, ent):
         return flask.render_template(self.view_template, entity=ent)
 
-    def edit_entity_form(self, entity_type, entity_id):
-        ent = self.load_entity(entity_type, entity_id)
+    def edit_entity_form(self, ent):
         form = EntityForm(ent)
         if form.handle_form():
             self.save_entity(ent)
-            return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=ent.db_id))
+            return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.db_id))
         return flask.render_template(self.edit_template, form=form)
 
-    def remove_entity_form(self, entity_type, entity_id):
-        ent = self.load_entity(entity_type, entity_id)
+    def remove_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
-            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=entity_type))
+            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.remove_confirmation"))
 
-    def restore_entity_form(self, entity_type, entity_id):
-        ent = self.load_entity(entity_type, entity_id)
+    def restore_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
-            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=entity_type))
+            return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.restore_confirmation"))
 
     def create_entity_form(self, entity_type):
@@ -68,49 +64,39 @@ class EntityController:
     def has_access(self, entity_type, op):
         return entity_access(entity_type, op)
 
-    def list_entities(self, entity_type, page=None, page_size=None):
-        return EntityIterator(entity_type, page, page_size)
+    def has_specific_access(self, entity, op):
+        return specific_entity_access(entity)
 
-    def entity_references_page(self, entity_type, entity_id):
-        pass
+    def _entity_iterator(self, query):
+        for ent in query:
+            dn = json.loads(ent.display_names) if ent.display_names else {}
+            actions = [
+                (flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.id), 'pipeman.general.view')
+            ]
+            yield ent, MultiLanguageString(dn), actions
+
+    def _entity_query(self, entity_type, session):
+        q = session.query(orm.Entity).filter_by(entity_type=entity_type)
+        if not flask_login.current_user.has_permission("organization.manage_any"):
+            q = q.filter(sa.or_(
+                orm.Entity.organization_id.in_(flask_login.current_user.organizations),
+                orm.Entity.organization_id == None
+            ))
+        return q.order_by(orm.Entity.id)
 
     def list_entities_page(self, entity_type):
         with self.db as session:
-            count = session.query(orm.Entity.id).filter_by(entity_type=entity_type).count()
-            page, page_size = self.get_pagination(count)
-            max_pages = max(1,math.ceil(count / page_size))
+            query = self._entity_query(entity_type, session)
+            query, page_args = paginate_query(query)
             create_link = ""
             if self.has_access(entity_type, "create"):
                 create_link = flask.url_for("core.create_entity", obj_type=entity_type)
             return flask.render_template(
                 "list_entities.html",
-                entities=self.list_entities(entity_type, page, page_size),
+                entities=self._entity_iterator(query),
                 create_link=create_link,
-                current_page=page,
-                page_size=page_size,
-                page_count=max_pages,
-                item_count=count,
+                **page_args
             )
-
-    def get_pagination(self, count):
-        page_size = flask.request.args.get("size", "")
-        if not page_size.isdigit():
-            page_size = 25
-        else:
-            page_size = int(page_size)
-            if page_size > 250:
-                page_size = 250
-            elif page_size < 10:
-                page_size = 10
-        page = flask.request.args.get("page", 1)
-        if not page.isdigit():
-            page = 1
-        else:
-            page = int(page)
-            max_pages = math.ceil(count / page_size)
-            if page > 1 and page > max_pages:
-                page = max_pages
-        return page, page_size
 
     def remove_entity(self, entity):
         with self.db as session:
@@ -176,38 +162,6 @@ class EntityController:
                 # Trap an error in case two people try to insert at the same time
                 except IntegrityError:
                     continue
-
-
-class EntityIterator:
-
-    db: Database = None
-
-    @injector.construct
-    def __init__(self, entity_type, page=None, page_size=None):
-        self.entity_type = entity_type
-        self.page = page
-        self.page_size = page_size
-
-    def __iter__(self):
-        generator = self.list_entities()
-        return iter(generator)
-
-    def list_entities(self):
-        with self.db as session:
-            q = session.query(orm.Entity).filter_by(entity_type=self.entity_type)
-            if not flask_login.current_user.has_permission("organization.manage_any"):
-                q = q.filter(sa.or_(
-                    orm.Entity.organization_id.in_(flask_login.current_user.organizations),
-                    orm.Entity.organization_id == None
-                ))
-            q = q.order_by(orm.Entity.id)
-            if self.page_size is not None:
-                q = q.limit(self.page_size).offset((self.page - 1)*self.page_size)
-            for ent in q:
-                dn = {}
-                if ent.display_names:
-                    dn = json.loads(ent.display_names)
-                yield ent, MultiLanguageString(dn)
 
 
 @injector.inject

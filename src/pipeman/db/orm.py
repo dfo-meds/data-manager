@@ -28,6 +28,13 @@ user_organization = sa.Table(
     sa.Column("organization_id", sa.ForeignKey("organization.id"), index=True)
 )
 
+user_dataset = sa.Table(
+    "user_dataset",
+    Base.metadata,
+    sa.Column("user_id", sa.ForeignKey("user.id"), index=True),
+    sa.Column("dataset_id", sa.ForeignKey("dataset.id"), index=True)
+)
+
 
 class _BaseModel(object):
 
@@ -71,6 +78,7 @@ class Organization(_DisplayNameModel, Base):
 
     users = orm.relationship("User", secondary=user_organization, back_populates="organizations")
     entities = orm.relationship("Entity", back_populates="organization")
+    datasets = orm.relationship("Dataset", back_populates="organization")
 
 
 class User(_BaseModel, Base):
@@ -83,6 +91,7 @@ class User(_BaseModel, Base):
 
     groups = orm.relationship("Group", secondary=user_group, back_populates="users")
     organizations = orm.relationship("Organization", secondary=user_organization, back_populates="users")
+    datasets = orm.relationship("Dataset", secondary=user_dataset, back_populates="users")
 
 
 class Group(_DisplayNameModel, Base):
@@ -191,14 +200,30 @@ class Dataset(_BaseModel, Base):
     created_date = sa.Column(sa.DateTime)
     modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
+    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=False)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     profiles = sa.Column(sa.Text)
+    pub_workflow = sa.Column(sa.String(255), nullable=False)
+    act_workflow = sa.Column(sa.String(255), nullable=False)
+    status = sa.Column(sa.String(255), nullable=False)
+    security_level = sa.Column(sa.String(255), nullable=False)
 
+    organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("DatasetData", back_populates="dataset")
+    users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
 
     def latest_revision(self):
         latest = None
         for ed in self.data:
+            if latest is None or latest.revision_no < ed.revision_no:
+                latest = ed
+        return latest
+
+    def latest_published_revision(self):
+        latest = None
+        for ed in self.data:
+            if not ed.is_published:
+                continue
             if latest is None or latest.revision_no < ed.revision_no:
                 latest = ed
         return latest
@@ -226,7 +251,7 @@ class Dataset(_BaseModel, Base):
         return f"{self.entity_type}_{self.id}"
 
 
-class DatasetData(_BaseModel, Base):
+class MetadataEdition(_BaseModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("dataset_id", "revision_no", name="unique_dataset_revision_data"),
@@ -236,6 +261,29 @@ class DatasetData(_BaseModel, Base):
     revision_no = sa.Column(sa.Integer, nullable=False)
     data = sa.Column(sa.Text)
     created_date = sa.Column(sa.DateTime)
+    is_published = sa.Column(sa.Boolean, default=False, nullable=False)
+    published_date = sa.Column(sa.DateTime, nullable=True, default=None)
 
     dataset = orm.relationship("Dataset", back_populates="data")
+
+
+class WorkflowItem(_BaseModel, Base):
+
+    context = sa.Column(sa.Text)
+    workflow_type = sa.Column(sa.String(255), index=True)
+    workflow_name = sa.Column(sa.String(255), index=True)
+    object_id = sa.Column(sa.Integer)
+    step_list = sa.Column(sa.Text)
+    created_date = sa.Column(sa.DateTime)
+    completed_index = sa.Column(sa.Integer, default=None, nullable=True)
+    status = sa.Column(sa.String(255))
+
+
+class WorkflowDecision(_BaseModel, Base):
+
+    workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False)
+    step_name = sa.Column(sa.String(255))
+    decider_id = sa.Column(sa.String(1024), nullable=False)
+    decision = sa.Column(sa.Boolean)
+    decision_date = sa.Column(sa.DateTime)
 

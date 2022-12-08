@@ -1,0 +1,14 @@
+dataset_publication:
+    direct_publish:
+        label:
+          en: Direct Publish
+        steps:
+          - publish_dataset
+        enabled: yes
+dataset_activation:
+    direct_activation:
+        label:
+          en: Direct Activation
+        steps:
+          - activate_dataset
+        enabled: yes

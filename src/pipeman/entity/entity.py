@@ -17,6 +17,12 @@ def entity_access(entity_type: str, op: str) -> bool:
     return True
 
 
+def specific_entity_access(entity) -> bool:
+    if flask_login.current_user.has_permission("organization.manage_any"):
+        return True
+    return entity.organization_id in flask_login.current_user.organizations
+
+
 @injector.injectable_global
 class EntityRegistry:
 
