@@ -76,25 +76,35 @@ class FieldContainer:
             if field_values and field_name in field_values:
                 self._fields[field_name].value = field_values[field_name]
 
-    def display_values(self):
+    def display_values(self, display_group = None):
         for fn in self._fields:
-            field = self._fields[fn]
-            yield field.label(), field.display()
+            if display_group is None or display_group == self._fields[fn].display_group:
+                field = self._fields[fn]
+                yield field.label(), field.display()
 
     def values(self) -> dict:
         return {fn: self._fields[fn].value for fn in self._fields}
+
+    def supports_display_group(self, display_group) -> bool:
+        return any(self._fields[fn].display_group == display_group for fn in self._fields)
+
+    def supported_display_groups(self) -> set:
+        return set(self._fields[fn].display_group for fn in self._fields)
 
     def data(self, key, **kwargs):
         if key in self._fields:
             return self._fields[key].data(**kwargs)
         return None
 
-    def controls(self):
-        return {fn: self._fields[fn].control() for fn in self._fields}
+    def controls(self, display_group=None):
+        return {fn: self._fields[fn].control() for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group}
 
-    def process_form_data(self, form_data):
+    def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
-            self._fields[fn].value = form_data[fn]
+            if display_group is None or display_group == self._fields[fn].display_group:
+                print(fn)
+                print(form_data[fn])
+                self._fields[fn].value = form_data[fn]
 
     def set_display(self, lang, name):
         self._display[lang] = name

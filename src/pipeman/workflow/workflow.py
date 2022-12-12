@@ -15,6 +15,7 @@ import requests
 import time
 import zirconium as zr
 from pipeman.i18n import gettext
+import logging
 
 
 class ItemResult(Enum):
@@ -49,6 +50,15 @@ class WorkflowRegistry:
             }
         }
         deep_update(self._workflows, record)
+
+    def workflow_display(self, category_name, workflow_name):
+        return MultiLanguageString(self._workflows[category_name][workflow_name]['label']) if category_name in self._workflows and workflow_name in self._workflows[category_name] else "?"
+
+    def list_workflows(self, category_name):
+        return [
+            (wn, MultiLanguageString(self._workflows[category_name][wn]["label"]))
+            for wn in self._workflows[category_name]
+        ] if category_name in self._workflows else []
 
     def register_step(self, step_name, label, step_type, item_config):
         record = {
@@ -216,7 +226,7 @@ class WorkflowController:
         next_index = item.completed_index
         if next_index >= len(steps):
             item.status = "COMPLETE"
-            return None
+            return None, None
         return self.reg.construct_step(steps[next_index]), steps
 
     def _start_next_step(self, item, session, steps=None, ctx=None):
@@ -282,13 +292,14 @@ class WorkflowStep:
             if res is False:
                 return ItemResult.FAILURE
         except Exception as ex:
+            logging.getLogger("pipeman.workflow").exception(ex)
             return ItemResult.FAILURE
 
     def _execute(self, context: dict) -> ItemResult:
         return ItemResult.SUCCESS
 
     def _call_function(self, func_path, *args, **kwargs):
-        mod_pos = func_path.rpos(".")
+        mod_pos = func_path.rfind(".")
         module_name = func_path[0:mod_pos]
         func_name = func_path[mod_pos+1:]
         module = importlib.import_module(module_name)

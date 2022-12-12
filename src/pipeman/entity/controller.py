@@ -12,7 +12,7 @@ from pipeman.util.errors import EntityNotFoundError
 import json
 import datetime
 import sqlalchemy as sa
-import math
+from pipeman.core.util import organization_list
 from sqlalchemy.exc import IntegrityError
 from pipeman.util.flask import ConfirmationForm, paginate_query
 import flask_login
@@ -74,6 +74,11 @@ class EntityController:
                 (flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.id), 'pipeman.general.view')
             ]
             yield ent, MultiLanguageString(dn), actions
+
+    def list_entities(self, entity_type):
+        with self.db as session:
+            query = self._entity_query(entity_type, session)
+            return self._entity_iterator(query)
 
     def _entity_query(self, entity_type, session):
         q = session.query(orm.Entity).filter_by(entity_type=entity_type)
@@ -164,20 +169,6 @@ class EntityController:
                     continue
 
 
-@injector.inject
-def organization_list(db: Database = None):
-    with db as session:
-        all_access = flask_login.current_user.has_permission("organization.manage_any")
-        global_access = flask_login.current_user.has_permission("organization.manage_global")
-        orgs = []
-        if global_access:
-            orgs.append(("", DelayedTranslationString("pipeman.organization.global")))
-        for org in session.query(orm.Organization):
-            if all_access or flask_login.current_user.belongs_to(org.id):
-                orgs.append((org.id, MultiLanguageString(json.loads(org.display_names))))
-        return orgs
-
-
 class EntityForm(BaseForm):
 
     def __init__(self, entity, *args, **kwargs):
@@ -207,7 +198,7 @@ class EntityForm(BaseForm):
                 self.entity.process_form_data(d)
                 for key in d["_name"]:
                     self.entity.set_display(key, d["_name"][key])
-                self.entity.organization_id = d["_org"]
+                self.entity.organization_id = d["_org"] if d["_org"] > 0 else None
                 return True
             else:
                 for key in self.errors:

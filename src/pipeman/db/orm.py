@@ -209,7 +209,7 @@ class Dataset(_BaseModel, Base):
     security_level = sa.Column(sa.String(255), nullable=False)
 
     organization = orm.relationship("Organization", back_populates="datasets")
-    data = orm.relationship("DatasetData", back_populates="dataset")
+    data = orm.relationship("MetadataEdition", back_populates="dataset")
     users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
 
     def latest_revision(self):

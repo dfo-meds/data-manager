@@ -18,8 +18,8 @@ def paginate_query(query, min_page_size=10, max_page_size=250, default_page_size
             page_size = max_page_size
         elif page_size < min_page_size:
             page_size = min_page_size
-    max_pages = math.ceil(count / page_size)
-    page = flask.request.args.get("page", 1)
+    max_pages = max(1, math.ceil(count / page_size))
+    page = flask.request.args.get("page", "")
     if not page.isdigit():
         page = 1
     else:

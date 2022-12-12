@@ -1,7 +1,35 @@
+locale:
+  display:
+    en: Locale
+  fields:
+    language:
+      data_type: text
+      label:
+        en: ISO 639-3 Language Code
+    country:
+      data_type: text
+      label:
+        en: ISO 3166-1-A3 Country Code
+    encoding:
+      data_type: vocabulary
+      vocabulary_name: core_charsets
+      label:
+        en: Character Encoding
+citation:
+  display:
+    en: Citation
+  fields:
+    title:
+    alt_title:
+    publication_date:
+    revision_date:
+    creation_date:
+    edition:
+    edition_date:
+
 resource:
   display:
     en: Resource
-    fr: Resource
   fields:
     url:
       data_type: url
@@ -94,3 +122,7 @@ contact:
       multilingual: yes
       label:
         en: Additional Instructions
+    persistent_id:
+      data_type: url
+      label:
+        und: RORID / ORCID

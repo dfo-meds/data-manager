@@ -2,6 +2,9 @@ from autoinject import injector
 from pipeman.util import deep_update
 from pipeman.entity import FieldContainer
 import typing as t
+from pipeman.i18n import MultiLanguageString, gettext
+import copy
+from pipeman.workflow import WorkflowRegistry
 
 
 @injector.injectable_global
@@ -10,6 +13,55 @@ class MetadataRegistry:
     def __init__(self):
         self._fields = {}
         self._profiles = {}
+        self._display_groups = {}
+        self._security_labels = {}
+
+    def security_labels_for_select(self):
+        return [
+            (x, MultiLanguageString(self._security_labels[x]))
+            for x in self._security_labels
+        ]
+
+    def security_label_display(self, name):
+        return MultiLanguageString(self._security_labels[name]) if name in self._security_labels else ""
+
+    def register_security_label(self, name, labels: dict = None):
+        if name in self._security_labels and labels:
+            self._security_labels[name].update(labels)
+        else:
+            self._security_labels[name] = labels if labels else {}
+
+    def register_security_labels_from_dict(self, d: dict):
+        if d:
+            self._security_labels.update(d)
+
+    def display_group_exists(self, display_group):
+        return display_group in self._display_groups
+
+    def display_group_label(self, display_group):
+        return MultiLanguageString(self._display_groups[display_group]['labels'])
+
+    def ordered_groups(self, display_groups):
+        reordered = [copy.deepcopy(self._display_groups[dg]) for dg in display_groups if dg in self._display_groups]
+        reordered.sort(key=lambda x: x['order'])
+        for x in reordered:
+            yield x['name']
+
+    def register_display_group(self, name, displays=None, order=None):
+        if name in self._display_groups:
+            if displays:
+                self._display_groups[name]["labels"].update(displays)
+            if order:
+                self._display_groups[name]["order"] = order
+        else:
+            if order is None:
+                order = max(self._display_groups[dg]["order"] for dg in self._display_groups) if self._display_groups else 0
+                order += 1
+            self._display_groups[name] = {
+                "labels": displays if displays else {},
+                "order": order,
+                "name": name
+            }
 
     def register_field(self, field_name, field_config):
         if field_name in self._fields:
@@ -17,9 +69,17 @@ class MetadataRegistry:
         else:
             self._fields[field_name] = field_config
 
-    def register_fields_from_dict(self, d: dict):
+    def register_fields_from_dict(self, d: dict, with_display_group_parents: bool = True):
         if d:
-            deep_update(self._fields, d)
+            if with_display_group_parents:
+                for dg_name in d:
+                    self.register_display_group(dg_name, d[dg_name]["label"] if "label" in d[dg_name] else {})
+                    if "fields" in d[dg_name]:
+                        for fn in d[dg_name]["fields"]:
+                            d[dg_name]["fields"][fn]["display_group"] = dg_name
+                            self.register_field(fn, d[dg_name]["fields"][fn])
+            else:
+                deep_update(self._fields, d)
 
     def register_profile(self, profile_name, display_names, field_list, formatters):
         if profile_name in self._profiles:
@@ -40,6 +100,12 @@ class MetadataRegistry:
         if d:
             deep_update(self._profiles, d)
 
+    def profiles_for_select(self):
+        return [
+            (x, MultiLanguageString(self._profiles[x]["label"]))
+            for x in self._profiles
+        ]
+
     def metadata_format_exists(self, profile_name, format_name):
         if profile_name not in self._profiles:
             return False
@@ -56,7 +122,7 @@ class MetadataRegistry:
         for profile in profiles:
             if profile in self._profiles:
                 fields.update(self._profiles[profile]["fields"].keys())
-                mandatory.update(x for x in self._profiles["fields"].keys() if self._profiles["fields"][x])
+                mandatory.update(x for x in self._profiles[profile]["fields"].keys() if self._profiles[profile]["fields"][x])
         field_list = {
             fn: self._fields[fn] for fn in fields
         }
@@ -76,3 +142,29 @@ class Dataset(FieldContainer):
 
     def status(self):
         return self.extras["status"] if "status" in self.extras else None
+
+    def status_display(self):
+        stat = self.status()
+        if stat is None or stat == "":
+            return gettext("pipeman.status.unknown")
+        return gettext(f"pipeman.dataset.status.{stat.lower()}")
+
+    @injector.inject
+    def pub_workflow_display(self, wreg: WorkflowRegistry = None):
+        return wreg.workflow_display("dataset_publication", self.extras["pub_workflow"])
+
+    @injector.inject
+    def act_workflow_display(self, wreg: WorkflowRegistry = None):
+        return wreg.workflow_display("dataset_activation", self.extras["act_workflow"])
+
+    @injector.inject
+    def security_level_display(self, reg: MetadataRegistry = None):
+        return reg.security_label_display(self.extras["security_level"])
+
+    def properties(self):
+        return [
+            ('pipeman.dataset.status', self.status_display()),
+            ('pipeman.dataset.act_workflow', self.act_workflow_display()),
+            ('pipeman.dataset.pub_workflow', self.pub_workflow_display()),
+            ('pipeman.dataset.security_level', self.security_level_display()),
+        ]

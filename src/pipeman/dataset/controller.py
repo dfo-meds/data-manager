@@ -15,7 +15,8 @@ from flask_wtf import FlaskForm
 import wtforms.validators as wtfv
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query
-from pipeman.workflow import WorkflowController
+from pipeman.workflow import WorkflowController, WorkflowRegistry
+from pipeman.core.util import organization_list, user_list
 
 
 @injector.injectable
@@ -26,7 +27,7 @@ class DatasetController:
     workflow: WorkflowController = None
 
     @injector.construct
-    def __init__(self, view_template="view_dataset.html", edit_template="form.html", meta_edit_template="form.html"):
+    def __init__(self, view_template="view_dataset.html", edit_template="form.html", meta_edit_template="metadata_form.html"):
         self.view_template = view_template
         self.edit_template = edit_template
         self.meta_template = meta_edit_template
@@ -35,6 +36,19 @@ class DatasetController:
         return self.reg.metadata_format_exists(profile_name, format_name)
 
     def has_access(self, dataset, operation):
+        if operation == "activate" and not dataset.status() == "DRAFT":
+            return False
+        if operation == "publish" and not dataset.status() == "ACTIVE":
+            return False
+        if operation == "edit" and dataset.status() == "UNDER_REVIEW":
+            return False
+        if dataset.is_deprecated:
+            if operation not in ("restore", "view"):
+                return False
+            if not flask_login.current_user.has_permission(f"datasets.deprecated_access"):
+                return False
+        elif operation == "restore":
+            return False
         if flask_login.current_user.has_permission(f"datasets.{operation}.all"):
             return True
         if flask_login.current_user.has_permission(f"datasets.{operation}.organization"):
@@ -61,7 +75,7 @@ class DatasetController:
                 create_link = flask.url_for("core.create_dataset")
             return flask.render_template(
                 "list_datasets.html",
-                datasets=self._entity_iterator(query),
+                datasets=self._dataset_iterator(query),
                 create_link=create_link,
                 **page_args
             )
@@ -76,6 +90,8 @@ class DatasetController:
 
     def _dataset_query(self, session):
         q = session.query(orm.Dataset)
+        if not flask_login.current_user.has_permission("datasets.deprecated_access"):
+            q = q.filter_by(is_deprecated=False)
         if flask_login.current_user.has_permission(f"datasets.view.all"):
             pass
         elif flask_login.current_user.has_permission("datasets.view.organization") and flask_login.current_user.has_permission("organization.manage_any"):
@@ -100,10 +116,23 @@ class DatasetController:
             ds = form.build_dataset()
             self.save_dataset(ds)
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
-        return flask.render_template(self.edit_template, form=form)
+        return flask.render_template(
+            self.edit_template,
+            form=form,
+            title=gettext('pipeman.dataset.create_dataset_form')
+        )
 
     def view_dataset_page(self, dataset):
-        return flask.render_template(self.view_template, dataset=dataset)
+        groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
+        labels = {x: self.reg.display_group_label(x) for x in groups}
+        return flask.render_template(
+            self.view_template,
+            dataset=dataset,
+            actions=self.dataset_actions(dataset),
+            title=dataset.get_display(),
+            groups=groups,
+            group_labels=labels
+        )
 
     def edit_dataset_form(self, dataset):
         form = None
@@ -114,36 +143,102 @@ class DatasetController:
         if form.validate_on_submit():
             ds = form.build_dataset()
             self.save_dataset(ds)
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
-        return flask.render_template(self.edit_template, form=form, title=gettext("pipeman.dataset.edit_dataset_form"))
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.id))
+        return flask.render_template(
+            self.edit_template,
+            form=form,
+            title=gettext("pipeman.dataset.edit_dataset_form"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
+        )
 
-    def edit_metadata_form(self, dataset):
-        form = DatasetMetadataForm(dataset)
+    def edit_metadata_form(self, dataset, display_group):
+        supported_groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
+        if not supported_groups:
+            return flask.abort(404)
+        if display_group is None:
+            display_group = supported_groups[0]
+        if not self.reg.display_group_exists(display_group):
+            return flask.abort(404)
+        if display_group not in supported_groups:
+            return flask.abort(404)
+        form = DatasetMetadataForm(dataset, display_group)
         if form.handle_form():
             self.save_metadata(dataset)
-            return flask.redirect(flask.url_For("core.view_dataset", dataset_id=dataset.id))
-        return flask.render_template(self.meta_template, form=form, title=gettext("pipeman.dataset.edit_metadata_form"))
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+        group_list = [
+            (
+                flask.url_for(
+                    'core.edit_dataset_metadata',
+                    dataset_id=dataset.dataset_id,
+                    display_group=dg
+                ),
+                self.reg.display_group_label(dg)
+            )
+            for dg in supported_groups
+        ]
+        return flask.render_template(
+            self.meta_template,
+            form=form,
+            title=gettext("pipeman.dataset.edit_metadata_form"),
+            groups=group_list,
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
+        )
+
+    def dataset_actions(self, dataset):
+        actions = []
+        if self.has_access(dataset, 'edit'):
+            actions.append((
+                flask.url_for('core.edit_dataset', dataset_id=dataset.dataset_id),
+                'pipeman.dataset.edit_link'
+            ))
+            actions.append((
+                flask.url_for('core.edit_dataset_metadata_base', dataset_id=dataset.dataset_id),
+                "pipeman.dataset.edit_metadata_link"
+            ))
+        if self.has_access(dataset, 'activate'):
+            actions.append((
+                flask.url_for('core.activate_dataset', dataset_id=dataset.dataset_id),
+                "pipeman.dataset.activate_link"
+            ))
+        if self.has_access(dataset, "publish"):
+            actions.append((
+                flask.url_for("core.publish_dataset", dataset_id=dataset.dataset_id),
+                "pipeman.dataset.publish_link"
+            ))
+        if self.has_access(dataset, "remove"):
+            actions.append((
+                flask.url_for("core.remove_dataset", dataset_id=dataset.dataset_id),
+                "pipeman.dataset.remove_link"
+            ))
+        if self.has_access(dataset, "restore"):
+            actions.append((
+                flask.url_for("core.restore_dataset", dataset_id=dataset.dataset_id),
+                "pipeman.dataset.restore_link"
+            ))
+        return actions
 
     def remove_dataset_form(self, dataset):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_dataset(dataset)
-            return flask.redirect("core.list_datasets")
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.remove_dataset_form.confirmation"), title=gettext("pipeman.dataset.remove_dataset_form"))
+            return flask.redirect(flask.url_for("core.list_datasets"))
+        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.remove_dataset_form.confirmation"), title=gettext("pipeman.dataset.remove_dataset_form"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def restore_dataset_form(self, dataset):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_dataset(dataset)
-            return flask.redirect("core.list_datasets")
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.restore_dataset_form.confirmation"), title=gettext("pipeman.dataset.restore_dataset_form"))
+            return flask.redirect(flask.url_for("core.list_datasets"))
+        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.restore_dataset_form.confirmation"), title=gettext("pipeman.dataset.restore_dataset_form"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def view_revision_page(self, dataset):
         return flask.render_template(self.view_template, dataset=dataset)
 
     def publish_dataset_form(self, dataset):
         form = ConfirmationForm()
-        dataset_url = flask.url_for("core.view_dataset", dataset_id=dataset.id)
+        dataset_url = flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         if form.validate_on_submit():
             self.publish_dataset(dataset)
             return flask.redirect(dataset_url)
@@ -159,19 +254,20 @@ class DatasetController:
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.activate_dataset(dataset)
-            return flask.redirect(flask.url_For("core.view_dataset", dataset_id=dataset.id))
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
         return flask.render_template("form.html", form=form,
                                      instructions=gettext("pipeman.dataset.activate_dataset_form.confirmation"),
-                                     title=gettext("pipeman.dataset.activate_dataset_form"))
+                                     title=gettext("pipeman.dataset.activate_dataset_form"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):
         status = self.workflow.start_workflow(
             "dataset_activation",
-            dataset.act_workflow,
+            dataset.extras['act_workflow'],
             {
-                "dataset_id": dataset.id
+                "dataset_id": dataset.dataset_id
             },
-            dataset.id
+            dataset.dataset_id
         )
         if status == "COMPLETE":
             flask.flash(gettext("pipeman.dataset.activated"), "success")
@@ -183,12 +279,12 @@ class DatasetController:
     def publish_dataset(self, dataset):
         status = self.workflow.start_workflow(
             "dataset_publication",
-            dataset.pub_workflow,
+            dataset.extras['pub_workflow'],
             {
-                "dataset_id": dataset.id,
+                "dataset_id": dataset.dataset_id,
                 "metadata_id": dataset.metadata_id
             },
-            dataset.id
+            dataset.dataset_id
         )
         if status == "COMPLETE":
             flask.flash(gettext("pipeman.dataset.published"), "success")
@@ -205,13 +301,13 @@ class DatasetController:
 
     def remove_dataset(self, dataset):
         with self.db as session:
-            ds = session.query(orm.Dataset).filter_by(id=dataset.id).first()
+            ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = True
             session.commit()
 
     def restore_dataset(self, dataset):
         with self.db as session:
-            ds = session.query(orm.Dataset).filter_by(id=dataset.id).first()
+            ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = False
             session.commit()
 
@@ -221,7 +317,7 @@ class DatasetController:
             if not ds:
                 raise DatasetNotFoundError(dataset_id)
             ds_data = ds.latest_revision() if revision_no is None else ds.specific_revision(revision_no)
-            if not ds_data:
+            if revision_no and not ds_data:
                 raise DatasetNotFoundError(f"{dataset_id}__{revision_no}")
             return self.reg.build_dataset(
                 ds.profiles.replace("\r", "").split("\n"),
@@ -234,7 +330,8 @@ class DatasetController:
                 extras={
                     "pub_workflow": ds.pub_workflow,
                     "act_workflow": ds.act_workflow,
-                    "status": ds.status
+                    "status": ds.status,
+                    "security_level": ds.security_level
                 }
             )
 
@@ -275,16 +372,17 @@ class DatasetController:
 
     def save_metadata(self, dataset):
         with self.db as session:
+            ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             retries = 5
             while retries > 0:
                 retries -= 1
                 try:
-                    rev_nos = [dd.revision_no for dd in dataset.data]
+                    rev_nos = [dd.revision_no for dd in ds.data]
                     next_rev = 1 if not rev_nos else max(rev_nos) + 1
                     ds_data = orm.MetadataEdition(
-                        dataset_id=dataset.id,
+                        dataset_id=ds.id,
                         revision_no=next_rev,
-                        data=json.dump(dataset.values()),
+                        data=json.dumps(dataset.values()),
                         created_date=datetime.datetime.now()
                     )
                     session.add(ds_data)
@@ -297,6 +395,7 @@ class DatasetController:
 class DatasetForm(FlaskForm):
 
     reg: MetadataRegistry = None
+    wreg: WorkflowRegistry = None
 
     names = TranslatableField(
         wtf.StringField,
@@ -309,7 +408,7 @@ class DatasetForm(FlaskForm):
         coerce=int
     )
 
-    profiles = wtf.SelectField(
+    profiles = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.dataset.profiles"),
         choices=[],
         coerce=str
@@ -327,7 +426,7 @@ class DatasetForm(FlaskForm):
         coerce=str
     )
 
-    assigned_users = wtf.SelectField(
+    assigned_users = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.dataset.assigned_users"),
         choices=[],
         coerce=int
@@ -336,7 +435,7 @@ class DatasetForm(FlaskForm):
     security_level = wtf.SelectField(
         DelayedTranslationString("pipeman.dataset.security_level"),
         choices=[],
-        coerce=int
+        coerce=str
     )
 
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
@@ -351,10 +450,16 @@ class DatasetForm(FlaskForm):
                 "pub_workflow": dataset.extras['pub_workflow'],
                 "act_workflow": dataset.extras['act_workflow'],
                 "security_level": dataset.extras['security_level'],
-                "profiles": json.loads(dataset.profiles),
+                "profiles": dataset.profiles,
                 "organization": dataset.organization_id,
             })
         super().__init__(*args, **kwargs)
+        self.organization.choices = organization_list()
+        self.profiles.choices = self.reg.profiles_for_select()
+        self.act_workflow.choices = self.wreg.list_workflows("dataset_activation")
+        self.pub_workflow.choices = self.wreg.list_workflows("dataset_publication")
+        self.security_level.choices = self.reg.security_labels_for_select()
+        self.assigned_users.choices = user_list()
 
     def build_dataset(self):
         if self.dataset:
@@ -379,7 +484,8 @@ class DatasetForm(FlaskForm):
                 {
                     "pub_workflow": self.pub_workflow.data,
                     "act_workflow": self.act_workflow.data,
-                    "security_level": self.security_level.data
+                    "security_level": self.security_level.data,
+                    "status": "DRAFT",
                 },
                 self.assigned_users.data
             )
@@ -392,7 +498,7 @@ class ApprovedDatasetForm(FlaskForm):
         label=DelayedTranslationString("pipeman.general.display_name")
     )
 
-    assigned_users = wtf.SelectField(
+    assigned_users = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.dataset.assigned_users"),
         choices=[],
         coerce=int
@@ -406,6 +512,7 @@ class ApprovedDatasetForm(FlaskForm):
             self.dataset = dataset
             kwargs["names"] = dataset.get_displays()
         super().__init__(*args, **kwargs)
+        self.assigned_users.choices = user_list()
 
     def build_dataset(self):
         for key in self.names.data:
@@ -416,9 +523,10 @@ class ApprovedDatasetForm(FlaskForm):
 
 class DatasetMetadataForm(BaseForm):
 
-    def __init__(self, entity, *args, **kwargs):
+    def __init__(self, entity, display_group, *args, **kwargs):
         self.entity = entity
-        cntrls = self.entity.controls()
+        self.display_group = display_group
+        cntrls = self.entity.controls(display_group)
         cntrls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
         super().__init__(cntrls, *args, **kwargs)
         self.process()
@@ -428,10 +536,7 @@ class DatasetMetadataForm(BaseForm):
             self.process(flask.request.form)
             if self.validate():
                 d = self.data
-                self.entity.process_form_data(d)
-                for key in d["_name"]:
-                    self.entity.set_display(key, d["_name"][key])
-                self.entity.organization_id = d["_org"]
+                self.entity.process_form_data(d, self.display_group)
                 return True
             else:
                 for key in self.errors:

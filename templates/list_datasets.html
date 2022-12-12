@@ -9,6 +9,7 @@
         <thead>
             <tr>
                 <th>{{'pipeman.dataset.id' | gettext}}</th>
+                <th>{{'pipeman.dataset.state' | gettext}}</th>
                 <th>{{'pipeman.dataset.display' | gettext}}</th>
                 <th>{{'pipeman.general.actions' | gettext}}</th>
             </tr>
@@ -16,8 +17,8 @@
         <tbody>
             {% for dataset, label, actions in datasets %}
             <tr>
-                <td>{{entity.id}}</td>
-                <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
+                <td>{{dataset.id}}</td>
+                <td>{% if dataset.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
                 <td>{{label}}</td>
                 <td>
                     <ul class="table-actions">

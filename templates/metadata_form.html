@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+    <ul>
+        <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
+    </ul>
+    <ul>
+        {% for link, txt in groups %}
+        <li><a href="{{link}}">{{txt}}</a></li>
+        {% endfor %}
+    </ul>
+    <div class="subnav_content">
+        {{ showform(form) }}
+        {% if instructions %}
+            <div class="instructions">{{instructions}}</div>
+        {% endif %}
+    </div>
+{% endblock %}

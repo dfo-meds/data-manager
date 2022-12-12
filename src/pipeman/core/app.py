@@ -159,12 +159,25 @@ def edit_dataset(dataset_id, con: DatasetController = None):
 @core.route("/datasets/<dataset_id>/metadata", methods=["POST", "GET"])
 @require_permission("datasets.edit")
 @injector.inject
-def edit_dataset_metadata(dataset_id, con: DatasetController = None):
+def edit_dataset_metadata_base(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
         if not con.has_access(dataset, "edit"):
             return flask.abort(403)
-        return con.edit_metadata_form(dataset)
+        return con.edit_metadata_form(dataset, None)
+    except DatasetNotFoundError:
+        return flask.abort(404)
+
+
+@core.route("/datasets/<dataset_id>/metadata/<display_group>", methods=["POST", "GET"])
+@require_permission("datasets.edit")
+@injector.inject
+def edit_dataset_metadata(dataset_id, display_group, con: DatasetController = None):
+    try:
+        dataset = con.load_dataset(dataset_id)
+        if not con.has_access(dataset, "edit"):
+            return flask.abort(403)
+        return con.edit_metadata_form(dataset, display_group)
     except DatasetNotFoundError:
         return flask.abort(404)
 

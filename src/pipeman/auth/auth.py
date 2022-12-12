@@ -35,6 +35,8 @@ class AuthenticatedUser(fl.UserMixin):
         return self.username
 
     def has_permission(self, permission_name):
+        if "superuser" in self.permissions:
+            return True
         return permission_name in self.permissions
 
     def belongs_to(self, organization_id):

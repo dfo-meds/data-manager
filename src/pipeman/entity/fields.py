@@ -8,7 +8,6 @@ from autoinject import injector
 from pipeman.util.flask import TranslatableField
 import json
 import pipeman.db.orm as orm
-from pipeman.entity.controller import EntityController
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 
@@ -30,6 +29,7 @@ class Field:
     def __init__(self, field_name, field_config):
         self.field_name = field_name
         self.field_config = field_config
+        self.display_group = field_config['display_group'] if 'display_group' in field_config else ""
         self.value = None
         self._use_default_repeatable = True
 
@@ -387,70 +387,6 @@ class URLField(LengthValidationMixin, Field):
 
     def _control_class(self) -> t.Callable:
         return wtf.URLField
-
-
-class EntityReferenceField(ChoiceField):
-
-    DATA_TYPE = "entity_ref"
-
-    ec: EntityController = None
-
-    @injector.construct
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._value_cache = None
-
-    def choices(self):
-        if self._value_cache is None:
-            self._value_cache = self._load_values()
-        return self._value_cache
-
-    def entity_revisions(self):
-        refs = []
-        if self.value and isinstance(self.value, list):
-            for ref in self.value:
-                refs.append([int(x) for x in ref.split("-", maxsplit=1)])
-        elif self.value:
-            refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
-        return refs
-
-    def _load_values(self):
-        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
-        revisions = self.entity_revisions()
-        old_rev_text = gettext("pipeman.general.outdated")
-        dep_rev_text = gettext("pipeman.general.deprecated")
-        for entity, display in self.ec.list_entities(self.field_config['entity_type']):
-            dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
-            latest_rev = entity.latest_revision()
-            val_key = f"{entity.id}-{latest_rev.id}"
-            dn = json.loads(entity.display_names) if entity.display_names else {}
-            if not entity.is_deprecated:
-                values.append((val_key, dn))
-            for rev in revisions:
-                if rev[0] == entity.id and not rev[1] == latest_rev.id:
-                    specific_rev = entity.specific_revision(rev[1])
-                    if specific_rev:
-                        dep_val_key = f"{entity.id}-{specific_rev.id}"
-                        dn_dep = {
-                            key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
-                            for key in dn
-                        }
-                        values.append((dep_val_key, MultiLanguageString(dn_dep)))
-                elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
-                    dep_dn = {
-                        key: dn[key] + f"[{dep_text[:-1]}" for key in dn
-                    }
-                    values.append((val_key, MultiLanguageString(dep_dn)))
-        return values
-
-    def _process_value(self, val, **kwargs):
-        entity_id, rev_no = val.split("-", maxsplit=1)
-        return self.ec.load_entity(
-            self.field_config['entity_type'],
-            int(entity_id),
-            int(rev_no)
-        )
-
 
 class DatasetReferenceField(ChoiceField):
 

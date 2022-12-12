@@ -1,0 +1,17 @@
+core_charsets:
+  display:
+    en: Character Sets
+  uri:
+  terms:
+    utf8:
+      display:
+        und: UTF-8
+    8859part1:
+      display:
+        und: ISO-8859-1
+    ucs2:
+      display:
+        und: UCS-2
+    utf16:
+      display:
+        und: UTF-16

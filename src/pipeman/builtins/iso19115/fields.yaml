@@ -10,6 +10,18 @@ data_info:
       data_type: multitext
       label:
         en: Abstract
+    purpose:
+      data_type: multitext
+      label:
+        en: Purpose
+    pub_date:
+      data_type: date
+      label:
+        en: Publication Date
+    credit:
+      data_type: multitext
+      label:
+        en: Credit
     publisher:
       data_type: entity_ref
       entity_type: contact
@@ -31,3 +43,38 @@ data_info:
       entity_type: resource
       label:
         en: DOI
+    info_link:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Information Link
+    scope:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_scope_code
+      label:
+        en: Scope
+keywords:
+  label:
+    en: Keywords
+  fields:
+    topic_category:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_topic_category_code
+      label:
+        en: Topic Category
+technical:
+  label:
+    en: Data Details
+  fields:
+    default_locale:
+      data_type: entity_ref
+      entity_type: locale
+      label:
+        en: Default Locale
+    other_locales:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: locale
+      label:
+        en: Other Locales
+

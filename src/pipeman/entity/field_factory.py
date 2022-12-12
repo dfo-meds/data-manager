@@ -21,6 +21,7 @@ class GenericFactory:
 class _BuiltInFactory(GenericFactory):
 
     def __init__(self):
+        import pipeman.entity.entity_field as ef
         super().__init__([
             fields.BooleanField,
             fields.DateField,
@@ -35,7 +36,7 @@ class _BuiltInFactory(GenericFactory):
             fields.TelephoneField,
             fields.TimeField,
             fields.URLField,
-            fields.EntityReferenceField,
+            ef.EntityReferenceField,
             fields.VocabularyReferenceField,
             fields.DatasetReferenceField
         ])
