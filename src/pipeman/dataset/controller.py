@@ -16,7 +16,8 @@ import wtforms.validators as wtfv
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query
 from pipeman.workflow import WorkflowController, WorkflowRegistry
-from pipeman.core.util import organization_list, user_list
+from pipeman.core.util import user_list
+from pipeman.org import OrganizationController
 
 
 @injector.injectable
@@ -396,6 +397,7 @@ class DatasetForm(FlaskForm):
 
     reg: MetadataRegistry = None
     wreg: WorkflowRegistry = None
+    ocontroller: OrganizationController = None
 
     names = TranslatableField(
         wtf.StringField,
@@ -454,7 +456,7 @@ class DatasetForm(FlaskForm):
                 "organization": dataset.organization_id,
             })
         super().__init__(*args, **kwargs)
-        self.organization.choices = organization_list()
+        self.organization.choices = self.ocontroller.list_organizations()
         self.profiles.choices = self.reg.profiles_for_select()
         self.act_workflow.choices = self.wreg.list_workflows("dataset_activation")
         self.pub_workflow.choices = self.wreg.list_workflows("dataset_publication")

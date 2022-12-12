@@ -6,6 +6,7 @@ from pipeman.dataset import DatasetController
 from pipeman.auth import require_permission
 from pipeman.util.errors import DatasetNotFoundError, EntityNotFoundError
 from pipeman.workflow import WorkflowController
+from pipeman.org import OrganizationController
 
 core = flask.Blueprint("core", __name__)
 
@@ -288,3 +289,31 @@ def approve_item(item_id, wfc: WorkflowController = None):
 @injector.inject
 def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
+
+
+@core.route("/organizations")
+@require_permission("organizations.view")
+@injector.inject
+def list_organizations(oc: OrganizationController = None):
+    return oc.list_organizations_page()
+
+
+@core.route('/organizations/create', methods=['GET', 'POST'])
+@require_permission("organizations.edit")
+@injector.inject
+def create_organization(oc: OrganizationController = None):
+    return oc.create_organization_page()
+
+
+@core.route("/organizations/<org_id>")
+@require_permission("organizations.view")
+@injector.inject
+def view_organization(org_id, oc: OrganizationController = None):
+    return oc.view_organization_page(org_id)
+
+
+@core.route("/organizations/<org_id>/edit", methods=['GET', 'POST'])
+@require_permission("organizations.edit")
+@injector.inject
+def edit_organization(org_id, oc: OrganizationController = None):
+    return oc.edit_organization_form(org_id)

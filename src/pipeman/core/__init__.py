@@ -15,6 +15,7 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
     system.register_nav_item("datasets", "pipeman.datasets", "core.list_datasets", "datasets.view")
     system.register_nav_item("entities", "pipeman.entities", "core.list_entities", "entities.view_entities")
     system.register_nav_item("action-items", "pipeman.action-items", "core.list_workflow_items", "action_items.view")
+    system.register_nav_item("organizations", "pipeman.organizations", "core.list_organizations", "organizations.view")
     root = pathlib.Path(__file__).parent
     with open(root / "steps.yaml", "r") as h:
         wreg.register_steps_from_dict(yaml.safe_load(h))

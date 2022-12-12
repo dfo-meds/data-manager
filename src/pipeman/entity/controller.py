@@ -12,7 +12,7 @@ from pipeman.util.errors import EntityNotFoundError
 import json
 import datetime
 import sqlalchemy as sa
-from pipeman.core.util import organization_list
+from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
 from pipeman.util.flask import ConfirmationForm, paginate_query
 import flask_login
@@ -171,6 +171,9 @@ class EntityController:
 
 class EntityForm(BaseForm):
 
+    ocontroller: OrganizationController = None
+
+    @injector.construct
     def __init__(self, entity, *args, **kwargs):
         self.entity = entity
         cntrls = {
@@ -181,7 +184,7 @@ class EntityForm(BaseForm):
             ),
             "_org": wtf.SelectField(
                 label=DelayedTranslationString("pipeman.entity.organization"),
-                choices=organization_list(),
+                choices=self.ocontroller.list_organizations(),
                 default=self.entity.organization_id if self.entity.organization_id else ""
             )
         }

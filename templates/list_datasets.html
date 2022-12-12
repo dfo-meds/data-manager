@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="real_content">
-    <h1>{{'pipeman.dataset.list' | gettext}}</h1>
     {% if create_link %}
     <p><a href="{{create_link}}">{{'pipeman.create_dataset' | gettext}}</a></p>
     {% endif %}
