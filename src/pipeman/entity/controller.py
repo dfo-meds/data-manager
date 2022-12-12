@@ -198,7 +198,7 @@ class EntityForm(BaseForm):
                 self.entity.process_form_data(d)
                 for key in d["_name"]:
                     self.entity.set_display(key, d["_name"][key])
-                self.entity.organization_id = d["_org"] if d["_org"] > 0 else None
+                self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
                 return True
             else:
                 for key in self.errors:

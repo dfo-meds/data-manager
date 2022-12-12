@@ -5,6 +5,12 @@ dataset_publication:
         steps:
           - publish_dataset
         enabled: yes
+    super_user_publish:
+      label:
+        en: Superuser Publish
+      steps:
+        - superuser_approval
+        - publish_dataset
 dataset_activation:
     direct_activation:
         label:
@@ -12,3 +18,10 @@ dataset_activation:
         steps:
           - activate_dataset
         enabled: yes
+    super_user_activation:
+      label:
+        en: Superuser Approval
+      steps:
+        - flag_dataset_for_review
+        - superuser_approval
+        - activate_dataset

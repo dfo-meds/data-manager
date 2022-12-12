@@ -1,8 +1,10 @@
+import flask_login
 from autoinject import injector
 import zirconium as zr
 import importlib
 import zrlog
 import pkgutil
+from pipeman.i18n import gettext
 
 
 def load_dynamic_class(cls_name):
@@ -26,6 +28,7 @@ class System:
         self._cli_init_cb = []
         self._flask_blueprints = []
         self._click_groups = []
+        self._nav_menu = {}
 
     def init(self):
         zrlog.init_logging()
@@ -45,6 +48,35 @@ class System:
                     if "weight" not in cls_def:
                         cls_def["weight"] = 1
                     injector.override(cls_name, cls_def.pop("constructor"), *a, **cls_def)
+
+    def register_nav_item(self, hierarchy, item_text, item_link, permission):
+        levels = hierarchy.split(".")
+        levels.reverse()
+        working = self._nav_menu
+        while len(levels) > 1:
+            nxt = levels.pop()
+            if nxt in working:
+                working = working[nxt]
+            else:
+                working[nxt] = {}
+        working[levels[0]] = {
+            "_label": item_text,
+            "_link": item_link,
+            "_permission": permission
+        }
+
+    def _build_nav(self, items):
+        nav = []
+        for x in items:
+            item = items[x]
+            if item["_permission"] and not flask_login.current_user.has_permission(item["_permission"]):
+                continue
+            nav.append((
+                gettext(item["_label"]),
+                item["_link"],
+                self._build_nav({i: item[i] for i in item if not i.startswith("_")})
+            ))
+        return nav
 
     def register_init_app(self, init_app_cb):
         self._flask_init_cb.append(init_app_cb)
@@ -92,6 +124,11 @@ class System:
             mod = importlib.import_module(bp_mod)
             bp = getattr(mod, bp_obj)
             app.register_blueprint(bp, url_prefix=prefix)
+
+        @app.context_processor
+        def add_menu_item():
+            return {'nav': self._build_nav(self._nav_menu)}
+
         return app
 
     def init_cli(self):

@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="real_content">
-    view workflow item
-</div>
+<h2>{{'pipeman.workflow_item.properties' | gettext}}</h2>
+<dl>
+    {% for txt, val in item.properties() %}
+    <dt>{{txt | gettext}}</dt>
+    <dd>{{val}}</dd>
+    {% endfor %}
+</dl>
+<h2>{{'pipeman.workflow_item.logs' | gettext}}</h2>
+<table cellpadding="0" cellspacing="0" border="0">
+    <thead>
+        <tr>
+            <th>{{'pipeman.workflow_item.step.name' | gettext}}</th>
+            <th>{{'pipeman.workflow_item.step.notes' | gettext}}</th>
+            <th>{{'pipeman.workflow_item.step.status' | gettext}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for name, notes, status in item.steps() %}
+        <tr class="workflow-step-{{status}}">
+            <td>{{name}}</td>
+            <td>{{notes}}</td>
+            <td>{{'pipeman.workflow_item.core_steps.' + status}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

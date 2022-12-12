@@ -2,7 +2,7 @@
     <ul class="menu">
         {% for txt, pth, subitems in menu_items %}
             <li class="menu-item">
-                <a href="{{url_for(pth)}}">txt</a>
+                <a href="{{url_for(pth)}}">{{txt}}</a>
                 {% if subitems %}
                 {{ showmenu(subitems) }}
                 {% endif %}
@@ -69,6 +69,7 @@
             <div class="body">
                 {% block full_body %}
                 <div class="nav">
+                    {{showmenu(nav)}}
                 </div>
                 {% block body %}
                     <div class="content">

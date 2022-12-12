@@ -33,6 +33,9 @@ class Field:
         self.value = None
         self._use_default_repeatable = True
 
+    def cleanup_value(self, val):
+        return val
+
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
         parent_args, field_args = self._split_args()
@@ -308,6 +311,13 @@ class ChoiceField(Field):
                     self._values.append((x, disp))
         return self._values
 
+    def cleanup_value(self, val):
+        if "repeatable" not in self.field_config or not self.field_config["repeatable"]:
+            return val
+        if isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
+            return val[0]
+        return val
+
     def _extra_wtf_arguments(self) -> dict:
         args = {
             "choices": self.choices,
@@ -387,6 +397,7 @@ class URLField(LengthValidationMixin, Field):
 
     def _control_class(self) -> t.Callable:
         return wtf.URLField
+
 
 class DatasetReferenceField(ChoiceField):
 

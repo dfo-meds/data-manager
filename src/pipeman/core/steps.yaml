@@ -13,3 +13,8 @@ flag_dataset_for_review:
     en: Block Dataset Edits
   step_type: action
   action: pipeman.dataset.workflow.flag_dataset_for_review
+superuser_approval:
+  label:
+    en: General Approval
+  step_type: gate
+  require_permission: superuser

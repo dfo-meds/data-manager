@@ -102,9 +102,7 @@ class FieldContainer:
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
             if display_group is None or display_group == self._fields[fn].display_group:
-                print(fn)
-                print(form_data[fn])
-                self._fields[fn].value = form_data[fn]
+                self._fields[fn].value = self._fields[fn].cleanup_value(form_data[fn])
 
     def set_display(self, lang, name):
         self._display[lang] = name

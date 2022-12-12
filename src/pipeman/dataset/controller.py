@@ -143,7 +143,7 @@ class DatasetController:
         if form.validate_on_submit():
             ds = form.build_dataset()
             self.save_dataset(ds)
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.id))
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
         return flask.render_template(
             self.edit_template,
             form=form,

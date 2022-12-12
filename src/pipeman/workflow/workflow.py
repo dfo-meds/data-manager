@@ -14,8 +14,9 @@ import datetime
 import requests
 import time
 import zirconium as zr
-from pipeman.i18n import gettext
+from pipeman.i18n import gettext, format_datetime
 import logging
+import markupsafe
 
 
 class ItemResult(Enum):
@@ -38,6 +39,9 @@ class WorkflowRegistry:
 
     def register_step_factory(self, factory):
         self._factories.append(factory)
+
+    def step_display(self, step_name):
+        return MultiLanguageString(self._steps[step_name]['label'])
 
     def register_workflow(self, workflow_name, category, label, steps, enabled=True):
         record = {
@@ -98,8 +102,70 @@ class WorkflowRegistry:
         return [
             (x, MultiLanguageString(self._workflows[workflow_type][x]["label"]))
             for x in self._workflows[workflow_type]
-            if self._workflows[workflow_type][x]["enabled"]
+            if "enabled" not in self._workflows[workflow_type][x] or self._workflows[workflow_type][x]["enabled"]
         ]
+
+
+class ItemDisplayWrapper:
+
+    reg: WorkflowRegistry = None
+
+    @injector.construct
+    def __init__(self, workflow_item):
+        self.item = workflow_item
+
+    def __getattr__(self, item):
+        return getattr(self.item, item)
+
+    def object_link(self):
+        if self.item.workflow_type.startswith('dataset_'):
+            return flask.url_for('core.view_dataset', dataset_id=self.item.object_id)
+        return ""
+
+    @injector.inject
+    def object_link_text(self, db: Database = None):
+        with db as session:
+            if self.item.workflow_type.startswith('dataset_'):
+                obj = session.query(orm.Dataset).filter_by(id=self.item.object_id).first()
+                if obj:
+                    return MultiLanguageString(json.loads(obj.display_names) if obj.display_names else {})
+        return ""
+
+    def properties(self):
+        return [
+            ('pipeman.workflow_item.object_link', markupsafe.Markup(f"<a href='{self.object_link()}'>{self.object_link_text()}</a>")),
+            ('pipeman.workflow_item.type', gettext(f'pipeman.workflow_types.{self.item.workflow_type}')),
+            ('pipeman.workflow_item.name', self.reg.workflow_display(self.item.workflow_type, self.item.workflow_name)),
+            ('pipeman.workflow_item.created', format_datetime(self.item.created_date)),
+            ('pipeman.workflow_item.status', gettext(f'pipeman.workflow_statuses.{self.item.status.lower()}')),
+        ]
+
+    def steps(self):
+        decision_list = {}
+        for decision in self.item.decisions:
+            decision_list[decision.step_name] = decision
+        step_list = json.loads(self.item.step_list)
+        for idx, step in enumerate(step_list):
+            data = [self.reg.step_display(step)]
+            if step in decision_list:
+                template = gettext("pipeman.workflow_item.gate_completed" if decision_list[step].decision else "pipeman.workflow_item.gate_cancelled")
+                occurances = template.count("{")
+                if occurances > 1:
+                    template = template.format(decision_list[step].decider_id, format_datetime(decision_list[step].decision_date))
+                elif occurances == 1:
+                    template = template.format(decision_list[step].decider_id)
+                data.append(template)
+            else:
+                data.append("")
+            if self.item.completed_index is None and idx == 0:
+                data.append("in-progress")
+            elif self.item.completed_index >= idx:
+                data.append("complete")
+            elif self.item.completed_index == (idx - 1):
+                data.append("in-progress")
+            else:
+                data.append("pending")
+            yield data
 
 
 @injector.injectable
@@ -160,13 +226,15 @@ class WorkflowController:
                 return flask.abort(403)
             return flask.render_template(
                 "view_workflow_item.html",
-                item=item
+                item=ItemDisplayWrapper(item),
+                title=gettext("pipeman.workflow_view.title")
             )
 
     def list_workflow_items_page(self):
         return flask.render_template(
             "list_workflow_items.html",
-            items=self._iterate_workflow_items()
+            items=self._iterate_workflow_items(),
+            title=gettext("pipeman.workflow_list.title")
         )
 
     def _iterate_workflow_items(self):
@@ -183,11 +251,13 @@ class WorkflowController:
                         (flask.url_for('core.approve_item', item_id=item.id), 'pipeman.workflow_item.approve'),
                         (flask.url_for('core.cancel_item', item_id=item.id), 'pipeman.workflow_item.cancel'),
                     ])
-                yield item, actions
+                yield ItemDisplayWrapper(item), actions
 
     def _has_access(self, item, mode):
         step, steps = self._build_next_step(item)
         ctx = json.loads(item.context)
+        if step is None:
+            return flask_login.current_user.has_permission("action_items.view_completed")
         if mode == 'view' and step.allow_view(ctx):
             return True
         elif mode == 'decide' and step.allow_decision(ctx):
@@ -291,6 +361,7 @@ class WorkflowStep:
                 return ItemResult.SUCCESS
             if res is False:
                 return ItemResult.FAILURE
+            return res
         except Exception as ex:
             logging.getLogger("pipeman.workflow").exception(ex)
             return ItemResult.FAILURE

@@ -31,7 +31,7 @@
             {% endfor %}
         </tbody>
     </table>
-    <p>Page {{current_page}} of {{page_count}}</p>
+    <p>{{'pipeman.general.pages'}}{{current_page}} / {{page_count}}</p>
     <ul>
         {% for i in range(0, page_count) %}
         <li><a href="?page={{i+1}}">{{i+1}}</a></li>

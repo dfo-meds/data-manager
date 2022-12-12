@@ -278,6 +278,8 @@ class WorkflowItem(_BaseModel, Base):
     completed_index = sa.Column(sa.Integer, default=None, nullable=True)
     status = sa.Column(sa.String(255))
 
+    decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
+
 
 class WorkflowDecision(_BaseModel, Base):
 
@@ -286,4 +288,6 @@ class WorkflowDecision(_BaseModel, Base):
     decider_id = sa.Column(sa.String(1024), nullable=False)
     decision = sa.Column(sa.Boolean)
     decision_date = sa.Column(sa.DateTime)
+
+    workflow_item = orm.relationship("WorkflowItem", back_populates="decisions")
 

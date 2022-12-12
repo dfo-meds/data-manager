@@ -25,7 +25,9 @@ class EntityReferenceField(ChoiceField):
         refs = []
         if self.value and isinstance(self.value, list):
             for ref in self.value:
-                if ref:
+                if isinstance(ref, list):
+                    print(ref)
+                elif ref:
                     refs.append([int(x) for x in ref.split("-", maxsplit=1)])
         elif self.value:
             refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
@@ -38,13 +40,13 @@ class EntityReferenceField(ChoiceField):
         revisions = self.entity_revisions()
         old_rev_text = gettext("pipeman.general.outdated")
         dep_rev_text = gettext("pipeman.general.deprecated")
-        for entity, display in self.ec.list_entities(self.field_config['entity_type']):
+        for entity, display, _ in self.ec.list_entities(self.field_config['entity_type']):
             dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
             latest_rev = entity.latest_revision()
             val_key = f"{entity.id}-{latest_rev.id}"
             dn = json.loads(entity.display_names) if entity.display_names else {}
             if not entity.is_deprecated:
-                values.append((val_key, dn))
+                values.append((val_key, MultiLanguageString(dn)))
             for rev in revisions:
                 if rev[0] == entity.id and not rev[1] == latest_rev.id:
                     specific_rev = entity.specific_revision(rev[1])
