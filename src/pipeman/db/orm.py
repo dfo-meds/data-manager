@@ -2,6 +2,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 from sqlalchemy.ext.declarative import declared_attr
 import json
+from pipeman.i18n import MultiLanguageString
 
 meta = sa.MetaData(naming_convention={
     "ix": "ix_%(column_0_label)s",
@@ -55,6 +56,9 @@ class _DisplayNameModel(_BaseModel):
 
     short_name = sa.Column(sa.String(255), unique=True, nullable=False)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
+
+    def display(self):
+        return MultiLanguageString(json.loads(self.display_names) if self.display_names else {"und": self.short_name})
 
     def set_display_name(self, language, display_name):
         dns = {}

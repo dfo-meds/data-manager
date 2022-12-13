@@ -1,6 +1,9 @@
 import click
 import getpass
+from autoinject import injector
+from .controller import DatabaseUserController
 from pipeman.util import UserInputError
+from pipeman.util.cli import no_error_wrapper
 
 
 @click.group
@@ -24,7 +27,7 @@ def _get_password(password_entry: str, arg_password: str) -> str:
     """
     pw = arg_password
     if password_entry == "random":  # noqa: S105
-        raise UserInputError("Random password not yet supported")
+        pw = None
     elif password_entry == "input":  # noqa: S105
         pw_test = getpass.getpass("Password: ")
         pw_test2 = getpass.getpass("Retype Password: ")
@@ -43,18 +46,19 @@ def _get_password(password_entry: str, arg_password: str) -> str:
 @click.option("--password", default=None)
 @click.argument("username")
 @click.argument("email")
-def create(username, email, display="", password=None, password_entry="", no_error=False):
+@injector.inject
+def create(username, email, display="", password=None, password_entry="", no_error=False, duc: DatabaseUserController = None):
     """Create a user account."""
-    from .util import create_user
     if display == "":
         display = username
-    try:
-        create_user(username, display, email, _get_password(password_entry, password))
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+    no_error_wrapper(
+        no_error,
+        duc.create_user_cli,
+        username,
+        email,
+        display,
+        _get_password(password_entry, password)
+    )
 
 
 @user.command
@@ -62,16 +66,15 @@ def create(username, email, display="", password=None, password_entry="", no_err
 @click.option("--password-entry", default="argument")
 @click.option("--password", default=None)
 @click.argument("username")
-def set_password(username, password=None, password_entry="", no_error=False):
+@injector.inject
+def set_password(username, password=None, password_entry="", no_error=False, duc: DatabaseUserController = None):
     """Create a user account."""
-    from .util import set_password
-    try:
-        set_password(username, _get_password(password_entry, password))
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+    no_error_wrapper(
+        no_error,
+        duc.set_password_cli,
+        username,
+        _get_password(password_entry, password)
+    )
 
 
 @user.group
@@ -83,30 +86,28 @@ def group():
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("group_name")
-def assign(username, group_name, no_error=False):
-    from .util import assign_to_group
-    try:
-        assign_to_group(group_name, username)
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+@injector.inject
+def assign(username, group_name, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.assign_to_group_cli,
+        group_name,
+        username
+    )
 
 
 @group.command
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("group_name")
-def remove(username, group_name, no_error=False):
-    from .util import remove_from_group
-    try:
-        remove_from_group(group_name, username)
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+@injector.inject
+def remove(username, group_name, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.remove_from_group_cli,
+        group_name,
+        username
+    )
 
 
 @user.group
@@ -118,27 +119,25 @@ def org():
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("org_name")
-def assign_org(username, org_name, no_error=False):
-    from .util import assign_to_organization
-    try:
-        assign_to_organization(org_name, username)
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+@injector.inject
+def assign_org(username, org_name, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.assign_to_org_cli,
+        org_name,
+        username
+    )
 
 
 @org.command("remove")
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
 @click.argument("org_name")
-def remove_org(username, org_name, no_error=False):
-    from .util import remove_from_organization
-    try:
-        remove_from_organization(org_name, username)
-    except UserInputError as ex:
-        if no_error:
-            print(str(ex))
-        else:
-            raise ex
+@injector.inject
+def remove_org(username, org_name, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.remove_from_group_cli,
+        org_name,
+        username
+    )

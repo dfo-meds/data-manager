@@ -3,6 +3,17 @@ from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.util import UserInputError
 import logging
+import json
+from pipeman.i18n import MultiLanguageString
+
+
+@injector.inject
+def groups_select(db: Database = None):
+    with db as session:
+        return [
+            (group.id, MultiLanguageString(json.loads(group.display_names) if group.display_names else {"und": group.short_name}))
+            for group in session.query(orm.Group)
+        ]
 
 
 @injector.inject

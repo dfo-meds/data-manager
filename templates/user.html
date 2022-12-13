@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<dl>
+    <dt>{{'auth_db.user.username' | gettext}}</dt>
+    <dd>user.username</dd>
+    <dt>{{'auth_db.user.display' | gettext}}</dt>
+    <dd>user.display</dd>
+    <dt>{{'auth_db.user.groups' | gettext}}</dt>
+    <dd>
+        <ul>
+            {% for group in user.groups %}
+            <li>{{group.display()}}</li>
+            {% endfor %}
+        </ul>
+    </dd>
+    <dt>{{'auth_db.user.organizations' | gettext}}</dt>
+    <dd>
+        <ul>
+            {% for org in user.organizations %}
+            <li>{{org.display()}}</li>
+            {% endfor %}
+        </ul>
+    </dd>
+</dl>
+{% endblock %}
