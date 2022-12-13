@@ -291,6 +291,41 @@ def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
 
 
+@core.route("/api/pop-remote-item/<pipeline_name>")
+@require_permission("remote_items.access")
+@injector.inject
+def pop_remote_item(pipeline_name, wfc: WorkflowController = None):
+    return wfc.pop_remote_pipeline(pipeline_name)
+
+
+@core.route("/api/release-remote-item/<item_id>")
+@require_permission("remote_items.access")
+@injector.inject
+def release_remote_item(item_id, wfc: WorkflowController = None):
+    return wfc.release_remote_lock(item_id)
+
+
+@core.route("/api/renew-remote-item/<item_id>")
+@require_permission("remote_items.access")
+@injector.inject
+def renew_remote_item(item_id, wfc: WorkflowController = None):
+    return wfc.renew_remote_lock(item_id)
+
+
+@core.route("/api/complete-remote-item/<item_id>")
+@require_permission("remote_items.access")
+@injector.inject
+def item_completed(item_id, wfc: WorkflowController = None):
+    return wfc.remote_work_complete(item_id, True)
+
+
+@core.route("/api/cancel-remote-item/<item_id>")
+@require_permission("remote_items.access")
+@injector.inject
+def item_cancelled(item_id, wfc: WorkflowController = None):
+    return wfc.remote_work_complete(item_id, False)
+
+
 @core.route("/organizations")
 @require_permission("organizations.view")
 @injector.inject

@@ -1,3 +1,4 @@
+import uuid
 from enum import Enum
 import importlib
 import flask_login
@@ -11,6 +12,7 @@ from pipeman.i18n import MultiLanguageString
 import json
 import pipeman.db.orm as orm
 import datetime
+import sqlalchemy as sa
 import requests
 import time
 import zirconium as zr
@@ -26,6 +28,7 @@ class ItemResult(Enum):
     CANCELLED = "cancelled"
     BATCH_EXECUTE = "batch_execute"
     DECISION_REQUIRED = "decision_required"
+    REMOTE_EXECUTE_REQUIRED = "remote_required"
 
 
 @injector.injectable_global
@@ -34,6 +37,7 @@ class WorkflowRegistry:
     def __init__(self):
         self._steps = {}
         self._workflows = {}
+        self._pipelines = {}
         self._factories = []
         self._factories.append(DefaultStepFactory())
 
@@ -42,6 +46,28 @@ class WorkflowRegistry:
 
     def step_display(self, step_name):
         return MultiLanguageString(self._steps[step_name]['label'])
+
+    def register_pipeline(self,
+                          pipeline_name,
+                          label,
+                          trigger_fields,
+                          steps,
+                          enabled=True
+                          ):
+        record = {
+            "label": label,
+            "trigger": trigger_fields,
+            "steps": steps,
+            "enabled": enabled,
+        }
+        if pipeline_name in self._pipelines:
+            deep_update(self._pipelines[pipeline_name], record)
+        else:
+            self._pipelines[pipeline_name] = record
+
+    def register_pipelines_from_dict(self, d: dict):
+        if d:
+            deep_update(self._pipelines, d)
 
     def register_workflow(self, workflow_name, category, label, steps, enabled=True):
         record = {
@@ -57,12 +83,6 @@ class WorkflowRegistry:
 
     def workflow_display(self, category_name, workflow_name):
         return MultiLanguageString(self._workflows[category_name][workflow_name]['label']) if category_name in self._workflows and workflow_name in self._workflows[category_name] else "?"
-
-    def list_workflows(self, category_name):
-        return [
-            (wn, MultiLanguageString(self._workflows[category_name][wn]["label"]))
-            for wn in self._workflows[category_name]
-        ] if category_name in self._workflows else []
 
     def register_step(self, step_name, label, step_type, item_config):
         record = {
@@ -92,6 +112,10 @@ class WorkflowRegistry:
         raise StepConfigurationError(f"Invalid step type for {step_name}: {step_config['step_type']}")
 
     def step_list(self, workflow_type, workflow_name):
+        if workflow_type == "pipeline":
+            if workflow_name not in self._pipelines:
+                raise WorkflowNotFoundError(f"pipeline-{workflow_name}")
+            return self._pipelines[workflow_name]["steps"]
         if workflow_type not in self._workflows:
             raise WorkflowNotFoundError(f"{workflow_type}-{workflow_name}")
         if workflow_name not in self._workflows[workflow_type]:
@@ -104,6 +128,11 @@ class WorkflowRegistry:
             for x in self._workflows[workflow_type]
             if "enabled" not in self._workflows[workflow_type][x] or self._workflows[workflow_type][x]["enabled"]
         ]
+
+    def pipeline_fields(self, pipeline_name):
+        if pipeline_name not in self._pipelines:
+            raise WorkflowNotFoundError(f"pipeline-{pipeline_name}")
+        return self._pipelines[pipeline_name]["trigger"]
 
 
 class ItemDisplayWrapper:
@@ -196,6 +225,17 @@ class WorkflowController:
             self._start_next_step(item, session)
             return item.status
 
+    def pipeline_fields(self, pipeline_name):
+        return self.reg.pipeline_fields(pipeline_name)
+
+    def start_pipeline(self, pipeline_name, context):
+        return self.start_workflow("pipeline", pipeline_name, context, None)
+
+    # todo: form to trigger the pipeline
+    # todo: api endpoint to trigger the pipeline
+    # todo: access controls for the above
+    # todo: validation of inputs for pipeline?
+
     def workflow_form(self, item_id, decision: bool = True):
         with self.db as session:
             item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
@@ -216,6 +256,91 @@ class WorkflowController:
                 title=gettext(f"{base_key}.title"),
                 back=item_url
             )
+
+    def pop_remote_pipeline(self, pipeline_name):
+        with self.db as session:
+            q = session.query(orm.WorkflowItem).filter_by(
+                workflow_type='pipeline',
+                workflow_name=pipeline_name,
+                status='REMOTE_EXEC_QUEUED',
+                locked_by=None
+            )
+            my_id = str(uuid.uuid4())
+            lock_time = datetime.datetime.now()
+            for item in q:
+                step, steps = self._build_next_step(item)
+                ctx = json.dumps(item.context)
+                if not step.allow_decision(ctx):
+                    continue
+                res = session.execute(
+                    sa.update(orm.WorkflowItem)
+                    .where(orm.WorkflowItem.id == item.id)
+                    .where(orm.WorkflowItem.locked_by == None)
+                    .values(
+                        locked_by=my_id,
+                        locked_since=lock_time,
+                        status='REMOTE_EXEC_IN_PROGRESS'
+                    )
+                )
+                session.commit()
+                session.refresh(item)
+                if item.locked_by == my_id:
+                    return json.dumps({
+                        "id": item.id,
+                        "context": ctx,
+                        "until": lock_time,
+                        "owner_id": my_id,
+                        "renew_url": flask.url_for("core.renew_remote_item", item_id=item.id, _external=True),
+                        "complete_url": flask.url_for("core.item_completed", item_id=item.id, _external=True),
+                        "cancel_url": flask.url_for("core.item_cancelled", item_id=item.id, _external=True),
+                        "release_url": flask.url_for("core.release_remote_item", item_id=item.id, _external=True),
+                    }), 200, {"ContentType": "application/json"}
+            return json.dumps({}), 200, {"ContentType": "application/json"}
+
+    def release_remote_lock(self, item_id):
+        with self.db as session:
+            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
+            if not item:
+                return flask.abort(404)
+            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
+                return flask.abort(403)
+            step, steps = self._build_next_step(item)
+            ctx = json.dumps(item.context)
+            if not step.allow_decision(ctx):
+                return flask.abort(403)
+            item.locked_since = None
+            item.locked_by = None
+            item.status = "REMOTE_EXEC_QUEUED"
+            session.commit()
+
+    def renew_remote_lock(self, item_id):
+        with self.db as session:
+            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
+            if not item:
+                return flask.abort(404)
+            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
+                return flask.abort(403)
+            step, steps = self._build_next_step(item)
+            ctx = json.dumps(item.context)
+            if not step.allow_decision(ctx):
+                return flask.abort(403)
+            item.locked_since = datetime.datetime.now()
+            session.commit()
+
+    def remote_work_complete(self, item_id, decision: bool = True):
+        with self.db as session:
+            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
+            if not item:
+                return flask.abort(404)
+            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
+                return flask.abort(403)
+            step, steps = self._build_next_step(item)
+            ctx = json.loads(item.context)
+            if not step.allow_decision(ctx):
+                return flask.abort(403)
+            self._make_decision(item, session, decision)
+            session.commit()
+            return "", 200, {}
 
     def view_item_page(self, item_id):
         with self.db as session:
@@ -283,6 +408,8 @@ class WorkflowController:
             item.status = "BATCH_EXECUTE"
         elif result == ItemResult.CANCELLED:
             item.status = "CANCELLED"
+        elif result == ItemResult.REMOTE_EXECUTE_REQUIRED:
+            item.status = "REMOTE_EXEC_QUEUED"
         else:
             item.completed_index += 1
             item.status = "IN_PROGRESS"
@@ -421,6 +548,27 @@ class WorkflowBatchStep(WorkflowDelayedStep):
 
     def _batch_execute(self, context: dict) -> ItemResult:
         return self._call_function(self.item_config["action"], context)
+
+
+class WorkflowRemoteStep(WorkflowDelayedStep):
+
+    STEP_TYPE = "remote"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, execute_response=ItemResult.REMOTE_EXECUTE_REQUIRED)
+
+    def allow_decision(self, context: dict) -> bool:
+        if "require_permission" in self.item_config:
+            if not flask_login.current_user.has_permission(self.item_config["require_permission"]):
+                return False
+        if "access_check" in self.item_config:
+            if not self._call_function(self.item_config["access_check"], context):
+                return False
+        return True
+
+    def complete(self, decision: bool, context: dict) -> ItemResult:
+        res = ItemResult.SUCCESS if decision else ItemResult.CANCELLED
+        return self._execute_wrapper(self._post_hook, context, res)
 
 
 class WorkflowHookStep(WorkflowBatchStep):

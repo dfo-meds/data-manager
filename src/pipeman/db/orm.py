@@ -281,6 +281,8 @@ class WorkflowItem(_BaseModel, Base):
     created_date = sa.Column(sa.DateTime)
     completed_index = sa.Column(sa.Integer, default=None, nullable=True)
     status = sa.Column(sa.String(255))
+    locked_by = sa.Column(sa.String(36))
+    locked_since = sa.Column(sa.DateTime)
 
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 

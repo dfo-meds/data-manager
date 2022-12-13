@@ -20,3 +20,5 @@ def logout(am: AuthenticationManager = None):
     if not fl.current_user.is_authenticated:
         return am.logout_success()
     return am.logout_handler()
+
+# TODO: add group controls here?
