@@ -14,11 +14,15 @@ import pipeman.db.orm as orm
 import datetime
 import sqlalchemy as sa
 import requests
+import wtforms as wtf
 import time
 import zirconium as zr
-from pipeman.i18n import gettext, format_datetime
+from pipeman.i18n import gettext, format_datetime, DelayedTranslationString
 import logging
 import markupsafe
+from wtforms.form import BaseForm
+from pipeman.entity import FieldContainer
+import asyncio
 
 
 class ItemResult(Enum):
@@ -27,6 +31,7 @@ class ItemResult(Enum):
     FAILURE = "failure"
     CANCELLED = "cancelled"
     BATCH_EXECUTE = "batch_execute"
+    ASYNC_EXECUTE = "async_execute"
     DECISION_REQUIRED = "decision_required"
     REMOTE_EXECUTE_REQUIRED = "remote_required"
 
@@ -39,6 +44,7 @@ class WorkflowRegistry:
         self._workflows = {}
         self._pipelines = {}
         self._factories = []
+        self._events = {}
         self._factories.append(DefaultStepFactory())
 
     def register_step_factory(self, factory):
@@ -47,23 +53,49 @@ class WorkflowRegistry:
     def step_display(self, step_name):
         return MultiLanguageString(self._steps[step_name]['label'])
 
+    def register_event_type(self, event_name, label, fields, enabled=True):
+        record = {
+            event_name: {
+                "label": label or {},
+                "fields": fields or {},
+                "enabled": enabled
+            }
+        }
+        deep_update(self._events, record)
+
+    def get_event_fields(self, event_name):
+        return self._events[event_name]["fields"]
+
     def register_pipeline(self,
                           pipeline_name,
                           label,
-                          trigger_fields,
                           steps,
+                          trigger_events,
                           enabled=True
                           ):
         record = {
-            "label": label,
-            "trigger": trigger_fields,
+            "label": label or {},
             "steps": steps,
+            "trigger_events": trigger_events,
             "enabled": enabled,
         }
         if pipeline_name in self._pipelines:
             deep_update(self._pipelines[pipeline_name], record)
         else:
             self._pipelines[pipeline_name] = record
+
+    def triggered_pipelines(self, event_name):
+        for pipeline_name in self._pipelines:
+            if 'enabled' in self._pipelines[pipeline_name] and not self._pipelines['enabled']:
+                continue
+            if event_name == self._pipelines[pipeline_name]["trigger_events"]:
+                yield pipeline_name
+            elif (not isinstance(self._pipelines[pipeline_name]["trigger_events"], str)) and event_name in self._pipelines["trigger_events"]:
+                yield pipeline_name
+
+    def register_event_types_from_dict(self, d: dict):
+        if d:
+            deep_update(self._events, d)
 
     def register_pipelines_from_dict(self, d: dict):
         if d:
@@ -73,7 +105,7 @@ class WorkflowRegistry:
         record = {
             category: {
                 workflow_name: {
-                    "label": label,
+                    "label": label or {},
                     "steps": steps,
                     "enabled": enabled
                 }
@@ -84,10 +116,20 @@ class WorkflowRegistry:
     def workflow_display(self, category_name, workflow_name):
         return MultiLanguageString(self._workflows[category_name][workflow_name]['label']) if category_name in self._workflows and workflow_name in self._workflows[category_name] else "?"
 
+    def event_exists(self, event_name):
+        if event_name not in self._events:
+            return False
+        return 'enabled' not in self._events[event_name] or self._events[event_name]['enabled']
+
+    def list_events(self):
+        for en in self._events:
+            if self.event_exists(en):
+                yield en
+
     def register_step(self, step_name, label, step_type, item_config):
         record = {
             step_name: {
-                "label": label,
+                "label": label or {},
                 "step_type": step_type,
                 **item_config
             }
@@ -128,11 +170,6 @@ class WorkflowRegistry:
             for x in self._workflows[workflow_type]
             if "enabled" not in self._workflows[workflow_type][x] or self._workflows[workflow_type][x]["enabled"]
         ]
-
-    def pipeline_fields(self, pipeline_name):
-        if pipeline_name not in self._pipelines:
-            raise WorkflowNotFoundError(f"pipeline-{pipeline_name}")
-        return self._pipelines[pipeline_name]["trigger"]
 
 
 class ItemDisplayWrapper:
@@ -208,7 +245,27 @@ class WorkflowController:
     def __init__(self):
         pass
 
-    def start_workflow(self, workflow_type, workflow_name, workflow_context, object_id):
+    def interpret_result(self, result):
+        if result == ItemResult.SUCCESS:
+            return "complete"
+        elif result == ItemResult.FAILURE:
+            return "failure"
+        elif result == ItemResult.CANCELLED:
+            return "cancelled"
+        else:
+            return "in_progress"
+
+    def interpret_status(self, status):
+        if status == "SUCCESS":
+            return "complete"
+        elif status == "FAILURE":
+            return "failure"
+        elif status == "CANCELLED":
+            return "cancelled"
+        else:
+            return "in_progress"
+
+    def start_workflow(self, workflow_type, workflow_name, workflow_context, object_id=None):
         with self.db as session:
             item = orm.WorkflowItem(
                 workflow_type=workflow_type,
@@ -223,18 +280,58 @@ class WorkflowController:
             session.add(item)
             session.commit()
             self._start_next_step(item, session)
-            return item.status
+            return item.status, item.id
 
-    def pipeline_fields(self, pipeline_name):
-        return self.reg.pipeline_fields(pipeline_name)
+    def has_access_to_event(self, event_name):
+        # TODO: implement this
+        return True
 
-    def start_pipeline(self, pipeline_name, context):
+    def event_exists(self, event_name):
+        return self.reg.event_exists(event_name)
+
+    def fire_event(self, event_name, data):
+        results = []
+        for triggered_pipeline in self.reg.triggered_pipelines(event_name):
+            results.append(self.trigger_pipeline(triggered_pipeline, data))
+        return results
+
+    def trigger_pipeline(self, pipeline_name, context):
         return self.start_workflow("pipeline", pipeline_name, context, None)
 
-    # todo: form to trigger the pipeline
-    # todo: api endpoint to trigger the pipeline
-    # todo: access controls for the above
-    # todo: validation of inputs for pipeline?
+    def list_events_page(self):
+        return flask.render_template(
+            "list_events.html",
+            events=self._event_iterator(),
+            title=gettext("pipeman.events.title")
+        )
+
+    def _event_iterator(self):
+        for en in self.reg.list_events():
+            if self.has_access_to_event(en):
+                yield en, [
+                    (flask.url_for("core.event_firing_form", event_name=en), "pipeman.event.fire"),
+                ]
+
+    def workflow_item_status_by_id(self, item_id):
+        with self.db as session:
+            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
+            if not item:
+                return "unknown"
+            return self.interpret_status(item.status)
+
+    def workflow_item_statuses_by_object_id(self, workflow_type, object_id):
+        with self.db as session:
+            return [
+                self.interpret_status(item.status)
+                for item in session.query(orm.WorkflowItem).filter_by(object_id=object_id, workflow_type=workflow_type)
+            ]
+
+    def event_form(self, event_name):
+        form = EventFiringForm(event_name)
+        if form.handle_form():
+            self.fire_event(form.event_name, form.container.values())
+            return flask.redirect(flask.url_for("core.list_events"))
+        return flask.render_template("form.html", form=form, title=gettext("pipeman.fire_event.title"))
 
     def workflow_form(self, item_id, decision: bool = True):
         with self.db as session:
@@ -269,10 +366,10 @@ class WorkflowController:
             lock_time = datetime.datetime.now()
             for item in q:
                 step, steps = self._build_next_step(item)
-                ctx = json.dumps(item.context)
+                ctx = self._build_context(item)
                 if not step.allow_decision(ctx):
                     continue
-                res = session.execute(
+                session.execute(
                     sa.update(orm.WorkflowItem)
                     .where(orm.WorkflowItem.id == item.id)
                     .where(orm.WorkflowItem.locked_by == None)
@@ -305,7 +402,7 @@ class WorkflowController:
             if not item.status == "REMOTE_EXEC_IN_PROGRESS":
                 return flask.abort(403)
             step, steps = self._build_next_step(item)
-            ctx = json.dumps(item.context)
+            ctx = self._build_context(item)
             if not step.allow_decision(ctx):
                 return flask.abort(403)
             item.locked_since = None
@@ -321,7 +418,7 @@ class WorkflowController:
             if not item.status == "REMOTE_EXEC_IN_PROGRESS":
                 return flask.abort(403)
             step, steps = self._build_next_step(item)
-            ctx = json.dumps(item.context)
+            ctx = self._build_context(item)
             if not step.allow_decision(ctx):
                 return flask.abort(403)
             item.locked_since = datetime.datetime.now()
@@ -335,7 +432,7 @@ class WorkflowController:
             if not item.status == "REMOTE_EXEC_IN_PROGRESS":
                 return flask.abort(403)
             step, steps = self._build_next_step(item)
-            ctx = json.loads(item.context)
+            ctx = self._build_context(item)
             if not step.allow_decision(ctx):
                 return flask.abort(403)
             self._make_decision(item, session, decision)
@@ -399,6 +496,32 @@ class WorkflowController:
                 if elapsed_time >= max_exec_time:
                     break
 
+    async def async_batch_process_items(self):
+        max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "async_batch_process_time"), default=5)
+        max_items = self.cfg.as_int(("pipeman", "async_max_items"), default=5)
+        with self.db as session:
+            start_time = time.monotonic_ns()
+            tasks = []
+            for item in session.query(orm.WorkflowItem).filter_by(status="ASYNC_EXECUTE"):
+                if (time.monotonic_ns() - start_time) > max_exec_time:
+                    break
+                tasks.append(asyncio.create_task(self._async_batch_execute(item, session)))
+                while len(tasks) >= max_items:
+                    await asyncio.sleep(0.5)
+                    if (time.monotonic_ns() - start_time) > max_exec_time:
+                        break
+                    tasks, _ = await asyncio.wait(tasks)
+            await asyncio.gather(*tasks)
+
+    async def _async_batch_execute(self, item, session):
+        step, steps = self._build_next_step(item)
+        if step is None:
+            session.commit()
+            return
+        ctx = self._build_context(item)
+        result = await step.async_execute(ctx)
+        self._handle_step_result(result, item, session, steps, ctx)
+
     def _handle_step_result(self, result, item, session, steps, ctx):
         if result == ItemResult.FAILURE:
             item.status = "FAILURE"
@@ -406,6 +529,8 @@ class WorkflowController:
             item.status = "DECISION_REQUIRED"
         elif result == ItemResult.BATCH_EXECUTE:
             item.status = "BATCH_EXECUTE"
+        elif result == ItemResult.ASYNC_EXECUTE:
+            item.status = "ASYNC_EXECUTE"
         elif result == ItemResult.CANCELLED:
             item.status = "CANCELLED"
         elif result == ItemResult.REMOTE_EXECUTE_REQUIRED:
@@ -431,7 +556,7 @@ class WorkflowController:
         if step is None:
             session.commit()
             return
-        ctx = ctx or json.loads(item.context)
+        ctx = self._build_context(item, ctx)
         result = step.execute(ctx)
         self._handle_step_result(result, item, session, steps, ctx)
 
@@ -440,7 +565,7 @@ class WorkflowController:
         if step is None:
             session.commit()
             return
-        ctx = json.loads(item.context)
+        ctx = self._build_context(item)
         result = step.batch(ctx)
         self._handle_step_result(result, item, session, steps, ctx)
 
@@ -449,7 +574,7 @@ class WorkflowController:
         if step is None:
             session.commit()
             return
-        ctx = json.loads(item.context)
+        ctx = self._build_context(item)
         result = step.complete(decision, ctx)
         self._handle_step_result(result, item, session, steps, ctx)
         dec = orm.WorkflowDecision(
@@ -461,6 +586,12 @@ class WorkflowController:
         )
         session.add(dec)
         session.commit()
+
+    def _build_context(self, item, ctx=None):
+        if ctx is None:
+            ctx = json.load(item.context) if item.context else {}
+        ctx['_id'] = item.id
+        return ctx
 
 
 class WorkflowStep:
@@ -480,6 +611,9 @@ class WorkflowStep:
 
     def allow_decision(self, context: dict) -> bool:
         return False
+
+    async def async_execute(self, context: dict) -> ItemResult:
+        return ItemResult.SUCCESS
 
     def _execute_wrapper(self, call_me, *args, **kwargs) -> ItemResult:
         try:
@@ -533,6 +667,29 @@ class WorkflowDelayedStep(WorkflowStep):
             if res is None or res is True:
                 res = outcome
         return res
+
+
+class WorkflowAsynchronousStep(WorkflowDelayedStep):
+
+    STEP_TYPE = "asyncio"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, execute_response=ItemResult.ASYNC_EXECUTE, **kwargs)
+
+    async def async_execute(self, context: dict) -> ItemResult:
+        try:
+            res = await self._async_execute(context)
+            if res is None or res is True:
+                res = ItemResult.SUCCESS
+            if res is False:
+                res = ItemResult.FAILURE
+            return self._execute_wrapper(self._post_hook, context, res)
+        except Exception as ex:
+            logging.getLogger("pipeman.workflow").exception(ex)
+            return ItemResult.FAILURE
+
+    async def _async_execute(self, context: dict) -> ItemResult:
+        return await self._call_function(self.item_config["coro"], context)
 
 
 class WorkflowBatchStep(WorkflowDelayedStep):
@@ -632,3 +789,30 @@ class DefaultStepFactory(GenericStepFactory):
             WorkflowBatchStep,
             WorkflowActionStep
         ])
+
+
+class EventFiringForm(BaseForm):
+
+    reg: WorkflowRegistry = None
+
+    @injector.construct
+    def __init__(self, *args, event_name=None, **kwargs):
+        self.event_name = event_name
+        fields = self.reg.get_event_fields(self.event_name)
+        self.container = FieldContainer(fields)
+        controls = self.container.controls()
+        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+        super().__init__(controls, *args, **kwargs)
+
+    def handle_form(self):
+        if flask.request.method == "POST":
+            self.process(flask.request.form)
+            if self.validate():
+                d = self.data
+                self.container.process_form_data(d)
+                return True
+            else:
+                for key in self.errors:
+                    for m in self.errors[key]:
+                        flask.flash(gettext("pipeman.entity.form_error") % (self._fields[key].label.text, m), "error")
+        return False

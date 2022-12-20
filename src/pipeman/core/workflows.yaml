@@ -1,3 +1,17 @@
+receive_send_item:
+  default:
+    label:
+      en: Default Send Item
+    steps:
+      - split_send_files
+    enabled: yes
+send_file:
+  basic:
+    label:
+      en: Default Upload File
+    steps:
+      - handle_file_upload
+    enabled: yes
 dataset_publication:
     direct_publish:
         label:

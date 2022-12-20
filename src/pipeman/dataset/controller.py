@@ -262,7 +262,7 @@ class DatasetController:
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):
-        status = self.workflow.start_workflow(
+        status, _ = self.workflow.start_workflow(
             "dataset_activation",
             dataset.extras['act_workflow'],
             {
@@ -278,7 +278,7 @@ class DatasetController:
             flask.flash(gettext("pipeman.dataset.activation_in_progress"), "success")
 
     def publish_dataset(self, dataset):
-        status = self.workflow.start_workflow(
+        status, _ = self.workflow.start_workflow(
             "dataset_publication",
             dataset.extras['pub_workflow'],
             {

@@ -7,6 +7,7 @@ from pipeman.auth import require_permission
 from pipeman.util.errors import DatasetNotFoundError, EntityNotFoundError
 from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
+from pipeman.files import FileController
 
 core = flask.Blueprint("core", __name__)
 
@@ -352,3 +353,50 @@ def view_organization(org_id, oc: OrganizationController = None):
 @injector.inject
 def edit_organization(org_id, oc: OrganizationController = None):
     return oc.edit_organization_form(org_id)
+
+
+@core.route("/api/fire-event/<event_name>", methods=['POST'])
+@require_permission("events.fire")
+@injector.inject
+def fire_event(event_name, wc: WorkflowController):
+    if not wc.event_exists(event_name):
+        return flask.abort(404)
+    if not wc.has_access_to_event(event_name):
+        return flask.abort(403)
+    return wc.fire_event(event_name, flask.request.data)
+
+
+@core.route("/events")
+@require_permission("events.fire")
+@injector.inject
+def list_events(wc: WorkflowController = None):
+    return wc.list_events_page()
+
+
+@core.route("/events/<event_name>", methods=['GET', 'POST'])
+@require_permission("events.fire")
+@injector.inject
+def event_firing_form(event_name, wc: WorkflowController):
+    if not wc.event_exists(event_name):
+        return flask.abort(404)
+    if not wc.has_access_to_event(event_name):
+        return flask.abort(403)
+    return wc.event_form(event_name)
+
+
+@core.route("/api/file-upload/<data_store_name>/<filename>", methods=['PUT'])
+@require_permission("files.upload")
+@injector.inject
+def file_upload(data_store_name, filename, fc: FileController = None):
+    if not fc.data_store_exists(data_store_name):
+        return flask.abort(404)
+    if not fc.has_access(data_store_name):
+        return flask.abort(403)
+    return fc.send_file_from_handle(data_store_name, filename, flask.request.stream)
+
+
+@core.route("/api/file-upload-status/<item_id>")
+@require_permission("files.upload")
+@injector.inject
+def file_upload_status(item_id, fc: FileController = None):
+    return fc.upload_status(item_id)

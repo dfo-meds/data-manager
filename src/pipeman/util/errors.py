@@ -46,3 +46,11 @@ class WorkflowNotFoundError(PipemanError):
 
 class WorkflowItemNotFoundError(PipemanError):
     pass
+
+
+class DataStoreNotFoundError(PipemanError):
+    pass
+
+
+class PipemanConfigurationError(PipemanError):
+    pass

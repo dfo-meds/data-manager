@@ -18,3 +18,13 @@ superuser_approval:
     en: General Approval
   step_type: gate
   require_permission: superuser
+split_send_files:
+  label:
+    en: Split Send Files
+    step_type: async
+    action: pipeman.files.workflow.split_send_files
+handle_file_upload:
+  label:
+    en: Upload File
+    step_type: async
+    action: pipeman.files.workflow.upload_file

@@ -296,4 +296,3 @@ class WorkflowDecision(_BaseModel, Base):
     decision_date = sa.Column(sa.DateTime)
 
     workflow_item = orm.relationship("WorkflowItem", back_populates="decisions")
-
