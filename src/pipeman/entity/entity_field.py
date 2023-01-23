@@ -40,34 +40,36 @@ class EntityReferenceField(ChoiceField):
         revisions = self.entity_revisions()
         old_rev_text = gettext("pipeman.general.outdated")
         dep_rev_text = gettext("pipeman.general.deprecated")
-        for entity, display, _ in self.ec.list_entities(self.field_config['entity_type']):
-            dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
-            latest_rev = entity.latest_revision()
-            val_key = f"{entity.id}-{latest_rev.id}"
-            dn = json.loads(entity.display_names) if entity.display_names else {}
-            if not entity.is_deprecated:
-                values.append((val_key, MultiLanguageString(dn)))
-            for rev in revisions:
-                if rev[0] == entity.id and not rev[1] == latest_rev.id:
-                    specific_rev = entity.specific_revision(rev[1])
-                    if specific_rev:
-                        dep_val_key = f"{entity.id}-{specific_rev.id}"
-                        dn_dep = {
-                            key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
-                            for key in dn
+        loop_types = [self.field_config['entity_type']] if isinstance(self.field_config['entity_type'], str) else self.field_config['entity_type']
+        for ent_type in loop_types:
+            for entity, display, _ in self.ec.list_entities(ent_type):
+                dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
+                latest_rev = entity.latest_revision()
+                val_key = f"{entity.id}-{latest_rev.id}"
+                dn = json.loads(entity.display_names) if entity.display_names else {}
+                if not entity.is_deprecated:
+                    values.append((val_key, MultiLanguageString(dn)))
+                for rev in revisions:
+                    if rev[0] == entity.id and not rev[1] == latest_rev.id:
+                        specific_rev = entity.specific_revision(rev[1])
+                        if specific_rev:
+                            dep_val_key = f"{entity.id}-{specific_rev.id}"
+                            dn_dep = {
+                                key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.id}]"
+                                for key in dn
+                            }
+                            values.append((dep_val_key, MultiLanguageString(dn_dep)))
+                    elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
+                        dep_dn = {
+                            key: dn[key] + f"[{dep_text[:-1]}" for key in dn
                         }
-                        values.append((dep_val_key, MultiLanguageString(dn_dep)))
-                elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
-                    dep_dn = {
-                        key: dn[key] + f"[{dep_text[:-1]}" for key in dn
-                    }
-                    values.append((val_key, MultiLanguageString(dep_dn)))
+                        values.append((val_key, MultiLanguageString(dep_dn)))
         return values if values else []
 
     def _process_value(self, val, **kwargs):
         entity_id, rev_no = val.split("-", maxsplit=1)
         return self.ec.load_entity(
-            self.field_config['entity_type'],
+            None,
             int(entity_id),
             int(rev_no)
         )
