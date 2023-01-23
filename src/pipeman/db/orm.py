@@ -78,6 +78,15 @@ class _DisplayNameModel(_BaseModel):
         return self.short_name
 
 
+class Metric(_BaseModel, Base):
+
+    metric_name = sa.Column(sa.String(256), index=True)
+    timestamp = sa.Column(sa.DateTime)
+    value = sa.Column(sa.String(1024))
+    source_info = sa.Column(sa.String(1024))
+    username = sa.Column(sa.String(1024))
+
+
 class Organization(_DisplayNameModel, Base):
 
     users = orm.relationship("User", secondary=user_organization, back_populates="organizations")

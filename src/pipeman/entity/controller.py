@@ -117,7 +117,11 @@ class EntityController:
 
     def load_entity(self, entity_type, entity_id, revision_no=None):
         with self.db as session:
-            e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
+            if entity_type is None:
+                e = session.query(orm.Entity).filter_by(id=entity_id).first()
+                entity_type = e.entity_type if e else None
+            else:
+                e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
             if not e:
                 raise EntityNotFoundError(entity_id)
             entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()

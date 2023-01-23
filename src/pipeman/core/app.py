@@ -8,6 +8,7 @@ from pipeman.util.errors import DatasetNotFoundError, EntityNotFoundError
 from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
 from pipeman.files import FileController
+from pipeman.metric import MetricController
 
 core = flask.Blueprint("core", __name__)
 
@@ -400,3 +401,13 @@ def file_upload(data_store_name, filename, fc: FileController = None):
 @injector.inject
 def file_upload_status(item_id, fc: FileController = None):
     return fc.upload_status(item_id)
+
+
+@core.route("/api/metrics/<metric_name>/add")
+@require_permission("metrics.add")
+@injector.inject
+def add_metric(metric_name, mc: MetricController = None):
+    if not mc.can_add_metric(metric_name):
+        return flask.abort(403)
+    body = flask.request.json
+    mc.add_metric(metric_name, body['value'], body['source_info'] if 'source_info' in body else '')
