@@ -77,6 +77,30 @@ def set_password(username, password=None, password_entry="", no_error=False, duc
     )
 
 
+@user.command
+@click.argument("username")
+@injector.inject
+def enable_api_access(username, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.set_api_access,
+        username,
+        True
+    )
+
+
+@user.command
+@click.argument("username")
+@injector.inject
+def disable_api_access(username, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.set_api_access,
+        username,
+        False
+    )
+
+
 @user.group
 def group():
     pass

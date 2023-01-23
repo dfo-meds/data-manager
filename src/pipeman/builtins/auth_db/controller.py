@@ -27,6 +27,14 @@ class DatabaseUserController:
     def __init__(self):
         pass
 
+    def set_api_access(self, username, is_enabled: bool):
+        with self.db as session:
+            user = session.query(orm.User).filter_by(username=username).first()
+            if not user:
+                raise ValueError("No such user")
+            user.allowed_api_access = is_enabled
+            session.commit()
+
     def view_myself_page(self):
         with self.db as session:
             user = session.query(orm.User).filter_by(username=flask_login.current_user.get_id()).first()
