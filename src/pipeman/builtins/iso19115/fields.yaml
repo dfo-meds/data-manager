@@ -2,6 +2,11 @@ data_info:
   label:
     en: Data Identification
   fields:
+    contact_point:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Point of Contact
     title:
       data_type: text
       label:
@@ -14,30 +19,10 @@ data_info:
       data_type: multitext
       label:
         en: Purpose
-    pub_date:
-      data_type: date
-      label:
-        en: Publication Date
     credit:
       data_type: multitext
       label:
         en: Credit
-    publisher:
-      data_type: entity_ref
-      entity_type: contact
-      label:
-        en: Publisher
-    owner:
-      data_type: entity_ref
-      entity_type: contact
-      label:
-        en: Owner
-    contributors:
-      data_type: entity_ref
-      entity_type: contact
-      repeatable: yes
-      label:
-        en: Contributors
     doi:
       data_type: entity_ref
       entity_type: resource
@@ -48,20 +33,38 @@ data_info:
       entity_type: resource
       label:
         en: Information Link
-    scope:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_scope_code
+    publication_date:
+      data_type: date
       label:
-        en: Scope
+        en: Publication Date
+    revision_date:
+      data_type: date
+      label:
+        en: Revision Date
+    creation_date:
+      data_type: date
+      label:
+        en: Creation Date
+    publisher:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Publisher
+    author:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Author
+    contributors:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Contributors
+      repeatable: yes
 keywords:
   label:
     en: Keywords
   fields:
-    topic_category:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_topic_category_code
-      label:
-        en: Topic Category
 technical:
   label:
     en: Data Details
@@ -77,4 +80,81 @@ technical:
       entity_type: locale
       label:
         en: Other Locales
-
+    status:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_progress_code
+      label:
+        en: Status
+      repeatable: yes
+    spatial_representation_type:
+      data_type: vocabulary
+      name: iso19115_md_spatial_representation_type_code
+      label:
+        en: Spatial Representation Type
+      repeatable: yes
+    extent:
+      data_type: entity_ref
+      entity_type: extent
+      label:
+        en: Extent
+      repeatable: yes
+    spatial_resolution:
+      data_type: entity_ref
+      entity_type: spatial_res
+      label:
+        en: Spatial Resolution
+      repeatable: yes
+    temporal_resolution:
+      data_type: entity_ref
+      entity_type: time_res
+      label:
+        en: Temporal Resolution
+      repeatable: yes
+    parent_metadata:
+      data_type: entity_ref
+      entity _type: citation
+      label:
+        en: Parent Metadata
+    scope:
+      data_type: entity_ref
+      entity_type: resource_scope
+      label:
+        en: Resource Scope
+      repeatable: yes
+    alt_meta_refs:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Alternative Metadata Links
+      repeatable: yes
+    metadata_links:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Metadata Links
+      repeatable: yes
+    ref_systems:
+      data_type: entity_ref
+      entity_type: ref_system
+      repeatable: yes
+      label:
+        en: Reference Systems
+    spatial_representation:
+      data_type: entity_ref
+      entity_type:
+        - vector_repr
+        - grid_repr
+      label:
+        en: Spatial Representation
+    topic_category:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_topic_category_code
+      repeatable: yes
+      label:
+        en: Topic Category
+    additional_docs:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: citation
+      label:
+        en: Additional Documentation

@@ -118,3 +118,34 @@ iso19115_link_protocols:
   display:
     en: Link Protocols
   uri: https://github.com/OSGeo/Cat-Interop/blob/master/LinkPropertyLookupTable.csv
+iso19115_units:
+  display:
+    en: Units
+  uri:
+  terms:
+    kg:
+      en: Kilograms
+    km:
+      en: Kilometers
+iso19115_distance_units:
+  display:
+    en: Distance Units
+  uri:
+  terms:
+    m:
+      en: Meters
+    km:
+      en: Kilometers
+iso19115_angular_units:
+  display:
+    en: Angular Units
+  uri:
+  terms:
+    radian:
+      en: Radians
+    arc_degree:
+      en: Degrees
+    arc_minute:
+      en: Minutes
+    arc_second:
+      en: Seconds

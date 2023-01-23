@@ -20,13 +20,463 @@ citation:
     en: Citation
   fields:
     title:
+      data_type: text
+      label:
+        en: Title
     alt_title:
+      data_type: text
+      label:
+        en: Alternative Title
     publication_date:
+      data_type: date
+      label:
+        en: Publication Date
     revision_date:
+      data_type: date
+      label:
+        en: Revision Date
     creation_date:
+      data_type: date
+      label:
+        en: Creation Date
     edition:
+      data_type: text
+      label:
+        en: Edition
     edition_date:
-
+      data_type: date
+      label:
+        en: Edition Date
+    publisher:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Publisher
+    presentation_form:
+      data_type: vocabulary
+      vocabulary_name: iso19115_ci_presentation_form_code
+      label:
+        en: Presentation Form
+    series:
+      data_type: entity_ref
+      entity_type: series
+      label:
+        en: Series
+    details:
+      data_type: longtext
+      label:
+        en: Other Details
+    collective_title:
+      data_type: longtext
+      label:
+        en: Collective Title
+    isbn:
+      data_type: text
+      label:
+        en: ISBN
+    issn:
+      data_type: text
+      label:
+        en: ISSN
+    resource:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Link
+graphic:
+  display:
+    en: Graphic
+  fields:
+    file_url:
+      data_type: url
+      label:
+        en: File URL
+    description:
+      data_type: longtext
+      label:
+        en: Description
+    file_ext:
+      data_type: text
+      label:
+        en: File Extension
+    reference_link:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Reference Link
+    use_constraint:
+      data_type: entity_ref
+      entity_type: use_constraint
+      label:
+        en: Use Constraint
+resource_scope:
+  display:
+    en: Resource Scope
+  fields:
+    scope_code:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_scope_code
+      label:
+        en: Scope Code
+    scope_name:
+      data_type: text
+      label:
+        en: Name
+vector_repr:
+  display:
+    en: Vector Representation
+  fields:
+    scope:
+      data_type: entity_ref
+      entity_type: scope
+      label:
+        en: Scope
+    topo_code:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_topology_level_code
+      label:
+        en: Topology Level
+    geom_obj_infos:
+      data_type: entity_ref
+      entity_type: geom_obj_info
+      label:
+        en: Geometric Object Information
+geom_obj_info:
+  display:
+    en: Geometric Object Information
+  fields:
+    object_type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_geometric_object_type_code
+      label:
+        en: Object Type
+    object_count:
+      data_type: integer
+      label:
+        en: Object Count
+grid_repr:
+  display:
+    en: Grid Representation
+  fields:
+    scope:
+      data_type: entity_ref
+      entity_type: scope
+      label:
+        en: Scope
+    dimensions:
+      data_type: integer
+      label:
+        en: Dimensions
+    can_transform:
+      data_type: boolean
+      label:
+        en: Can Transform
+    cell_geometry:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_cell_geometry_code
+      label:
+        en: Cell Geometry
+    dimension_details:
+      data_type: entity_ref
+      entity_type: dimension_detail
+      label:
+        en: Dimension Properties
+dimension_detail:
+  display:
+    en: Dimension Propertyset
+  fields:
+    name:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_dimension_name_type_code
+      label:
+        en: Dimension Name
+    size:
+      data_type: integer
+      label:
+        en: Number of Elements
+    resolution:
+      data_type: decimal
+      label:
+        en: Resolution
+    resolution_units:
+      data_type: vocabulary
+      vocabulary_name: iso19115_units
+      label:
+        en: Resolution Units
+    title:
+      data_type: text
+      label:
+        en: Title
+    description:
+      data_type: longtext
+      label:
+        en: Description
+scope:
+  display:
+    en: Scope
+  fields:
+    scope_code:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_scope_code
+      label:
+        en: Scope Code
+    extent:
+      data_type: entity_ref
+      entity_type: extent
+      label:
+        en: Entity
+      repeatable: yes
+    attr_desc:
+      data_type: longtext
+      label:
+        en: Attribute Description
+    feat_desc:
+      data_type: longtext
+      label:
+        en: Feature Description
+    fint_desc:
+      data_type: longtext
+      label:
+        en: Feature Instance Description
+    aint_desc:
+      data_type: longtext
+      label:
+        en: Attribute Instance Description
+    dset_desc:
+      data_type: longtext
+      label:
+        en: Dataset Description
+    other_desc:
+      data_type: longtext
+      label:
+        en: Other Description
+extent:
+  display:
+    en: Extent
+  fields:
+    description:
+      data_type: longtext
+      label:
+        en: Description
+    locations:
+      data_type: entity_ref
+      entity_type: location
+      label:
+        en: Locations
+      repeatable: yes
+    time_periods:
+      data_type: entity_ref
+      entity_type: time_period
+      label:
+        en: Time Periods
+      repeatable: yes
+    vlocations:
+      data_type: entity_ref
+      entity_type: vlocation
+      label:
+        en: Vertical Locations
+      repeatable: yes
+    stextents:
+      data_type: entity_ref
+      entity_type: stextent
+      label:
+        en: Spatial-Temporal Combined Extents
+      repeatable: yes
+stextent:
+  display:
+    en: Spatial-Temporal Extent
+  fields:
+    locations:
+      data_type: entity_ref
+      entity_type: location
+      label:
+        en: Locations
+      repeatable: yes
+    time_period:
+      data_type: entity_ref
+      entity_type: time_period
+      label:
+        en: Time Period
+    vlocation:
+      data_type: entity_ref
+      entity_type: vlocation
+      label:
+        en: Vertical Location
+time_period:
+  display:
+    en: Time Period
+  fields:
+    description:
+      data_type: text
+      label:
+        en: Description
+    start_time:
+      data_type: datetime
+      label:
+        en: Start Time
+    end_time:
+      data_type: datetime
+      label:
+        en: End Time
+    is_ongoing:
+      data_type: boolean
+      label:
+        en: Is On-Going
+    is_instant:
+      data_type: boolean
+      label:
+        en: Is Instant
+vlocation:
+  display:
+    en: Vertical Locations
+  fields:
+    min_value:
+      data_type: decimal
+      label:
+        en: Minimum Value
+    max_value:
+      data_type: decimal
+      label:
+        en: Maximum Value
+    ref_system:
+      data_type: entity_ref
+      entity_type: ref_system
+      label:
+        en: Reference System
+ref_system:
+  display:
+    en: Reference System
+  fields:
+    system_type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_reference_system_type_code
+      label:
+        en: Reference System Type
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
+    code:
+      data_type: text
+      label:
+        en: Code
+    code_space:
+      data_type: text
+      label:
+        en: Code Space
+    version:
+      data_type: text
+      label:
+        en: Version
+    description:
+      data_type: text
+      label:
+        en: Description
+location:
+  display:
+    en: Location
+  fields:
+    bbox_west:
+      data_type: decimal
+      label:
+        en: West
+    bbox_east:
+      data_type: decimal
+      label:
+        en: East
+    bbox_north:
+      data_type: decimal
+      label:
+        en: North
+    bbox_south:
+      data_type: decimal
+      label:
+        en: South
+    polygon_wkt:
+      data_type: longtext
+      label:
+        en: Polygon Boundary (WKT)
+    description:
+      data_type: longtext
+      label:
+        en: Description
+    exclude_area:
+      data_type: boolean
+      label:
+        en: Exclude Area
+use_constraint:
+  display:
+    en: Usage Constraint
+  fields:
+    description:
+      data_type: longtext
+      label:
+        en: Limitation Description
+      repeatable: yes
+    graphic:
+      data_type: entity_ref
+      entity_type: graphic
+      label:
+        en: Graphic
+      repeatable: yes
+    reference_link:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Reference Link
+      repeatable: yes
+    responsible_party:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Responsible Party
+      repeatable: yes
+    app_scope:
+      data_type: entity_ref
+      entity_type: scope
+      label:
+        en: Applicability Scope
+    releasability:
+      data_type: entity_ref
+      entity_type: releasability
+      label:
+        en: Release Statement
+releasability:
+  display:
+    en: Release Statement
+  fields:
+    statement:
+      data_type: text
+      label:
+        en: Statement
+    addressees:
+      repeatable: yes
+      data_type: contact
+      label:
+        en: Applicable Party
+    constraints:
+      repeatable: yes
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_restriction_code
+      label:
+        en: Release Constraints
+series:
+  display:
+    en: Series
+  fields:
+    name:
+      data_type: text
+      label:
+        en: Series Name
+    issue_identifier:
+      data_type: text
+      label:
+        en: Issue Identifier
+    page:
+      data_type: text
+      label:
+        en: Page(s)
 resource:
   display:
     en: Resource
@@ -126,3 +576,70 @@ contact:
       data_type: url
       label:
         und: RORID / ORCID
+spatial_res:
+  display:
+    en: Spatial Resolution
+  fields:
+    scale:
+      data_type: integer
+      label:
+        en: Scale Factor
+    distance:
+      data_type: decimal
+      label:
+        en: Horizontal Resolution
+    distance_units:
+      data_type: vocabulary
+      vocabulary_name: iso19115_distance_units
+      label:
+        en: Horizontal Resolution Units
+    vertical:
+      data_type: decimal
+      label:
+        en: Vertical Resolution
+    vertical_units:
+      data_type: vocabulary
+      vocabulary_name: iso19115_distance_units
+      label:
+        en: Distance Resolution Units
+    angular:
+      data_type: decimal
+      label:
+        en: Angular Resolution
+    angular_units:
+      data_type: vocabulary
+      vocabulary_name: iso19115_angular_units
+      label:
+        en: Angular Resolution Units
+    level_of_detail:
+      data_type: longtext
+      label:
+        en: Level of Detail
+time_res:
+  display:
+    en: Time Resolution
+  fields:
+    years:
+      data_type: integer
+      label:
+        en: Years
+    months:
+      data_type: integer
+      label:
+        en: Months
+    days:
+      data_type: integer
+      label:
+        en: Days
+    hours:
+      data_type: integer
+      label:
+        en: Hours
+    minutes:
+      data_type: integer
+      label:
+        en: Minutes
+    seconds:
+      data_type: decimal
+      label:
+        en: Seconds
