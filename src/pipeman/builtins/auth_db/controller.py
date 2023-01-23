@@ -13,6 +13,8 @@ import wtforms.validators as wtfv
 from pipeman.util.errors import UserInputError
 from pipeman.auth.util import groups_select
 from pipeman.org import OrganizationController
+import base64
+import datetime
 
 
 @injector.injectable
@@ -402,10 +404,12 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
                 return self._build_user(user)
         return None
 
-    def find_user(self, username, password):
+    def find_user(self, username, password, from_api: bool = False):
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
+                return None
+            if from_api and not user.allowed_api_access:
                 return None
             if user.phash is None:
                 return None
@@ -413,6 +417,47 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             if not self.sh.compare_digest(pw_hash, user.phash):
                 return None
             return self._build_user(user)
+
+    def login_from_request(self, request):
+        auth_header = request.headers.get('Authorization', default=None)
+        if not auth_header:
+            return None
+        if ' ' not in auth_header:
+            return None
+        scheme, token = auth_header.split(' ', maxsplit=1)
+        if scheme.lower() == 'basic':
+            return self._basic_auth(token)
+        elif scheme.lower() == 'bearer':
+            return self._bearer_auth(token)
+        return None
+
+    def _basic_auth(self, auth_header):
+        un, pw = base64.b64decode(auth_header).decode("utf-8").split(":", maxsplit=1)
+        return self.find_user(un, pw, True)
+
+    def _bearer_auth(self, auth_header):
+        username, prefix, key = auth_header.split(".", maxsplit=2)
+        with self.db as session:
+            user = session.query(orm.User).filter_by(username=username).first()
+            if not user:
+                return None
+            if not user.allowed_api_access:
+                return None
+            key = session.query(orm.APIKey).filter_by(user_id=user.id, prefix=prefix).first()
+            if not key:
+                return None
+            if not key.is_active:
+                return None
+            gate_date = datetime.datetime.now()
+            if key.expiry > gate_date:
+                key_hash = self.sh.hash_password(auth_header, key.key_salt)
+                if self.sh.compare_digest(key_hash, key.key_hash):
+                    return self._build_user(user)
+            if key.old_expiry > gate_date:
+                key_hash = self.sh.hash_password(auth_header, key.old_key_salt)
+                if self.sh.compare_digest(key_hash, key.old_key_hash):
+                    return self._build_user(user)
+        return None
 
     def _build_user(self, user):
         permissions = set()

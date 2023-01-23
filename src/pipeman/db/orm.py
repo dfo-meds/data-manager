@@ -101,10 +101,25 @@ class User(_BaseModel, Base):
     salt = sa.Column(sa.String(64), nullable=True)
     phash = sa.Column(sa.String(128), nullable=True)
     email = sa.Column(sa.String(1024), nullable=False, index=True)
+    allowed_api_access = sa.Column(sa.Boolean, nullable=False, default=False)
 
     groups = orm.relationship("Group", secondary=user_group, back_populates="users")
     organizations = orm.relationship("Organization", secondary=user_organization, back_populates="users")
     datasets = orm.relationship("Dataset", secondary=user_dataset, back_populates="users")
+
+
+class APIKey(_BaseModel, Base):
+
+    user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False)
+    display = sa.Column(sa.String(1024), nullable=True)
+    prefix = sa.Column(sa.String(64), nullable=False, index=True)
+    key_hash = sa.Column(sa.String(128), nullable=True)
+    key_salt = sa.Column(sa.String(64), nullable=True)
+    expiry = sa.Column(sa.DateTime, nullable=True)
+    old_key_hash = sa.Column(sa.String(128), nullable=True)
+    old_key_salt = sa.Column(sa.String(64), nullable=True)
+    old_expiry = sa.Column(sa.DateTime, nullable=True)
+    is_active = sa.Column(sa.Boolean, default=True)
 
 
 class Group(_DisplayNameModel, Base):
