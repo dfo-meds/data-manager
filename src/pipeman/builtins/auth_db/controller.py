@@ -88,6 +88,7 @@ class DatabaseUserController:
                 key.old_expiry = None
             key.key_salt = key_salt
             key.key_hash = key_hash
+            key.expiry = datetime.datetime.now() + datetime.timedelta(days=expiry_days)
             session.commit()
             print(
                 "API Key rotated. Please record these details as they will not be available again. Store them in a secure location.")
