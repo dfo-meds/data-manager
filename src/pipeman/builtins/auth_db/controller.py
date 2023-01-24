@@ -35,6 +35,70 @@ class DatabaseUserController:
             user.allowed_api_access = is_enabled
             session.commit()
 
+    def create_api_key(self, username, display, expiry_days):
+        with self.db as session:
+            user = session.query(orm.User).filter_by(username=username).first()
+            if not user:
+                raise ValueError("No such user")
+            prefix = self.sh.generate_secret(32)
+            raw_key = self.sh.generate_secret(64)
+            key_salt = self.sh.generate_salt()
+            auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
+            key_hash = self.sh.hash_password(auth_header, key_salt)
+            key = orm.APIKey(
+                user_id=user.id,
+                display=display,
+                prefix=prefix,
+                key_hash=key_hash,
+                key_salt=key_salt,
+                expiry=datetime.datetime.now() + datetime.timedelta(days=expiry_days),
+                is_active=True,
+                old_key_hash=None,
+                old_key_salt=None,
+                old_expiry=None
+            )
+            session.add(key)
+            session.commit()
+            print("API Key created. Please record these details as they will not be available again. Store them in a secure location.")
+            print(f"Username: {username}")
+            print(f"Prefix: {prefix}")
+            print(f"Authorization: Bearer {auth_header}")
+            print(f"Expiry: {key.expiry.strftime('%Y-%m-%d %H:%M:%S')}")
+            print("To rotate the key, use rotate-api-key [USERNAME] [PREFIX].")
+
+    def rotate_api_key(self, username, prefix, expiry_days, leave_old_active_days):
+        with self.db as session:
+            user = session.query(orm.User).filter_by(username=username).first()
+            if not user:
+                raise ValueError("No such user")
+            key = session.query(orm.APIKey).filter_by(user_id=user.id, prefix=prefix).first()
+            if not key:
+                raise ValueError("No such API key")
+            raw_key = self.sh.generate_secret(64)
+            key_salt = self.sh.generate_salt()
+            auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
+            key_hash = self.sh.hash_password(auth_header, key_salt)
+            if leave_old_active_days > 0:
+                key.old_key_hash = key.key_hash
+                key.old_key_salt = key.key_salt
+                key.old_expiry = datetime.datetime.now() + datetime.timedelta(days=leave_old_active_days)
+            else:
+                key.old_key_hash = None
+                key.old_key_salt = None
+                key.old_expiry = None
+            key.key_salt = key_salt
+            key.key_hash = key_hash
+            session.commit()
+            print(
+                "API Key rotated. Please record these details as they will not be available again. Store them in a secure location.")
+            print(f"Username: {username}")
+            print(f"Prefix: {prefix}")
+            print(f"Authorization: Bearer {auth_header}")
+            print(f"Expiry: {key.expiry.strftime('%Y-%m-%d %H:%M:%S')}")
+            if leave_old_active_days > 0:
+                print(f"Old Key Expiry: {key.old_expiry.strftime('%Y-%m-%d %H:%M:%S')}")
+            print("To rotate the key, use rotate-api-key [USERNAME] [PREFIX].")
+
     def view_myself_page(self):
         with self.db as session:
             user = session.query(orm.User).filter_by(username=flask_login.current_user.get_id()).first()
@@ -444,7 +508,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
         return self.find_user(un, pw, True)
 
     def _bearer_auth(self, auth_header):
-        username, prefix, key = auth_header.split(".", maxsplit=2)
+        prefix, key, username = self.sh.parse_auth_header(auth_header)
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:

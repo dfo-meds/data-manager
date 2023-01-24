@@ -79,6 +79,7 @@ def set_password(username, password=None, password_entry="", no_error=False, duc
 
 @user.command
 @click.argument("username")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
 @injector.inject
 def enable_api_access(username, no_error=False, duc: DatabaseUserController = None):
     no_error_wrapper(
@@ -91,6 +92,7 @@ def enable_api_access(username, no_error=False, duc: DatabaseUserController = No
 
 @user.command
 @click.argument("username")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
 @injector.inject
 def disable_api_access(username, no_error=False, duc: DatabaseUserController = None):
     no_error_wrapper(
@@ -98,6 +100,40 @@ def disable_api_access(username, no_error=False, duc: DatabaseUserController = N
         duc.set_api_access,
         username,
         False
+    )
+
+
+@user.command
+@click.argument("username")
+@click.argument("display")
+@click.argument("expiry_days")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@injector.inject
+def create_api_key(username, display, expiry_days, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.create_api_key,
+        username,
+        display,
+        int(expiry_days)
+    )
+
+
+@user.command
+@click.argument("username")
+@click.argument("prefix")
+@click.argument("expiry_days")
+@click.argument("leave_old_active_days")
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@injector.inject
+def rotate_api_key(username, prefix, expiry_days, leave_old_active_days, no_error=False, duc: DatabaseUserController = None):
+    no_error_wrapper(
+        no_error,
+        duc.rotate_api_key,
+        username,
+        prefix,
+        int(expiry_days),
+        int(leave_old_active_days)
     )
 
 

@@ -4,6 +4,7 @@ from autoinject import injector
 import zirconium as zr
 import re
 import math
+import base64
 import logging
 from pipeman.util import UserInputError
 
@@ -53,6 +54,16 @@ class SecurityHelper:
             salt.encode("utf-8"),
             self.rounds
         ).hex()
+
+    def build_auth_header(self, username, secret_key, prefix):
+        return f"{prefix}.{secret_key}.{base64.b64encode(username)}"
+
+    def parse_auth_header(self, auth_header):
+        pieces = auth_header.split(".", maxsplit=2)
+        return pieces[0], pieces[1], base64.b64decode(pieces[2])
+
+    def generate_secret(self, secret_length_bytes):
+        return secrets.token_hex(secret_length_bytes)
 
     def generate_salt(self):
         return secrets.token_hex(self.salt_size)
