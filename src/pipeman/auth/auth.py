@@ -4,6 +4,7 @@ import zirconium as zr
 from autoinject import injector
 import typing as t
 from functools import wraps
+from pipeman.i18n import gettext
 
 
 def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
@@ -99,5 +100,5 @@ class AuthenticationManager:
         if flask.request.path.startswith("/api"):
             return flask.abort(403)
         else:
-            flask.flash("Request not authorized", "error")
+            flask.flash(gettext("pipeman.auth.not_authorized"), "error")
             return flask.redirect(self.unauthorized_route)

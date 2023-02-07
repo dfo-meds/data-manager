@@ -2,14 +2,18 @@ import yaml
 import os
 from autoinject import injector
 from pipeman.i18n import LanguageDetector
+import zirconium as zr
 
 
 class YamlTranslationManager:
 
     ld: LanguageDetector = None
+    cfg: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self, dictionary_path: str):
+    def __init__(self, dictionary_path: str = None):
+        if dictionary_path is None:
+            dictionary_path = self.cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_path'))
         self._dictionaries = {}
         self._dictionary_lookup = {}
         for file in os.scandir(dictionary_path):

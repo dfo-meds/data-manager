@@ -20,29 +20,24 @@ class TranslationManager:
 
 class DelayedTranslationString:
 
-    tm: TranslationManager = None
-
-    @injector.construct
     def __init__(self, text_key, default=None):
         self.text_key = text_key
         self.default = default
 
-    def __str__(self):
-        return self.tm.get_text(self.text_key, self.default)
+    @injector.inject
+    def __str__(self, tm: TranslationManager):
+        return tm.get_text(self.text_key, self.default)
 
 
 class MultiLanguageString:
 
-    tm: TranslationManager = None
-    ld: LanguageDetector = None
-
-    @injector.construct
     def __init__(self, language_map: dict, default_lang="en"):
         self.language_map = language_map
         self.default_lang = default_lang
 
-    def __str__(self):
-        lang = self.ld.detect_language(self.language_map.keys())
+    @injector.inject
+    def __str__(self, tm: TranslationManager = None, ld: LanguageDetector = None):
+        lang = ld.detect_language(self.language_map.keys())
         use_blank = lang in self.language_map
         if lang in self.language_map and self.language_map[lang]:
             return self.language_map[lang]
@@ -52,4 +47,4 @@ class MultiLanguageString:
             return ""
         if self.default_lang in self.language_map:
             return self.language_map[self.default_lang]
-        return self.tm.get_text("pipeman.general.unknown")
+        return tm.get_text("pipeman.general.unknown")

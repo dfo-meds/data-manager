@@ -5,6 +5,7 @@ import importlib
 import zrlog
 import pkgutil
 from pipeman.i18n import gettext
+import pathlib
 
 
 def load_dynamic_class(cls_name):
@@ -29,11 +30,17 @@ class System:
         self._flask_blueprints = []
         self._click_groups = []
         self._nav_menu = {}
+        self.i18n_dirs = set()
 
     def init(self):
         zrlog.init_logging()
         self.init_plugins()
         self._init_overrides()
+        root = pathlib.Path(__file__).absolute().parent.parent
+        self.i18n_dirs.update([
+            str(root),
+            str(pathlib.Path(".").absolute() / "templates"),
+        ])
 
     def _init_overrides(self):
         injections = self.config.get("autoinject", default=None)

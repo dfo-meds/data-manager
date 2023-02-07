@@ -1,0 +1,139 @@
+auth_db.change_password: Change Password
+auth_db.change_password.title: Change Password
+auth_db.cli.user_already_exists: User already exists
+auth_db.create_user.error_already_exists: Username already exists
+auth_db.create_user.error_email_exists: Email exists
+auth_db.create_user.success: User created
+auth_db.create_user.title: Create User
+auth_db.display_name: Display Name
+auth_db.edit_myself.title: Edit My Profile
+auth_db.edit_profile: Edit Profile
+auth_db.edit_user.success: User updated successfully
+auth_db.edit_user.title: Edit User
+auth_db.email: Email
+auth_db.groups: Groups
+auth_db.list_users: List Users
+auth_db.list_users.title: List Users
+auth_db.me: My Account
+auth_db.organizations: Organizations
+auth_db.password: Password
+auth_db.repeat_password: Repeat Password
+auth_db.reset_password.instructions: Reset the users password
+auth_db.reset_password.success: Password reset to {}
+auth_db.reset_password.title: Reset PAssword
+auth_db.user.display: User
+auth_db.user.groups: Groups
+auth_db.user.organizations: Organizations
+auth_db.user.username: Username
+auth_db.username: Username
+auth_db.username_does_not_exist: Username does not exist
+forms.back: Back
+language_names.en: English
+language_names.fr: French
+pipeman.action-items: Action Items
+pipeman.auth.group_does_not_exist: Group does not exist
+pipeman.auth.hash_not_available: Hash function not available
+pipeman.auth.not_authorized: User not authorized for access
+pipeman.auth.org_does_not_exist: Organization does not exist
+pipeman.auth.password_too_long: Password is too long
+pipeman.core.org_not_found: Organization not found
+pipeman.create_dataset: Create Dataset
+pipeman.create_entity: Create Entity
+pipeman.create_organization: Create Organization
+pipeman.create_organization.title: Create Organization
+pipeman.dataset.activate_dataset_form: Activate Dataset
+pipeman.dataset.activate_dataset_form.confirmation: Are you sure you want to activate
+  this dataset?
+pipeman.dataset.activated: Dataset activated
+pipeman.dataset.activation_error: Error while activating dataset
+pipeman.dataset.activation_in_progress: Activation process started
+pipeman.dataset.activation_workflow: Activation Workflow
+pipeman.dataset.assigned_users: Assigned Users
+pipeman.dataset.create_dataset_form: Create Dataset
+pipeman.dataset.display: Display
+pipeman.dataset.edit_dataset_form: Edit Dataset
+pipeman.dataset.edit_link: Edit
+pipeman.dataset.edit_metadata_form: Edit Metadata
+pipeman.dataset.edit_metadata_link: Edit Metadata
+pipeman.dataset.id: ID
+pipeman.dataset.metadata: Metadata
+pipeman.dataset.organization: Organization
+pipeman.dataset.profiles: Metadata Profiles
+pipeman.dataset.properties: Properties
+pipeman.dataset.publication_error: An error occurred during publication
+pipeman.dataset.publication_in_progress: Publication is in progress
+pipeman.dataset.publication_workflow: Publication Workflow
+pipeman.dataset.publish_dataset_form.confirmation: Are you sure you want to publish
+  this dataset?
+pipeman.dataset.publish_dataset_form.title: Publish Dataset
+pipeman.dataset.publish_link: Publish
+pipeman.dataset.published: Published
+pipeman.dataset.remove_link: Remove
+pipeman.dataset.remove_dataset_form: Remove Dataset
+pipeman.dataset.remove_dataset_form.confirmation: Are you sure you want to remove
+  this dataset?
+pipeman.dataset.restore_dataset_form: Restore Dataset
+pipeman.dataset.restore_dataset_form.confirmation: Are you sure you want to remove
+  this dataset?
+pipeman.dataset.security_level: Security Level
+pipeman.dataset.state: State
+pipeman.dataset_remove_link: Remove
+pipeman.datasets: Datasets
+pipeman.edit_organization.title: Title
+pipeman.entities: Entities
+pipeman.entity.display: Display
+pipeman.entity.form_error: An error has occurred
+pipeman.entity.id: ID
+pipeman.entity.is_deprecated: Is Deprecated
+pipeman.entity.organization: Organization
+pipeman.entity.remove_confirmation: Remove Entity
+pipeman.entity.restore_confirmation: Restore Entity
+pipeman.entity.state: State
+pipeman.entity_form.display_name: Display Name
+pipeman.entity_form.submit: Submit
+pipeman.entity_type.list: Entity Types
+pipeman.events.title: Events
+pipeman.fire_event.title: Fire Event
+pipeman.general.actions: Actions
+pipeman.general.active: Active
+pipeman.general.deprecated: Deprecated
+pipeman.general.display_name: Display Name
+pipeman.general.empty_select: <None>
+pipeman.general.na: N/A
+pipeman.general.no: 'No'
+pipeman.general.edit: 'Edit'
+auth_db.reset_password: 'Reset Password'
+pipeman.general.outdated: Outdated
+pipeman.general.pages: Page
+pipeman.general.submit: Submit
+pipeman.general.unknown: Unknown
+pipeman.general.view: View
+pipeman.general.yes: 'Yes'
+pipeman.list_organizations.title: Title
+pipeman.organization.already_exists: This organization already exists
+pipeman.organization.display: Display
+pipeman.organization.display_names: Display Name
+pipeman.organization.global: Global
+pipeman.organization.name: Name
+pipeman.organization.short_name: Short Name
+pipeman.organizations: Organizations
+pipeman.plugins.auth_db.blank_password: Password is blank
+pipeman.plugins.auth_db.short_password: Password is too short
+pipeman.plugins.auth_db.username_does_not_exist: No such user
+pipeman.plugins.auth_form.login_error: Error while logging in
+pipeman.plugins.auth_form.login_success: Login succes
+pipeman.status.unknown: Unknown
+pipeman.view_organization.title: View Organization
+pipeman.welcome: Welcome
+pipeman.workflow_item.logs: Logs
+pipeman.workflow_item.properties: Properties
+pipeman.workflow_item.step.name: Step Name
+pipeman.workflow_item.step.notes: Notes
+pipeman.workflow_item.step.status: Status
+pipeman.workflow_item.type: Type
+pipeman.workflow_list.title: List Workflows
+pipeman.workflow_view.title: View Workflow
+pipeman.dataset.status: Status
+pipeman.dataset.act_workflow: Activation Workflow
+pipeman.dataset.pub_workflow: Publication Workflow
+pipeman.dataset.status.active: Active

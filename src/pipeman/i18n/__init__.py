@@ -36,3 +36,4 @@ def create_jinja_filters(app):
 
 def init(system):
     system.register_init_app(create_jinja_filters)
+    system.register_cli("pipeman.i18n.cli", "i18n")
