@@ -3,13 +3,15 @@ from pipeman.util import caps_to_snake
 from pipeman.workflow.workflow import WorkflowRegistry
 from pipeman.dataset import MetadataRegistry
 from pipeman.vocab import VocabularyRegistry
+from pipeman.files import DataStoreRegistry
 import pathlib
 import yaml
 
 
 @injector.inject
-def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vreg: VocabularyRegistry = None):
+def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vreg: VocabularyRegistry = None, dsr: DataStoreRegistry = None):
     system.register_cli("pipeman.core.cli", "org")
+    system.register_cli("pipeman.core.cli", "workflow")
     system.register_blueprint("pipeman.core.app", "core")
     system.register_init_app(create_jinja_filters)
     system.register_nav_item("datasets", "pipeman.datasets", "core.list_datasets", "datasets.view")
@@ -25,6 +27,8 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
         reg.register_security_labels_from_dict(yaml.safe_load(h))
     with open(root / "vocabs.yaml", "r") as h:
         vreg.register_from_dict(yaml.safe_load(h))
+    dsr.register_data_store("test-store", {"en": "Test Store"}, "C:/my/local_store", True, 'basic', 'basic', True)
+
 
 
 def create_jinja_filters(app):

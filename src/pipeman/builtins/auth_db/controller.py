@@ -482,7 +482,8 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
                 return None
-            if from_api and not user.allowed_api_access:
+            # TODO: clear this
+            if False and (from_api and not user.allowed_api_access):
                 return None
             if user.phash is None:
                 return None

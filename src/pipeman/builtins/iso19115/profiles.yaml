@@ -2,20 +2,43 @@ iso19115:
   label:
     en: Core ISO-19115
   fields:
+    contact_point: yes
     title: yes
     abstract: no
     purpose: no
-    pub_date: no
     credit: no
-    publisher: yes
-    owner: yes
-    contributors: no
     doi: no
     info_link: no
-    scope: no
-    topic_category: no
+    publication_date: no
+    revision_date: no
+    creation_date: no
+    publisher: no
+    author: no
+    contributors: no
+    topic_category: yes
+    parent_metadata: no
+    alt_meta_refs: no
+    metadata_links: no
+    additional_docs: no
+    bbox_west: no
+    bbox_east: no
+    bbox_north: no
+    bbox_south: no
+    wkt_polygon: no
+    vertical_min: no
+    vertical_max: no
+    start_time: no
+    end_time: no
+    is_ongoing: no
+    spatial_resolution: no
+    temporal_resolution: no
+    ref_systems: no
     default_locale: no
     other_locales: no
+    status: no
+    spatial_representation_type: no
+    resource_maintenance_frequency: no
+    metadata_maintenance_frequency: no
   formatters:
     iso19115xml:
       label:

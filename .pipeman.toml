@@ -10,3 +10,6 @@ logout_route = "logged_out"
 
 [flask]
 SECRET_KEY = "VeryModernMajorGeneral"
+
+[pipeman]
+holding_dir = "C:/my/test_upload"

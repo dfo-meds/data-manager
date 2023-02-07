@@ -21,10 +21,10 @@ superuser_approval:
 split_send_files:
   label:
     en: Split Send Files
-    step_type: async
-    action: pipeman.files.workflow.split_send_files
+  step_type: async
+  coro: pipeman.files.workflow.split_send_files
 handle_file_upload:
   label:
     en: Upload File
-    step_type: async
-    action: pipeman.files.workflow.upload_file
+  step_type: async
+  coro: pipeman.files.workflow.upload_file

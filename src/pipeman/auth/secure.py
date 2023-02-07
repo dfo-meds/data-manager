@@ -72,6 +72,8 @@ class SecurityHelper:
         return secrets.compare_digest(d1, d2)
 
     def check_password_strength(self, password):
+        if not password:
+            raise UserInputError("pipeman.plugins.auth_db.blank_password")
         if len(password) < self.cfg.as_int(("security", "password_min_length"), default=0):
             raise UserInputError("pipeman.plugins.auth_db.short_password")
         complexities = self.cfg.get(("security", "password_complexity_classes"), default=None)

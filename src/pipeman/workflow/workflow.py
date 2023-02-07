@@ -589,7 +589,7 @@ class WorkflowController:
 
     def _build_context(self, item, ctx=None):
         if ctx is None:
-            ctx = json.load(item.context) if item.context else {}
+            ctx = json.loads(item.context) if item.context else {}
         ctx['_id'] = item.id
         return ctx
 
@@ -671,7 +671,7 @@ class WorkflowDelayedStep(WorkflowStep):
 
 class WorkflowAsynchronousStep(WorkflowDelayedStep):
 
-    STEP_TYPE = "asyncio"
+    STEP_TYPE = "async"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, execute_response=ItemResult.ASYNC_EXECUTE, **kwargs)
@@ -787,7 +787,8 @@ class DefaultStepFactory(GenericStepFactory):
             WorkflowHookStep,
             WorkflowGateStep,
             WorkflowBatchStep,
-            WorkflowActionStep
+            WorkflowActionStep,
+            WorkflowAsynchronousStep,
         ])
 
 

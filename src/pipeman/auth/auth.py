@@ -96,5 +96,8 @@ class AuthenticationManager:
         return flask.redirect(self.logout_success_route)
 
     def unauthorized_handler(self):
-        flask.flash("Request not authorized", "error")
-        return flask.redirect(self.unauthorized_route)
+        if flask.request.path.startswith("/api"):
+            return flask.abort(403)
+        else:
+            flask.flash("Request not authorized", "error")
+            return flask.redirect(self.unauthorized_route)

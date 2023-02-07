@@ -1,1 +1,1 @@
-from .files import FileController
+from .files import FileController, DataStoreRegistry

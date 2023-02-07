@@ -114,6 +114,8 @@ class Field:
         return {}
 
     def display(self):
+        if self.value is None:
+            return ""
         use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
         use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
         if use_repeatable and use_multilingual:
@@ -299,6 +301,7 @@ class ChoiceField(Field):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._values = None
+        self._use_default_repeatable = False
 
     def choices(self):
         if self._values is None:

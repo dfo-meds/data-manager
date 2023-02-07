@@ -40,9 +40,11 @@ class OrganizationController:
             org = session.query(orm.Organization).filter_by(id=org_id).first()
             if not org:
                 return flask.abort(404)
+            display_name = MultiLanguageString(json.loads(org.display_names)) if org.display_names else gettext("pipeman.general.na")
             return flask.render_template(
                 "view_organization.html",
                 org=org,
+                display=display_name,
                 title=gettext('pipeman.view_organization.title')
             )
 

@@ -13,7 +13,7 @@ def configure_pipeman(config: zr.ApplicationConfig):
     config.register_file("~/.pipeman.toml")
 
 
-def init():
+def init(db_only=False):
     from pipeman.util.system import System
     from pipeman.auth import init as auth_init
     from pipeman.core import init as core_init
@@ -21,10 +21,11 @@ def init():
 
     @injector.inject
     def _do_init(system: System = None):
-        i18n_init(system)
-        auth_init(system)
-        core_init(system)
-        system.init()
+        if not db_only:
+            i18n_init(system)
+            auth_init(system)
+            core_init(system)
+            system.init()
         return system
 
     return _do_init()

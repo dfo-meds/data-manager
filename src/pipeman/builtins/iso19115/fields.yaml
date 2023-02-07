@@ -1,6 +1,6 @@
 data_info:
   label:
-    en: Data Identification
+    en: Identification
   fields:
     contact_point:
       data_type: entity_ref
@@ -65,9 +65,104 @@ keywords:
   label:
     en: Keywords
   fields:
+    topic_category:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_topic_category_code
+      repeatable: yes
+      label:
+        en: Topic Category
+references:
+  label:
+    en: References
+  fields:
+    parent_metadata:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Parent Metadata
+    alt_meta_refs:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Alternative Metadata Links
+      repeatable: yes
+    metadata_links:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Metadata Links
+      repeatable: yes
+    additional_docs:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: citation
+      label:
+        en: Additional Documentation
+extent:
+  label:
+    en: Extent
+  fields:
+    bbox_west:
+      data_type: decimal
+      label:
+        en: West
+    bbox_east:
+      data_type: decimal
+      label:
+        en: East
+    bbox_north:
+      data_type: decimal
+      label:
+        en: North
+    bbox_south:
+      data_type: decimal
+      label:
+        en: South
+    wkt_polygon:
+      data_type: multitext
+      label:
+        en: Polygon Boundary (WKT)
+    vertical_min:
+      data_type: decimal
+      label:
+        en: Vertical Minimum
+    vertical_max:
+      data_type: decimal
+      label:
+        en: Vertical Maximum
+    start_time:
+      data_type: datetime
+      label:
+        en: Start Time
+    end_time:
+      data_type: datetime
+      lable:
+        en: End Time
+    is_ongoing:
+      data_type: boolean
+      label:
+        en: Is On-Going
+    spatial_resolution:
+      data_type: entity_ref
+      entity_type: spatial_res
+      label:
+        en: Spatial Resolution
+      repeatable: yes
+    temporal_resolution:
+      data_type: entity_ref
+      entity_type: time_res
+      label:
+        en: Temporal Resolution
+      repeatable: yes
+    ref_systems:
+      data_type: entity_ref
+      entity_type: ref_system
+      repeatable: yes
+      label:
+        en: Reference Systems
 technical:
   label:
-    en: Data Details
+    en: Technical
   fields:
     default_locale:
       data_type: entity_ref
@@ -88,73 +183,17 @@ technical:
       repeatable: yes
     spatial_representation_type:
       data_type: vocabulary
-      name: iso19115_md_spatial_representation_type_code
+      vocabulary_name: iso19115_md_spatial_representation_type_code
       label:
         en: Spatial Representation Type
       repeatable: yes
-    extent:
-      data_type: entity_ref
-      entity_type: extent
-      label:
-        en: Extent
-      repeatable: yes
-    spatial_resolution:
-      data_type: entity_ref
-      entity_type: spatial_res
-      label:
-        en: Spatial Resolution
-      repeatable: yes
-    temporal_resolution:
-      data_type: entity_ref
-      entity_type: time_res
-      label:
-        en: Temporal Resolution
-      repeatable: yes
-    parent_metadata:
-      data_type: entity_ref
-      entity _type: citation
-      label:
-        en: Parent Metadata
-    scope:
-      data_type: entity_ref
-      entity_type: resource_scope
-      label:
-        en: Resource Scope
-      repeatable: yes
-    alt_meta_refs:
-      data_type: entity_ref
-      entity_type: resource
-      label:
-        en: Alternative Metadata Links
-      repeatable: yes
-    metadata_links:
-      data_type: entity_ref
-      entity_type: resource
-      label:
-        en: Metadata Links
-      repeatable: yes
-    ref_systems:
-      data_type: entity_ref
-      entity_type: ref_system
-      repeatable: yes
-      label:
-        en: Reference Systems
-    spatial_representation:
-      data_type: entity_ref
-      entity_type:
-        - vector_repr
-        - grid_repr
-      label:
-        en: Spatial Representation
-    topic_category:
+    resource_maintenance_frequency:
       data_type: vocabulary
-      vocabulary_name: iso19115_md_topic_category_code
-      repeatable: yes
+      vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
-        en: Topic Category
-    additional_docs:
-      data_type: entity_ref
-      repeatable: yes
-      entity_type: citation
+        en: Resource Maintenance Frequency
+    metadata_maintenance_frequency:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
-        en: Additional Documentation
+        en: Metadata Maintenance Frequency

@@ -63,11 +63,11 @@ citation:
       label:
         en: Series
     details:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Other Details
     collective_title:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Collective Title
     isbn:
@@ -92,7 +92,7 @@ graphic:
       label:
         en: File URL
     description:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Description
     file_ext:
@@ -109,108 +109,108 @@ graphic:
       entity_type: use_constraint
       label:
         en: Use Constraint
-resource_scope:
-  display:
-    en: Resource Scope
-  fields:
-    scope_code:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_scope_code
-      label:
-        en: Scope Code
-    scope_name:
-      data_type: text
-      label:
-        en: Name
-vector_repr:
-  display:
-    en: Vector Representation
-  fields:
-    scope:
-      data_type: entity_ref
-      entity_type: scope
-      label:
-        en: Scope
-    topo_code:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_topology_level_code
-      label:
-        en: Topology Level
-    geom_obj_infos:
-      data_type: entity_ref
-      entity_type: geom_obj_info
-      label:
-        en: Geometric Object Information
-geom_obj_info:
-  display:
-    en: Geometric Object Information
-  fields:
-    object_type:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_geometric_object_type_code
-      label:
-        en: Object Type
-    object_count:
-      data_type: integer
-      label:
-        en: Object Count
-grid_repr:
-  display:
-    en: Grid Representation
-  fields:
-    scope:
-      data_type: entity_ref
-      entity_type: scope
-      label:
-        en: Scope
-    dimensions:
-      data_type: integer
-      label:
-        en: Dimensions
-    can_transform:
-      data_type: boolean
-      label:
-        en: Can Transform
-    cell_geometry:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_cell_geometry_code
-      label:
-        en: Cell Geometry
-    dimension_details:
-      data_type: entity_ref
-      entity_type: dimension_detail
-      label:
-        en: Dimension Properties
-dimension_detail:
-  display:
-    en: Dimension Propertyset
-  fields:
-    name:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_dimension_name_type_code
-      label:
-        en: Dimension Name
-    size:
-      data_type: integer
-      label:
-        en: Number of Elements
-    resolution:
-      data_type: decimal
-      label:
-        en: Resolution
-    resolution_units:
-      data_type: vocabulary
-      vocabulary_name: iso19115_units
-      label:
-        en: Resolution Units
-    title:
-      data_type: text
-      label:
-        en: Title
-    description:
-      data_type: longtext
-      label:
-        en: Description
+#resource_scope:
+#  display:
+#    en: Resource Scope
+#  fields:
+#    scope_code:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_md_scope_code
+#      label:
+#        en: Scope Code
+#    scope_name:
+#      data_type: text
+#      label:
+#        en: Name
+#vector_repr:
+#  display:
+#    en: Vector Representation
+#  fields:
+#    scope:
+#      data_type: entity_ref
+#      entity_type: scope
+#      label:
+#        en: Scope
+#    topo_code:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_md_topology_level_code
+#      label:
+#        en: Topology Level
+#    geom_obj_infos:
+#      data_type: entity_ref
+#      entity_type: geom_obj_info
+#      label:
+#        en: Geometric Object Information
+#geom_obj_info:
+#  display:
+#    en: Geometric Object Information
+#  fields:
+#    object_type:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_md_geometric_object_type_code
+#      label:
+#        en: Object Type
+#    object_count:
+#      data_type: integer
+#      label:
+#        en: Object Count
+#grid_repr:
+#  display:
+#    en: Grid Representation
+#  fields:
+#    scope:
+#      data_type: entity_ref
+#      entity_type: scope
+#      label:
+#        en: Scope
+#    dimensions:
+#      data_type: integer
+#      label:
+#        en: Dimensions
+#    can_transform:
+#      data_type: boolean
+#      label:
+#        en: Can Transform
+#    cell_geometry:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_md_cell_geometry_code
+#      label:
+#        en: Cell Geometry
+#    dimension_details:
+#      data_type: entity_ref
+#      entity_type: dimension_detail
+#      label:
+#        en: Dimension Properties
+#dimension_detail:
+#  display:
+#    en: Dimension Propertyset
+#  fields:
+#    name:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_md_dimension_name_type_code
+#      label:
+#        en: Dimension Name
+#    size:
+#      data_type: integer
+#      label:
+#        en: Number of Elements
+#    resolution:
+#      data_type: decimal
+#      label:
+#        en: Resolution
+#    resolution_units:
+#      data_type: vocabulary
+#      vocabulary_name: iso19115_units
+#      label:
+#        en: Resolution Units
+#    title:
+#      data_type: text
+#      label:
+#        en: Title
+#    description:
+#      data_type: multitext
+#      label:
+#        en: Description
 scope:
   display:
     en: Scope
@@ -227,122 +227,122 @@ scope:
         en: Entity
       repeatable: yes
     attr_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Attribute Description
     feat_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Feature Description
     fint_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Feature Instance Description
     aint_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Attribute Instance Description
     dset_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Dataset Description
     other_desc:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Other Description
-extent:
-  display:
-    en: Extent
-  fields:
-    description:
-      data_type: longtext
-      label:
-        en: Description
-    locations:
-      data_type: entity_ref
-      entity_type: location
-      label:
-        en: Locations
-      repeatable: yes
-    time_periods:
-      data_type: entity_ref
-      entity_type: time_period
-      label:
-        en: Time Periods
-      repeatable: yes
-    vlocations:
-      data_type: entity_ref
-      entity_type: vlocation
-      label:
-        en: Vertical Locations
-      repeatable: yes
-    stextents:
-      data_type: entity_ref
-      entity_type: stextent
-      label:
-        en: Spatial-Temporal Combined Extents
-      repeatable: yes
-stextent:
-  display:
-    en: Spatial-Temporal Extent
-  fields:
-    locations:
-      data_type: entity_ref
-      entity_type: location
-      label:
-        en: Locations
-      repeatable: yes
-    time_period:
-      data_type: entity_ref
-      entity_type: time_period
-      label:
-        en: Time Period
-    vlocation:
-      data_type: entity_ref
-      entity_type: vlocation
-      label:
-        en: Vertical Location
-time_period:
-  display:
-    en: Time Period
-  fields:
-    description:
-      data_type: text
-      label:
-        en: Description
-    start_time:
-      data_type: datetime
-      label:
-        en: Start Time
-    end_time:
-      data_type: datetime
-      label:
-        en: End Time
-    is_ongoing:
-      data_type: boolean
-      label:
-        en: Is On-Going
-    is_instant:
-      data_type: boolean
-      label:
-        en: Is Instant
-vlocation:
-  display:
-    en: Vertical Locations
-  fields:
-    min_value:
-      data_type: decimal
-      label:
-        en: Minimum Value
-    max_value:
-      data_type: decimal
-      label:
-        en: Maximum Value
-    ref_system:
-      data_type: entity_ref
-      entity_type: ref_system
-      label:
-        en: Reference System
+#extent:
+#  display:
+#    en: Extent
+#  fields:
+#    description:
+#      data_type: multitext
+#      label:
+#        en: Description
+#    locations:
+#      data_type: entity_ref
+#      entity_type: location
+#      label:
+#        en: Locations
+#      repeatable: yes
+#    time_periods:
+#      data_type: entity_ref
+#      entity_type: time_period
+#      label:
+#        en: Time Periods
+#      repeatable: yes
+#    vlocations:
+#      data_type: entity_ref
+#      entity_type: vlocation
+#      label:
+#        en: Vertical Locations
+#      repeatable: yes
+#    stextents:
+#      data_type: entity_ref
+#      entity_type: stextent
+#      label:
+#        en: Spatial-Temporal Combined Extents
+#      repeatable: yes
+#stextent:
+#  display:
+#    en: Spatial-Temporal Extent
+#  fields:
+#    locations:
+#      data_type: entity_ref
+#      entity_type: location
+#      label:
+#        en: Locations
+#      repeatable: yes
+#    time_period:
+#      data_type: entity_ref
+#      entity_type: time_period
+#      label:
+#        en: Time Period
+#    vlocation:
+#      data_type: entity_ref
+#      entity_type: vlocation
+#      label:
+#        en: Vertical Location
+#time_period:
+#  display:
+#    en: Time Period
+#  fields:
+#    description:
+#      data_type: text
+#      label:
+#        en: Description
+#    start_time:
+#      data_type: datetime
+#      label:
+#        en: Start Time
+#    end_time:
+#      data_type: datetime
+#      label:
+#        en: End Time
+#    is_ongoing:
+#      data_type: boolean
+#      label:
+#        en: Is On-Going
+#    is_instant:
+#      data_type: boolean
+#      label:
+#        en: Is Instant
+#vlocation:
+#  display:
+#    en: Vertical Locations
+#  fields:
+#    min_value:
+#      data_type: decimal
+#      label:
+#        en: Minimum Value
+#    max_value:
+#      data_type: decimal
+#      label:
+#        en: Maximum Value
+#    ref_system:
+#      data_type: entity_ref
+#      entity_type: ref_system
+#      label:
+#        en: Reference System
 ref_system:
   display:
     en: Reference System
@@ -373,44 +373,44 @@ ref_system:
       data_type: text
       label:
         en: Description
-location:
-  display:
-    en: Location
-  fields:
-    bbox_west:
-      data_type: decimal
-      label:
-        en: West
-    bbox_east:
-      data_type: decimal
-      label:
-        en: East
-    bbox_north:
-      data_type: decimal
-      label:
-        en: North
-    bbox_south:
-      data_type: decimal
-      label:
-        en: South
-    polygon_wkt:
-      data_type: longtext
-      label:
-        en: Polygon Boundary (WKT)
-    description:
-      data_type: longtext
-      label:
-        en: Description
-    exclude_area:
-      data_type: boolean
-      label:
-        en: Exclude Area
+#location:
+#  display:
+#    en: Location
+#  fields:
+#    bbox_west:
+#      data_type: decimal
+#      label:
+#        en: West
+#    bbox_east:
+#      data_type: decimal
+#      label:
+#        en: East
+#    bbox_north:
+#      data_type: decimal
+#      label:
+#        en: North
+#    bbox_south:
+#      data_type: decimal
+#      label:
+#        en: South
+#    polygon_wkt:
+#      data_type: multitext
+#      label:
+#        en: Polygon Boundary (WKT)
+#    description:
+#      data_type: multitext
+#      label:
+#        en: Description
+#    exclude_area:
+#      data_type: boolean
+#      label:
+#        en: Exclude Area
 use_constraint:
   display:
     en: Usage Constraint
   fields:
     description:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Limitation Description
       repeatable: yes
@@ -442,6 +442,39 @@ use_constraint:
       entity_type: releasability
       label:
         en: Release Statement
+    access_constraints:
+      repeatable: yes
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_restriction_code
+      label:
+        en: Access Constraints
+    use_constraints:
+      repeatable: yes
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_restriction_code
+      label:
+        en: Use Constraints
+    other_constraints:
+      data_type: multitext
+      label:
+        en: Other Constraint Details
+    classification:
+      data_type: vocabulary
+      label:
+        en: Classification
+      vocabulary_name: iso19115_md_classification_code
+    user_notes:
+      data_type: multitext
+      label:
+        en: User Notes
+    classification_system:
+      data_type: multitext
+      label:
+        en: Classification System
+    handling_description:
+      data_type: multitext
+      label:
+        en: Handling Description
 releasability:
   display:
     en: Release Statement
@@ -509,7 +542,6 @@ resource:
       vocabulary_name: iso19115_ci_on_line_function_code
       label:
         en: Function
-
 contact:
   display:
     en: Contact
@@ -612,7 +644,7 @@ spatial_res:
       label:
         en: Angular Resolution Units
     level_of_detail:
-      data_type: longtext
+      data_type: multitext
       label:
         en: Level of Detail
 time_res:
