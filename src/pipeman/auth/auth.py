@@ -5,6 +5,8 @@ from autoinject import injector
 import typing as t
 from functools import wraps
 from pipeman.i18n import gettext
+from pipeman.util import System
+import datetime
 
 
 def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
@@ -25,12 +27,16 @@ def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
 
 class AuthenticatedUser(fl.UserMixin):
 
+    system: System = None
+
+    @injector.construct
     def __init__(self, username, display_name, permissions, organization_ids, dataset_ids):
         self.permissions = permissions
         self.display = display_name
         self.username = username
         self.organizations = organization_ids
         self.datasets = dataset_ids
+        self.session_timeout = datetime.datetime.now() + datetime.timedelta(minutes=self.system.user_timeout)
 
     def get_id(self):
         return self.username

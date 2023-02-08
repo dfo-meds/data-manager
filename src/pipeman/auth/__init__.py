@@ -9,6 +9,7 @@ import flask
 @injector.inject
 def auth_init_app(app, am: AuthenticationManager):
     lm = flask_login.LoginManager()
+    lm.session_protection = 'strong'
     lm.init_app(app)
     lm.login_view = "auth.login"
     lm.user_loader(am.load_user)

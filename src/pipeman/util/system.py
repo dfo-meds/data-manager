@@ -6,6 +6,8 @@ import zrlog
 import pkgutil
 from pipeman.i18n import gettext
 import pathlib
+from flask import session
+import datetime
 
 
 def load_dynamic_class(cls_name):
@@ -31,6 +33,7 @@ class System:
         self._click_groups = []
         self._nav_menu = {}
         self.i18n_dirs = set()
+        self.user_timeout = 0
 
     def init(self):
         zrlog.init_logging()
@@ -123,8 +126,15 @@ class System:
             self.plugins.add(name)
 
     def init_app(self, app):
+        @app.before_request
+        def make_session_permanent():
+            session.permanent = True
+            session.modified = True
         if "flask" in self.config:
             app.config.update(self.config["flask"])
+        self.user_timeout = self.config.as_int(("pipeman", "session_expiry"), default=44640)
+        app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=self.user_timeout + 1)
+
         for cb in self._flask_init_cb:
             cb(app)
         for bp_mod, bp_obj, prefix in self._flask_blueprints:
