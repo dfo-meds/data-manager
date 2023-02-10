@@ -14,7 +14,7 @@ import datetime
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm, paginate_query
+from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList
 import flask_login
 
 
@@ -29,50 +29,92 @@ class EntityController:
         self.view_template = view_template
         self.edit_template = edit_template
 
+    def _build_action_list(self, ent, short_list: bool = False):
+        actions = ActionList()
+        kwargs = {
+            "obj_type": ent.entity_type,
+            "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id
+        }
+        if short_list:
+            actions.add_action("pipeman.general.view", "core.view_entity", **kwargs)
+        if self.has_specific_access(ent, "edit"):
+            actions.add_action("pipeman.general.edit", "core.edit_entity", **kwargs)
+        if not short_list:
+            if self.has_specific_access(ent, "remove"):
+                actions.add_action("pipeman.general.remove", "core.remove_entity", **kwargs)
+            if self.has_specific_access(ent, "restore"):
+                actions.add_action("pipeman.general.restore", "core.restore_entity", **kwargs)
+        return actions
+
     def view_entity_page(self, ent):
-        return flask.render_template(self.view_template, entity=ent)
+        return flask.render_template(
+            self.view_template,
+            entity=ent,
+            title=gettext("pipeman.entity_view.title"),
+            actions=self._build_action_list(ent, False)
+        )
 
     def edit_entity_form(self, ent):
         form = EntityForm(ent)
         if form.handle_form():
             self.save_entity(ent)
+            flask.flash(gettext("pipeman.entity_edit.success"), 'success')
             return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.db_id))
-        return flask.render_template(self.edit_template, form=form)
+        return flask.render_template(
+            self.edit_template,
+            form=form,
+            title=gettext("pipeman.entity_edit.title")
+        )
 
     def remove_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
+            flask.flash(gettext("pipeman.entity_remove.success"), 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.remove_confirmation"))
+        return flask.render_template(
+            "form.html",
+            form=form,
+            instructions=gettext("pipeman.entity_remove.confirmation"),
+            title=gettext("pipeman.entity_remove.title")
+        )
 
     def restore_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
+            flask.flash(gettext("pipeman.entity_restore.success"), 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.entity.restore_confirmation"))
+        return flask.render_template(
+            "form.html",
+            form=form,
+            instructions=gettext("pipeman.entity_restore.confirmation"),
+            title=gettext("pipeman.entity_restore.title")
+        )
 
     def create_entity_form(self, entity_type):
         new_ent = self.reg.new_entity(entity_type)
         form = EntityForm(new_ent)
         if form.handle_form():
             self.save_entity(new_ent)
+            flask.flash(gettext("pipeman.entity_create.success"), 'success')
             return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.db_id))
-        return flask.render_template(self.edit_template, form=form)
+        return flask.render_template(
+            self.edit_template,
+            form=form,
+            title=gettext('pipeman.entity_create.title')
+        )
 
     def has_access(self, entity_type, op):
         return entity_access(entity_type, op)
 
     def has_specific_access(self, entity, op):
-        return specific_entity_access(entity)
+        return specific_entity_access(entity, op)
 
     def _entity_iterator(self, query):
         for ent in query:
             dn = json.loads(ent.display_names) if ent.display_names else {}
-            actions = [
-                (flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.id), 'pipeman.general.view')
-            ]
+            actions = self._build_action_list(ent, True)
             yield ent, MultiLanguageString(dn), actions
 
     def list_entities(self, entity_type):
@@ -100,6 +142,7 @@ class EntityController:
                 "list_entities.html",
                 entities=self._entity_iterator(query),
                 create_link=create_link,
+                title=gettext("pipeman.entity_list.title"),
                 **page_args
             )
 

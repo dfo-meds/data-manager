@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="actions">
+    {% for link, txt in actions %}
+        <li><a href="{{link}}">{{txt | gettext}}</a></li>
+    {% endfor %}
+</ul>
+<h2>{{'pipeman.dataset.properties' | gettext}}</h2>
+<dl>
+    {% for name, value in dataset.properties() %}
+    <dt>{{name | gettext}}</dt>
+    <dd>{{value}}</dd>
+    {% endfor %}
+</dl>
+<h2>{{'pipeman.dataset.metadata' | gettext}}</h2>
+{% for group in groups %}
+<h3>{{group_labels[group]}}</h3>
+<dl>
+    {% for name, value in dataset.display_values(group) %}
+    <dt>{{name}}</dt>
+    <dd>{{value}}</dd>
+    {% endfor %}
+</dl>
+{% endfor %}
+{% endblock %}

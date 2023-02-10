@@ -8,6 +8,7 @@ from pipeman.util.errors import DatasetNotFoundError, EntityNotFoundError
 from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
 from pipeman.files import FileController
+from pipeman.i18n import gettext
 
 core = flask.Blueprint("core", __name__)
 
@@ -25,7 +26,7 @@ def list_entities(reg: EntityRegistry):
                 flask.url_for("core.list_entities_by_type", obj_type=k),
                 flask.url_for("core.create_entity", obj_type=k)
             ))
-    return flask.render_template("list_entity_types.html", entity_types=entity_list)
+    return flask.render_template("list_entity_types.html", entity_types=entity_list, title=gettext('pipeman.entity_type.list'))
 
 
 @core.route("/objects/<obj_type>")

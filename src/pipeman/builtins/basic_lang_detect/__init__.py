@@ -22,7 +22,8 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
             "language_switchers": {}
         }
         for lang in supported_languages:
-            ctx["language_switchers"][lang] = (gettext(f"language_names.{lang}"), "?lang={lang}", current_lang != lang)
+            # TODO: should update second parameter to be the full language link to the current page
+            ctx["language_switchers"][lang] = (gettext(f"language_names.{lang}"), f"?lang={lang}", current_lang != lang)
         return ctx
 
 

@@ -10,7 +10,7 @@ import json
 import flask
 from flask_wtf import FlaskForm
 import wtforms as wtf
-from pipeman.util.flask import TranslatableField
+from pipeman.util.flask import TranslatableField, ActionList
 
 
 @injector.injectable
@@ -31,7 +31,7 @@ class OrganizationController:
             return flask.render_template(
                 "list_organizations.html",
                 organizations=self._iterate_organizations(query),
-                title=gettext("pipeman.list_organizations.title"),
+                title=gettext("pipeman.organization_list.title"),
                 create_link=create_link
             )
 
@@ -45,16 +45,22 @@ class OrganizationController:
                 "view_organization.html",
                 org=org,
                 display=display_name,
-                title=gettext('pipeman.view_organization.title')
+                title=gettext('pipeman.organization_view.title'),
+                actions=self._build_action_list(org, False)
             )
+
+    def _build_action_list(self, org, short_list: bool = True):
+        actions = ActionList()
+        kwargs = {"org_id": org.id}
+        if short_list:
+            actions.add_action('pipeman.general.view', 'core.view_organization', **kwargs)
+        if flask_login.current_user.has_permission("organizations.edit"):
+            actions.add_action("pipeman.general.edit", "core.edit_organization", **kwargs)
+        return actions
 
     def _iterate_organizations(self, query):
         for org in query:
-            actions = [
-                (flask.url_for("core.view_organization", org_id=org.id), "pipeman.general.view")
-            ]
-            if flask_login.current_user.has_permission("organizations.edit"):
-                actions.append((flask.url_for("core.edit_organization", org_id=org.id), "pipeman.general.edit"))
+            actions = self._build_action_list(org, True)
             yield org, MultiLanguageString(json.loads(org.display_names) if org.display_names else {"und": org.short_name}), actions
 
     def create_organization_page(self):
@@ -62,7 +68,7 @@ class OrganizationController:
         if form.validate_on_submit():
             org_id = self.upsert_organization(form.short_name.data, form.display_names.data)
             return flask.redirect(flask.url_for('core.view_organization', org_id=org_id))
-        return flask.render_template('form.html', form=form, title=gettext('pipeman.create_organization.title'))
+        return flask.render_template('form.html', form=form, title=gettext('pipeman.organization_create.title'))
 
     def edit_organization_form(self, org_id):
         with self.db as session:
@@ -71,7 +77,7 @@ class OrganizationController:
             if form.validate_on_submit():
                 org_id = self.upsert_organization(form.short_name.data, form.display_names.data, org.id)
                 return flask.redirect(flask.url_for('core.view_organization', org_id=org_id))
-            return flask.render_template('form.html', form=form, title=gettext('pipeman.edit_organization.title'))
+            return flask.render_template('form.html', form=form, title=gettext('pipeman.organization_edit.title'))
 
     def upsert_organization(self, org_name, display_names=None, org_id=None):
         with self.db as session:

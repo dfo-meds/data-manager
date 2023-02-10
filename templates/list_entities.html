@@ -1,40 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="real_content">
-    {% if create_link %}
-    <p><a href="{{create_link}}">{{'pipeman.create_entity' | gettext}}</a></p>
-    {% endif %}
-    <table cellpadding="0" cellspacing="0" border="0">
-        <thead>
-            <tr>
-                <th>{{'pipeman.entity.id' | gettext}}</th>
-                <th>{{'pipeman.entity.state' | gettext}}</th>
-                <th>{{'pipeman.entity.display' | gettext}}</th>
-                <th>{{'pipeman.general.actions' | gettext}}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entity, label, actions in entities %}
-            <tr>
-                <td>{{entity.id}}</td>
-                <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
-                <td>{{label}}</td>
-                <td>
-                    <ul class="table-actions">
-                        {% for path, text in actions %}
-                        <li><a href="{{path}}">{{text | gettext}}</a></li>
-                        {% endfor %}
-                    </ul>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p>Page {{current_page}} of {{page_count}}</p>
-    <ul>
-        {% for i in range(0, page_count) %}
-        <li><a href="?page={{i+1}}">{{i+1}}</a></li>
+<table cellpadding="0" cellspacing="0" border="0" class="data_table entities_table">
+    <thead>
+        <tr>
+            <th>{{'pipeman.entity.id' | gettext}}</th>
+            <th>{{'pipeman.entity.state' | gettext}}</th>
+            <th>{{'pipeman.entity.display' | gettext}}</th>
+            <th>{{'pipeman.general.actions' | gettext}}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entity, label, actions in entities %}
+        <tr>
+            <td>{{entity.id}}</td>
+            <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
+            <td>{{label}}</td>
+            <td>{{action_list(actions)}}</td>
+        </tr>
         {% endfor %}
-    </ul>
-</div>
+    </tbody>
+</table>
+{{ pager(current_page, page_count) }}
+{% endblock %}
+{% block sidebar %}
+{% if create_link %}
+<div class="subnav"><ul class="action_list"><li><a href="{{create_link}}">{{'pipeman.create_entity' | gettext}}</a></li></ul></div>
+{% endif %}
 {% endblock %}

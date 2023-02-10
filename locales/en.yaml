@@ -103,6 +103,9 @@ pipeman.general.na: N/A
 pipeman.general.no: 'No'
 pipeman.general.edit: 'Edit'
 auth_db.reset_password: 'Reset Password'
+dfo.cnodc: Canadian National Oceanographic Data Centre
+dfo.tos.label: Terms and Conditions
+dfo.privacy.label: Privacy Policy
 pipeman.general.outdated: Outdated
 pipeman.general.pages: Page
 pipeman.general.submit: Submit

@@ -3,7 +3,7 @@ from enum import Enum
 import importlib
 import flask_login
 import flask
-from pipeman.util.flask import ConfirmationForm
+from pipeman.util.flask import ConfirmationForm, ActionList
 from pipeman.util import deep_update
 from pipeman.util.errors import StepNotFoundError, StepConfigurationError, WorkflowNotFoundError, WorkflowItemNotFoundError
 from autoinject import injector
@@ -199,11 +199,11 @@ class ItemDisplayWrapper:
 
     def properties(self):
         return [
-            ('pipeman.workflow_item.object_link', markupsafe.Markup(f"<a href='{self.object_link()}'>{self.object_link_text()}</a>")),
-            ('pipeman.workflow_item.type', gettext(f'pipeman.workflow_types.{self.item.workflow_type}')),
-            ('pipeman.workflow_item.name', self.reg.workflow_display(self.item.workflow_type, self.item.workflow_name)),
-            ('pipeman.workflow_item.created', format_datetime(self.item.created_date)),
-            ('pipeman.workflow_item.status', gettext(f'pipeman.workflow_statuses.{self.item.status.lower()}')),
+            (gettext('pipeman.workflow_item.object_link'), markupsafe.Markup(f"<a href='{self.object_link()}'>{self.object_link_text()}</a>")),
+            (gettext('pipeman.workflow_item.type'), gettext(f'pipeman.workflow_types.{self.item.workflow_type}')),
+            (gettext('pipeman.workflow_item.name'), self.reg.workflow_display(self.item.workflow_type, self.item.workflow_name)),
+            (gettext('pipeman.workflow_item.created'), format_datetime(self.item.created_date)),
+            (gettext('pipeman.workflow_item.status'), gettext(f'pipeman.workflow_statuses.{self.item.status.lower()}')),
         ]
 
     def steps(self):
@@ -446,10 +446,12 @@ class WorkflowController:
                 return flask.abort(404)
             if not self._has_access(item, "view"):
                 return flask.abort(403)
+            actions = self._build_action_list(item, False)
             return flask.render_template(
                 "view_workflow_item.html",
                 item=ItemDisplayWrapper(item),
-                title=gettext("pipeman.workflow_view.title")
+                title=gettext("pipeman.workflow_view.title"),
+                actions=actions
             )
 
     def list_workflow_items_page(self):
@@ -459,27 +461,30 @@ class WorkflowController:
             title=gettext("pipeman.workflow_list.title")
         )
 
+    def _build_action_list(self, item, short_mode: bool = True):
+        actions = ActionList()
+        kwargs = {'item_id': item.id}
+        if short_mode:
+            actions.add_action('pipeman.general.view', 'core.view_item', **kwargs)
+        if self._has_access(item, 'decide'):
+            actions.add_action('pipeman.workflow_item.approve', 'core.approve_item', **kwargs)
+            actions.add_action('pipeman.workflow_item.cancel', 'core.cancel_item', **kwargs)
+        return actions
+
     def _iterate_workflow_items(self):
         with self.db as session:
             items = session.query(orm.WorkflowItem).filter_by(status='DECISION_REQUIRED')
             for item in items:
                 if not self._has_access(item, 'view'):
                     continue
-                actions = [
-                    (flask.url_for('core.view_item', item_id=item.id),'pipeman.general.view')
-                ]
-                if self._has_access(item, 'decide'):
-                    actions.extend([
-                        (flask.url_for('core.approve_item', item_id=item.id), 'pipeman.workflow_item.approve'),
-                        (flask.url_for('core.cancel_item', item_id=item.id), 'pipeman.workflow_item.cancel'),
-                    ])
+                actions = self._build_action_list(item, True)
                 yield ItemDisplayWrapper(item), actions
 
     def _has_access(self, item, mode):
         step, steps = self._build_next_step(item)
-        ctx = json.loads(item.context)
         if step is None:
-            return flask_login.current_user.has_permission("action_items.view_completed")
+            return flask_login.current_user.has_permission("action_items.view_completed") if mode == 'view' else False
+        ctx = json.loads(item.context)
         if mode == 'view' and step.allow_view(ctx):
             return True
         elif mode == 'decide' and step.allow_decision(ctx):

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="real_content">
+    {% if create_link %}
+    <p><a href="{{create_link}}">{{'pipeman.create_dataset' | gettext}}</a></p>
+    {% endif %}
+    <table cellpadding="0" cellspacing="0" border="0">
+        <thead>
+            <tr>
+                <th>{{'pipeman.dataset.id' | gettext}}</th>
+                <th>{{'pipeman.dataset.state' | gettext}}</th>
+                <th>{{'pipeman.dataset.display' | gettext}}</th>
+                <th>{{'pipeman.general.actions' | gettext}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dataset, label, actions in datasets %}
+            <tr>
+                <td>{{dataset.id}}</td>
+                <td>{% if dataset.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
+                <td>{{label}}</td>
+                <td>
+                    <ul class="table-actions">
+                        {% for path, text in actions %}
+                        <li><a href="{{path}}">{{text | gettext}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p>{{'pipeman.general.pages'}}{{current_page}} / {{page_count}}</p>
+    <ul>
+        {% for i in range(0, page_count) %}
+        <li><a href="?page={{i+1}}">{{i+1}}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

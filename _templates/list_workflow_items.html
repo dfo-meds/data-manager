@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
-<table cellpadding="0" cellspacing="0" border="0" class="data_table actions_table">
+<table cellpadding="0" cellspacing="0" border="0">
     <thead>
         <tr>
             <th>{{'pipeman.workflow_item.type' | gettext}}</th>
-            <th>{{'pipeman.workflow_item.object' | gettext}}</th>
             <th>{{'pipeman.general.actions' | gettext}}</th>
         </tr>
     </thead>
@@ -13,7 +12,13 @@
         <tr>
             <td>{{'pipeman.workflow_types.' + item.workflow_type | gettext}}</td>
             <td><a href="{{item.object_link()}}">{{item.object_link_text()}}</a></td>
-            <td>{{action_list(actions)}}</td>
+            <td>
+                <ul>
+                    {% for link, txt in actions %}
+                    <li><a href="{{link}}">{{txt | gettext}}</a></li>
+                    {% endfor %}
+                </ul>
+            </td>
         </tr>
         {% endfor %}
     </tbody>

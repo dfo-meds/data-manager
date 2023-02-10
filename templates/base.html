@@ -1,3 +1,17 @@
+{% macro pager(current_page, page_count) %}
+<div class="pager_control">
+    <p>{{'pipeman.general.pages' | gettext}} {{current_page}} / {{page_count}}</p>
+    <ul class="table_actions">
+        {% for i in range(0, page_count) %}
+        <li><a href="?page={{i+1}}">{{i+1}}</a></li>
+        {% endfor %}
+    </ul>
+    <br style="clear: both" />
+</div>
+{%- endmacro %}
+{% macro action_list(actions) %}
+{{actions.render('table_actions')}}
+{%- endmacro %}
 {% macro showmenu(menu_items) -%}
     <ul class="menu">
         {% for txt, pth, subitems in menu_items %}
@@ -21,6 +35,7 @@
             <div class="form-control">
                 {{control}} {{control.label}}
             </div>
+            <br style="clear: both" />
         </div>
     {% elif control.__class__.__name__ == "SubmitField" %}
         <div class="form-field form-field-submit-field">
@@ -30,6 +45,7 @@
             <div class="form-control">
                 {{control}}
             </div>
+            <br style="clear: both" />
         </div>
     {% else %}
         <div class="form-field form-field-{{control.__class__.__name__ | caps_to_snake('-')}}">
@@ -39,6 +55,7 @@
             <div class="form-control">
                 {{control}}
             </div>
+            <br style="clear: both" />
         </div>
     {% endif %}
 {%- endmacro %}
@@ -59,45 +76,85 @@
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
         {% endblock %}
         {% block style %}
-            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
+            <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dfo.css')}}" />
         {% endblock %}
         <meta charset="utf-8" />
     </head>
     <body>
+        {% block body %}
         <div class="container">
-            {% block container %}
-            <div class="body">
-                {% block full_body %}
-                <div class="nav">
-                    {{showmenu(nav)}}
+            <div class="header">
+                <div class="sig_block">
+                    <img src="{{url_for('static', filename='sig-blk-en.svg')}}" height="35" />
                 </div>
-                {% block body %}
-                    <div class="content">
-
-                        {% with messages = get_flashed_messages(with_categories=true) %}
-                            {% if messages %}
-                                <ul class="messages">
-                                    {% for category, message in messages %}
-                                        <li class="{{category}}">{{message}}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% endif %}
+                <div class="right_block">
+                    <p class="site_title">{{'dfo.cnodc' | gettext}}</p>
+                    <ul class="langswitch">
+                        {% for lang in language_switchers %}
+                        {% with txt, url, show = language_switchers[lang] %}
+                        {% if show %}
+                        <li><a href="{{url}}">{{txt}}</a></li>
+                        {% endif %}
                         {% endwith %}
-                        <h1>{{title}}</h1>
-                        {% block content %}
-                        {{ content }}
-                        {% endblock %}
+                        {% endfor %}
+                    </ul>
+                    <br style="clear: both" />
+                </div>
+                <br style="clear: both" />
+                </div>
+            <div class="topnav">
+                {{showmenu(nav_user)}}
+                <br style="clear: both" />
+            </div>
+            {% block container %}
+            <div class="main_body">
+                {% block main_body %}
+                <div class="nav">
+                    {{showmenu(nav_main)}}
+                </div>
+                {% block inner_body %}
+                <div class="content">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <ul class="messages">
+                                {% for category, message in messages %}
+                                    <li class="{{category}}">{{message}}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    {% endwith %}
+                    <h1>{{title}}</h1>
+                    <div class="inner_content">
+                        <div class="main_content">
+                            {% block content %}
+                              {{content}}
+                            {% endblock %}
+                        </div>
+                        <div class="sidebar">
+                            {% block sidebar %}
+                              {{sidebar}}
+                            {% endblock %}
+                        </div>
                     </div>
+                </div>
                 {% endblock %}
                 {% endblock %}
             </div>
             <hr style="clear: both" />
             <div class="footer">
-                <p class="copyright">Copyright nobody yet</p>
-
-
+                {% block footer %}
+                <ul class="bottom_links">
+                    <li><a href="{{url_for('dfo.tos')}}">{{'dfo.tos.label' | gettext}}</a></li>
+                    <li><a href="{{url_for('dfo.privacy')}}">{{'dfo.privacy.label' | gettext}}</a></li>
+                </ul>
+                <div class="bottom_image">
+                    <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="200" />
+                </div>
+                {% endblock %}
             </div>
             {% endblock %}
         </div>
+        {% endblock %}
     </body>
 </html>

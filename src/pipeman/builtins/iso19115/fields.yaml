@@ -7,60 +7,73 @@ data_info:
       entity_type: contact
       label:
         en: Point of Contact
+      order: 10
     title:
       data_type: text
       label:
         en: Title
+      order: 20
     abstract:
       data_type: multitext
       label:
         en: Abstract
+      order: 30
     purpose:
       data_type: multitext
       label:
         en: Purpose
+      order: 40
     credit:
       data_type: multitext
       label:
         en: Credit
+      order: 50
     doi:
       data_type: entity_ref
       entity_type: resource
       label:
         en: DOI
+      order: 60
     info_link:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Information Link
+      order: 70
     publication_date:
       data_type: date
       label:
         en: Publication Date
+      order: 80
     revision_date:
       data_type: date
       label:
         en: Revision Date
+      order: 90
     creation_date:
       data_type: date
       label:
         en: Creation Date
+      order: 100
     publisher:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Publisher
+      order: 110
     author:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Author
+      order: 120
     contributors:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Contributors
       repeatable: yes
+      order: 130
 keywords:
   label:
     en: Keywords
@@ -71,6 +84,7 @@ keywords:
       repeatable: yes
       label:
         en: Topic Category
+      order: 10
 references:
   label:
     en: References
@@ -80,11 +94,13 @@ references:
       entity_type: citation
       label:
         en: Parent Metadata
+      order: 10
     alt_meta_refs:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Alternative Metadata Links
+      order: 20
       repeatable: yes
     metadata_links:
       data_type: entity_ref
@@ -92,10 +108,12 @@ references:
       label:
         en: Metadata Links
       repeatable: yes
+      order: 30
     additional_docs:
       data_type: entity_ref
       repeatable: yes
       entity_type: citation
+      order: 40
       label:
         en: Additional Documentation
 extent:
@@ -103,59 +121,72 @@ extent:
     en: Extent
   fields:
     bbox_west:
+      order: 10
       data_type: decimal
       label:
         en: West
     bbox_east:
       data_type: decimal
+      order: 20
       label:
         en: East
     bbox_north:
       data_type: decimal
+      order: 30
       label:
         en: North
     bbox_south:
       data_type: decimal
+      order: 40
       label:
         en: South
     wkt_polygon:
       data_type: multitext
+      order: 50
       label:
         en: Polygon Boundary (WKT)
     vertical_min:
       data_type: decimal
+      order: 60
       label:
         en: Vertical Minimum
     vertical_max:
       data_type: decimal
+      order: 70
       label:
         en: Vertical Maximum
     start_time:
       data_type: datetime
+      order: 80
       label:
         en: Start Time
     end_time:
       data_type: datetime
-      lable:
+      order: 90
+      label:
         en: End Time
     is_ongoing:
       data_type: boolean
+      order: 100
       label:
         en: Is On-Going
     spatial_resolution:
       data_type: entity_ref
+      order: 110
       entity_type: spatial_res
       label:
         en: Spatial Resolution
       repeatable: yes
     temporal_resolution:
       data_type: entity_ref
+      order: 120
       entity_type: time_res
       label:
         en: Temporal Resolution
       repeatable: yes
     ref_systems:
       data_type: entity_ref
+      order: 130
       entity_type: ref_system
       repeatable: yes
       label:
@@ -166,34 +197,40 @@ technical:
   fields:
     default_locale:
       data_type: entity_ref
+      order: 10
       entity_type: locale
       label:
         en: Default Locale
     other_locales:
       data_type: entity_ref
+      order: 20
       repeatable: yes
       entity_type: locale
       label:
         en: Other Locales
     status:
       data_type: vocabulary
+      order: 30
       vocabulary_name: iso19115_md_progress_code
       label:
         en: Status
       repeatable: yes
     spatial_representation_type:
       data_type: vocabulary
+      order: 40
       vocabulary_name: iso19115_md_spatial_representation_type_code
       label:
         en: Spatial Representation Type
       repeatable: yes
     resource_maintenance_frequency:
       data_type: vocabulary
+      order: 50
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Resource Maintenance Frequency
     metadata_maintenance_frequency:
       data_type: vocabulary
+      order: 60
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Metadata Maintenance Frequency

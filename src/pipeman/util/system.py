@@ -32,6 +32,7 @@ class System:
         self._flask_blueprints = []
         self._click_groups = []
         self._nav_menu = {}
+        self._user_nav_menu = {}
         self.i18n_dirs = set()
         self.user_timeout = 0
 
@@ -47,7 +48,6 @@ class System:
 
     def _init_overrides(self):
         injections = self.config.get("autoinject", default=None)
-
         if injections:
             for cls_name in injections:
                 cls_def = injections[cls_name]
@@ -59,10 +59,12 @@ class System:
                         cls_def["weight"] = 1
                     injector.override(cls_name, cls_def.pop("constructor"), *a, **cls_def)
 
-    def register_nav_item(self, hierarchy, item_text, item_link, permission):
+    def register_nav_item(self, hierarchy, item_text, item_link, permission, nav_group='main'):
         levels = hierarchy.split(".")
         levels.reverse()
-        working = self._nav_menu
+        if nav_group not in self._nav_menu:
+            self._nav_menu[nav_group] = {}
+        working = self._nav_menu[nav_group]
         while len(levels) > 1:
             nxt = levels.pop()
             if nxt in working:
@@ -144,7 +146,10 @@ class System:
 
         @app.context_processor
         def add_menu_item():
-            return {'nav': self._build_nav(self._nav_menu)}
+            items = {}
+            for key in self._nav_menu:
+                items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])
+            return items
 
         return app
 

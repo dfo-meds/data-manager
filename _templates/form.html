@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="real_content">
+    {% if back %}
+        <ul class="subnav">
+            <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
+        </ul>
+        <div class="subnav_content">
+            {{ showform(form) }}
+            {% if instructions %}
+                <div class="instructions">{{instructions}}</div>
+            {% endif %}
+        </div>
+    {% else %}
+        {{ showform(form) }}
+        {% if instructions %}
+            <div class="instructions">{{instructions}}</div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

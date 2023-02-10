@@ -37,7 +37,7 @@ class MultiLanguageString:
 
     @injector.inject
     def __str__(self, tm: TranslationManager = None, ld: LanguageDetector = None):
-        lang = ld.detect_language(self.language_map.keys())
+        lang = ld.detect_language(list(self.language_map.keys()))
         use_blank = lang in self.language_map
         if lang in self.language_map and self.language_map[lang]:
             return self.language_map[lang]

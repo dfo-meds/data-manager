@@ -14,7 +14,7 @@ import wtforms as wtf
 from flask_wtf import FlaskForm
 import wtforms.validators as wtfv
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
-from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query
+from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
@@ -37,11 +37,12 @@ class DatasetController:
         return self.reg.metadata_format_exists(profile_name, format_name)
 
     def has_access(self, dataset, operation):
-        if operation == "activate" and not dataset.status() == "DRAFT":
+        status = dataset.status if dataset.status is None or isinstance(dataset.status, str) else dataset.status()
+        if operation == "activate" and not status == "DRAFT":
             return False
-        if operation == "publish" and not dataset.status() == "ACTIVE":
+        if operation == "publish" and not status == "ACTIVE":
             return False
-        if operation == "edit" and dataset.status() == "UNDER_REVIEW":
+        if operation == "edit" and status == "UNDER_REVIEW":
             return False
         if dataset.is_deprecated:
             if operation not in ("restore", "view"):
@@ -78,16 +79,35 @@ class DatasetController:
                 "list_datasets.html",
                 datasets=self._dataset_iterator(query),
                 create_link=create_link,
+                title=gettext('pipeman.dataset_list.title'),
                 **page_args
             )
+
+    def _build_action_list(self, ds, short_list: bool = True):
+        actions = ActionList()
+        kwargs = {
+            "dataset_id": ds.dataset_id if hasattr(ds, "dataset_id") else ds.id
+        }
+        if short_list:
+            actions.add_action("pipeman.general.view", "core.view_dataset", **kwargs)
+        if self.has_access(ds, 'edit'):
+            actions.add_action("pipeman.general.edit", "core.edit_dataset", **kwargs)
+            actions.add_action("pipeman.dataset_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
+        if not short_list:
+            if self.has_access(ds, 'activate'):
+                actions.add_action("pipeman.dataset_activate.link", "core.activate_dataset", **kwargs)
+            if self.has_access(ds, "publish"):
+                actions.add_action("pipeman.dataset_publish.link", "core.publish_dataset", **kwargs)
+            if self.has_access(ds, "remove"):
+                actions.add_action("pipeman.general.remove", "core.remove_dataset", **kwargs)
+            if self.has_access(ds, "restore"):
+                actions.add_action("pipeman.general.restore", "core.restore_dataset", **kwargs)
+        return actions
 
     def _dataset_iterator(self, query):
         for ds in query:
             dsn = json.loads(ds.display_names) if ds.display_names else {}
-            actions = [
-                (flask.url_for("core.view_dataset", dataset_id=ds.id), 'pipeman.general.view')
-            ]
-            yield ds, MultiLanguageString(dsn), actions
+            yield ds, MultiLanguageString(dsn), self._build_action_list(ds, True)
 
     def _dataset_query(self, session):
         q = session.query(orm.Dataset)
@@ -120,7 +140,7 @@ class DatasetController:
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.dataset.create_dataset_form')
+            title=gettext('pipeman.dataset_create.title')
         )
 
     def view_dataset_page(self, dataset):
@@ -129,7 +149,7 @@ class DatasetController:
         return flask.render_template(
             self.view_template,
             dataset=dataset,
-            actions=self.dataset_actions(dataset),
+            actions=self._build_action_list(dataset, False),
             title=dataset.get_display(),
             groups=groups,
             group_labels=labels
@@ -148,7 +168,7 @@ class DatasetController:
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.dataset.edit_dataset_form"),
+            title=gettext("pipeman.dataset_edit.title"),
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
 
@@ -180,62 +200,43 @@ class DatasetController:
         return flask.render_template(
             self.meta_template,
             form=form,
-            title=gettext("pipeman.dataset.edit_metadata_form"),
+            title=gettext("pipeman.dataset_metadata.title"),
             groups=group_list,
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
-
-    def dataset_actions(self, dataset):
-        actions = []
-        if self.has_access(dataset, 'edit'):
-            actions.append((
-                flask.url_for('core.edit_dataset', dataset_id=dataset.dataset_id),
-                'pipeman.dataset.edit_link'
-            ))
-            actions.append((
-                flask.url_for('core.edit_dataset_metadata_base', dataset_id=dataset.dataset_id),
-                "pipeman.dataset.edit_metadata_link"
-            ))
-        if self.has_access(dataset, 'activate'):
-            actions.append((
-                flask.url_for('core.activate_dataset', dataset_id=dataset.dataset_id),
-                "pipeman.dataset.activate_link"
-            ))
-        if self.has_access(dataset, "publish"):
-            actions.append((
-                flask.url_for("core.publish_dataset", dataset_id=dataset.dataset_id),
-                "pipeman.dataset.publish_link"
-            ))
-        if self.has_access(dataset, "remove"):
-            actions.append((
-                flask.url_for("core.remove_dataset", dataset_id=dataset.dataset_id),
-                "pipeman.dataset.remove_link"
-            ))
-        if self.has_access(dataset, "restore"):
-            actions.append((
-                flask.url_for("core.restore_dataset", dataset_id=dataset.dataset_id),
-                "pipeman.dataset.restore_link"
-            ))
-        return actions
 
     def remove_dataset_form(self, dataset):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_dataset(dataset)
             return flask.redirect(flask.url_for("core.list_datasets"))
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.remove_dataset_form.confirmation"), title=gettext("pipeman.dataset.remove_dataset_form"),
-            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+        return flask.render_template(
+            "form.html",
+            form=form,
+            instructions=gettext("pipeman.dataset_remove.confirmation"),
+            title=gettext("pipeman.dataset_remove.title"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
+        )
 
     def restore_dataset_form(self, dataset):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_dataset(dataset)
             return flask.redirect(flask.url_for("core.list_datasets"))
-        return flask.render_template("form.html", form=form, instructions=gettext("pipeman.dataset.restore_dataset_form.confirmation"), title=gettext("pipeman.dataset.restore_dataset_form"),
-            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+        return flask.render_template(
+            "form.html",
+            form=form,
+            instructions=gettext("pipeman.dataset_restore.confirmation"),
+            title=gettext("pipeman.dataset_restore.title"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
+        )
 
     def view_revision_page(self, dataset):
-        return flask.render_template(self.view_template, dataset=dataset)
+        return flask.render_template(
+            self.view_template,
+            dataset=dataset,
+            title=dataset.get_display(),
+        )
 
     def publish_dataset_form(self, dataset):
         form = ConfirmationForm()
@@ -246,8 +247,8 @@ class DatasetController:
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.dataset.publish_dataset_form.confirmation"),
-            title=gettext("pipeman.dataset.publish_dataset_form.title"),
+            instructions=gettext("pipeman.dataset_publish.confirmation"),
+            title=gettext("pipeman.dataset_publish.title"),
             back=dataset_url
         )
 
@@ -257,8 +258,8 @@ class DatasetController:
             self.activate_dataset(dataset)
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
         return flask.render_template("form.html", form=form,
-                                     instructions=gettext("pipeman.dataset.activate_dataset_form.confirmation"),
-                                     title=gettext("pipeman.dataset.activate_dataset_form"),
+                                     instructions=gettext("pipeman.dataset_activate.confirmation"),
+                                     title=gettext("pipeman.dataset_activate.title"),
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):

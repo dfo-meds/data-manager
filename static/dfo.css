@@ -1,0 +1,246 @@
+body {
+    font-family: "Noto Sans", sans-serif;
+    font-size: 16px;
+    line-height: 1.4375;
+    color: #333333;
+    margin: 0;
+}
+a {
+    color: #284162;
+}
+a:hover {
+    color: #0000CC;
+}
+.sig_block {
+    padding: 20px;
+    margin-top: 20px;
+}
+.site_title {
+    font-weight: bold;
+    font-size: 26px;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.right_block ul.langswitch {
+    margin-top: 0;
+    padding-top: 0;
+}
+.topnav {
+    background-color: #333333;
+}
+.topnav a {
+    color: #CCCCCC;
+}
+.topnav a:hover {
+    color: #FFFFFF;
+}
+
+.bottom_links {
+    width: 50%;
+    float: left;
+}
+.header {
+    display: flex;
+    flex-direction: row;
+}
+.sig_block {
+    flex-grow: 0;
+    min-width: 500px;
+    float: left;
+    width: 200px;
+}
+.right_block {
+    flex-grow: 1;
+    float: right;
+    width: 500px;
+    text-align: right;
+    margin-right: 20px;
+}
+.right_block li {
+    list-style: none;
+    float: right;
+    margin-left: 20px;
+}
+.topnav {
+    padding: 6px 20px;
+}
+.topnav ul {
+    padding: 0;
+    margin: 0;
+}
+.topnav li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    float: left;
+    margin-right: 20px;
+}
+.bottom_links li {
+    list-style: none;
+    float: left;
+    margin-right: 20px;
+}
+.bottom_image {
+    width: 25%;
+    float: right;
+    text-align: right;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+.main_body {
+    display: flex;
+    flex-direction: row;
+}
+.nav {
+    flex-grow: 0;
+    align-items: stretch;
+    background-color: #CCC;
+    padding: 0;
+}
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.nav ul li {
+    padding: 0;
+    margin: 0;
+}
+.nav ul li a {
+    display: block;
+    padding-left: 20px;
+    padding-right: 30px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.nav ul li a:hover {
+    background-color: #284162;
+    color: #FFFFFF;
+}
+.content {
+    flex-grow: 5;
+    padding: 10px;
+}
+.inner_content {
+    display: flex;
+    flex-direction: row;
+}
+.inner_content .main_content {
+    flex-grow: 1;
+}
+.inner_content .sidebar {
+    flex-grow: 0;
+}
+.inner_content .sidebar .action_list {
+    background-color: #CCCCCC;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.inner_content .sidebar .action_list li {
+    margin: 0;
+    padding: 0;
+}
+.inner_content .sidebar .action_list li a {
+    display: block;
+    padding-left: 20px;
+    padding-right: 30px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.inner_content .sidebar .action_list li a:hover {
+    background-color: #333333;
+    color: #FFFFFF;
+}
+table.data_table {
+    width: 95%;
+    border: 1px solid #CCC;
+}
+table.data_table th {
+    text-align: left;
+    background-color: #284162;
+    color: #FFFFFF;
+    padding: 5px 10px;
+}
+table.data_table td {
+    text-align: left;
+    padding: 5px 10px;
+}
+table.data_table tbody tr:nth-child(even) td {
+    background-color: #EEEEFF;
+}
+ul.table_actions {
+    padding: 0;
+    margin: 0;
+}
+ul.table_actions li {
+    padding: 0;
+    margin: 0;
+    float: left;
+    margin-right: 6px;
+    list-style: none;
+}
+.pager_control {
+    background-color: #EEEEEE;
+    display: inline-block;
+    margin-top: 10px;
+    border-radius: 6px;
+    padding: 5px 10px;
+}
+.pager_control p {
+    margin: 0;
+    padding: 0;
+}
+.form-field .form-label {
+    width: 200px;
+    float: left;
+    font-weight: bold;
+}
+.form-field {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-top: 1px solid #CCCCCC;
+    padding-top: 10px;
+    max-width: 90%;
+}
+.form-field .form-control {
+    float: left;
+}
+.property-list {
+    border: 3px solid #CCCCCC;
+    width: 95%;
+}
+.property_list tr {
+}
+.property-list th {
+    width: 200px;
+    font-weight: bold;
+    padding: 5px 10px;
+    background-color: #CCCCCC;
+    text-align: left;
+    border-bottom: 1px solid #CCCCCC;
+}
+.property-list td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #CCCCCC;
+}
+.metadata-groups {
+    background-color: #EEEEFF;
+    margin: 0;
+    padding: 0;
+}
+.metadata-groups li {
+    float: left;
+    display: block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.metadata-groups li a {
+    display: block;
+    padding: 5px 10px;
+}
+.metadata-groups li a:hover {
+    background-color: #284162;
+    color: #FFFFFF;
+}

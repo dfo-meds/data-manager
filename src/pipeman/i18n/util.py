@@ -9,7 +9,8 @@ class TranslatableStringFinder:
         self._py_res = [
             re.compile(r'gettext\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
             re.compile(r'UserInputError\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
-            re.compile(r'DelayedTranslationString\([\'"]([A-Za-z_\.-]*?)[\'"]\)')
+            re.compile(r'DelayedTranslationString\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
+            re.compile(r'\.add_action\([\'"]([A-Za-z_\.]*?)[\'"]')
         ]
         self._jinja_res = [
             re.compile(r'\{\{[ ]{0,}\'([A-Za-z_\.-]*?)\'[ ]{0,}\|[ ]{0,}gettext[ ]{0,}\}\}'),

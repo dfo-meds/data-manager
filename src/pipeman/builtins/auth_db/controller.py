@@ -3,7 +3,7 @@ from pipeman.auth import AuthenticatedUser, SecurityHelper
 from pipeman.db.db import Database
 from autoinject import injector
 import pipeman.db.orm as orm
-from pipeman.util.flask import ConfirmationForm, paginate_query
+from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList
 from pipeman.i18n import gettext, DelayedTranslationString
 import flask
 import flask_login
@@ -138,20 +138,24 @@ class DatabaseUserController:
                 "list_users.html",
                 users=self._user_iterator(query),
                 create_link=create_link,
-                title=gettext("auth_db.list_users.title"),
+                title=gettext("auth_db.user_list.title"),
                 **page_args
             )
 
+    def _build_action_list(self, user, short_mode: bool = True):
+        actions = ActionList()
+        kwargs = {'username': user.username}
+        if short_mode:
+            actions.add_action('pipeman.general.view', 'users.view_user', **kwargs)
+        if flask_login.current_user.has_permission("auth_db.edit_users"):
+            actions.add_action('pipeman.general.edit', 'users.edit_user', **kwargs)
+        if flask_login.current_user.has_permission("auth_db.reset_passwords"):
+            actions.add_action('auth_db.reset_password', 'users.reset_password', **kwargs)
+        return actions
+
     def _user_iterator(self, query):
         for user in query:
-            actions = [
-                (flask.url_for("users.view_user", username=user.username), "pipeman.general.view")
-            ]
-            if flask_login.current_user.has_permission("auth_db.edit_users"):
-                actions.append((flask.url_for("users.edit_user", username=user.username), "pipeman.general.edit"))
-            if flask_login.current_user.has_permission("auth_db.reset_passwords"):
-                actions.append((flask.url_for("users.reset_password", username=user.username), "auth_db.reset_password"))
-            yield user, actions
+            yield user, self._build_action_list(user, True)
 
     def create_user_form(self):
         form = CreateUserForm()
@@ -178,7 +182,7 @@ class DatabaseUserController:
                     session.commit()
                     flask.flash(gettext("auth_db.create_user.success") + f" {pw}", "success")
                     return flask.redirect(flask.url_for("users.view_user", username=user.username))
-        return flask.render_template("form.html", form=form, title=gettext("auth_db.create_user.title"))
+        return flask.render_template("form.html", form=form, title=gettext("auth_db.user_create.title"))
 
     def create_user_cli(self, username, email, display, password):
         skip_check = False
@@ -282,7 +286,7 @@ class DatabaseUserController:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
                 return flask.abort(404)
-            return flask.render_template("user.html", user=user, title=user.username)
+            return flask.render_template("user.html", user=user, title=user.username, actions=self._build_action_list(user, False))
 
     def edit_user_form(self, username):
         with self.db as session:
@@ -315,7 +319,7 @@ class DatabaseUserController:
             return flask.render_template(
                 "form.html",
                 form=form,
-                title=gettext("auth_db.edit_user.title")
+                title=gettext("auth_db.user_edit.title")
             )
 
     def reset_password_form(self, username):
@@ -329,7 +333,7 @@ class DatabaseUserController:
                 session.commit()
                 flask.flash(gettext("auth_db.reset_password.success") + f" {new_password}", "success")
                 return flask.redirect(flask.url_for("users.view_user", username=username))
-            return flask.render_template("form.html", form=form, title=gettext("auth_db.reset_password.title"), instructions=gettext("auth_db.reset_password.instructions"))
+            return flask.render_template("form.html", form=form, title=gettext("auth_db.user_reset_password.title"), instructions=gettext("auth_db.reset_password.instructions"))
 
     def set_password_cli(self, username, password):
         with self.db as session:
@@ -409,7 +413,7 @@ class EditUserForm(FlaskForm):
 
     groups = wtf.SelectMultipleField(DelayedTranslationString("auth_db.groups"), coerce=int)
     organizations = wtf.SelectMultipleField(DelayedTranslationString("auth_db.organizations"), coerce=int)
-    submit = wtf.SubmitField("pipeman.general.submit")
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
 
     @injector.construct
     def __init__(self, *args, user=None, **kwargs):
@@ -434,7 +438,7 @@ class EditMyselfForm(FlaskForm):
         ]
     )
 
-    submit = wtf.SubmitField("pipeman.general.submit")
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
 
     def __init__(self, *args, user=None, **kwargs):
         if user:
@@ -458,7 +462,7 @@ class ChangePasswordForm(FlaskForm):
         ]
     )
 
-    submit = wtf.SubmitField("pipeman.general.submit")
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
 
 
 class DatabaseEntityAuthenticationManager(FormAuthenticationManager):

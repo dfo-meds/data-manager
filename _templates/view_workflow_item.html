@@ -1,18 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>{{'pipeman.workflow_item.properties' | gettext}}</h2>
-<table class="property-list" cellpadding="0" cellspacing="0">
-    <tbody>
+<dl>
     {% for txt, val in item.properties() %}
-    <tr>
-    <th>{{txt}}</th>
-    <td>{{val}}</td>
-        </tr>
+    <dt>{{txt | gettext}}</dt>
+    <dd>{{val}}</dd>
     {% endfor %}
-</tbody>
-</table>
+</dl>
 <h2>{{'pipeman.workflow_item.logs' | gettext}}</h2>
-<table cellpadding="0" cellspacing="0" border="0" class="data_table">
+<table cellpadding="0" cellspacing="0" border="0">
     <thead>
         <tr>
             <th>{{'pipeman.workflow_item.step.name' | gettext}}</th>
@@ -30,9 +26,4 @@
         {% endfor %}
     </tbody>
 </table>
-{% endblock %}
-{% block sidebar %}
-{% if actions %}
-<div class="subnav">{{actions}}</div>
-{% endif %}
 {% endblock %}

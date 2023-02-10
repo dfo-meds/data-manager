@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<dl>
+    <dt>{{'pipeman.organization.name' | gettext}}</dt>
+    <dd>{{display}}</dd>
+    <dt>{{'pipeman.organization.short_name' | gettext}}</dt>
+    <dd>{{org.short_name}}</dd>
+</dl>
+{% endblock %}

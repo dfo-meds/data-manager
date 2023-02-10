@@ -4,6 +4,7 @@ url = "sqlite:///./test.db"
 [autoinject]
 "pipeman.auth.auth.AuthenticationManager" = "pipeman.builtins.auth_db.DatabaseEntityAuthenticationManager"
 "pipeman.i18n.i18n.TranslationManager" = "pipeman.builtins.i18n_yaml.translator.YamlTranslationManager"
+"pipeman.i18n.i18n.LanguageDetector" = "pipeman.builtins.basic_lang_detect.detector.BasicRequestLanguageDetector"
 
 [pipeman.i18n_yaml]
 dictionary_path = "C:/my/data-manager/locales"

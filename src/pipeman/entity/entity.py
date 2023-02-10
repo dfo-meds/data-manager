@@ -17,7 +17,11 @@ def entity_access(entity_type: str, op: str) -> bool:
     return True
 
 
-def specific_entity_access(entity) -> bool:
+def specific_entity_access(entity, op: str) -> bool:
+    if op == "remove" and entity.is_deprecated:
+        return False
+    if op == "restore" and not entity.is_deprecated:
+        return False
     if flask_login.current_user.has_permission("organization.manage_any"):
         return True
     return entity.organization_id in flask_login.current_user.organizations
@@ -97,7 +101,9 @@ class FieldContainer:
         return None
 
     def controls(self, display_group=None):
-        return {fn: self._fields[fn].control() for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group}
+        fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]
+        fields.sort(key=lambda x: self._fields[x].order)
+        return {fn: self._fields[fn].control() for fn in fields}
 
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:

@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 {% block content %}
-    <ul>
-        <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
-    </ul>
-    <ul>
+    <ul class="metadata-groups">
         {% for link, txt in groups %}
         <li><a href="{{link}}">{{txt}}</a></li>
         {% endfor %}
+        <br style="clear: both;" />
     </ul>
-    <div class="subnav_content">
-        {{ showform(form) }}
-        {% if instructions %}
-            <div class="instructions">{{instructions}}</div>
-        {% endif %}
-    </div>
+    {% if instructions %}
+        <div class="instructions">{{instructions}}</div>
+    {% endif %}
+    {{ showform(form) }}
+{% endblock %}
+{% block sidebar %}
+<ul class="subnav">
+    <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
+</ul>
 {% endblock %}

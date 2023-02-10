@@ -30,6 +30,7 @@ class Field:
         self.field_name = field_name
         self.field_config = field_config
         self.display_group = field_config['display_group'] if 'display_group' in field_config else ""
+        self.order = field_config['order'] if 'order' in field_config else 0
         self.value = None
         self._use_default_repeatable = True
 
