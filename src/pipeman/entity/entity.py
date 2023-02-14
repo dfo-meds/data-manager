@@ -98,7 +98,7 @@ class FieldContainer:
             field_config = copy.deepcopy(field_list[field_name])
             self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_id)
             if field_values and field_name in field_values:
-                self._fields[field_name].value = field_values[field_name]
+                self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
     def display_values(self, display_group = None):
         for fn in self._fields:
@@ -107,7 +107,10 @@ class FieldContainer:
                 yield field.label(), field.display()
 
     def values(self) -> dict:
-        return {fn: self._fields[fn].value for fn in self._fields}
+        return {
+            fn: self._fields[fn].serialize(self._fields[fn].value)
+            for fn in self._fields
+        }
 
     def supports_display_group(self, display_group) -> bool:
         return any(self._fields[fn].display_group == display_group for fn in self._fields)

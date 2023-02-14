@@ -10,7 +10,7 @@ import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
-
+import datetime
 
 
 class HtmlList:
@@ -37,6 +37,12 @@ class Field:
         self.parent_id = parent_id
 
     def cleanup_value(self, val):
+        return val
+
+    def serialize(self, val):
+        return val
+
+    def unserialize(self, val):
         return val
 
     def control(self) -> wtf.Field:
@@ -233,6 +239,18 @@ class DateField(Field):
         if "storage_format" not in self.field_config:
             self.field_config["storage_format"] = default_format
 
+    def serialize(self, val):
+        if val is None:
+            return ""
+        if not isinstance(val, str):
+            return val.strftime(self.field_config["storage_format"])
+        return val
+
+    def unserialize(self, val):
+        if val is None or val == "":
+            return None
+        return datetime.datetime.strptime(val, self.field_config["storage_format"])
+
     def _extra_wtf_arguments(self) -> dict:
         return {
             "format": self.field_config["storage_format"]
@@ -381,14 +399,12 @@ class TelephoneField(Field):
         return wtf.TelField
 
 
-class TimeField(Field):
+class TimeField(DateField):
 
     DATA_TYPE = "time"
 
     def __init__(self, field_name, field_config, container_id):
-        super().__init__(field_name, field_config, container_id)
-        if "storage_format" not in self.field_config:
-            self.field_config["storage_format"] = "%H:%M"
+        super().__init__(field_name, field_config, container_id, default_format="%H:%M")
 
     def _extra_wtf_arguments(self) -> dict:
         return {

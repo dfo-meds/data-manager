@@ -277,8 +277,6 @@ class EntityController:
                 session.add(e)
             session.commit()
             entity.db_id = e.id
-            print("saving")
-            print(e.dataset_id)
             retries = 5
             while retries > 0:
                 retries -= 1
@@ -348,7 +346,7 @@ class EntityForm(BaseForm):
             else:
                 for key in self.errors:
                     for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error") % (self._fields[key].label.text, m), "error")
+                        flask.flash(f"{gettext('pipeman.entity.form_error')}: {m} [{self._fields[key].label.text}]")
         return False
 
     def validate(self, extra_validators=None):

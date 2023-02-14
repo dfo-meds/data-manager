@@ -82,7 +82,7 @@ pipeman.datasets: Datasets
 pipeman.edit_organization.title: Title
 pipeman.entities: Entities
 pipeman.entity.display: Display
-pipeman.entity.form_error: An error has occurred
+pipeman.entity.form_error: "An error has occurred"
 pipeman.entity.id: ID
 pipeman.entity.is_deprecated: Is Deprecated
 pipeman.entity.organization: Organization

@@ -1,3 +1,22 @@
+maintenance:
+  display:
+    en: Maintenance
+  is_component: yes
+  fields:
+    scope:
+      data_type: vocabulary
+      vocabulary_name: iso19115_maintenance_scope
+      label:
+        en: Scope
+    date:
+      data_type: datetime
+      label:
+        en: Date
+    notes:
+      data_type: multitext
+      label:
+        en: Notes
+      multilingual: yes
 locale:
   display:
     en: Locale

@@ -7,8 +7,8 @@
 {% endblock %}
 {% block sidebar %}
 {% if back %}
-<ul class="subnav">
-    <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
-</ul>
+<div class="subnav">
+    <ul class="action_list"><li><a href="{{back}}">{{'forms.back' | gettext}}</a></li></ul>
+</div>
 {% endif %}
 {% endblock %}

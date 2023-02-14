@@ -1,6 +1,7 @@
 variables:
   label:
     en: Variables
+  order: 200
   fields:
     variables:
       data_type: component_ref

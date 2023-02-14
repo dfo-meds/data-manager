@@ -1,6 +1,7 @@
 data_info:
   label:
     en: Identification
+  order: 10
   fields:
     contact_point:
       data_type: entity_ref
@@ -77,6 +78,7 @@ data_info:
 keywords:
   label:
     en: Keywords
+  order: 20
   fields:
     topic_category:
       data_type: vocabulary
@@ -88,6 +90,7 @@ keywords:
 references:
   label:
     en: References
+  order: 50
   fields:
     parent_metadata:
       data_type: entity_ref
@@ -119,6 +122,7 @@ references:
 extent:
   label:
     en: Extent
+  order: 30
   fields:
     bbox_west:
       order: 10
@@ -194,6 +198,7 @@ extent:
 technical:
   label:
     en: Technical
+  order: 100
   fields:
     default_locale:
       data_type: entity_ref
@@ -234,3 +239,13 @@ technical:
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Metadata Maintenance Frequency
+components:
+  label:
+    en: Components
+  order: 60
+  fields:
+    iso_maintenance:
+      data_type: component_ref
+      entity_type: maintenance
+      label:
+        en: Maintenance Records

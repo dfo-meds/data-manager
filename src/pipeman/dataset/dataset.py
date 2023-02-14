@@ -73,7 +73,11 @@ class MetadataRegistry:
         if d:
             if with_display_group_parents:
                 for dg_name in d:
-                    self.register_display_group(dg_name, d[dg_name]["label"] if "label" in d[dg_name] else {})
+                    self.register_display_group(
+                        dg_name,
+                        d[dg_name]["label"] if "label" in d[dg_name] else {},
+                        d[dg_name]["order"] if "order" in d[dg_name] else None
+                    )
                     if "fields" in d[dg_name]:
                         for fn in d[dg_name]["fields"]:
                             d[dg_name]["fields"][fn]["display_group"] = dg_name
