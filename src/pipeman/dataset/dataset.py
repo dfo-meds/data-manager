@@ -132,7 +132,7 @@ class MetadataRegistry:
 class Dataset(FieldContainer):
 
     def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
-        super().__init__(field_list, field_values, display_names, is_deprecated, org_id)
+        super().__init__(dataset_id, field_list, field_values, display_names, is_deprecated, org_id)
         self.required_fields = required_fields
         self.profiles = profiles
         self.dataset_id = dataset_id

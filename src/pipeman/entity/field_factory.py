@@ -13,9 +13,9 @@ class GenericFactory:
             for field in field_list:
                 self._field_list[getattr(field, "DATA_TYPE")] = field
 
-    def build_field(self, field_name: str, data_type: str, field_config: dict) -> t.Optional[fields.Field]:
+    def build_field(self, field_name: str, data_type: str, field_config: dict, container_id: int) -> t.Optional[fields.Field]:
         if data_type in self._field_list:
-            return self._field_list[data_type](field_name, field_config)
+            return self._field_list[data_type](field_name, field_config, container_id)
 
 
 class _BuiltInFactory(GenericFactory):
@@ -37,6 +37,7 @@ class _BuiltInFactory(GenericFactory):
             fields.TimeField,
             fields.URLField,
             ef.EntityReferenceField,
+            ef.ComponentReferenceField,
             fields.VocabularyReferenceField,
             fields.DatasetReferenceField
         ])
@@ -52,9 +53,9 @@ class FieldCreator:
     def register_factory(self, factory: GenericFactory):
         self._factories[factory.factory_name] = factory
 
-    def build_field(self, field_name: str, data_type: str, field_config: dict) -> fields.Field:
+    def build_field(self, field_name: str, data_type: str, field_config: dict, container_id: int = None) -> fields.Field:
         for fact in self._factories.values():
-            field = fact.build_field(field_name, data_type, field_config)
+            field = fact.build_field(field_name, data_type, field_config, container_id)
             if field:
                 return field
         raise DataTypeNotSupportedError(data_type)

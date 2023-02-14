@@ -4,12 +4,13 @@ from pipeman.workflow.workflow import WorkflowRegistry
 from pipeman.dataset import MetadataRegistry
 from pipeman.vocab import VocabularyRegistry
 from pipeman.files import DataStoreRegistry
+from pipeman.entity import EntityRegistry
 import pathlib
 import yaml
 
 
 @injector.inject
-def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vreg: VocabularyRegistry = None, dsr: DataStoreRegistry = None):
+def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vreg: VocabularyRegistry = None, dsr: DataStoreRegistry = None, ereg: EntityRegistry = None):
     system.register_cli("pipeman.core.cli", "org")
     system.register_cli("pipeman.core.cli", "workflow")
     system.register_blueprint("pipeman.core.app", "core")
@@ -27,8 +28,11 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
         reg.register_security_labels_from_dict(yaml.safe_load(h))
     with open(root / "vocabs.yaml", "r") as h:
         vreg.register_from_dict(yaml.safe_load(h))
+    with open(root / "entities.yaml", "r") as h:
+        ereg.register_from_dict(yaml.safe_load(h))
+    with open(root / "fields.yaml") as h:
+        reg.register_fields_from_dict(yaml.safe_load(h))
     dsr.register_data_store("test-store", {"en": "Test Store"}, "C:/my/local_store", True, 'basic', 'basic', True)
-
 
 
 def create_jinja_filters(app):

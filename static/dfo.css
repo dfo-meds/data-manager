@@ -169,16 +169,21 @@ table.data_table td {
 table.data_table tbody tr:nth-child(even) td {
     background-color: #EEEEFF;
 }
+
 ul.table_actions {
     padding: 0;
     margin: 0;
+    display: inline;
 }
 ul.table_actions li {
     padding: 0;
     margin: 0;
-    float: left;
     margin-right: 6px;
     list-style: none;
+    display: inline;
+}
+ul.table_actions li:last-child {
+    margin-right: 0;
 }
 .pager_control {
     background-color: #EEEEEE;
@@ -243,4 +248,8 @@ ul.table_actions li {
 .metadata-groups li a:hover {
     background-color: #284162;
     color: #FFFFFF;
+}
+ul li.removed .name {
+    text-decoration: line-through;
+    color: #FF0000;
 }

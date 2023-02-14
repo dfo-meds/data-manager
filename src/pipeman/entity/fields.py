@@ -5,11 +5,12 @@ import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField
+from pipeman.util.flask import TranslatableField, HtmlField
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
+
 
 
 class HtmlList:
@@ -26,13 +27,14 @@ class HtmlList:
 
 class Field:
 
-    def __init__(self, field_name, field_config):
+    def __init__(self, field_name, field_config, parent_id=None):
         self.field_name = field_name
         self.field_config = field_config
         self.display_group = field_config['display_group'] if 'display_group' in field_config else ""
         self.order = field_config['order'] if 'order' in field_config else 0
         self.value = None
         self._use_default_repeatable = True
+        self.parent_id = parent_id
 
     def cleanup_value(self, val):
         return val
@@ -224,8 +226,8 @@ class DateField(Field):
 
     DATA_TYPE = "date"
 
-    def __init__(self, field_name, field_config, default_format="%Y-%m-%d"):
-        super().__init__(field_name, field_config)
+    def __init__(self, field_name, field_config, container_id, default_format="%Y-%m-%d"):
+        super().__init__(field_name, field_config, container_id)
         if "storage_format" not in self.field_config:
             self.field_config["storage_format"] = default_format
 
@@ -245,8 +247,8 @@ class DateTimeField(DateField):
 
     DATA_TYPE = "datetime"
 
-    def __init__(self, field_name, field_config):
-        super().__init__(field_name, field_config, "%Y-%m-%d %H:%M:%S")
+    def __init__(self, field_name, field_config, container_id):
+        super().__init__(field_name, field_config, container_id, "%Y-%m-%d %H:%M:%S")
 
     def _control_class(self) -> t.Callable:
         return wtf.DateTimeField
@@ -381,8 +383,8 @@ class TimeField(Field):
 
     DATA_TYPE = "time"
 
-    def __init__(self, field_name, field_config):
-        super().__init__(field_name, field_config)
+    def __init__(self, field_name, field_config, container_id):
+        super().__init__(field_name, field_config, container_id)
         if "storage_format" not in self.field_config:
             self.field_config["storage_format"] = "%H:%M"
 
@@ -425,6 +427,24 @@ class DatasetReferenceField(ChoiceField):
             for entity in session.query(orm.Dataset).filter_by(is_deprecated=False):
                 values.append((entity.id, MultiLanguageString(json.loads(entity.display_names) if entity.display_names else {})))
         return values
+
+
+class HtmlContentField(Field):
+
+    def control(self):
+        parent_args, field_args = self._split_args()
+        return HtmlField(**parent_args, **field_args)
+
+    def _control_class(self):
+        return None
+
+    def _extra_wtf_arguments(self) -> dict:
+        return {
+            "html_content": self._build_html_content()
+        }
+
+    def _build_html_content(self):
+        raise NotImplementedError()
 
 
 class VocabularyReferenceField(ChoiceField):

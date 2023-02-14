@@ -9,6 +9,25 @@ from markupsafe import Markup, escape
 from pipeman.i18n import gettext
 
 
+class BareHtmlWidget:
+
+    def __call__(self, field, **kwargs):
+        return field.html_content
+
+
+class HtmlField(wtf.Field):
+
+    def __init__(self, html_content=None, **kwargs):
+        super().__init__(widget=BareHtmlWidget(), **kwargs)
+        self.html_content = html_content
+
+    def validate(self, **kwargs):
+        return True
+
+    def process(self, *args, **kwargs):
+        return
+
+
 class ActionList:
 
     def __init__(self):

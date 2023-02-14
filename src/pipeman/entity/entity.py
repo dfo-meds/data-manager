@@ -39,26 +39,45 @@ class EntityRegistry:
     def type_exists(self, key):
         return key in self._entity_types
 
-    def register_type(self, key, display_names, field_config):
+    def register_type(self, key, display_names, field_config, is_component: bool = None):
         if key in self._entity_types:
             deep_update(self._entity_types[key]["display"], display_names)
             deep_update(self._entity_types[key]["fields"], field_config)
+            if is_component is not None:
+                self._entity_types[key]['is_component'] = is_component
         else:
             self._entity_types[key] = {
                 "display": display_names,
-                "fields": field_config
+                "fields": field_config,
+                "is_component": bool(is_component)
             }
 
     def register_from_dict(self, cfg_dict):
         if cfg_dict:
             for key in cfg_dict:
-                self.register_type(key, cfg_dict[key]["display"], cfg_dict[key]["fields"])
+                self.register_type(
+                    key,
+                    cfg_dict[key]["display"],
+                    cfg_dict[key]["fields"],
+                    cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
+                )
 
     def display(self, key):
         return MultiLanguageString(self._entity_types[key]["display"])
 
-    def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False, org_id=None):
-        return Entity(key, self._entity_types[key]["fields"], values, display_names=display_names, db_id=db_id, ed_id=data_id, is_deprecated=is_deprecated, org_id=org_id)
+    def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False, org_id=None, dataset_id=None):
+        return Entity(
+            key,
+            self._entity_types[key]["fields"],
+            self._entity_types[key]["is_component"],
+            values,
+            display_names=display_names,
+            db_id=db_id,
+            ed_id=data_id,
+            is_deprecated=is_deprecated,
+            org_id=org_id,
+            dataset_id=dataset_id
+        )
 
 
 class FieldContainer:
@@ -66,8 +85,9 @@ class FieldContainer:
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
+    def __init__(self, container_id: int, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
         self._fields = {}
+        self.container_id = container_id
         self.organization_id = org_id
         self._load_fields(field_list, field_values)
         self._display = display_names if display_names else {}
@@ -76,7 +96,7 @@ class FieldContainer:
     def _load_fields(self, field_list: dict, field_values: dict = None):
         for field_name in field_list:
             field_config = copy.deepcopy(field_list[field_name])
-            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config)
+            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_id)
             if field_values and field_name in field_values:
                 self._fields[field_name].value = field_values[field_name]
 
@@ -125,12 +145,14 @@ class Entity(FieldContainer):
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, entity_type, field_list: dict, field_values: dict = None, display_names: dict = None,
-                 db_id: int = None, ed_id: int = None, is_deprecated: bool = False, org_id: int = None):
-        super().__init__(field_list, field_values, display_names, is_deprecated, org_id)
+    def __init__(self, entity_type, field_list: dict, is_component: bool, field_values: dict = None, display_names: dict = None,
+                 db_id: int = None, ed_id: int = None, is_deprecated: bool = False, org_id: int = None, dataset_id=None):
+        super().__init__(db_id, field_list, field_values, display_names, is_deprecated, org_id)
+        self.is_component = is_component
         self.entity_type = entity_type
         self.db_id = db_id
         self.entity_data_id = ed_id
+        self.dataset_id=dataset_id
 
     def actions(self, for_view: bool = False):
         action_args = {

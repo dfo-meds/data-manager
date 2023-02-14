@@ -109,21 +109,30 @@ class DatasetController:
             dsn = json.loads(ds.display_names) if ds.display_names else {}
             yield ds, MultiLanguageString(dsn), self._build_action_list(ds, True)
 
-    def _dataset_query(self, session):
+    def list_datasets_for_component(self):
+        with self.db as session:
+            ds_list = []
+            query = self._dataset_query(session, "edit")
+            for ds in query:
+                dsn = json.loads(ds.display_names) if ds.display_names else {}
+                ds_list.append((ds.id, MultiLanguageString(dsn)))
+            return ds_list
+
+    def _dataset_query(self, session, op="view"):
         q = session.query(orm.Dataset)
         if not flask_login.current_user.has_permission("datasets.deprecated_access"):
             q = q.filter_by(is_deprecated=False)
-        if flask_login.current_user.has_permission(f"datasets.view.all"):
+        if flask_login.current_user.has_permission(f"datasets.{op}.all"):
             pass
-        elif flask_login.current_user.has_permission("datasets.view.organization") and flask_login.current_user.has_permission("organization.manage_any"):
+        elif flask_login.current_user.has_permission(f"datasets.{op}.organization") and flask_login.current_user.has_permission("organization.manage_any"):
             pass
         else:
             sql_ors = []
-            if flask_login.current_user.has_permission(f"datasets.view.organization"):
+            if flask_login.current_user.has_permission(f"datasets.{op}.organization"):
                 sql_ors.append(orm.Dataset.organization_id == None)
                 if flask_login.current_user.organizations:
                     sql_ors.append(orm.Dataset.organization_id.in_(flask_login.current_user.organizations))
-            if flask_login.current_user.has_permission(f"datasets.view.assigned") and flask_login.current_user.datasets:
+            if flask_login.current_user.has_permission(f"datasets.{op}.assigned") and flask_login.current_user.datasets:
                 sql_ors.append(orm.Dataset.organization_id.in_(flask_login.current_user.datasets))
             if len(sql_ors) == 1:
                 q = q.filter(sql_ors[0])

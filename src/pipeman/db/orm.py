@@ -149,9 +149,11 @@ class Entity(_BaseModel, Base):
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True, index=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
     organization = orm.relationship("Organization", back_populates="entities")
+    dataset = orm.relationship("Dataset", back_populates="components")
 
     def latest_revision(self):
         latest = None
@@ -239,6 +241,7 @@ class Dataset(_BaseModel, Base):
     organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("MetadataEdition", back_populates="dataset")
     users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
+    components = orm.relationship("Entity", back_populates="dataset")
 
     def latest_revision(self):
         latest = None

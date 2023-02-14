@@ -1,0 +1,10 @@
+variables:
+  label:
+    en: Variables
+  fields:
+    variables:
+      data_type: component_ref
+      order: 10
+      entity_type: variable
+      label:
+        en: Variables

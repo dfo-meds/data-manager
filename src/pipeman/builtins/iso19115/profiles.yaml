@@ -39,6 +39,7 @@ iso19115:
     spatial_representation_type: no
     resource_maintenance_frequency: no
     metadata_maintenance_frequency: no
+    variables: no
   formatters:
     iso19115xml:
       label:

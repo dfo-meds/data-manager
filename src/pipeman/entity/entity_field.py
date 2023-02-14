@@ -1,8 +1,41 @@
-from pipeman.entity.fields import ChoiceField
+
+from pipeman.entity.fields import ChoiceField, HtmlContentField
 from pipeman.entity.controller import EntityController
 from autoinject import injector
 import json
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
+import flask
+import markupsafe
+
+
+class ComponentReferenceField(HtmlContentField):
+
+    DATA_TYPE = "component_ref"
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def display(self):
+        return markupsafe.Markup(self._build_html_content())
+
+    def _build_html_content(self):
+        create_link = None
+        if self.ec.has_access(self.field_config["entity_type"], "create"):
+            # TODO: dataset access to edit??
+            create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], dataset_id=self.parent_id)
+        return flask.render_template(
+            "component_ref.html",
+            create_link=create_link,
+            entities=self._component_list()
+        )
+
+    def _component_list(self):
+        if not self.parent_id:
+            return
+        return self.ec.list_components(self.field_config["entity_type"], self.parent_id)
 
 
 class EntityReferenceField(ChoiceField):
