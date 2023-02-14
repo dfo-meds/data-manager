@@ -3,7 +3,7 @@ variable:
     en: Variable
   is_component: yes
   fields:
-    source_name:
+    short_name:
       data_type: text
       label:
-        en: Source Name
+        en: Short Name

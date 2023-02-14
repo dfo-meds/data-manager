@@ -101,6 +101,8 @@ class Field:
         return self.value
 
     def _wtf_arguments(self) -> dict:
+        print(self.field_name)
+        print(self.label())
         args = {
             "label": self.label(),
             "description": self.description(),
@@ -467,7 +469,9 @@ class VocabularyReferenceField(ChoiceField):
         values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
-                values.append((term.short_name, MultiLanguageString(json.loads(term.display_names))))
+                dns = json.loads(term.display_names)
+                dns['und'] = term.short_name
+                values.append((term.short_name, MultiLanguageString(dns)))
         return values
 
     def _process_value(self, val, **kwargs):

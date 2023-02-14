@@ -57,8 +57,13 @@ class VocabularyTermController:
                     desc = json.loads(term.descriptions)
                     if "display" in terms[tsname]:
                         dn.update(terms[tsname]["display"])
-                    if "description" in terms[tsname]:
-                        desc.update(terms[tsname]["description"])
+                        if "description" in terms[tsname]:
+                            desc.update(terms[tsname]["description"])
+                    else:
+                        print(vocab_name)
+                        print(terms)
+                        print(terms[tsname])
+                        dn.update(terms[tsname])
                     term.display_names = json.dumps(dn)
                     term.descriptions = json.dumps(desc)
             session.commit()

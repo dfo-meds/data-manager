@@ -1,0 +1,102 @@
+variable:
+  fields:
+    source_name:
+      data_type: text
+      label:
+        en: Source Name
+    destination_name:
+      data_type: text
+      label:
+        en: Destination Name
+    short_name:
+      data_type: text
+      label:
+        en: Short Name
+    long_name:
+      data_type: text
+      label:
+        en: Long Name
+    source_data_type:
+      data_type: vocabulary
+      vocabulary_name: erddap_data_types
+      label:
+        en: Source Data Type
+    destination_data_type:
+      data_type: vocabulary
+      vocabulary_name: erddap_data_types
+      label:
+        en: Destination Data Type
+    min_value:
+      data_type: float
+      label:
+        en: Actual Minimum Value
+    max_value:
+      data_type: float
+      label:
+        en: Actual Maximum Value
+    encoding:
+      data_type: vocabulary
+      vocabulary_name: erddap_encodings
+      label:
+        en: Encoding
+    ioos_category:
+      data_type: vocabulary
+      vocabulary_name: ioos_categories
+      label:
+        en: IOOS Category
+    fill_value:
+      data_type: text
+      label:
+        en: Fill Value
+    scale_factor:
+      data_type: float
+      label:
+        en: Scale Factor
+    add_offset:
+      data_type: float
+      label:
+        en: Add Offset
+    standard_name:
+      data_type: text
+      label:
+        en: CF Standard Name
+    time_precision:
+      data_type: vocabulary
+      vocabulary_name: erddap_time_precisions
+      label:
+        en: Time Precision
+    time_zone:
+      data_type: vocabulary
+      vocabulary_name: timezones
+      label:
+        en: Time Zone
+    units:
+      data_type: text
+      label:
+        en: Units/DateTime Format
+    valid_min:
+      data_type: float
+      label:
+        en: Minimum Valid Value
+    valid_max:
+      data_type: float
+      label:
+        en: Maximum Valid Value
+    role:
+      data_type: vocabulary
+      vocabulary_name: erddap_roles
+      label:
+        en: Dataset Role
+    is_axis:
+      data_type: boolean
+      label:
+        en: Is Axis?
+    allow_subsets:
+      data_type: boolean
+      label:
+        en: Allow Subsetting?
+    altitude_proxy:
+      data_type: boolean
+      label:
+        en: Is Altitude Proxy?
+

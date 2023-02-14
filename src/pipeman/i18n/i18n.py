@@ -34,6 +34,8 @@ class MultiLanguageString:
     def __init__(self, language_map: dict, default_lang="en"):
         self.language_map = language_map
         self.default_lang = default_lang
+        if not self.language_map:
+            raise ValueError("Language required")
 
     @injector.inject
     def __str__(self, tm: TranslationManager = None, ld: LanguageDetector = None):

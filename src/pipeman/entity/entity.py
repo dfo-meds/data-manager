@@ -57,8 +57,8 @@ class EntityRegistry:
             for key in cfg_dict:
                 self.register_type(
                     key,
-                    cfg_dict[key]["display"],
-                    cfg_dict[key]["fields"],
+                    cfg_dict[key]["display"] if "display" in cfg_dict[key] else {},
+                    cfg_dict[key]["fields"] if "fields" in cfg_dict[key] else {},
                     cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
                 )
 

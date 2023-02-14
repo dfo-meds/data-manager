@@ -1,0 +1,165 @@
+erddap_data_types:
+  display:
+    en: ERDDAP Variable Data Types
+  uri:
+  terms:
+    boolean:
+      en: Boolean
+    byte:
+      en: Byte (8 bits, signed)
+    ubyte:
+      en: Byte (8 bits, unsigned)
+    short:
+      en: Short (16 bits, signed)
+    ushort:
+      en: Short (16 bits, unsigned)
+    int:
+      en: Integer (32 bits, signed)
+    uint:
+      en: Integer (32 bits, unsigned)
+    long:
+      en: "Long (64 bits, signed, not recommended)"
+    ulong:
+      en: "Long (64 bits, unsigned, not recommended)"
+    float:
+      en: Float (IEEE 754, 32 bits)
+    double:
+      en: Double (IEEE 754, 64 bits)
+    char:
+      en: Single UCS-2 Character (not recommended)
+    String:
+      en: Characters (UCS-2)
+erddap_encodings:
+  display:
+    en: ERDDAP Encodings
+  uri:
+  terms:
+    none:
+      en: Numeric or Binary
+    UTF-8:
+      und: UTF-8
+    ISO-8859-1:
+      und: ISO-8859-1
+    UCS-2:
+      und: UCS-2
+ioos_categories:
+  display:
+    en: IOOS Categories
+  uri:
+  terms:
+    Bathymetry:
+      en: Bathymetry
+    Biology:
+      en: Biology
+    Bottom Character:
+      en: Bottom Character
+    CO2:
+      en: Carbon Dioxide
+    Colored Dissolved Organic Matter:
+      en: Colored Dissolved Organic Matter
+    Contaminants:
+      en: Contaminants
+    Currents:
+      en: Currents
+    Dissolved Nutrients:
+      en: Dissolved Nutrients
+    Dissolved O2:
+      en: Dissolved Oxygen
+    Ecology:
+      en: Ecology
+    Fish Abundance:
+      en: Fish Abundance
+    Fish Species:
+      en: Fish Species
+    Heat Flux:
+      en: Heat Flux
+    Hydrology:
+      en: Hydrology
+    Ice Distribution:
+      en: Ice Distribution
+    Identifier:
+      en: Identifier
+    Location:
+      en: Location
+    Meteorology:
+      en: Meteorology
+    Ocean Color:
+      en: Ocean Color
+    Optical Properties:
+      en: Optical Properties
+    Other:
+      en: Other
+    Pathogens:
+      en: Pathogens
+    Phytoplankton Species:
+      en: Phytoplankton Species
+    Pressure:
+      en: Pressure
+    Productivity:
+      en: Productivity
+    Quality:
+      en: Quality
+    Salinity:
+      en: Salinity
+    Sea Level:
+      en: Sea Level
+    Statistics:
+      en: Statistics
+    Stream Flow:
+      en: Stream Flow
+    Surface Waves:
+      en: Surface Waves
+    Taxonomy:
+      en: Taxonomy
+    Temperature:
+      en: Temperature
+    Time:
+      en: Time
+    Total Suspended Matter:
+      en: Total Suspended Matter
+    Unknown:
+      en: Unknown
+    Wind:
+      en: Wind
+    Zooplankton Species:
+      en: Zooplankton Species
+    Zooplankton Abundance:
+      en: Zooplankton Abundance
+erddap_time_precisions:
+  display:
+    en: ERDDAP Time Precisions
+  uri:
+  terms:
+    month:
+      en: Month
+    day:
+      en: Day
+    hour:
+      en: Hour
+    minute:
+      en: Minute
+    second:
+      en: Second
+    tenth_second:
+      en: 1/10 Second
+    hundredth_second:
+      en: 1/100 Second
+    millisecond:
+      en: Millisecond
+erddap_roles:
+  display:
+    en: ERDDAP Variable Roles
+  uri:
+  terms:
+    profile_id:
+      en: Profile ID
+    timeseries_id:
+      en: Timeseries ID
+    trajectory_id:
+      en: Trajectory ID
+    profile_extra:
+      en: Profile Extra Info
+    timeseries_extra:
+      en: Timeseries Extra Info
+    trajectory_extra:
+      en: Trajectory Extra Info
