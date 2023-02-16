@@ -144,6 +144,13 @@ class System:
             bp = getattr(mod, bp_obj)
             app.register_blueprint(bp, url_prefix=prefix)
 
+        @app.teardown_request
+        @injector.inject
+        def kill_db_session(exc):
+            # Make sure we get the local (at the time) instance
+            db = injector.get("pipeman.db.db.Database")
+            db.close()
+
         @app.context_processor
         def add_menu_item():
             items = {}

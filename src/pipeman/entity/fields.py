@@ -107,8 +107,6 @@ class Field:
         return self.value
 
     def _wtf_arguments(self) -> dict:
-        print(self.field_name)
-        print(self.label())
         args = {
             "label": self.label(),
             "description": self.description(),

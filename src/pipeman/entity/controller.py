@@ -47,7 +47,6 @@ class EntityController:
         elif for_comp:
             actions.add_action("pipeman.entity.view_dataset", "core.view_dataset", dataset_id=ent.dataset_id)
         if self.has_specific_access(ent, "edit"):
-            print(for_comp)
             if for_comp:
                 actions.add_action("pipeman.general.edit", "core.edit_component", **comp_kwargs)
             else:

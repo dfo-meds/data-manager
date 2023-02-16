@@ -5,6 +5,7 @@ import typing as t
 from pipeman.i18n import MultiLanguageString, gettext
 import copy
 from pipeman.workflow import WorkflowRegistry
+import logging
 
 
 @injector.injectable_global
@@ -127,9 +128,12 @@ class MetadataRegistry:
             if profile in self._profiles:
                 fields.update(self._profiles[profile]["fields"].keys())
                 mandatory.update(x for x in self._profiles[profile]["fields"].keys() if self._profiles[profile]["fields"][x])
-        field_list = {
-            fn: self._fields[fn] for fn in fields
-        }
+        field_list = {}
+        for fn in fields:
+            if fn not in self._fields:
+                logging.getLogger("pipeman.fields").error(f"Field {fn} not defined, skipping")
+            else:
+                field_list[fn] = self._fields[fn]
         return Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, profiles, ds_data_id, is_deprecated, org_id, extras, users)
 
 

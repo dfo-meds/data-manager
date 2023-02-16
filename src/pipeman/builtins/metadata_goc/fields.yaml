@@ -1,0 +1,31 @@
+keywords:
+  fields:
+    goc_subject:
+      data_type: vocabulary
+      vocabulary_name: goc_subjects
+      label:
+        en: GoC Subject
+    goc_publication_place:
+      data_type: vocabulary
+      vocabulary_name: goc_places
+      label:
+        en: GoC Publication Places
+      repeatable: yes
+    goc_audience:
+      data_type: vocabulary
+      vocabulary_name: goc_audiences
+      label:
+        en: GoC Audiences
+      repeatable: yes
+publishing:
+  fields:
+    goc_collection_type:
+      data_type: vocabulary
+      vocabulary_name: goc_collection_types
+      label:
+        en: GoC Collection Type
+    goc_publisher:
+      data_type: entity_ref
+      entity_type: goc_publishing_section
+      label:
+        en: GoC Publisher

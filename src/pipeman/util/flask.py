@@ -47,7 +47,6 @@ class ActionList:
         for path, txt in self.action_items:
             mu += f'<li><a href="{escape(path)}">{gettext(txt)}</a></li>'
         mu += '</ul>'
-        print(Markup(mu))
         return Markup(mu)
 
     def __html__(self):

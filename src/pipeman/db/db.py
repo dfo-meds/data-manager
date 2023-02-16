@@ -5,7 +5,7 @@ import zirconium as zr
 from autoinject import injector
 
 from .orm import Base
-
+import threading
 
 class SessionWrapper:
     """Wrapper for a session to allow users to call methods on either the transaction or session object.
@@ -59,10 +59,15 @@ class Database:
     @injector.construct
     def __init__(self):
         """Implement __init__()."""
-        # Create the engine from the connection string
-        self.engine = sa.engine_from_config(self.config["database"], prefix="")
+        self.engine = None
         self._session = None
         self._transaction_stack = []
+        print(f"creation: {threading.get_ident()}")
+
+    def _create_connection(self):
+        if self.engine is None:
+            # Create the engine from the connection string
+            self.engine = sa.engine_from_config(self.config["database"], prefix="")
 
     def __enter__(self) -> SessionWrapper:
         """Implement __enter__().
@@ -74,6 +79,7 @@ class Database:
         SessionWrapper
             An instance of SessionWrapper that wraps both the session and transaction object.
         """
+        self._create_connection()
         if self._session is None:
             self._session = orm.Session(self.engine)
             self._transaction_stack = [self._session.begin()]
@@ -102,6 +108,11 @@ class Database:
         if not self._transaction_stack:
             self._session.close()
             self._session = None
+
+    def close(self):
+        if self.engine is not None:
+            self.engine.dispose()
+            self.engine = None
 
     def commit_last_tx(self) -> orm.SessionTransaction:
         """Commit the most recent transaction, close it, and start a new one."""

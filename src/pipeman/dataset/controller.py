@@ -12,7 +12,6 @@ import sqlalchemy as sa
 from wtforms.form import BaseForm
 import wtforms as wtf
 from flask_wtf import FlaskForm
-import wtforms.validators as wtfv
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList
 from pipeman.workflow import WorkflowController, WorkflowRegistry
@@ -194,7 +193,7 @@ class DatasetController:
         form = DatasetMetadataForm(dataset, display_group)
         if form.handle_form():
             self.save_metadata(dataset)
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            flask.flash(gettext("pipeman.dataset_metadata.success"), "success")
         group_list = [
             (
                 flask.url_for(

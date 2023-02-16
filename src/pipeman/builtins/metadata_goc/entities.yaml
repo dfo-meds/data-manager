@@ -1,0 +1,27 @@
+goc_publishing_section:
+  display:
+    en: GoC Publishing Sections
+  fields:
+    section_name:
+      data_type: text
+      multilingual: yes
+      label:
+        en: Section Name
+    publisher:
+      data_type: entity_ref
+      label:
+        en: Publisher
+      entity_type: goc_publishing_org
+goc_publishing_org:
+  display:
+    en: GoC Publishers
+  fields:
+    publisher_name:
+      data_type: text
+      multilingual: yes
+      label:
+        en: Publisher Name
+    publisher_code:
+      data_type: text
+      label:
+        en: Publisher Code
