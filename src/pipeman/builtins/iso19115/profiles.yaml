@@ -41,6 +41,9 @@ iso19115:
     metadata_maintenance_frequency: no
     variables: no
     iso_maintenance: no
+    custom_keywords: no
+    content_coverage_type: no
+    license: yes
   formatters:
     iso19115xml:
       label:

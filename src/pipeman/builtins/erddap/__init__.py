@@ -1,9 +1,6 @@
 from autoinject import injector
-from pipeman.util import caps_to_snake
-from pipeman.workflow.workflow import WorkflowRegistry
 from pipeman.dataset import MetadataRegistry
 from pipeman.vocab import VocabularyRegistry
-from pipeman.files import DataStoreRegistry
 from pipeman.entity import EntityRegistry
 import pathlib
 import yaml
@@ -18,4 +15,5 @@ def init_plugin(reg: MetadataRegistry = None, vreg: VocabularyRegistry = None, e
         ereg.register_from_dict(yaml.safe_load(h))
     with open(root / "fields.yaml") as h:
         reg.register_fields_from_dict(yaml.safe_load(h))
-
+    with open(root / "profiles.yaml") as h:
+        reg.register_profiles_from_dict(yaml.safe_load(h))

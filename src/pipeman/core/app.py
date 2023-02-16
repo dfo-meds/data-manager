@@ -26,6 +26,7 @@ def list_entities(reg: EntityRegistry):
                 flask.url_for("core.list_entities_by_type", obj_type=k),
                 flask.url_for("core.create_entity", obj_type=k)
             ))
+    entity_list.sort(key=lambda x: str(x[1]))
     return flask.render_template("list_entity_types.html", entity_types=entity_list, title=gettext('pipeman.entity_type.list'))
 
 

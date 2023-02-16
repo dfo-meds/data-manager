@@ -9,3 +9,15 @@ variables:
       entity_type: variable
       label:
         en: Variables
+keywords:
+  label:
+    en: Keywords
+  order: 20
+  fields:
+    custom_keywords:
+      data_type: entity_ref
+      repeatable: yes
+      order: 1000000000
+      entity_type: keyword
+      label:
+        en: Custom Keywords

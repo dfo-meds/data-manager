@@ -1,0 +1,32 @@
+erddap:
+  label:
+    en: Core ERDDAP
+  fields:
+    erddap_dataset_name: yes
+    cdm_data_type: yes
+    processing_level: no
+    project: no
+    program: no
+    title: yes
+    abstract: no
+    credit: no
+    publication_date: yes
+    info_link: yes
+    short_institution: yes
+    author: yes
+    contributions: no
+    contact_point: no
+    revision_date: no
+    creation_date: no
+    custom_keywords: no
+    topic_category: no
+    iso_maintenance: no
+    spatial_representation_type: yes
+    content_coverage_type: no
+    variables: yes
+    license: yes
+  formatters:
+    erddapxml:
+      label:
+        en: ERDAP XML
+      template: erddap.xml

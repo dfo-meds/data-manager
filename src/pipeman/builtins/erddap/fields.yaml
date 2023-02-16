@@ -1,0 +1,37 @@
+data_info:
+  fields:
+    short_institution:
+      order: 125
+      data_type: text
+      label:
+        en: Institution (Short)
+
+
+publishing:
+  label:
+    en: Publishing
+  weight: 150
+  fields:
+    erddap_dataset_name:
+      data_type: text
+      label:
+        en: ERDDAP Dataset Name
+technical:
+  fields:
+    cdm_data_type:
+      data_type: vocabulary
+      label:
+        en: CDM Data Type
+      vocabulary_name: cdm_data_types
+    processing_level:
+      data_type: text
+      label:
+        en: Processing Level
+    project:
+      data_type: text
+      label:
+        en: Project
+    program:
+      data_type: text
+      label:
+        en: Program

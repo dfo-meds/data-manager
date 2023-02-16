@@ -75,10 +75,13 @@ data_info:
         en: Contributors
       repeatable: yes
       order: 130
+    license:
+      data_type: entity_ref
+      entity_type: use_constraint
+      label:
+        en: License
+      order: 140
 keywords:
-  label:
-    en: Keywords
-  order: 20
   fields:
     topic_category:
       data_type: vocabulary
@@ -239,6 +242,12 @@ technical:
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Metadata Maintenance Frequency
+    content_coverage_type:
+      data_type: vocabulary
+      order: 70
+      vocabulary_name: iso19115_md_coverage_content_type_code
+      label:
+        en: Content Coverage Type
 components:
   label:
     en: Components

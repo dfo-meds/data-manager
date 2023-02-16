@@ -163,3 +163,30 @@ erddap_roles:
       en: Timeseries Extra Info
     trajectory_extra:
       en: Trajectory Extra Info
+cdm_data_types:
+  display:
+    en: CDM Data Types
+  uri:
+  terms:
+    Point:
+      en: Point
+    Profile:
+      en: Profile
+    TimeSeries:
+      en: Time Series
+    TimeSeriesProfile:
+      en: Time Series of Profiles
+    Trajectory:
+      en: Trajectory
+    TrajectoryProfile:
+      en: Trajectory of Profiles
+    Grid:
+      en: Grid (gridded data only)
+    MovingGrid:
+      en: Moving Grid (gridded data only)
+    RadialSweep:
+      en: Radial Sweep (gridded data only)
+    Swath:
+      en: Swath (gridded data only)
+    Other:
+      en: Other
