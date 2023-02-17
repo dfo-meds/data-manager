@@ -25,6 +25,7 @@ class ComponentReferenceField(HtmlContentField):
         return [
             self.ec.load_entity(ent.entity_type, ent.id)
             for ent, name, actions in self._component_list()
+            if not ent.is_deprecated
         ]
 
     def get_keywords(self, language):
@@ -37,6 +38,8 @@ class ComponentReferenceField(HtmlContentField):
 
         keywords = set()
         for ent in self._component_list():
+            if ent.is_deprecated:
+                continue
             actual_ent = self.ec.load_entity(ent.entity_type, ent.id)
             uri = default_uri
             if uri_field:

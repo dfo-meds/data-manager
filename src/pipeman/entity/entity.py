@@ -102,7 +102,7 @@ class FieldContainer:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
     def display_values(self, display_group = None):
-        for fn in self._fields:
+        for fn in self._ordered_field_names(display_group):
             if display_group is None or display_group == self._fields[fn].display_group:
                 field = self._fields[fn]
                 yield field.label(), field.display()
@@ -137,9 +137,12 @@ class FieldContainer:
         return self.data(key)
 
     def controls(self, display_group=None):
+        return {fn: self._fields[fn].control() for fn in self._ordered_field_names(display_group)}
+
+    def _ordered_field_names(self, display_group=None):
         fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]
         fields.sort(key=lambda x: self._fields[x].order)
-        return {fn: self._fields[fn].control() for fn in fields}
+        return fields
 
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
