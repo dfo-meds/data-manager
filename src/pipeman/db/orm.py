@@ -163,6 +163,7 @@ class Entity(_BaseModel, Base):
         return latest
 
     def specific_revision(self, rev_no):
+        rev_no = int(rev_no)
         for ed in self.data:
             if ed.revision_no == rev_no:
                 return ed
@@ -260,6 +261,7 @@ class Dataset(_BaseModel, Base):
         return latest
 
     def specific_revision(self, rev_no):
+        rev_no = int(rev_no)
         for ed in self.data:
             if ed.revision_no == rev_no:
                 return ed

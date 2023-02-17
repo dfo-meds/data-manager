@@ -1,3 +1,9 @@
+use_constraint:
+  fields:
+    erddap_display:
+      data_type: multitext
+      label:
+        en: ERDDAP License Text
 variable:
   fields:
     source_name:
@@ -27,11 +33,11 @@ variable:
       label:
         en: Destination Data Type
     min_value:
-      data_type: float
+      data_type: decimal
       label:
         en: Actual Minimum Value
     max_value:
-      data_type: float
+      data_type: decimal
       label:
         en: Actual Maximum Value
     encoding:
@@ -75,18 +81,18 @@ variable:
       label:
         en: Units/DateTime Format
     valid_min:
-      data_type: float
+      data_type: decimal
       label:
         en: Minimum Valid Value
     valid_max:
-      data_type: float
+      data_type: decimal
       label:
         en: Maximum Valid Value
     role:
       data_type: vocabulary
       vocabulary_name: erddap_roles
       label:
-        en: Dataset Role
+        en: Variable Role
     is_axis:
       data_type: boolean
       label:

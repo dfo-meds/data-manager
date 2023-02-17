@@ -1,11 +1,12 @@
 from autoinject import injector
-from pipeman.util import deep_update
+from pipeman.util import deep_update, load_object
 from pipeman.entity import FieldContainer
 import typing as t
 from pipeman.i18n import MultiLanguageString, gettext
 import copy
 from pipeman.workflow import WorkflowRegistry
 import logging
+import flask
 
 
 @injector.injectable_global
@@ -16,6 +17,10 @@ class MetadataRegistry:
         self._profiles = {}
         self._display_groups = {}
         self._security_labels = {}
+        self._dataset_output_processing_hooks = []
+
+    def register_metadata_processor(self, cb):
+        self._dataset_output_processing_hooks.append(cb)
 
     def security_labels_for_select(self):
         return [
@@ -86,7 +91,7 @@ class MetadataRegistry:
             else:
                 deep_update(self._fields, d)
 
-    def register_profile(self, profile_name, display_names, field_list, formatters):
+    def register_profile(self, profile_name, display_names, field_list, formatters, preprocess=None):
         if profile_name in self._profiles:
             if display_names:
                 deep_update(self._profiles[profile_name]["label"], display_names)
@@ -94,11 +99,14 @@ class MetadataRegistry:
                 deep_update(self._profiles[profile_name]["fields"], field_list)
             if formatters:
                 deep_update(self._profiles[profile_name]["formatters"], formatters)
+            if preprocess:
+                self._profiles[profile_name]["preprocess"] = preprocess
         else:
             self._profiles[profile_name] = {
                 "label": display_names or {},
                 "fields": field_list or {},
                 "formatters": formatters or {},
+                "preprocess": preprocess or None
             }
 
     def register_profiles_from_dict(self, d: dict):
@@ -118,8 +126,29 @@ class MetadataRegistry:
             return False
         return True
 
+    def metadata_processors(self, profile_name, format_name):
+        for hook in self._dataset_output_processing_hooks:
+            yield load_object(hook)
+        formatter = self._profiles[profile_name]["formatters"][format_name]
+        if "preprocess" in formatter and formatter["preprocess"]:
+            yield load_object(formatter['preprocess'])
+
+    def metadata_formats(self, profile_name):
+        return set((profile_name, x) for x in self._profiles[profile_name]['formatters'].keys()) if profile_name in self._profiles else set()
+
     def metadata_format_template(self, profile_name, format_name):
         return self._profiles[profile_name]["formatters"][format_name]["template"]
+
+    def metadata_format_link(self, profile_name, format_name, dataset_id, revision_no):
+        link = flask.url_for(
+            "core.generate_metadata_format",
+            profile_name=profile_name,
+            format_name=format_name,
+            dataset_id=dataset_id,
+            revision_no=revision_no
+        )
+        text = MultiLanguageString(self._profiles[profile_name]["formatters"][format_name]["label"])
+        return link, text
 
     def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, display_names=None, is_deprecated=False, org_id=None, extras=None, users=None):
         fields = set()
@@ -139,6 +168,9 @@ class MetadataRegistry:
 
 class Dataset(FieldContainer):
 
+    mreg: MetadataRegistry = None
+
+    @injector.construct
     def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
         super().__init__(dataset_id, field_list, field_values, display_names, is_deprecated, org_id)
         self.required_fields = required_fields
@@ -147,6 +179,19 @@ class Dataset(FieldContainer):
         self.metadata_id = ds_data_id
         self.extras = extras or {}
         self.users = []
+
+    def keywords(self, language=None):
+        keywords = set()
+        for fn in self._fields:
+            keywords.update(self._fields[fn].get_keywords(language))
+        return keywords
+
+    def metadata_format_links(self):
+        formats = set()
+        for profile in self.profiles:
+            formats.update(self.mreg.metadata_formats(profile))
+        for f in formats:
+            yield self.mreg.metadata_format_link(*f, self.dataset_id, self.metadata_id)
 
     def status(self):
         return self.extras["status"] if "status" in self.extras else None

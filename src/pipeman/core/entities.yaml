@@ -11,10 +11,6 @@ keyword:
   display:
     en: Custom Keyword
   fields:
-    short_name:
-      data_type: text
-      label:
-        en: Vocabulary Short Form
     description:
       data_type: multitext
       multilingual: yess

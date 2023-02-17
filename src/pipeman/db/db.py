@@ -5,7 +5,6 @@ import zirconium as zr
 from autoinject import injector
 
 from .orm import Base
-import threading
 
 class SessionWrapper:
     """Wrapper for a session to allow users to call methods on either the transaction or session object.
@@ -62,7 +61,6 @@ class Database:
         self.engine = None
         self._session = None
         self._transaction_stack = []
-        print(f"creation: {threading.get_ident()}")
 
     def _create_connection(self):
         if self.engine is None:

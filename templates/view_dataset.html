@@ -23,6 +23,12 @@
     {% endfor %}</tbody>
 </table>
 {% endfor %}
+<h2>{{'pipeman.dataset.metadata_files' | gettext}}</h2>
+<ul>
+{% for link, text in dataset.metadata_format_links() %}
+<li><a href="{{link}}">{{text}}</a></li>
+{% endfor %}
+</ul>
 {% endblock %}
 {% block sidebar %}
 {% if actions %}

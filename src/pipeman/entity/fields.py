@@ -45,6 +45,23 @@ class Field:
     def unserialize(self, val):
         return val
 
+    def get_keywords(self, language):
+        if not self.value:
+            return set()
+        if "is_keyword" not in self.field_config or not self.field_config["is_keyword"]:
+            return set()
+        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
+        if use_repeatable:
+            keywords = set()
+            for value in self.value:
+                keywords.update(self._as_keyword(value, language))
+            return keywords
+        else:
+            return self._as_keyword(self.value, language)
+
+    def _as_keyword(self, value, language):
+        return str(value), None
+
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
         parent_args, field_args = self._split_args()
@@ -140,6 +157,8 @@ class Field:
             items = [self._format_for_ui(x) for x in self.value]
             return str(HtmlList(items))
         elif use_multilingual:
+            if isinstance(self.value, str):
+                return MultiLanguageString({"und": self.value})
             return MultiLanguageString({
                 x: self._format_for_ui(self.value[x]) for x in self.value
             })
@@ -150,9 +169,11 @@ class Field:
         use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
         use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
         value = self.value
+        if value is None:
+            return self._process_value(None, **kwargs)
         if index is not None and use_repeatable:
             if index >= len(self.value):
-                return None
+                return self._process_value(None, **kwargs)
             value = self.value[index]
             use_repeatable = False
         if lang is not None and use_multilingual:
@@ -160,23 +181,23 @@ class Field:
             use_multilingual = False
         if use_repeatable and use_multilingual:
             return [
-                {
+                MultiLanguageString({
                     y: self._process_value(value[x][y], **kwargs)
                     for y in x
-                }
+                })
                 for x in value
             ]
         elif use_repeatable:
             return [self._process_value(x, **kwargs) for x in value]
         elif use_multilingual:
-            return {
+            return MultiLanguageString({
                 x: self._process_value(value[x], **kwargs) for x in value
-            }
+            })
         else:
             return self._process_value(value, **kwargs)
 
-    def _process_value(self, val, **kwargs):
-        return val
+    def _process_value(self, val, none_as_blank=True, **kwargs):
+        return "" if val is None and none_as_blank else val
 
     def _format_for_ui(self, val):
         if val is None:
@@ -290,6 +311,16 @@ class DecimalField(NumberValidationMixin, Field):
     def _control_class(self) -> t.Callable:
         return wtf.DecimalField
 
+    def unserialize(self, val):
+        if val is None or val == "":
+            return None
+        return decimal.Decimal(val)
+
+    def serialize(self, val):
+        if val is None or val == "":
+            return None
+        return str(val)
+
 
 class EmailField(LengthValidationMixin, Field):
 
@@ -323,6 +354,36 @@ class ChoiceField(Field):
         super().__init__(*args, **kwargs)
         self._values = None
         self._use_default_repeatable = False
+
+    def _as_keyword(self, value, language):
+        print(value)
+        keyword_mode = self.field_config["keyword_type"]
+        uri = self.field_config["keyword_uri"] if "keyword_uri" in self.field_config else None
+        if keyword_mode == "translated":
+            disp = self._get_display(value)
+            if isinstance(disp, dict):
+                if language == "*":
+                    keys = [disp.keys()]
+                    omit_und = len(keys) > 1 or keys[0] != "und"
+                    keywords = set()
+                    for key in disp:
+                        if omit_und and key == "und":
+                            continue
+                        keywords.add((disp[key], uri))
+                    return keywords
+                elif language in disp:
+                    return {(disp[language], uri), }
+                elif "und" in disp:
+                    return {(disp["und"], uri), }
+                else:
+                    return set()
+            else:
+                return {(disp, uri), }
+        else:
+            return {(value, uri), }
+
+    def _get_display(self, value):
+        return self.field_config["values"][value]
 
     def choices(self):
         if self._values is None:
@@ -474,6 +535,14 @@ class VocabularyReferenceField(ChoiceField):
         super().__init__(*args, **kwargs)
         self._value_cache = None
 
+    def _get_display(self, value):
+        with self.db as session:
+            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name'], short_name=value).first()
+            if term:
+                dns = json.loads(term.display_names)
+                dns['und'] = value
+                return dns
+
     def choices(self):
         if self._value_cache is None:
             self._value_cache = self._load_values()
@@ -488,10 +557,12 @@ class VocabularyReferenceField(ChoiceField):
                 values.append((term.short_name, MultiLanguageString(dns)))
         return values
 
-    def _process_value(self, val, **kwargs):
+    def _process_value(self, val, none_as_blank=True, **kwargs):
         with self.db as session:
             term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config["vocabulary_name"], short_name=val).first()
-            return {
-                "short_name": term.short_name,
-                "display": MultiLanguageString(json.loads(term.display_names))
-            }
+            if term is not None:
+                return {
+                    "short_name": term.short_name,
+                    "display": MultiLanguageString(json.loads(term.display_names))
+                }
+        return {"short_name": "", "display": ""} if none_as_blank else None

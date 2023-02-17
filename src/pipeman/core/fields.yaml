@@ -21,3 +21,6 @@ keywords:
       entity_type: keyword
       label:
         en: Custom Keywords
+      is_keyword: yes
+      keyword_mode: translated
+

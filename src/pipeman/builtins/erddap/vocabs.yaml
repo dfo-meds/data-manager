@@ -1,3 +1,12 @@
+erddap_dataset_types:
+  display:
+    en: ERDDAP Dataset Types
+  uri:
+  terms:
+    EDDTableFromNcFiles:
+      en: Table from NetCDF
+    EDDTableFromAsciiFiles:
+      en: Table from ASCII
 erddap_data_types:
   display:
     en: ERDDAP Variable Data Types

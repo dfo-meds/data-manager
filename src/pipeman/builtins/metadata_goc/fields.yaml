@@ -5,18 +5,24 @@ keywords:
       vocabulary_name: goc_subjects
       label:
         en: GoC Subject
+      is_keyword: yes
+      keyword_type: translated
     goc_publication_place:
       data_type: vocabulary
       vocabulary_name: goc_places
       label:
         en: GoC Publication Places
       repeatable: yes
+      is_keyword: yes
+      keyword_type: translated
     goc_audience:
       data_type: vocabulary
       vocabulary_name: goc_audiences
       label:
         en: GoC Audiences
       repeatable: yes
+      is_keyword: yes
+      keyword_type: translated
 publishing:
   fields:
     goc_collection_type:

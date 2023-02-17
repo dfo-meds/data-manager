@@ -1,4 +1,4 @@
-from .system import System, load_dynamic_class
+from .system import System, load_dynamic_class, load_object
 from .errors import TranslatableError, UserInputError
 from .dict import deep_update
 

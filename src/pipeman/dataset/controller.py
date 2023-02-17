@@ -17,6 +17,7 @@ from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_que
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
+import re
 
 
 @injector.injectable
@@ -304,10 +305,18 @@ class DatasetController:
             flask.flash(gettext("pipeman.dataset.publication_in_progress"), "success")
 
     def generate_metadata_file(self, dataset, profile_name, format_name):
-        return flask.render_template(
+        args = {
+            "dataset": dataset
+        }
+        for processor in self.reg.metadata_processors(profile_name, format_name):
+            updates = processor(**args)
+            if updates:
+                args.update(updates)
+        content = flask.render_template(
             self.reg.metadata_format_template(profile_name, format_name),
-            dataset=dataset
+            **args
         )
+        return re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n"))
 
     def remove_dataset(self, dataset):
         with self.db as session:

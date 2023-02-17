@@ -38,8 +38,9 @@ class MultiLanguageString:
             raise ValueError("Language required")
 
     @injector.inject
-    def __str__(self, tm: TranslationManager = None, ld: LanguageDetector = None):
-        lang = ld.detect_language(list(self.language_map.keys()))
+    def render(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None):
+        lang_opts = list(self.language_map.keys())
+        lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
         use_blank = lang in self.language_map
         if lang in self.language_map and self.language_map[lang]:
             return self.language_map[lang]
@@ -50,3 +51,16 @@ class MultiLanguageString:
         if self.default_lang in self.language_map:
             return self.language_map[self.default_lang]
         return tm.get_text("pipeman.general.unknown")
+
+    def __call__(self, language=None):
+        return self.render(language)
+
+    def __html__(self):
+        return self.render()
+
+    def __str__(self):
+        return self.render()
+
+    def __getitem__(self, key):
+        return self.render(key)
+

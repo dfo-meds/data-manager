@@ -14,21 +14,25 @@ data_info:
       label:
         en: Title
       order: 20
+      multilingual: yes
     abstract:
       data_type: multitext
       label:
         en: Abstract
       order: 30
+      multilingual: yes
     purpose:
       data_type: multitext
       label:
         en: Purpose
       order: 40
+      multilingual: yes
     credit:
       data_type: multitext
       label:
         en: Credit
       order: 50
+      multilingual: yes
     doi:
       data_type: entity_ref
       entity_type: resource
@@ -90,6 +94,8 @@ keywords:
       label:
         en: Topic Category
       order: 10
+      is_keyword: true
+      keyword_type: value
 references:
   label:
     en: References

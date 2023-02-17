@@ -5,6 +5,7 @@ import flask_login
 from pipeman.i18n import MultiLanguageString
 import copy
 from pipeman.util import deep_update
+from functools import cache
 
 
 def entity_access(entity_type: str, op: str) -> bool:
@@ -118,10 +119,22 @@ class FieldContainer:
     def supported_display_groups(self) -> set:
         return set(self._fields[fn].display_group for fn in self._fields)
 
+    def __html__(self):
+        return str(self)
+
+    @cache
     def data(self, key, **kwargs):
         if key in self._fields:
-            return self._fields[key].data(**kwargs)
-        return None
+            try:
+                return self._fields[key].data(**kwargs)
+            except Exception as ex:
+                print(ex)
+                return "ERROR"
+
+    def __getitem__(self, key):
+        if key not in self._fields:
+            return ""
+        return self.data(key)
 
     def controls(self, display_group=None):
         fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]

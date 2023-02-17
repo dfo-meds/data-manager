@@ -2,7 +2,7 @@ erddap:
   label:
     en: Core ERDDAP
   fields:
-    erddap_dataset_name: yes
+    erddap_dataset_id: yes
     cdm_data_type: yes
     processing_level: no
     project: no
@@ -14,7 +14,7 @@ erddap:
     info_link: yes
     short_institution: yes
     author: yes
-    contributions: no
+    contributors: no
     contact_point: no
     revision_date: no
     creation_date: no
@@ -25,8 +25,13 @@ erddap:
     content_coverage_type: no
     variables: yes
     license: yes
+    erddap_dataset_type: yes
+    erddap_data_file_path: yes
+    erddap_data_file_pattern: yes
+    standard_name_vocab: no
   formatters:
     erddapxml:
       label:
-        en: ERDAP XML
+        en: ERDDAP XML
       template: erddap.xml
+      preprocess: pipeman.builtins.erddap.util.preprocess_dataset
