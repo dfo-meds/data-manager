@@ -17,6 +17,7 @@ from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_que
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
+from xml.dom import minidom
 import re
 
 
@@ -316,6 +317,7 @@ class DatasetController:
             self.reg.metadata_format_template(profile_name, format_name),
             **args
         )
+        xml = minidom.parseString(content)
         return re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n"))
 
     def remove_dataset(self, dataset):

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 {% macro render_multilingual_text(text) %}
   {% if text is not mapping %}
   <gco:CharacterString>{{text}}</gco:CharacterString>
@@ -233,7 +234,6 @@
   </lan:characterEncoding>
 </lan:PT_Locale>
 {% endmacro %}
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
   xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -370,6 +370,30 @@
       <mri:citation>
         {{render_citation(dataset_citation)}}
       </mri:citation>
+      {% if dataset['abstract'] %}
+      <mri:abstract xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['abstract'])}}</mri:abstract>
+      {% endif %}
+      {% if dataset['purpose'] %}
+      <mri:purpose xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['purpose'])}}</mri:purpose>
+      {% endif %}
+      {% if dataset['credit'] %}
+      <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['credit'])}}</mri:credit>
+      {% endif %}
+      {% if dataset['status'] %}
+      <mri:status>
+        <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{dataset['status']['short_name']}}">{{dataset['status']['short_name']}}</mcc:MD_ProgressCode>
+      </mri:status>
+      {% endif %}
+      {% if dataset['topic_category'] %}
+      <mri:topicCategory>
+        <mri:MD_TopicCategoryCode>{{dataset['topic_category']['short_name']}}</mri:MD_TopicCategoryCode>
+      </mri:topicCategory>
+      {% endif %}
+      {% if dataset['spatial_representation_type'] %}
+      <mri:spatialRepresentationType>
+        <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{dataset['spatial_representation']['short_name']}}">{{dataset['spatial_representation']['short_name']}}</mcc:MD_SpatialRepresentationTypeCode>
+      </mri:spatialRepresentationType>
+      {% endif %}
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
 </mdb:MD_Metadata>
