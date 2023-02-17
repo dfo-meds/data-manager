@@ -1,4 +1,5 @@
 from autoinject import injector
+import markupsafe
 
 
 @injector.injectable_global
@@ -37,6 +38,9 @@ class MultiLanguageString:
         if not self.language_map:
             raise ValueError("Language required")
 
+    def __bool__(self):
+        return any(self.language_map[x] for x in self.language_map)
+
     @injector.inject
     def render(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None):
         lang_opts = list(self.language_map.keys())
@@ -64,3 +68,13 @@ class MultiLanguageString:
     def __getitem__(self, key):
         return self.render(key)
 
+
+class MultiLanguageLink(MultiLanguageString):
+
+    def __init__(self, link, language_map: dict, default_lang="en"):
+        self.link = link
+        super().__init__(language_map, default_lang)
+
+    def render(self, *args, **kwargs):
+        text = super().render(*args, **kwargs)
+        return markupsafe.Markup(f'<a href="{markupsafe.escape(self.link)}">{markupsafe.escape(text)}</a>')

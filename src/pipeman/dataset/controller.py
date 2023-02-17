@@ -350,7 +350,9 @@ class DatasetController:
                     "pub_workflow": ds.pub_workflow,
                     "act_workflow": ds.act_workflow,
                     "status": ds.status,
-                    "security_level": ds.security_level
+                    "security_level": ds.security_level,
+                    "created_date": ds.created_date,
+                    "modified_date": ds.modified_date
                 }
             )
 

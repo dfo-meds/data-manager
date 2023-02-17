@@ -24,7 +24,11 @@ locale:
     language:
       data_type: text
       label:
-        en: ISO 639-3 Language Code
+        en: ISO 639 Language Code (Alpha-3)
+    a2_language:
+      data_type: text
+      label:
+        en: ISO 639 Language code (Alpha-2)
     country:
       data_type: text
       label:
@@ -102,6 +106,10 @@ citation:
       entity_type: resource
       label:
         en: Link
+    identifier:
+      data_type: text
+      label:
+        en: Identifier (e.g. DOI)
 graphic:
   display:
     en: Graphic
@@ -542,6 +550,10 @@ resource:
       vocabulary_name: iso19115_link_protocols
       label:
         en: Protocol
+    protocol_request:
+      data_type: text
+      label:
+        en: Protocol Request
     app_profile:
       data_type: text
       label:
@@ -574,10 +586,12 @@ contact:
       data_type: text
       label:
         en: Organization Name
+      multilingual: yes
     position_name:
       data_type: text
       label:
         en: Position Name
+      multilingual: yes
     phone:
       data_type: telephone
       label:

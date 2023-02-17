@@ -356,7 +356,6 @@ class ChoiceField(Field):
         self._use_default_repeatable = False
 
     def _as_keyword(self, value, language):
-        print(value)
         keyword_mode = self.field_config["keyword_type"]
         uri = self.field_config["keyword_uri"] if "keyword_uri" in self.field_config else None
         if keyword_mode == "translated":

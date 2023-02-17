@@ -1,1 +1,375 @@
-ISO 19115 XML
+{% macro render_multilingual_text(text) %}
+  {% if text is not mapping %}
+  <gco:CharacterString>{{text}}</gco:CharacterString>
+  {% else %}
+  {% if default_locale in text %}
+  <gco:CharacterString>{{text['default_locale']}}</gco:CharacterString>
+  {% elif "und" in text %}
+  <gco:CharacterString>{{text['und']}}</gco:CharacterString>
+  {% endif %}
+  <lan:PT_FreeText>
+    <lan:textGroup>
+  {% for a2l, a3l in locale_mapping %}
+      {% if a2l in text %}
+      <lan:LocalisedCharacterString locale="#{{a3l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
+      {% endif %}
+  {% endfor %}
+    </lan:textGroup>
+  </lan:PT_FreeText>
+  {% endif %}
+{% endmacro %}
+{% macro render_resource(resource) %}
+<cit:CI_OnlineResource>
+  <cit:linkage>
+    <gco:CharacterString>{{resource['url']}}</gco:CharacterString>
+  </cit:linkage>
+  {% if resource['protocol'] %}
+  <cit:protocol>
+    <gco:CharacterString>{{resource['protocol']['short_name']}}</gco:CharacterString>
+  </cit:protocol>
+  {% endif %}
+  {% if resource['app_profile'] %}
+  <cit:applicationProfile>
+    <gco:CharacterString>{{resource['app_profile']}}</gco:CharacterString>
+  </cit:applicationProfile>
+  {% endif %}
+  {% if resource['name'] %}
+  <cit:name xsi:type="lan:PT_FreeText_PropertyType">
+    {{render_multilingual_text(resource['name'])}}
+  </cit:name>
+  {% endif %}
+  {% if resource['description'] %}
+  <cit:description xsi:type="lan:PT_FreeText_PropertyType">
+    {{render_multilingual_text(resource['description'])}}
+  </cit:description>
+  {% endif %}
+  {% if resource['protocol_request'] %}
+  <cit:protocolRequest>
+    <gco:CharacterString>{{resource['protocol_request']}}</gco:CharacterString>
+  </cit:protocolRequest>
+  {% endif %}
+  {% if resource['function'] %}
+  <cit:function>
+    <cit:CI_OnLineFunctionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode" codeListValue="{{resource['function']['short_name']}}">{{resource['short_name']}}</cit:CI_OnLineFunctionCode>
+  </cit:function>
+  {% endif %}
+</cit:CI_OnlineResource>
+{% endmacro %}
+{% macro render_contact(contact) %}
+<cit:{% if contact['organization_name'] %}CI_Organisation{% else %}CI_Individual{% endif %}>
+  {% if contact['organization_name'] %}
+  <cit:name xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(contact['organization_name'])}}</cit:name>
+  {% else %}
+    {% if contact['individual_name'] %}
+    <cit:name>{{render_multilingual_text(contact['individual_name'])}}</cit:name>
+    {% endif %}
+    {% if contact['position_name'] %}
+    <cit:positionName xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(contact['position_name'])}}</cit:positionName>
+    {% endif %}
+  {% endif %}
+  <cit:contactInfo>
+    <cit:CI_Contact>
+      {% if contact['phone'] %}
+      <cit:phone>
+        <cit:CI_Telephone>
+          <cit:number>
+            <gco:CharacterString>{{contact['phone']}}</gco:CharacterString>
+          </cit:number>
+        </cit:CI_Telephone>
+      </cit:phone>
+      {% endif %}
+      <cit:address>
+        <cit:CI_Address>
+          {% for dp in contact['delivery_point'] %}
+          <cit:deliveryPoint>
+            <gco:CharacterString>{{dp}}</gco:CharacterString>
+          </cit:deliveryPoint>
+          {% endfor %}
+          {% if contact['city'] %}
+          <cit:city>
+            <gco:CharacterString>{{contact['city']}}</gco:CharacterString>
+          </cit:city>
+          {% endif %}
+          {% if contact['admin_area'] %}
+          <cit:administrativeArea>
+            <gco:CharacterString>{{contact['admin_area']}}</gco:CharacterString>
+          </cit:administrativeArea>
+          {% endif %}
+          {% if contact['country'] %}
+          <cit:country>
+            <gco:CharacterString>{{contact['country']}}</gco:CharacterString>
+          </cit:country>
+          {% endif %}
+          {% if contact['postal_code'] %}
+          <cit:postalCode>
+            <gco:CharacterString>{{contact['postal_code']}}</gco:CharacterString>
+          </cit:postalCode>
+          {% endif %}
+          {% for email in contact['email'] %}
+          <cit:electronicMailAddress>
+            <gco:CharacterString>{{email}}</gco:CharacterString>
+          </cit:electronicMailAddress>
+          {% endfor %}
+        </cit:CI_Address>
+      </cit:address>
+      {% if contact['web_resource'] %}
+      <cit:onlineResource>
+        {{render_resource(contact['web_resource'])}}
+      </cit:onlineResource>
+      {% endif %}
+      {% if contact['service_hours'] %}
+      <cit:hoursOfService xsi:type="lan:PT_FreeText_PropertyType">
+        {{render_multilingual_string(contact['service_hours'])}}
+      </cit:hoursOfService>
+      {% endif %}
+      {% if contact['instructions'] %}
+      <cit:contactInstructions xsi:type="lan:PT_FreeText_PropertyType">
+        {{render_multilingual_string(contact['instructions'])}}
+      </cit:contactInstructions>
+      {% endif %}
+    </cit:CI_Contact>
+  </cit:contactInfo>
+</cit:{% if contact['individual_name'] %}CI_Individual{% else %}CI_Organisation{% endif %}>
+{% endmacro %}
+{% macro render_citation(citation) %}
+<cit:CI_Citation>
+  {% if citation["identifier"] %}
+  <cit:identifier>
+    <gco:CharacterString>{{citation["identifier"]}}</gco:CharacterString>
+  </cit:identifier>
+  {% endif %}
+  <cit:title xsi:type="lan:PT_FreeText_PropertyType">
+    {{ render_multilingual_text(citation['title']) }}
+  </cit:title>
+  {% if citation['alt_title'] %}
+    {{ render_multilingual_text(citation['alt_title']) }}
+  {% endif %}
+  {% if citation["publication_date"] %}
+  <cit:date>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{citation["publication_date"].strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="publication">publication</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </cit:date>
+  {% endif %}
+  {% if citation["revision_date"] %}
+  <cit:date>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{citation["revision_date"].strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </cit:date>
+  {% endif %}
+  {% if citation["creation_date"] %}
+  <cit:date>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{citation["creation_date"].strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="creation">creation</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </cit:date>
+  {% endif %}
+  {% if citation['publisher'] %}
+   <cit:citedResponsibleParty>
+    <cit:CI_Responsibility>
+      <cit:role>
+        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="owner"/>
+      </cit:role>
+      <cit:party>
+        {{ render_contact(citation['publisher']) }}
+      </cit:party>
+    </cit:CI_Responsibility>
+  </cit:citedResponsibleParty>
+  {% endif %}
+  {% if citation['resource'] %}
+    <cit:onlineResource>{{render_resource(citation['resource'])}}</cit:onlineResource>
+  {% endif %}
+  {% if citation['isbn'] %}
+  <cit:ISBN><gco:CharacterString>{{citation['isbn']}}</gco:CharacterString></cit:ISBN>
+  {% endif %}
+  {% if citation['issn'] %}
+  <cit:ISSN><gco:CharacterString>{{citation['issn']}}</gco:CharacterString></cit:ISSN>
+  {% endif %}
+  {% if citation['collective_title'] %}
+  <cit:collectiveTitle>{{render_multilingual_text(citation['collective_title'])}}</cit:collectiveTitle>
+  {% endif %}
+  {% if citation['details'] %}
+  <cit:otherCitationDetails>{{render_multilingual_text(citation['details'])}}</cit:otherCitationDetails>
+  {% endif %}
+  {% if citation['presentation_form'] %}
+  <cit:presentationForm>
+    <cit:CI_PresentationFormCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_PresentationFormCode" codeListValue="{{citation['presentation_form']['short_name']}}"/>
+  </cit:presentationForm>
+  {% endif %}
+  {% if citation['edition'] %}
+  <cit:edition>{{render_multilingual_text(citation['edition'])}}</cit:edition>
+  {% endif %}
+  {% if citation['edition_date'] %}
+  <cit:editionDate><gco:DateTime>{{citation['edition_date'].strftime("%Y-%m-%dT%H:%m:%s")}}</gco:DateTime></cit:editionDate>
+  {% endif %}
+</cit:CI_Citation>
+{% endmacro %}
+{% macro render_locale(locale) %}
+<lan:PT_Locale>
+  <lan:language>
+    <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}">{{locale['language']}}</lan:LanguageCode>
+  </lan:language>
+  <lan:country>
+    <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}">{{locale['country']}}</lan:CountryCode>
+  </lan:country>
+  <lan:characterEncoding>
+    <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
+  </lan:characterEncoding>
+</lan:PT_Locale>
+{% endmacro %}
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
+  xmlns:gml="http://www.opengis.net/gml/3.2"
+  xmlns:mpc="http://standards.iso.org/iso/19115/-3/mpc/1.0"
+  xmlns:mri="http://standards.iso.org/iso/19115/-3/mri/1.0"
+  xmlns:mrl="http://standards.iso.org/iso/19115/-3/mrl/2.0"
+  xmlns:mmi="http://standards.iso.org/iso/19115/-3/mmi/1.0"
+  xmlns:mdb="http://standards.iso.org/iso/19115/-3/mdb/2.0"
+  xmlns:mcc="http://standards.iso.org/iso/19115/-3/mcc/1.0"
+  xmlns:msr="http://standards.iso.org/iso/19115/-3/msr/2.0"
+  xmlns:mac="http://standards.iso.org/iso/19115/-3/mac/2.0"
+  xmlns:cit="http://standards.iso.org/iso/19115/-3/cit/2.0"
+  xmlns:mrs="http://standards.iso.org/iso/19115/-3/mrs/1.0"
+  xmlns:gco="http://standards.iso.org/iso/19115/-3/gco/1.0"
+  xmlns:lan="http://standards.iso.org/iso/19115/-3/lan/1.0"
+  xmlns:mco="http://standards.iso.org/iso/19115/-3/mco/1.0"
+  xmlns:gex="http://standards.iso.org/iso/19115/-3/gex/1.0"
+  xmlns:mdq="http://standards.iso.org/iso/19157/-2/mdq/1.0"
+  xmlns:mas="http://standards.iso.org/iso/19115/-3/mas/1.0"
+  xmlns:mrd="http://standards.iso.org/iso/19115/-3/mrd/1.0"
+  xmlns:mrc="http://standards.iso.org/iso/19115/-3/mrc/2.0"
+  xmlns:gmx="http://www.isotc211.org/2005/gmx"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
+  <mdb:metadataIdentifier>
+    <mcc:MD_Identifier>
+      <mcc:authority>
+        <cit:CI_Citation>
+          <cit:title>
+            <gco:CharacterString>ca.gc.dfo-mpo</gco:CharacterString>
+          </cit:title>
+        </cit:CI_Citation>
+      </mcc:authority>
+      <mcc:code>
+        <gco:CharacterString>TODO</gco:CharacterString>
+      </mcc:code>
+    </mcc:MD_Identifier>
+  </mdb:metadataIdentifier>
+  <mdb:defaultLocale>
+    {{render_locale(dataset['default_locale'])}}
+  </mdb:defaultLocale>
+  {% if dataset['other_locales'] %}
+    {% for locale in dataset['other_locales'] %}
+      <mdb:otherLocale>
+        {{render_locale(locale)}}
+      </mdb:otherLocale>
+    {% endfor %}
+  {% endif %}
+  <mdb:metadataScope>
+    <mdb:MD_MetadataScope>
+      <mdb:resourceScope>
+        <mcc:MD_ScopeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="dataset" />
+      </mdb:resourceScope>
+    </mdb:MD_MetadataScope>
+  </mdb:metadataScope>
+      <mdb:metadataStandard>
+    <cit:CI_Citation>
+      <cit:title>
+        <gco:CharacterString>ISO 19115-1 Geographic information - Metadata</gco:CharacterString>
+      </cit:title>
+      <cit:edition>
+        <gco:CharacterString>First Edition 2014-04-01</gco:CharacterString>
+      </cit:edition>
+    </cit:CI_Citation>
+  </mdb:metadataStandard>
+  <mdb:metadataStandard>
+    <cit:CI_Citation>
+      <cit:title>
+        <gco:CharacterString>ISO 19115-2 Geographic information - Metadata</gco:CharacterString>
+      </cit:title>
+      <cit:edition>
+        <gco:CharacterString>Second Edition 2019-01</gco:CharacterString>
+      </cit:edition>
+    </cit:CI_Citation>
+  </mdb:metadataStandard>
+  <mdb:metadataStandard>
+    <cit:CI_Citation>
+      <cit:title>
+        <gco:CharacterString>ISO 19115-1 Geographic Information - Metadata Amendment 1</gco:CharacterString>
+      </cit:title>
+      <cit:edition>
+        <gco:CharacterString>2018-02</gco:CharacterString>
+      </cit:edition>
+    </cit:CI_Citation>
+  </mdb:metadataStandard>
+  <mdb:metadataProfile>
+    <cit:CI_Citation>
+      <cit:title>
+        <gco:CharacterString>Canadian Integrated Ocean Observing System Metadata Profile of ISO 19115</gco:CharacterString>
+      </cit:title>
+      <cit:date>
+        <cit:CI_Date>
+          <cit:date>
+            <gco:Date>2019-11-06</gco:Date>
+          </cit:date>
+          <cit:dateType>
+            <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="publication">publication</cit:CI_DateTypeCode>
+          </cit:dateType>
+        </cit:CI_Date>
+      </cit:date>
+    </cit:CI_Citation>
+  </mdb:metadataProfile>
+  <mdb:dateInfo>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{dataset.created_date().strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="created">created</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </mdb:dateInfo>
+  <mdb:dateInfo>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{dataset.modified_date().strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </mdb:dateInfo>
+    <mdb:contact>
+    <cit:CI_Responsibility>
+      <cit:role>
+        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="pointOfContact"/>
+      </cit:role>
+      <cit:party>
+        {{render_contact(dataset['contact_point'])}}
+      </cit:party>
+    </cit:CI_Responsibility>
+  </mdb:contact>
+  <mdb:identificationInfo>
+    <mri:MD_DataIdentification>
+      <mri:citation>
+        {{render_citation(dataset_citation)}}
+      </mri:citation>
+    </mri:MD_DataIdentification>
+  </mdb:identificationInfo>
+</mdb:MD_Metadata>

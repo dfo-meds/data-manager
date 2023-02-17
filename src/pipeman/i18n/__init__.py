@@ -1,5 +1,5 @@
 from autoinject import injector
-from pipeman.i18n.i18n import LanguageDetector, TranslationManager, DelayedTranslationString, MultiLanguageString
+from pipeman.i18n.i18n import LanguageDetector, TranslationManager, DelayedTranslationString, MultiLanguageString, MultiLanguageLink
 from jinja2 import pass_context
 
 

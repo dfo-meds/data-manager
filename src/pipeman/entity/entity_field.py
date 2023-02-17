@@ -3,7 +3,7 @@ from pipeman.entity.fields import ChoiceField, HtmlContentField
 from pipeman.entity.controller import EntityController
 from autoinject import injector
 import json
-from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
+from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, MultiLanguageLink
 import flask
 import markupsafe
 
@@ -106,6 +106,12 @@ class EntityReferenceField(ChoiceField):
         entity = self._process_value(value)
         if entity:
             return entity.data(keyword_field) if keyword_field else entity.get_displays()
+
+    def _format_for_ui(self, val):
+        entity = self._process_value(val)
+        if entity is None:
+            return ""
+        return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.get_displays())
 
     def _load_values(self):
         values = []

@@ -180,6 +180,12 @@ class Dataset(FieldContainer):
         self.extras = extras or {}
         self.users = []
 
+    def created_date(self):
+        return self.extras['created_date']
+
+    def modified_date(self):
+        return self.extras['modified_date']
+
     def keywords(self, language=None):
         keywords = set()
         for fn in self._fields:
