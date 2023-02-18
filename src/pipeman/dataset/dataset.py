@@ -187,9 +187,10 @@ class Dataset(FieldContainer):
         return self.extras['modified_date']
 
     def keywords(self, language=None):
-        keywords = set()
+        keywords = []
         for fn in self._fields:
-            keywords.update(self._fields[fn].get_keywords(language))
+            keywords.extend(self._fields[fn].get_keywords(language))
+        # TODO: unique filter of keywords by name and thesaurus
         return keywords
 
     def metadata_format_links(self):

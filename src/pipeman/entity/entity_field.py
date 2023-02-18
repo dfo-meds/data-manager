@@ -28,6 +28,35 @@ class ComponentReferenceField(HtmlContentField):
             if not ent.is_deprecated
         ]
 
+    def _extract_keywords(self, language, default_thesaurus, **kwargs):
+        keywords = set()
+        for value in self.data():
+            keywords.update(self._as_keyword(value, language, default_thesaurus, **kwargs))
+        return keywords
+
+    def _as_keyword(self, value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
+        field_name = self.field_config['keyword_config']['value_field'] if 'value_field' in self.field_config['keyword_config'] else None
+        disp = value.get_displays() if not field_name else value.data(field_name)
+        thesaurus = default_thesaurus if not thesaurus_field else value.data(thesaurus_field)
+        if isinstance(disp, dict):
+            if language == "*":
+                keys = [disp.keys()]
+                omit_und = len(keys) > 1 or keys[0] != "und"
+                keywords = []
+                for key in disp:
+                    if omit_und and key == "und":
+                        continue
+                    keywords.append((disp[key], thesaurus))
+                return keywords
+            elif language in disp:
+                return [(disp[language], thesaurus), ]
+            elif "und" in disp:
+                return [(disp["und"], thesaurus), ]
+            else:
+                return []
+        else:
+            return [(disp, thesaurus), ]
+
     def get_keywords(self, language):
         if "is_keyword" not in self.field_config or not self.field_config["is_keyword"]:
             return set()
@@ -100,6 +129,30 @@ class EntityReferenceField(ChoiceField):
         elif self.value:
             refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
         return refs
+
+    def _as_keyword(self, str_value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
+        value = self._process_value(str_value)
+        field_name = self.field_config['keyword_config']['value_field'] if 'value_field' in self.field_config['keyword_config'] else None
+        disp = value.get_displays() if not field_name else value.data(field_name)
+        thesaurus = default_thesaurus if not thesaurus_field else value.data(thesaurus_field)
+        if isinstance(disp, dict):
+            if language == "*":
+                keys = [disp.keys()]
+                omit_und = len(keys) > 1 or keys[0] != "und"
+                keywords = []
+                for key in disp:
+                    if omit_und and key == "und":
+                        continue
+                    keywords.append((disp[key], thesaurus))
+                return keywords
+            elif language in disp:
+                return [(disp[language], thesaurus), ]
+            elif "und" in disp:
+                return [(disp["und"], thesaurus), ]
+            else:
+                return []
+        else:
+            return [(disp, thesaurus), ]
 
     def _get_display(self, value):
         keyword_field = self.field_config["keyword_field"] if "keyword_field" in self.field_config else None

@@ -1,3 +1,16 @@
+thesaurus:
+  display:
+    en: Thesaurus
+  fields:
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
+    type:
+      data_type: text
+      label:
+        en: Keyword Type
 variable:
   display:
     en: Variable
@@ -13,10 +26,11 @@ keyword:
   fields:
     description:
       data_type: multitext
-      multilingual: yess
+      multilingual: yes
       label:
         en: Description
-    uri:
-      data_type: url
+    thesaurus:
+      data_type: entity_ref
+      entity_type: thesaurus
       label:
-        en: Vocabulary URI
+        en: Thesaurus

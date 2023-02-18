@@ -142,9 +142,11 @@
   <cit:title xsi:type="lan:PT_FreeText_PropertyType">
     {{ render_multilingual_text(citation['title']) }}
   </cit:title>
+  <cit:altTitle xsi:type="lan:PT_FreeText_PropertyType">
   {% if citation['alt_title'] %}
     {{ render_multilingual_text(citation['alt_title']) }}
   {% endif %}
+  </cit:altTitle>
   {% if citation["publication_date"] %}
   <cit:date>
     <cit:CI_Date>
@@ -203,10 +205,10 @@
   <cit:ISSN><gco:CharacterString>{{citation['issn']}}</gco:CharacterString></cit:ISSN>
   {% endif %}
   {% if citation['collective_title'] %}
-  <cit:collectiveTitle>{{render_multilingual_text(citation['collective_title'])}}</cit:collectiveTitle>
+  <cit:collectiveTitle xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['collective_title'])}}</cit:collectiveTitle>
   {% endif %}
   {% if citation['details'] %}
-  <cit:otherCitationDetails>{{render_multilingual_text(citation['details'])}}</cit:otherCitationDetails>
+  <cit:otherCitationDetails xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['details'])}}</cit:otherCitationDetails>
   {% endif %}
   {% if citation['presentation_form'] %}
   <cit:presentationForm>
@@ -214,7 +216,7 @@
   </cit:presentationForm>
   {% endif %}
   {% if citation['edition'] %}
-  <cit:edition>{{render_multilingual_text(citation['edition'])}}</cit:edition>
+  <cit:edition xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['edition'])}}</cit:edition>
   {% endif %}
   {% if citation['edition_date'] %}
   <cit:editionDate><gco:DateTime>{{citation['edition_date'].strftime("%Y-%m-%dT%H:%m:%s")}}</gco:DateTime></cit:editionDate>
@@ -233,6 +235,21 @@
     <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
   </lan:characterEncoding>
 </lan:PT_Locale>
+{% endmacro %}
+{% macro render_maintenance(record) %}
+  <mmi:maintenanceNote xsi:type="lan:PT_FreeText_PropertyType">
+    {{ render_multilingual_text(record['notes']) }}
+  </mmi:maintenanceNote>
+  <mmi:maintenanceDate>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{record['date'].strftime('%Y-%m-%d')}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </mmi:maintenanceDate>
 {% endmacro %}
 <mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
@@ -394,6 +411,23 @@
         <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{dataset['spatial_representation']['short_name']}}">{{dataset['spatial_representation']['short_name']}}</mcc:MD_SpatialRepresentationTypeCode>
       </mri:spatialRepresentationType>
       {% endif %}
+      <mdb:resourceMaintenance>
+        <mmi:MD_MaintenanceInformation>
+          <mmi:maintenanceAndUpdateFrequency>
+            <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{dataset['metadata_maintenance_frequency']['short_name']}}">{{dataset['resource_maintenance_frequency']['short_name']}}</mmi:MD_MaintenanceFrequencyCode>
+          </mmi:maintenanceAndUpdateFrequency>
+        </mmi:MD_MaintenanceInformation>
+      </mdb:resourceMaintenance>
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
+  <mdb:metadataMaintenance>
+    <mmi:MD_MaintenanceInformation>
+      <mmi:maintenanceAndUpdateFrequency>
+        <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{dataset['metadata_maintenance_frequency']['short_name']}}">{{dataset['metadata_maintenance_frequency']['short_name']}}</mmi:MD_MaintenanceFrequencyCode>
+      </mmi:maintenanceAndUpdateFrequency>
+      {% for record in metadata_maintenance %}
+      {{ render_maintenance(record) }}
+      {% endfor %}
+    </mmi:MD_MaintenanceInformation>
+  </mdb:metadataMaintenance>
 </mdb:MD_Metadata>

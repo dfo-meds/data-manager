@@ -48,19 +48,33 @@ class Field:
     def get_keywords(self, language):
         if not self.value:
             return set()
-        if "is_keyword" not in self.field_config or not self.field_config["is_keyword"]:
+        if "keyword_config" not in self.field_config:
             return set()
+        if "is_keyword" not in self.field_config["keyword_config"] or not self.field_config["keyword_config"]["is_keyword"]:
+            return set()
+        default_thesaurus = None
+        thesaurus_field = None
+        extraction_method = "value"
+        if "thesaurus" in self.field_config["keyword_config"]:
+            default_thesaurus = self.field_config['keyword_config']['thesaurus']
+        if "thesaurus_field" in self.field_config["keyword_config"]:
+            thesaurus_field = self.field_config["keyword_config"]["thesaurus_field"]
+        if "extraction_method" in self.field_config["keyword_config"]:
+            extraction_method = self.field_config["keyword_config"]["extraction_method"]
+        return self._extract_keywords(language, default_thesaurus, thesaurus_field=thesaurus_field, extraction_method=extraction_method)
+
+    def _extract_keywords(self, language, default_thesaurus, **kwargs):
         use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
         if use_repeatable:
-            keywords = set()
+            keywords = []
             for value in self.value:
-                keywords.update(self._as_keyword(value, language))
+                keywords.extend(self._as_keyword(value, language, default_thesaurus, **kwargs))
             return keywords
         else:
-            return self._as_keyword(self.value, language)
+            return self._as_keyword(self.value, language, default_thesaurus, **kwargs)
 
-    def _as_keyword(self, value, language):
-        return str(value), None
+    def _as_keyword(self, value, language, default_thesaurus, **kwargs):
+        return [(str(value), default_thesaurus),]
 
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
@@ -355,31 +369,29 @@ class ChoiceField(Field):
         self._values = None
         self._use_default_repeatable = False
 
-    def _as_keyword(self, value, language):
-        keyword_mode = self.field_config["keyword_type"]
-        uri = self.field_config["keyword_uri"] if "keyword_uri" in self.field_config else None
-        if keyword_mode == "translated":
+    def _as_keyword(self, value, language, default_thesaurus, extraction_method, **kwargs):
+        if extraction_method == "translated":
             disp = self._get_display(value)
             if isinstance(disp, dict):
                 if language == "*":
                     keys = [disp.keys()]
                     omit_und = len(keys) > 1 or keys[0] != "und"
-                    keywords = set()
+                    keywords = []
                     for key in disp:
                         if omit_und and key == "und":
                             continue
-                        keywords.add((disp[key], uri))
+                        keywords.append((disp[key], default_thesaurus))
                     return keywords
                 elif language in disp:
-                    return {(disp[language], uri), }
+                    return [(disp[language], default_thesaurus), ]
                 elif "und" in disp:
-                    return {(disp["und"], uri), }
+                    return [(disp["und"], default_thesaurus), ]
                 else:
-                    return set()
+                    return []
             else:
-                return {(disp, uri), }
+                return [(disp, default_thesaurus), ]
         else:
-            return {(value, uri), }
+            return [(value, default_thesaurus), ]
 
     def _get_display(self, value):
         return self.field_config["values"][value]

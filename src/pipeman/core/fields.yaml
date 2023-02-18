@@ -21,6 +21,8 @@ keywords:
       entity_type: keyword
       label:
         en: Custom Keywords
-      is_keyword: yes
-      keyword_mode: translated
+      keyword_config:
+        is_keyword: yes
+        default_mode: translated
+        thesaurus_field: thesaurus
 

@@ -5,24 +5,55 @@ keywords:
       vocabulary_name: goc_subjects
       label:
         en: GoC Subject
-      is_keyword: yes
-      keyword_type: translated
+      keyword_config:
+        is_keyword: yes
+        extraction_method: translated
+        thesaurus:
+          citation:
+            title:
+              en: Government of Canada Core Subject Thesaurus
+            revision_date: 2016-10-13
+            resource:
+              url: https://open.canada.ca/data/en/dataset/d4a0e406-eea9-41a7-bcae-28c31f3b9c65
+              protocol:
+                short_name: "WWW:LINK"
+          type:
+            short_name: theme
     goc_publication_place:
       data_type: vocabulary
       vocabulary_name: goc_places
       label:
         en: GoC Publication Places
       repeatable: yes
-      is_keyword: yes
-      keyword_type: translated
+      keyword_config:
+        is_keyword: yes
+        extraction_method: translated
+        thesaurus:
+          citation:
+            title:
+              en: Government of Canada Census Divisions
+            revision_date: 2016-01-01
+            resource:
+              url: https://www12.statcan.gc.ca/census-recensement/2021/ref/dict/az/Definition-eng.cfm?ID=geo008
+              protocol:
+                short_name: "WWW:LINK"
+          type:
+            short_name: place
     goc_audience:
       data_type: vocabulary
       vocabulary_name: goc_audiences
       label:
         en: GoC Audiences
       repeatable: yes
-      is_keyword: yes
-      keyword_type: translated
+      keyword_config:
+        is_keyword: yes
+        extraction_method: translated
+        thesaurus:
+          citation:
+            title:
+              en: Government of Canada Audiences
+          type:
+            short_name: theme
 publishing:
   fields:
     goc_collection_type:

@@ -94,8 +94,6 @@ keywords:
       label:
         en: Topic Category
       order: 10
-      is_keyword: true
-      keyword_type: value
 references:
   label:
     en: References

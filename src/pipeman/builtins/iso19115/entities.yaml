@@ -17,6 +17,11 @@ maintenance:
       label:
         en: Notes
       multilingual: yes
+thesaurus:
+  fields:
+    type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_keyword_type_code
 locale:
   display:
     en: Locale
@@ -46,10 +51,12 @@ citation:
       data_type: text
       label:
         en: Title
+      multilingual: yes
     alt_title:
       data_type: text
       label:
         en: Alternative Title
+      multilingual: yes
     publication_date:
       data_type: date
       label:
@@ -66,6 +73,7 @@ citation:
       data_type: text
       label:
         en: Edition
+      multilingual: yes
     edition_date:
       data_type: date
       label:
@@ -89,10 +97,12 @@ citation:
       data_type: multitext
       label:
         en: Other Details
+      multilingual: yes
     collective_title:
       data_type: multitext
       label:
         en: Collective Title
+      multilingual: yes
     isbn:
       data_type: text
       label:
