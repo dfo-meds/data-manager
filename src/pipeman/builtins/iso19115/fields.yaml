@@ -79,12 +79,13 @@ data_info:
         en: Contributors
       repeatable: yes
       order: 130
-    license:
+    licenses:
       data_type: entity_ref
       entity_type: use_constraint
       label:
-        en: License
+        en: Data Constaints
       order: 140
+      repeatable: yes
 keywords:
   fields:
     topic_category:
@@ -105,20 +106,6 @@ references:
       label:
         en: Parent Metadata
       order: 10
-    alt_meta_refs:
-      data_type: entity_ref
-      entity_type: resource
-      label:
-        en: Alternative Metadata Links
-      order: 20
-      repeatable: yes
-    metadata_links:
-      data_type: entity_ref
-      entity_type: resource
-      label:
-        en: Metadata Links
-      repeatable: yes
-      order: 30
     additional_docs:
       data_type: entity_ref
       repeatable: yes
@@ -165,7 +152,13 @@ extent:
       data_type: decimal
       order: 70
       label:
-        en: Vertical Maximum
+        en: Vertical
+    vertical_ref_system:
+      data_type: entity_ref
+      entity_type: ref_system
+      label:
+        en: Vertical Reference System
+      order: 75
     start_time:
       data_type: datetime
       order: 80
@@ -195,13 +188,12 @@ extent:
       label:
         en: Temporal Resolution
       repeatable: yes
-    ref_systems:
+    horizontal_ref_system:
       data_type: entity_ref
       order: 130
       entity_type: ref_system
-      repeatable: yes
       label:
-        en: Reference Systems
+        en: Horizontal Reference System
 technical:
   label:
     en: Technical
@@ -212,14 +204,27 @@ technical:
       order: 10
       entity_type: locale
       label:
-        en: Default Locale
+        en: Default Metadata Locale
     other_locales:
       data_type: entity_ref
       order: 20
       repeatable: yes
       entity_type: locale
       label:
-        en: Other Locales
+        en: Other Metadata Locales
+    dataset_locale:
+      data_type: entity_ref
+      order: 25
+      entity_type: locale
+      label:
+        en: Dataset Primary Language
+    dataset_other_locales:
+      data_type: entity_ref
+      order: 26
+      entity_type: locale
+      label:
+        en: Dataset Other Languages
+      repeatable: yes
     status:
       data_type: vocabulary
       order: 30
@@ -262,3 +267,20 @@ components:
       entity_type: maintenance
       label:
         en: Maintenance Records
+publishing:
+  label:
+    en: Publishing Info
+  fields:
+    distributors:
+      data_type: component_ref
+      entity_type: dist_channel
+      label:
+        en: Distribution Channels
+      repeatable: yes
+    meta_licenses:
+      data_type: entity_ref
+      entity_type: use_constraint
+      label:
+        en: Metadata Constaints
+      order: 150
+      repeatable: yes

@@ -46,44 +46,16 @@ class ComponentReferenceField(HtmlContentField):
                 for key in disp:
                     if omit_und and key == "und":
                         continue
-                    keywords.append((disp[key], thesaurus))
+                    keywords.append((disp[key], key, thesaurus))
                 return keywords
             elif language in disp:
-                return [(disp[language], thesaurus), ]
+                return [(disp[language], language, thesaurus), ]
             elif "und" in disp:
-                return [(disp["und"], thesaurus), ]
+                return [(disp["und"], "und", thesaurus), ]
             else:
                 return []
         else:
-            return [(disp, thesaurus), ]
-
-    def get_keywords(self, language):
-        if "is_keyword" not in self.field_config or not self.field_config["is_keyword"]:
-            return set()
-        keyword_mode = self.field_config["keyword_type"]
-        keyword_field = self.field_config["keyword_field"] if "keyword_field" in self.field_config else None
-        uri_field = self.field_config["keyword_uri_field"] if "keyword_uri_field" in self.field_config else None
-        default_uri = self.field_config["keyword_uri"] if "keyword_uri" in self.field_config else None
-
-        keywords = set()
-        for ent in self._component_list():
-            if ent.is_deprecated:
-                continue
-            actual_ent = self.ec.load_entity(ent.entity_type, ent.id)
-            uri = default_uri
-            if uri_field:
-                uri = actual_ent.data(uri_field)
-            disp = actual_ent.data(keyword_field) if keyword_field else actual_ent.get_displays()
-            if keyword_mode == "translated":
-                if language == "*":
-                    keywords.update({(v, uri) for v in disp.values()})
-                if language in disp:
-                    keywords.add(disp[language])
-                elif "und" in disp:
-                    keywords.add(disp["und"])
-            elif keyword_mode == "all_languages":
-                keywords.update(disp.values())
-        return keywords
+            return [(disp, "und", thesaurus), ]
 
     def _build_html_content(self):
         create_link = None
@@ -143,16 +115,16 @@ class EntityReferenceField(ChoiceField):
                 for key in disp:
                     if omit_und and key == "und":
                         continue
-                    keywords.append((disp[key], thesaurus))
+                    keywords.append((disp[key], key, thesaurus))
                 return keywords
             elif language in disp:
-                return [(disp[language], thesaurus), ]
+                return [(disp[language], language, thesaurus), ]
             elif "und" in disp:
-                return [(disp["und"], thesaurus), ]
+                return [(disp["und"], "und", thesaurus), ]
             else:
                 return []
         else:
-            return [(disp, thesaurus), ]
+            return [(disp, "und", thesaurus), ]
 
     def _get_display(self, value):
         keyword_field = self.field_config["keyword_field"] if "keyword_field" in self.field_config else None

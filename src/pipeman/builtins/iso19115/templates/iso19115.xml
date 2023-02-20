@@ -1,256 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-{% macro render_multilingual_text(text) %}
-  {% if text is not mapping %}
-  <gco:CharacterString>{{text}}</gco:CharacterString>
-  {% else %}
-  {% if default_locale in text %}
-  <gco:CharacterString>{{text['default_locale']}}</gco:CharacterString>
-  {% elif "und" in text %}
-  <gco:CharacterString>{{text['und']}}</gco:CharacterString>
-  {% endif %}
-  <lan:PT_FreeText>
-    <lan:textGroup>
-  {% for a2l, a3l in locale_mapping %}
-      {% if a2l in text %}
-      <lan:LocalisedCharacterString locale="#{{a3l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
-      {% endif %}
-  {% endfor %}
-    </lan:textGroup>
-  </lan:PT_FreeText>
-  {% endif %}
-{% endmacro %}
-{% macro render_resource(resource) %}
-<cit:CI_OnlineResource>
-  <cit:linkage>
-    <gco:CharacterString>{{resource['url']}}</gco:CharacterString>
-  </cit:linkage>
-  {% if resource['protocol'] %}
-  <cit:protocol>
-    <gco:CharacterString>{{resource['protocol']['short_name']}}</gco:CharacterString>
-  </cit:protocol>
-  {% endif %}
-  {% if resource['app_profile'] %}
-  <cit:applicationProfile>
-    <gco:CharacterString>{{resource['app_profile']}}</gco:CharacterString>
-  </cit:applicationProfile>
-  {% endif %}
-  {% if resource['name'] %}
-  <cit:name xsi:type="lan:PT_FreeText_PropertyType">
-    {{render_multilingual_text(resource['name'])}}
-  </cit:name>
-  {% endif %}
-  {% if resource['description'] %}
-  <cit:description xsi:type="lan:PT_FreeText_PropertyType">
-    {{render_multilingual_text(resource['description'])}}
-  </cit:description>
-  {% endif %}
-  {% if resource['protocol_request'] %}
-  <cit:protocolRequest>
-    <gco:CharacterString>{{resource['protocol_request']}}</gco:CharacterString>
-  </cit:protocolRequest>
-  {% endif %}
-  {% if resource['function'] %}
-  <cit:function>
-    <cit:CI_OnLineFunctionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode" codeListValue="{{resource['function']['short_name']}}">{{resource['short_name']}}</cit:CI_OnLineFunctionCode>
-  </cit:function>
-  {% endif %}
-</cit:CI_OnlineResource>
-{% endmacro %}
-{% macro render_contact(contact) %}
-<cit:{% if contact['organization_name'] %}CI_Organisation{% else %}CI_Individual{% endif %}>
-  {% if contact['organization_name'] %}
-  <cit:name xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(contact['organization_name'])}}</cit:name>
-  {% else %}
-    {% if contact['individual_name'] %}
-    <cit:name>{{render_multilingual_text(contact['individual_name'])}}</cit:name>
-    {% endif %}
-    {% if contact['position_name'] %}
-    <cit:positionName xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(contact['position_name'])}}</cit:positionName>
-    {% endif %}
-  {% endif %}
-  <cit:contactInfo>
-    <cit:CI_Contact>
-      {% if contact['phone'] %}
-      <cit:phone>
-        <cit:CI_Telephone>
-          <cit:number>
-            <gco:CharacterString>{{contact['phone']}}</gco:CharacterString>
-          </cit:number>
-        </cit:CI_Telephone>
-      </cit:phone>
-      {% endif %}
-      <cit:address>
-        <cit:CI_Address>
-          {% for dp in contact['delivery_point'] %}
-          <cit:deliveryPoint>
-            <gco:CharacterString>{{dp}}</gco:CharacterString>
-          </cit:deliveryPoint>
-          {% endfor %}
-          {% if contact['city'] %}
-          <cit:city>
-            <gco:CharacterString>{{contact['city']}}</gco:CharacterString>
-          </cit:city>
-          {% endif %}
-          {% if contact['admin_area'] %}
-          <cit:administrativeArea>
-            <gco:CharacterString>{{contact['admin_area']}}</gco:CharacterString>
-          </cit:administrativeArea>
-          {% endif %}
-          {% if contact['country'] %}
-          <cit:country>
-            <gco:CharacterString>{{contact['country']}}</gco:CharacterString>
-          </cit:country>
-          {% endif %}
-          {% if contact['postal_code'] %}
-          <cit:postalCode>
-            <gco:CharacterString>{{contact['postal_code']}}</gco:CharacterString>
-          </cit:postalCode>
-          {% endif %}
-          {% for email in contact['email'] %}
-          <cit:electronicMailAddress>
-            <gco:CharacterString>{{email}}</gco:CharacterString>
-          </cit:electronicMailAddress>
-          {% endfor %}
-        </cit:CI_Address>
-      </cit:address>
-      {% if contact['web_resource'] %}
-      <cit:onlineResource>
-        {{render_resource(contact['web_resource'])}}
-      </cit:onlineResource>
-      {% endif %}
-      {% if contact['service_hours'] %}
-      <cit:hoursOfService xsi:type="lan:PT_FreeText_PropertyType">
-        {{render_multilingual_string(contact['service_hours'])}}
-      </cit:hoursOfService>
-      {% endif %}
-      {% if contact['instructions'] %}
-      <cit:contactInstructions xsi:type="lan:PT_FreeText_PropertyType">
-        {{render_multilingual_string(contact['instructions'])}}
-      </cit:contactInstructions>
-      {% endif %}
-    </cit:CI_Contact>
-  </cit:contactInfo>
-</cit:{% if contact['individual_name'] %}CI_Individual{% else %}CI_Organisation{% endif %}>
-{% endmacro %}
-{% macro render_citation(citation) %}
-<cit:CI_Citation>
-  {% if citation["identifier"] %}
-  <cit:identifier>
-    <gco:CharacterString>{{citation["identifier"]}}</gco:CharacterString>
-  </cit:identifier>
-  {% endif %}
-  <cit:title xsi:type="lan:PT_FreeText_PropertyType">
-    {{ render_multilingual_text(citation['title']) }}
-  </cit:title>
-  <cit:altTitle xsi:type="lan:PT_FreeText_PropertyType">
-  {% if citation['alt_title'] %}
-    {{ render_multilingual_text(citation['alt_title']) }}
-  {% endif %}
-  </cit:altTitle>
-  {% if citation["publication_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["publication_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="publication">publication</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
-  {% endif %}
-  {% if citation["revision_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["revision_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
-  {% endif %}
-  {% if citation["creation_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["creation_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="creation">creation</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
-  {% endif %}
-  {% if citation['publisher'] %}
-   <cit:citedResponsibleParty>
-    <cit:CI_Responsibility>
-      <cit:role>
-        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="owner"/>
-      </cit:role>
-      <cit:party>
-        {{ render_contact(citation['publisher']) }}
-      </cit:party>
-    </cit:CI_Responsibility>
-  </cit:citedResponsibleParty>
-  {% endif %}
-  {% if citation['resource'] %}
-    <cit:onlineResource>{{render_resource(citation['resource'])}}</cit:onlineResource>
-  {% endif %}
-  {% if citation['isbn'] %}
-  <cit:ISBN><gco:CharacterString>{{citation['isbn']}}</gco:CharacterString></cit:ISBN>
-  {% endif %}
-  {% if citation['issn'] %}
-  <cit:ISSN><gco:CharacterString>{{citation['issn']}}</gco:CharacterString></cit:ISSN>
-  {% endif %}
-  {% if citation['collective_title'] %}
-  <cit:collectiveTitle xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['collective_title'])}}</cit:collectiveTitle>
-  {% endif %}
-  {% if citation['details'] %}
-  <cit:otherCitationDetails xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['details'])}}</cit:otherCitationDetails>
-  {% endif %}
-  {% if citation['presentation_form'] %}
-  <cit:presentationForm>
-    <cit:CI_PresentationFormCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_PresentationFormCode" codeListValue="{{citation['presentation_form']['short_name']}}"/>
-  </cit:presentationForm>
-  {% endif %}
-  {% if citation['edition'] %}
-  <cit:edition xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(citation['edition'])}}</cit:edition>
-  {% endif %}
-  {% if citation['edition_date'] %}
-  <cit:editionDate><gco:DateTime>{{citation['edition_date'].strftime("%Y-%m-%dT%H:%m:%s")}}</gco:DateTime></cit:editionDate>
-  {% endif %}
-</cit:CI_Citation>
-{% endmacro %}
-{% macro render_locale(locale) %}
-<lan:PT_Locale>
-  <lan:language>
-    <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}">{{locale['language']}}</lan:LanguageCode>
-  </lan:language>
-  <lan:country>
-    <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}">{{locale['country']}}</lan:CountryCode>
-  </lan:country>
-  <lan:characterEncoding>
-    <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
-  </lan:characterEncoding>
-</lan:PT_Locale>
-{% endmacro %}
-{% macro render_maintenance(record) %}
-  <mmi:maintenanceNote xsi:type="lan:PT_FreeText_PropertyType">
-    {{ render_multilingual_text(record['notes']) }}
-  </mmi:maintenanceNote>
-  <mmi:maintenanceDate>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{record['date'].strftime('%Y-%m-%d')}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </mmi:maintenanceDate>
-{% endmacro %}
 <mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
   xmlns:gml="http://www.opengis.net/gml/3.2"
@@ -274,6 +22,7 @@
   xmlns:mrc="http://standards.iso.org/iso/19115/-3/mrc/2.0"
   xmlns:gmx="http://www.isotc211.org/2005/gmx"
   xmlns:xlink="http://www.w3.org/1999/xlink">
+  {% import 'iso_macros.xml' as iso %}
   <mdb:metadataIdentifier>
     <mcc:MD_Identifier>
       <mcc:authority>
@@ -284,20 +33,14 @@
         </cit:CI_Citation>
       </mcc:authority>
       <mcc:code>
-        <gco:CharacterString>TODO</gco:CharacterString>
+        <gco:CharacterString>{{ dataset.guid() }}</gco:CharacterString>
       </mcc:code>
     </mcc:MD_Identifier>
   </mdb:metadataIdentifier>
   <mdb:defaultLocale>
-    {{render_locale(dataset['default_locale'])}}
+    {{iso.render_locale(dataset['default_locale'])}}
   </mdb:defaultLocale>
-  {% if dataset['other_locales'] %}
-    {% for locale in dataset['other_locales'] %}
-      <mdb:otherLocale>
-        {{render_locale(locale)}}
-      </mdb:otherLocale>
-    {% endfor %}
-  {% endif %}
+  {# <!-- parentMetadata --> #}
   <mdb:metadataScope>
     <mdb:MD_MetadataScope>
       <mdb:resourceScope>
@@ -305,7 +48,37 @@
       </mdb:resourceScope>
     </mdb:MD_MetadataScope>
   </mdb:metadataScope>
-      <mdb:metadataStandard>
+  <mdb:contact>
+    <cit:CI_Responsibility>
+      <cit:role>
+        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="pointOfContact"/>
+      </cit:role>
+      <cit:party>
+        {{iso.render_contact(dataset['contact_point'])}}
+      </cit:party>
+    </cit:CI_Responsibility>
+  </mdb:contact>
+  <mdb:dateInfo>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{dataset.created_date().strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="created">created</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </mdb:dateInfo>
+  <mdb:dateInfo>
+    <cit:CI_Date>
+      <cit:date>
+        <gco:Date>{{dataset.modified_date().strftime("%Y-%m-%d")}}</gco:Date>
+      </cit:date>
+      <cit:dateType>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
+      </cit:dateType>
+    </cit:CI_Date>
+  </mdb:dateInfo>
+  <mdb:metadataStandard>
     <cit:CI_Citation>
       <cit:title>
         <gco:CharacterString>ISO 19115-1 Geographic information - Metadata</gco:CharacterString>
@@ -352,82 +125,181 @@
       </cit:date>
     </cit:CI_Citation>
   </mdb:metadataProfile>
-  <mdb:dateInfo>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{dataset.created_date().strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="created">created</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </mdb:dateInfo>
-  <mdb:dateInfo>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{dataset.modified_date().strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </mdb:dateInfo>
-    <mdb:contact>
-    <cit:CI_Responsibility>
-      <cit:role>
-        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="pointOfContact"/>
-      </cit:role>
-      <cit:party>
-        {{render_contact(dataset['contact_point'])}}
-      </cit:party>
-    </cit:CI_Responsibility>
-  </mdb:contact>
+  {# <!-- alternativeMetadataReference --> #}
+  {% if dataset['other_locales'] %}
+      <mdb:otherLocale>
+    {% for locale in dataset['other_locales'] %}
+        {{iso.render_locale(locale)}}
+    {% endfor %}
+      </mdb:otherLocale>
+  {% endif %}
+  {# <!-- metadataLinkage --> #}
+  {# <!-- spatialRepresentationInfo --> #}
+  <mdb:referenceSystemInfo>
+    {% if dataset['horizontal_ref_system'] %}
+     {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+    {% endif %}
+    {% if dataset['vertical_ref_system'] %}
+     {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+    {% endif %}
+  </mdb:referenceSystemInfo>
+  {# <!-- metadataExtensionInfo --> #}
   <mdb:identificationInfo>
     <mri:MD_DataIdentification>
       <mri:citation>
-        {{render_citation(dataset_citation)}}
+        {{iso.render_citation(dataset_citation)}}
       </mri:citation>
       {% if dataset['abstract'] %}
-      <mri:abstract xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['abstract'])}}</mri:abstract>
+      <mri:abstract xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['abstract'])}}</mri:abstract>
       {% endif %}
       {% if dataset['purpose'] %}
-      <mri:purpose xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['purpose'])}}</mri:purpose>
+      <mri:purpose xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['purpose'])}}</mri:purpose>
       {% endif %}
       {% if dataset['credit'] %}
-      <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{render_multilingual_text(dataset['credit'])}}</mri:credit>
+      <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['credit'])}}</mri:credit>
       {% endif %}
       {% if dataset['status'] %}
       <mri:status>
         <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{dataset['status']['short_name']}}">{{dataset['status']['short_name']}}</mcc:MD_ProgressCode>
       </mri:status>
       {% endif %}
-      {% if dataset['topic_category'] %}
-      <mri:topicCategory>
-        <mri:MD_TopicCategoryCode>{{dataset['topic_category']['short_name']}}</mri:MD_TopicCategoryCode>
-      </mri:topicCategory>
-      {% endif %}
+      {# <!-- pointOfContact --> #}
       {% if dataset['spatial_representation_type'] %}
       <mri:spatialRepresentationType>
         <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{dataset['spatial_representation']['short_name']}}">{{dataset['spatial_representation']['short_name']}}</mcc:MD_SpatialRepresentationTypeCode>
       </mri:spatialRepresentationType>
       {% endif %}
-      <mdb:resourceMaintenance>
-        <mmi:MD_MaintenanceInformation>
-          <mmi:maintenanceAndUpdateFrequency>
-            <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{dataset['metadata_maintenance_frequency']['short_name']}}">{{dataset['resource_maintenance_frequency']['short_name']}}</mmi:MD_MaintenanceFrequencyCode>
-          </mmi:maintenanceAndUpdateFrequency>
-        </mmi:MD_MaintenanceInformation>
-      </mdb:resourceMaintenance>
+      {# <!-- spatialResolution --> #}
+      {# <!-- temporalResolution --> #}
+      {% if dataset['topic_category'] %}
+      {% for tc in dataset['topic_category'] %}
+      <mri:topicCategory>
+        <mri:MD_TopicCategoryCode>{{tc['short_name']}}</mri:MD_TopicCategoryCode>
+      </mri:topicCategory>
+      {% endfor %}
+      {% endif %}
+      <mri:extent>
+        <gex:EX_Extent>
+          {% if dataset['bbox_north'] %}
+          <gex:geographicElement>
+            <gex:EX_GeographicBoundingBox>
+              <gex:extentTypeCode>
+                <gco:Boolean>true</gco:Boolean>
+              </gex:extentTypeCode>
+              <gex:westBoundLongitude>
+                <gco:Decimal>{{dataset['bbox_west']}}</gco:Decimal>
+              </gex:westBoundLongitude>
+              <gex:eastBoundLongitude>
+                <gco:Decimal>{{dataset['bbox_east']}}</gco:Decimal>
+              </gex:eastBoundLongitude>
+              <gex:southBoundLatitude>
+                <gco:Decimal>{{dataset['bbox_south']}}</gco:Decimal>
+              </gex:southBoundLatitude>
+              <gex:northBoundLatitude>
+                <gco:Decimal>{{dataset['bbox_north']}}</gco:Decimal>
+              </gex:northBoundLatitude>
+            </gex:EX_GeographicBoundingBox>
+          </gex:geographicElement>
+          {% endif %}
+          {% if dataset['start_time'] %}
+          <gex:temporalElement>
+            <gex:EX_TemporalExtent>
+              <gex:extent>
+                <gml:TimePeriod gml:id="time_period">
+                  <gml:beginPosition>{{dataset['start_time'].isoformat(timespec='milliseconds')}}</gml:beginPosition>
+                  {% if dataset['is_ongoing'] %}
+                  <gml:endPosition indeterminatePosition="now" />
+                  {% else %}
+                  <gml:endPosition>{{dataset['end_time'].isoformat(timespec='milliseconds')}}</gml:endPosition>
+                  {% endif %}
+                </gml:TimePeriod>
+              </gex:extent>
+            </gex:EX_TemporalExtent>
+          </gex:temporalElement>
+          {% endif %}
+          {% if dataset['vertical_min'] %}
+          <gex:verticalElement>
+            <gex:EX_VerticalExtent>
+              <gex:minimumValue>
+                <gco:Real>{{dataset['vertical_min']}}</gco:Real>
+              </gex:minimumValue>
+              <gex:maximumValue>
+                <gco:Real>{{dataset['vertical_max']}}</gco:Real>
+              </gex:maximumValue>
+              {% if dataset['vertical_ref_system'] %}
+              <gex:verticalCRSId>
+                {{ iso.render_ref_system(dataset['vertical_ref_system']) }}
+              </gex:verticalCRSId>
+              {% endif %}
+            </gex:EX_VerticalExtent>
+          </gex:verticalElement>
+          {% endif %}
+
+        </gex:EX_Extent>
+      </mri:extent>
+      {# <!-- additionalDocumentation --> #}
+      {# <!-- processingLevel --> #}
+      {# <!-- resourceMaintenance --> #}
+      {# <!-- graphicOverview --> #}
+      {# <!-- resourceFormat --> #}
+      {% if grouped_keywords %}
+        {% for key in grouped_keywords %}
+      <mri:descriptiveKeywords>
+        {{ iso.render_keywords(grouped_keywords[key]['keywords'], grouped_keywords[key]['thesaurus']) }}
+      </mri:descriptiveKeywords>
+        {% endfor %}
+      {% endif %}
+      {# <!-- resourceSpecificUsage --> #}
+      {% if dataset['licenses'] %}
+      {% for license in dataset['licenses'] %}
+      <mri:resourceConstraints>
+        {{ iso.render_constraint(license) }}
+      </mri:resourceConstraints>
+      {% endfor %}
+      {% endif %}
+      {# <!-- associatedResource --> #}
+      {% if dataset['dataset_locale'] %}
+      <mdb:defaultLocale>
+        {{iso.render_locale(dataset['dataset_locale'])}}
+      </mdb:defaultLocale>
+      {% endif %}
+      {% if dataset['dataset_other_locales'] %}
+          <mdb:otherLocale>
+        {% for locale in dataset['dataset_other_locales'] %}
+            {{iso.render_locale(locale)}}
+        {% endfor %}
+          </mdb:otherLocale>
+      {% endif %}
+      {# <!-- environmentDescription --> #}
+      {# <!-- supplementalInformation --> #}
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
+  {# <!-- contentInfo --> #}
+  <mdb:distributionInfo>
+    {% for dc in dataset['distributors'] %}
+      {{ iso.render_distribution(dc) }}
+    {% endfor %}
+  </mdb:distributionInfo>
+  {# <!-- dataQualityInfo --> #}
+  {# <!-- resourceLineage --> #}
+  {# <!-- portrayalCatalogueInfo --> #}
+  {% if dataset['meta_licenses'] %}
+  {% for license in dataset['meta_licenses'] %}
+  <mri:metadataConstraints>
+    {{ iso.render_constraint(license) }}
+  </mri:metadataConstraints>
+  {% endfor %}
+  {% endif %}
+  {# <!-- applicationSchemaInfo --> #}
   <mdb:metadataMaintenance>
     <mmi:MD_MaintenanceInformation>
       <mmi:maintenanceAndUpdateFrequency>
         <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{dataset['metadata_maintenance_frequency']['short_name']}}">{{dataset['metadata_maintenance_frequency']['short_name']}}</mmi:MD_MaintenanceFrequencyCode>
       </mmi:maintenanceAndUpdateFrequency>
       {% for record in metadata_maintenance %}
-      {{ render_maintenance(record) }}
+      {{ iso.render_maintenance(record) }}
       {% endfor %}
     </mmi:MD_MaintenanceInformation>
   </mdb:metadataMaintenance>
+  {# <!-- acquisitionInfo --> #}
 </mdb:MD_Metadata>

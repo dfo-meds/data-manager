@@ -180,6 +180,9 @@ class Dataset(FieldContainer):
         self.extras = extras or {}
         self.users = []
 
+    def guid(self):
+        return self.extras['guid'] if 'guid' in self.extras else ""
+
     def created_date(self):
         return self.extras['created_date']
 
@@ -227,4 +230,5 @@ class Dataset(FieldContainer):
             ('pipeman.dataset.act_workflow', self.act_workflow_display()),
             ('pipeman.dataset.pub_workflow', self.pub_workflow_display()),
             ('pipeman.dataset.security_level', self.security_level_display()),
+            ('pipeman.dataset.guid', self.guid()),
         ]

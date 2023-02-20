@@ -32,5 +32,6 @@ erddap:
     goc_publication_place: no
     goc_subject: yes
     goc_audience: no
+    distributor: yes
 
 

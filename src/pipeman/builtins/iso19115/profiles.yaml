@@ -37,6 +37,7 @@ iso19115:
     other_locales: no
     status: no
     spatial_representation_type: no
+    distributor: yes
     resource_maintenance_frequency: no
     metadata_maintenance_frequency: no
     variables: no

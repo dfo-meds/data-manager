@@ -132,6 +132,7 @@ graphic:
       data_type: multitext
       label:
         en: Description
+      multilingual: yes
     file_ext:
       data_type: text
       label:
@@ -141,11 +142,13 @@ graphic:
       entity_type: resource
       label:
         en: Reference Link
+      repeatable: yes
     use_constraint:
       data_type: entity_ref
       entity_type: use_constraint
       label:
         en: Use Constraint
+      repeatable: yes
 #resource_scope:
 #  display:
 #    en: Resource Scope
@@ -257,36 +260,36 @@ scope:
       vocabulary_name: iso19115_md_scope_code
       label:
         en: Scope Code
-    extent:
-      data_type: entity_ref
-      entity_type: extent
-      label:
-        en: Entity
-      repeatable: yes
-    attr_desc:
-      data_type: multitext
-      label:
-        en: Attribute Description
-    feat_desc:
-      data_type: multitext
-      label:
-        en: Feature Description
-    fint_desc:
-      data_type: multitext
-      label:
-        en: Feature Instance Description
-    aint_desc:
-      data_type: multitext
-      label:
-        en: Attribute Instance Description
-    dset_desc:
-      data_type: multitext
-      label:
-        en: Dataset Description
-    other_desc:
-      data_type: multitext
-      label:
-        en: Other Description
+#    extent:
+#      data_type: entity_ref
+#      entity_type: extent
+#      label:
+#        en: Entity
+#      repeatable: yes
+#    attr_desc:
+#      data_type: multitext
+#      label:
+#        en: Attribute Description
+#    feat_desc:
+#      data_type: multitext
+#      label:
+#        en: Feature Description
+#    fint_desc:
+#      data_type: multitext
+#      label:
+#        en: Feature Instance Description
+#    aint_desc:
+#      data_type: multitext
+#      label:
+#        en: Attribute Instance Description
+#    dset_desc:
+#      data_type: multitext
+#      label:
+#        en: Dataset Description
+#    other_desc:
+#      data_type: multitext
+#      label:
+#        en: Other Description
 #extent:
 #  display:
 #    en: Extent
@@ -451,15 +454,16 @@ use_constraint:
       label:
         en: Limitation Description
       repeatable: yes
+      multilingual: yes
     graphic:
       data_type: entity_ref
       entity_type: graphic
       label:
         en: Graphic
       repeatable: yes
-    reference_link:
+    reference:
       data_type: entity_ref
-      entity_type: resource
+      entity_type: citation
       label:
         en: Reference Link
       repeatable: yes
@@ -495,6 +499,7 @@ use_constraint:
       data_type: multitext
       label:
         en: Other Constraint Details
+      multilingual: yes
     classification:
       data_type: vocabulary
       label:
@@ -504,14 +509,17 @@ use_constraint:
       data_type: multitext
       label:
         en: User Notes
+      multilingual: yes
     classification_system:
       data_type: multitext
       label:
         en: Classification System
+      multilingual: yes
     handling_description:
       data_type: multitext
       label:
         en: Handling Description
+      multilingual: yes
 releasability:
   display:
     en: Release Statement
@@ -520,6 +528,7 @@ releasability:
       data_type: text
       label:
         en: Statement
+      multilingual: yes
     addressees:
       repeatable: yes
       data_type: contact
@@ -629,7 +638,6 @@ contact:
         en: Country
     email:
       data_type: email
-      repeatable: yes
       label:
         en: E-Mail
     web_resource:
@@ -637,6 +645,7 @@ contact:
       entity_type: resource
       label:
         en: Web Resource
+      repeatable: yes
     service_hours:
       data_type: multitext
       multilingual: yes
@@ -718,3 +727,24 @@ time_res:
       data_type: decimal
       label:
         en: Seconds
+dist_channel:
+  is_component: yes
+  display:
+    en: Distribution Channel
+  fields:
+    description:
+      data_type: multitext
+      label:
+        en: Description
+      multilingual: yes
+    distributor_contact:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Distributor Contact
+    links:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Resources
+      repeatable: yes

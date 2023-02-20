@@ -124,12 +124,16 @@ class FieldContainer:
 
     @cache
     def data(self, key, **kwargs):
+        print(f"{self.container_id}-{key}")
         if key in self._fields:
             try:
                 return self._fields[key].data(**kwargs)
             except Exception as ex:
                 print(ex)
                 return "ERROR"
+
+    def __contains__(self, item):
+        return item in self._fields
 
     def __getitem__(self, key):
         if key not in self._fields:

@@ -19,6 +19,7 @@ from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
 from xml.dom import minidom
 import re
+import uuid
 
 
 @injector.injectable
@@ -317,8 +318,7 @@ class DatasetController:
             self.reg.metadata_format_template(profile_name, format_name),
             **args
         )
-        xml = minidom.parseString(content)
-        return re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n"))
+        return re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip()
 
     def remove_dataset(self, dataset):
         with self.db as session:
@@ -354,7 +354,8 @@ class DatasetController:
                     "status": ds.status,
                     "security_level": ds.security_level,
                     "created_date": ds.created_date,
-                    "modified_date": ds.modified_date
+                    "modified_date": ds.modified_date,
+                    "guid": ds.guid
                 }
             )
 
@@ -370,6 +371,8 @@ class DatasetController:
                 ds.organization_id = dataset.organization_id
                 ds.display_names = json.dumps(dataset.get_displays())
                 ds.profiles = "\n".join(dataset.profiles)
+                if not ds.guid:
+                    ds.guid = str(uuid.uuid4())
             else:
                 ds = orm.Dataset(
                     organization_id=dataset.organization_id,
@@ -377,7 +380,8 @@ class DatasetController:
                     modified_date=datetime.datetime.now(),
                     is_deprecated=dataset.is_deprecated,
                     display_names=json.dumps(dataset.get_displays()),
-                    profiles="\n".join(dataset.profiles)
+                    profiles="\n".join(dataset.profiles),
+                    guid=str(uuid.uuid4())
                 )
                 session.add(ds)
             for keyword in dataset.extras:

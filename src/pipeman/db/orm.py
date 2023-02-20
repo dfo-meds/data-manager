@@ -238,6 +238,7 @@ class Dataset(_BaseModel, Base):
     act_workflow = sa.Column(sa.String(255), nullable=False)
     status = sa.Column(sa.String(255), nullable=False)
     security_level = sa.Column(sa.String(255), nullable=False)
+    guid = sa.Column(sa.String(255), nullable=False, unique=True)
 
     organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("MetadataEdition", back_populates="dataset")

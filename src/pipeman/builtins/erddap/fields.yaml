@@ -5,17 +5,12 @@ data_info:
       data_type: text
       label:
         en: Institution (Short)
-publishing:
-  label:
-    en: Publishing
-  weight: 150
+technical:
   fields:
     erddap_dataset_id:
       data_type: text
       label:
         en: ERDDAP Dataset ID
-technical:
-  fields:
     erddap_dataset_type:
       data_type: vocabulary
       vocabulary_name: erddap_dataset_types

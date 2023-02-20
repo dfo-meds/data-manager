@@ -74,7 +74,7 @@ class Field:
             return self._as_keyword(self.value, language, default_thesaurus, **kwargs)
 
     def _as_keyword(self, value, language, default_thesaurus, **kwargs):
-        return [(str(value), default_thesaurus),]
+        return [(str(value), "und", default_thesaurus),]
 
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
@@ -380,18 +380,18 @@ class ChoiceField(Field):
                     for key in disp:
                         if omit_und and key == "und":
                             continue
-                        keywords.append((disp[key], default_thesaurus))
+                        keywords.append((disp[key], key, default_thesaurus))
                     return keywords
                 elif language in disp:
-                    return [(disp[language], default_thesaurus), ]
+                    return [(disp[language], language, default_thesaurus), ]
                 elif "und" in disp:
-                    return [(disp["und"], default_thesaurus), ]
+                    return [(disp["und"], "und", default_thesaurus), ]
                 else:
                     return []
             else:
-                return [(disp, default_thesaurus), ]
+                return [(disp, "und", default_thesaurus), ]
         else:
-            return [(value, default_thesaurus), ]
+            return [(value, "und", default_thesaurus), ]
 
     def _get_display(self, value):
         return self.field_config["values"][value]
