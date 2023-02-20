@@ -3,35 +3,25 @@ erddap:
     en: Government of Canada ISO-19115
   extends: iso19115
   fields:
-    title: yes
-    abstract: yes
-    publication_date: yes
-    doi: no
-    info_link: no
-    author: yes
-    contributors: no
-    contact_point: yes
-    topic_category: yes
-    custom_keywords: no
-    resource_maintenance_frequency: yes
-    metadata_maintenance_frequency: yes
-    status: yes
-    default_locale: yes
-    ref_systems: no
-    license: yes
-    bbox_west: no
-    bbox_east: no
-    bbox_north: no
-    bbox_south: no
-    wkt_polygon: no
-    start_time: no
-    end_time: no
-    is_ongoing: no
-    goc_collection_type: yes
-    goc_publisher: yes
-    goc_publication_place: no
-    goc_subject: yes
-    goc_audience: no
-    distributor: yes
+    publication_date:
+      validation: required
+    author:
+      validation: required
+    topic_category:
+      validation: required
+    resource_maintenance_frequency:
+      validation: required
+    metadata_maintenance_frequency:
+      validation: required
+    status:
+      validation: required
+    goc_collection_type:
+      validation: required
+    goc_publisher:
+      validation: required
+    goc_publication_place:
+    goc_subject:
+      validation: required
+    goc_audience:
 
 

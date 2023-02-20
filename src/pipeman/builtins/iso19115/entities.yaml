@@ -22,6 +22,13 @@ thesaurus:
     type:
       data_type: vocabulary
       vocabulary_name: iso19115_md_keyword_type_code
+      label:
+        en: Keyword Type
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
 locale:
   display:
     en: Locale
@@ -43,6 +50,11 @@ locale:
       vocabulary_name: core_charsets
       label:
         en: Character Encoding
+  validation:
+    required:
+      - language
+      - a2_language
+      - encoding
 citation:
   display:
     en: Citation
@@ -98,11 +110,6 @@ citation:
       label:
         en: Other Details
       multilingual: yes
-    collective_title:
-      data_type: multitext
-      label:
-        en: Collective Title
-      multilingual: yes
     isbn:
       data_type: text
       label:
@@ -116,13 +123,29 @@ citation:
       entity_type: resource
       label:
         en: Link
-    identifier:
+    id_code:
       data_type: text
       label:
-        en: Identifier (e.g. DOI)
+        en: Identifier Code
+    id_description:
+      data_type: text
+      label:
+        en: Identifier Description
+      multilingual: yes
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: Identifier System
+  validation:
+    required:
+      - title
 graphic:
   display:
     en: Graphic
+  validation:
+    required:
+      - file_url
   fields:
     file_url:
       data_type: url
@@ -386,33 +409,28 @@ scope:
 ref_system:
   display:
     en: Reference System
+  validation:
+    required:
+      - code
   fields:
     system_type:
       data_type: vocabulary
       vocabulary_name: iso19115_md_reference_system_type_code
       label:
         en: Reference System Type
-    citation:
-      data_type: entity_ref
-      entity_type: citation
-      label:
-        en: Citation
     code:
       data_type: text
       label:
         en: Code
-    code_space:
-      data_type: text
-      label:
-        en: Code Space
-    version:
-      data_type: text
-      label:
-        en: Version
     description:
       data_type: text
       label:
         en: Description
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: Code System
 #location:
 #  display:
 #    en: Location
@@ -448,6 +466,9 @@ ref_system:
 use_constraint:
   display:
     en: Usage Constraint
+  validation:
+    custom:
+      - pipeman.builtins.iso19115.util.validate_use_constraint
   fields:
     description:
       data_type: multitext
@@ -523,6 +544,9 @@ use_constraint:
 releasability:
   display:
     en: Release Statement
+  validation:
+    custom:
+      - pipeman.builtins.iso19115.util.validate_releasability
   fields:
     statement:
       data_type: text
@@ -559,6 +583,9 @@ series:
 resource:
   display:
     en: Resource
+  validation:
+    required:
+      - url
   fields:
     url:
       data_type: url
@@ -592,10 +619,30 @@ resource:
       vocabulary_name: iso19115_ci_on_line_function_code
       label:
         en: Function
+id_system:
+  display:
+    en: Identifying System
+  fields:
+    authority:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Authority
+    code_space:
+      data_type: text
+      label:
+        en: Code Space
+    version:
+      data_type:
+        label:
+          en: Code Space Version
 contact:
   display:
     en: Contact
     fr: Contacte
+  validation:
+    custom:
+      - pipeman.builtins.iso19115.util.validate_contact
   fields:
     individual_name:
       data_type: text
@@ -609,7 +656,7 @@ contact:
     position_name:
       data_type: text
       label:
-        en: Position Name
+        en: Position Name (Individuals Only)
       multilingual: yes
     phone:
       data_type: telephone
@@ -656,13 +703,43 @@ contact:
       multilingual: yes
       label:
         en: Additional Instructions
-    persistent_id:
-      data_type: url
+    id_code:
+      data_type: text
       label:
-        und: RORID / ORCID
+        en: Identifier Code
+    id_description:
+      data_type: text
+      label:
+        en: Identifier Description
+      multilingual: yes
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: Identifier System
+    individuals:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Individuals (Orgs Only)
+    logo:
+      data_type: entity_ref
+      entity_type: graphic
+      label:
+        en: Logo (Orgs Only)
 spatial_res:
   display:
     en: Spatial Resolution
+  validation:
+    required:
+      - scale
+      - distance
+      - distance_units
+      - vertical
+      - vertical_units
+      - angular
+      - angular_units
+      - level_of_detail
   fields:
     scale:
       data_type: integer
@@ -699,9 +776,13 @@ spatial_res:
       data_type: multitext
       label:
         en: Level of Detail
+      multilingual: yes
 time_res:
   display:
     en: Time Resolution
+  validation:
+    custom:
+      - pipeman.builtins.iso19115.util.validate_time_res
   fields:
     years:
       data_type: integer
@@ -731,6 +812,11 @@ dist_channel:
   is_component: yes
   display:
     en: Distribution Channel
+  validation:
+    required:
+      - distributor_contact
+    recommended:
+      - links
   fields:
     description:
       data_type: multitext

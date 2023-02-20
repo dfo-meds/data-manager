@@ -2,49 +2,59 @@ iso19115:
   label:
     en: Core ISO-19115
   fields:
-    contact_point: yes
-    title: yes
-    abstract: no
-    purpose: no
-    credit: no
-    doi: no
-    info_link: no
-    publication_date: no
-    revision_date: no
-    creation_date: no
-    publisher: no
-    author: no
-    contributors: no
-    topic_category: yes
-    parent_metadata: no
-    alt_meta_refs: no
-    metadata_links: no
-    additional_docs: no
-    bbox_west: no
-    bbox_east: no
-    bbox_north: no
-    bbox_south: no
-    wkt_polygon: no
-    vertical_min: no
-    vertical_max: no
-    start_time: no
-    end_time: no
-    is_ongoing: no
-    spatial_resolution: no
-    temporal_resolution: no
-    ref_systems: no
-    default_locale: no
-    other_locales: no
-    status: no
-    spatial_representation_type: no
-    distributor: yes
-    resource_maintenance_frequency: no
-    metadata_maintenance_frequency: no
-    variables: no
-    iso_maintenance: no
-    custom_keywords: no
-    content_coverage_type: no
-    license: yes
+    contact_point:
+      validation: required
+    title:
+      validation: required
+    abstract:
+      validation: required
+    purpose:
+    credit:
+    doi:
+    info_link:
+    publication_date:
+    revision_date:
+    creation_date:
+      validation: required
+    publisher:
+    author:
+    contributors:
+    topic_category:
+    parent_metadata:
+    alt_meta_refs:
+    metadata_links:
+    additional_docs:
+    bbox_west:
+    bbox_east:
+    bbox_north:
+    bbox_south:
+    wkt_polygon:
+    vertical_min:
+    vertical_max:
+    start_time:
+    end_time:
+    is_ongoing:
+    spatial_resolution:
+    temporal_resolution:
+    horizontal_ref_system:
+    vertical_ref_system:
+    default_locale:
+      validation: required
+    other_locales:
+    status:
+    spatial_representation_type:
+    resource_maintenance_frequency:
+    metadata_maintenance_frequency:
+    variables:
+    iso_maintenance:
+    custom_keywords:
+    content_coverage_type:
+    licenses:
+      validation: required
+    dataset_locale:
+    dataset_other_locales:
+    distributors:
+    meta_licenses:
   formatters:
     iso19115xml:
       label:

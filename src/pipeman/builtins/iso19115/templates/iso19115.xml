@@ -40,7 +40,12 @@
   <mdb:defaultLocale>
     {{iso.render_locale(dataset['default_locale'])}}
   </mdb:defaultLocale>
+  {% if dataset['parent_metadata'] %}
+  <mdb:parentMetadata>
+    {{ iso.render_citation(dataset['parent_metadata']) }}
+  </mdb:parentMetadata>
   {# <!-- parentMetadata --> #}
+  {% endif %}
   <mdb:metadataScope>
     <mdb:MD_MetadataScope>
       <mdb:resourceScope>

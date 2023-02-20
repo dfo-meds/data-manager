@@ -1,4 +1,53 @@
 
+def validate_use_constraint(uc):
+    errors = []
+    if uc['classification']:
+        if uc['access_constraints']:
+            errors.append("pipeman.iso19115.security_constraint_has_access")
+        if uc['use_constraints']:
+            errors.append("pipeman.iso19115.security_constraint_has_use")
+        if uc['other_constraints']:
+            errors.append("pipeman.iso19115.security_constraint_has_other")
+    elif uc['user_notes'] or uc['classification_system'] or uc['handling_description']:
+        errors.append("pipeman.iso19115.security_constraint_missing_classification")
+    else:
+        if uc['use_constraints'] and uc['use_constraints']['short_name'] == 'otherRestrictions' and not uc['other_constraints']:
+            errors.append("pipeman.iso19115.legal_constraint_missing_other")
+        elif uc['access_constraints'] and uc['access_constraints']['short_name'] == 'otherRestrictions' and not uc['other_constraints']:
+            errors.append("pipeman.iso19115.legal_constraint_missing_other")
+    return errors
+
+
+def validate_time_res(tr):
+    if not (tr['years'] or tr['months'] or tr['days'] or tr['hours'] or tr['minutes'] or tr['seconds']):
+        return [("pipeman.iso19115.time_res_incomplete")]
+    return []
+
+
+def validate_contact(con):
+    errors = []
+    if not (con['individual_name'] or con['organization_name'] or con['position_name'] or con['logo']):
+        errors.append("pipeman.iso19115.contact_name_required")
+    if con['organization_name'] or con['logo']:
+        if con['individual_name']:
+            errors.append("pipeman.iso19115.org_has_individual_name")
+        if con['position_name']:
+            errors.append("pipeman.iso19115.org_has_position_name")
+        if any(x['organization_name'] or x['logo'] for x in con['individuals']):
+            errors.append("pipeman.iso19115.org_has_orgs")
+    else:
+        if con['individuals']:
+            errors.append("pipeman.iso19115.individual_has_individuals")
+    return errors
+
+
+def validate_releasability(rel):
+    errors = []
+    if not (rel['addressees'] or rel['statement']):
+        errors.append("pipeman.iso19115.releasability_requires_addressee_or_statement")
+    return errors
+
+
 def separate_keywords(keywords):
     groups = {}
     for keyword, language, thesaurus in keywords:

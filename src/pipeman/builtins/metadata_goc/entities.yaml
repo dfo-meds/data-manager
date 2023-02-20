@@ -1,6 +1,10 @@
 goc_publishing_section:
   display:
     en: GoC Publishing Sections
+  validation:
+    required:
+      - section_name
+      - publisher
   fields:
     section_name:
       data_type: text
@@ -15,6 +19,10 @@ goc_publishing_section:
 goc_publishing_org:
   display:
     en: GoC Publishers
+  validation:
+    required:
+      - publisher_name
+      - publisher_code
   fields:
     publisher_name:
       data_type: text

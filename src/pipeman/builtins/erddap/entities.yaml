@@ -5,6 +5,17 @@ use_constraint:
       label:
         en: ERDDAP License Text
 variable:
+  validation:
+    required:
+      - source_name
+      - destination_name
+      - source_data_type
+      - destination_data_type
+      - units
+    recommended:
+      - long_name
+      - standard_name
+      - ioos_category
   fields:
     source_name:
       data_type: text

@@ -2,33 +2,46 @@ erddap:
   label:
     en: Core ERDDAP
   fields:
-    erddap_dataset_id: yes
-    cdm_data_type: yes
-    processing_level: no
-    project: no
-    program: no
-    title: yes
-    abstract: no
-    credit: no
-    publication_date: yes
-    info_link: yes
-    short_institution: yes
-    author: yes
-    contributors: no
-    contact_point: no
-    revision_date: no
-    creation_date: no
-    custom_keywords: no
-    topic_category: no
-    iso_maintenance: no
-    spatial_representation_type: yes
-    content_coverage_type: no
-    variables: yes
-    license: yes
-    erddap_dataset_type: yes
-    erddap_data_file_path: yes
-    erddap_data_file_pattern: yes
-    standard_name_vocab: no
+    erddap_dataset_id:
+      validation: required
+    cdm_data_type:
+      validation: required
+    processing_level:
+    project:
+    program:
+    title:
+      validation: required
+    abstract:
+    credit:
+    publication_date:
+      validation: required
+    info_link:
+      valdiation: required
+    short_institution:
+      validation: required
+    author:
+      validation: required
+    contributors:
+    contact_point:
+    revision_date:
+    creation_date:
+    custom_keywords:
+    topic_category:
+    iso_maintenance:
+    spatial_representation_type:
+      validation: required
+    content_coverage_type:
+    variables:
+      validation: required
+    licenses:
+      validation: required
+    erddap_dataset_type:
+      validation: required
+    erddap_data_file_path:
+      validation: required
+    erddap_data_file_pattern:
+      validation: required
+    standard_name_vocab:
   formatters:
     erddapxml:
       label:

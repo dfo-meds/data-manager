@@ -25,4 +25,5 @@ keywords:
         is_keyword: yes
         default_mode: translated
         thesaurus_field: thesaurus
+        keyword_field: keyword
 

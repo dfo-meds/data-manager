@@ -1,6 +1,9 @@
 thesaurus:
   display:
     en: Thesaurus
+  validation:
+    required:
+      - citation
   fields:
     citation:
       data_type: entity_ref
@@ -23,12 +26,20 @@ variable:
 keyword:
   display:
     en: Custom Keyword
+  validation:
+    required:
+      - keyword
   fields:
+    keyword:
+      data_type: multitext
+      multilingual: yes
+      label:
+        en: Keyword Value
     description:
       data_type: multitext
       multilingual: yes
       label:
-        en: Description
+        en: Extended Description
     thesaurus:
       data_type: entity_ref
       entity_type: thesaurus
