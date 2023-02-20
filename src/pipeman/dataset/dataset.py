@@ -231,4 +231,5 @@ class Dataset(FieldContainer):
             ('pipeman.dataset.pub_workflow', self.pub_workflow_display()),
             ('pipeman.dataset.security_level', self.security_level_display()),
             ('pipeman.dataset.guid', self.guid()),
+
         ]

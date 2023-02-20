@@ -40,17 +40,19 @@ class EntityRegistry:
     def type_exists(self, key):
         return key in self._entity_types
 
-    def register_type(self, key, display_names, field_config, is_component: bool = None):
+    def register_type(self, key, display_names, field_config, validation, is_component: bool = None):
         if key in self._entity_types:
             deep_update(self._entity_types[key]["display"], display_names)
             deep_update(self._entity_types[key]["fields"], field_config)
+            deep_update(self._entity_types[key]["validation"], validation)
             if is_component is not None:
                 self._entity_types[key]['is_component'] = is_component
         else:
             self._entity_types[key] = {
                 "display": display_names,
                 "fields": field_config,
-                "is_component": bool(is_component)
+                "is_component": bool(is_component),
+                "validation": validation
             }
 
     def register_from_dict(self, cfg_dict):
@@ -60,6 +62,7 @@ class EntityRegistry:
                     key,
                     cfg_dict[key]["display"] if "display" in cfg_dict[key] else {},
                     cfg_dict[key]["fields"] if "fields" in cfg_dict[key] else {},
+                    cfg_dict[key]["validation"] if "validation" in cfg_dict[key] else {},
                     cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
                 )
 
@@ -124,7 +127,6 @@ class FieldContainer:
 
     @cache
     def data(self, key, **kwargs):
-        print(f"{self.container_id}-{key}")
         if key in self._fields:
             try:
                 return self._fields[key].data(**kwargs)
