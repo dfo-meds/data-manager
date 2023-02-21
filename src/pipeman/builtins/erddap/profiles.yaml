@@ -1,26 +1,36 @@
 erddap:
   label:
     en: Core ERDDAP
+  validation:
+    required:
+      - erddap_dataset_id
+      - cdm_data_type
+      - title
+      - publication_date
+      - info_link
+      - short_institution
+      - author
+      - spatial_representation_type
+      - variables
+      - erddap_data_file_path
+      - erddap_dataset_type
+      - licenses
+      - erddap_data_file_pattern
+    recommended:
+      - abstract
   fields:
     erddap_dataset_id:
-      validation: required
     cdm_data_type:
-      validation: required
     processing_level:
     project:
     program:
     title:
-      validation: required
     abstract:
     credit:
     publication_date:
-      validation: required
     info_link:
-      valdiation: required
     short_institution:
-      validation: required
     author:
-      validation: required
     contributors:
     contact_point:
     revision_date:
@@ -29,18 +39,12 @@ erddap:
     topic_category:
     iso_maintenance:
     spatial_representation_type:
-      validation: required
     content_coverage_type:
     variables:
-      validation: required
     licenses:
-      validation: required
     erddap_dataset_type:
-      validation: required
     erddap_data_file_path:
-      validation: required
     erddap_data_file_pattern:
-      validation: required
     standard_name_vocab:
   formatters:
     erddapxml:

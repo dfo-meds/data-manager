@@ -8,35 +8,11 @@ import flask
 import markupsafe
 
 
-class ComponentReferenceField(HtmlContentField):
+class EntityRefMixin:
 
-    DATA_TYPE = "component_ref"
-
-    ec: EntityController = None
-
-    @injector.construct
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def display(self):
-        return markupsafe.Markup(self._build_html_content())
-
-    def data(self, **kwargs):
-        return [
-            self.ec.load_entity(ent.entity_type, ent.id)
-            for ent, name, actions in self._component_list()
-            if not ent.is_deprecated
-        ]
-
-    def _extract_keywords(self, language, default_thesaurus, **kwargs):
-        keywords = set()
-        for value in self.data():
-            keywords.update(self._as_keyword(value, language, default_thesaurus, **kwargs))
-        return keywords
-
-    def _as_keyword(self, value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
-        field_name = self.field_config['keyword_config']['value_field'] if 'value_field' in self.field_config['keyword_config'] else None
-        disp = value.get_displays() if not field_name else value.data(field_name)
+    def extract_entity_keyword(self, value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
+        field_name = self.field_config['keyword_config']['keyword_field'] if 'keyword_field' in self.field_config['keyword_config'] else None
+        disp = value.display_names() if not field_name else value.data(field_name)
         thesaurus = default_thesaurus if not thesaurus_field else value.data(thesaurus_field)
         if isinstance(disp, dict):
             if language == "*":
@@ -57,6 +33,54 @@ class ComponentReferenceField(HtmlContentField):
         else:
             return [(disp, "und", thesaurus), ]
 
+    def validate(self, obj_path, memo):
+        errors = []
+        data = self.data()
+        if data is None:
+            return []
+        elif isinstance(data, list):
+            for ent in data:
+                if ent:
+                    errors.extend(ent.validate(obj_path, memo))
+        elif data:
+            errors.extend(data.validate(obj_path, memo))
+        return errors
+
+
+class ComponentReferenceField(EntityRefMixin, HtmlContentField):
+
+    DATA_TYPE = "component_ref"
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Component References are always repeatable
+        self.field_config["repeatable"] = True
+
+    def is_empty(self):
+        for x in self._component_list():
+            return False
+        return True
+
+    def display(self):
+        return markupsafe.Markup(self._build_html_content())
+
+    def data(self):
+        for c, _, _ in self._component_list():
+            if c.is_deprecated:
+                continue
+            ent = self.ec.load_entity(c.entity_type, c.id)
+            if ent:
+                yield ent
+
+    def _extract_keywords(self, language, default_thesaurus, **kwargs):
+        keywords = set()
+        for value in self.data():
+            keywords.update(self.extract_entity_keyword(value, language, default_thesaurus, **kwargs))
+        return keywords
+
     def _build_html_content(self):
         create_link = None
         if self.ec.has_access(self.field_config["entity_type"], "create"):
@@ -74,7 +98,7 @@ class ComponentReferenceField(HtmlContentField):
         return self.ec.list_components(self.field_config["entity_type"], self.parent_id)
 
 
-class EntityReferenceField(ChoiceField):
+class EntityReferenceField(EntityRefMixin, ChoiceField):
 
     DATA_TYPE = "entity_ref"
 
@@ -102,41 +126,15 @@ class EntityReferenceField(ChoiceField):
             refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
         return refs
 
-    def _as_keyword(self, str_value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
+    def _as_keyword(self, str_value, *args, **kwargs):
         value = self._process_value(str_value)
-        field_name = self.field_config['keyword_config']['value_field'] if 'value_field' in self.field_config['keyword_config'] else None
-        disp = value.get_displays() if not field_name else value.data(field_name)
-        thesaurus = default_thesaurus if not thesaurus_field else value.data(thesaurus_field)
-        if isinstance(disp, dict):
-            if language == "*":
-                keys = [disp.keys()]
-                omit_und = len(keys) > 1 or keys[0] != "und"
-                keywords = []
-                for key in disp:
-                    if omit_und and key == "und":
-                        continue
-                    keywords.append((disp[key], key, thesaurus))
-                return keywords
-            elif language in disp:
-                return [(disp[language], language, thesaurus), ]
-            elif "und" in disp:
-                return [(disp["und"], "und", thesaurus), ]
-            else:
-                return []
-        else:
-            return [(disp, "und", thesaurus), ]
-
-    def _get_display(self, value):
-        keyword_field = self.field_config["keyword_field"] if "keyword_field" in self.field_config else None
-        entity = self._process_value(value)
-        if entity:
-            return entity.data(keyword_field) if keyword_field else entity.get_displays()
+        return self.extract_entity_keyword(value, *args, **kwargs)
 
     def _format_for_ui(self, val):
         entity = self._process_value(val)
         if entity is None:
             return ""
-        return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.get_displays())
+        return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.display_names())
 
     def _load_values(self):
         values = []
@@ -166,17 +164,19 @@ class EntityReferenceField(ChoiceField):
                             values.append((dep_val_key, MultiLanguageString(dn_dep)))
                     elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
                         dep_dn = {
-                            key: dn[key] + f"[{dep_text[:-1]}" for key in dn
+                            key: f"{dn[key]} [{dep_text[:-1]}" for key in dn
                         }
                         values.append((val_key, MultiLanguageString(dep_dn)))
         return values if values else []
 
     def _process_value(self, val, **kwargs):
-        if val is None or "-" not in val:
+        if val is None or "-" not in val == '-' or val == "-":
             return None
-        entity_id, rev_no = val.split("-", maxsplit=1)
+        pieces = val.split("-", maxsplit=1)
+        if not len(pieces) == 2:
+            return None
         return self.ec.load_entity(
             None,
-            int(entity_id),
-            int(rev_no)
+            int(pieces[0]),
+            int(pieces[1])
         )

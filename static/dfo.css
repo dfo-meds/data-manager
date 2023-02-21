@@ -5,6 +5,38 @@ body {
     color: #333333;
     margin: 0;
 }
+ul.validation-results li {
+    list-style: none;
+    margin-top: 6px;
+    margin-bottom: 6px;
+    border: 3px solid #999999;
+    display: block;
+    width: 90%;
+    padding: 6px;
+}
+ul.validation-results p {
+    padding: 0;
+    margin: 0;
+}
+ul.validation-results .error_message {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+ul.validation-results .profile {
+    font-style: italic;
+}
+ul.validation-results .result-level-error {
+    background-color: #FFCCCC;
+    border-color: #FF0000;
+}
+ul.validation-results .result-level-warning {
+    background-color: #FFFFCC;
+    border-color: #FF9933;
+}
+ul.validation-results .result-level-success {
+    background-color: #CCFFCC;
+    border-color: #00FF00
+}
 a {
     color: #284162;
 }

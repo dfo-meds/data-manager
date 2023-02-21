@@ -85,25 +85,29 @@ class DatasetController:
                 **page_args
             )
 
-    def _build_action_list(self, ds, short_list: bool = True):
+    def _build_action_list(self, ds, short_list: bool = True, for_revision: bool = False):
         actions = ActionList()
         kwargs = {
             "dataset_id": ds.dataset_id if hasattr(ds, "dataset_id") else ds.id
         }
         if short_list:
             actions.add_action("pipeman.general.view", "core.view_dataset", **kwargs)
-        if self.has_access(ds, 'edit'):
-            actions.add_action("pipeman.general.edit", "core.edit_dataset", **kwargs)
-            actions.add_action("pipeman.dataset_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
-        if not short_list:
-            if self.has_access(ds, 'activate'):
-                actions.add_action("pipeman.dataset_activate.link", "core.activate_dataset", **kwargs)
-            if self.has_access(ds, "publish"):
-                actions.add_action("pipeman.dataset_publish.link", "core.publish_dataset", **kwargs)
-            if self.has_access(ds, "remove"):
-                actions.add_action("pipeman.general.remove", "core.remove_dataset", **kwargs)
-            if self.has_access(ds, "restore"):
-                actions.add_action("pipeman.general.restore", "core.restore_dataset", **kwargs)
+        if for_revision:
+            actions.add_action("pipeman.dataset_view_current.link", "core.view_dataset", **kwargs)
+        else:
+            actions.add_action("pipeman.dataset_validate.link", "core.validate_dataset", **kwargs)
+            if self.has_access(ds, 'edit'):
+                actions.add_action("pipeman.general.edit", "core.edit_dataset", **kwargs)
+                actions.add_action("pipeman.dataset_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
+            if not short_list:
+                if self.has_access(ds, 'activate'):
+                    actions.add_action("pipeman.dataset_activate.link", "core.activate_dataset", **kwargs)
+                if self.has_access(ds, "publish"):
+                    actions.add_action("pipeman.dataset_publish.link", "core.publish_dataset", **kwargs)
+                if self.has_access(ds, "remove"):
+                    actions.add_action("pipeman.general.remove", "core.remove_dataset", **kwargs)
+                if self.has_access(ds, "restore"):
+                    actions.add_action("pipeman.general.restore", "core.restore_dataset", **kwargs)
         return actions
 
     def _dataset_iterator(self, query):
@@ -161,9 +165,29 @@ class DatasetController:
             self.view_template,
             dataset=dataset,
             actions=self._build_action_list(dataset, False),
-            title=dataset.get_display(),
+            title=dataset.label(),
             groups=groups,
-            group_labels=labels
+            group_labels=labels,
+            pubs=self._build_published_list(dataset)
+        )
+
+    def _build_published_list(self, dataset):
+        with self.db as session:
+            ds = session.query(orm.Dataset).filter_by(id=dataset.container_id).first()
+            for rev in ds.data:
+                if rev.is_published:
+                    link = flask.url_for("core.view_dataset_revision",
+                                         dataset_id=rev.dataset_id,
+                                         revision_no=rev.revision_no)
+                    yield link, rev.published_date
+
+    def dataset_validation_page(self, dataset):
+        return flask.render_template(
+            "validation_page.html",
+            dataset=dataset,
+            actions=self._build_action_list(dataset, True),
+            title=gettext("pipeman.dataset_validation.title"),
+            errors=dataset.validate()
         )
 
     def edit_dataset_form(self, dataset):
@@ -243,10 +267,16 @@ class DatasetController:
         )
 
     def view_revision_page(self, dataset):
+        groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
+        labels = {x: self.reg.display_group_label(x) for x in groups}
         return flask.render_template(
             self.view_template,
             dataset=dataset,
-            title=dataset.get_display(),
+            for_revision=True,
+            actions=self._build_action_list(dataset, False, True),
+            title=dataset.label(),
+            groups=groups,
+            group_labels=labels,
         )
 
     def publish_dataset_form(self, dataset):
@@ -337,14 +367,21 @@ class DatasetController:
             ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
             if not ds:
                 raise DatasetNotFoundError(dataset_id)
-            ds_data = ds.latest_revision() if revision_no is None else ds.specific_revision(revision_no)
+            ds_data = None
+            if revision_no == "pub":
+                ds_data = ds.latest_published_revision()
+            elif revision_no:
+                ds_data = ds.specific_revision(revision_no)
+            else:
+                ds_data = ds.latest_revision()
             if revision_no and not ds_data:
-                raise DatasetNotFoundError(f"{dataset_id}__{revision_no}")
+                raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
             return self.reg.build_dataset(
                 ds.profiles.replace("\r", "").split("\n"),
                 json.loads(ds_data.data) if ds_data else {},
                 ds.id,
                 ds_data.id if ds_data else None,
+                ds_data.revision_no if ds_data else None,
                 json.loads(ds.display_names) if ds.display_names else None,
                 ds.is_deprecated,
                 ds.organization_id,
@@ -369,7 +406,7 @@ class DatasetController:
                 ds.modified_date = datetime.datetime.now()
                 ds.is_deprecated = dataset.is_deprecated
                 ds.organization_id = dataset.organization_id
-                ds.display_names = json.dumps(dataset.get_displays())
+                ds.display_names = json.dumps(dataset.display_names())
                 ds.profiles = "\n".join(dataset.profiles)
                 if not ds.guid:
                     ds.guid = str(uuid.uuid4())
@@ -379,7 +416,7 @@ class DatasetController:
                     created_date=datetime.datetime.now(),
                     modified_date=datetime.datetime.now(),
                     is_deprecated=dataset.is_deprecated,
-                    display_names=json.dumps(dataset.get_displays()),
+                    display_names=json.dumps(dataset.display_names()),
                     profiles="\n".join(dataset.profiles),
                     guid=str(uuid.uuid4())
                 )
@@ -474,7 +511,7 @@ class DatasetForm(FlaskForm):
         if dataset:
             self.dataset = dataset
             kwargs.update({
-                "names": dataset.get_displays(),
+                "names": dataset.display_names(),
                 "pub_workflow": dataset.extras['pub_workflow'],
                 "act_workflow": dataset.extras['act_workflow'],
                 "security_level": dataset.extras['security_level'],
@@ -492,7 +529,7 @@ class DatasetForm(FlaskForm):
     def build_dataset(self):
         if self.dataset:
             for key in self.names.data:
-                self.dataset.set_display(key, self.names.data[key])
+                self.dataset.set_display_name(key, self.names.data[key])
             self.dataset.profiles = self.profiles.data
             self.dataset.extras["pub_workflow"] = self.pub_workflow.data
             self.dataset.extras["act_workflow"] = self.act_workflow.data
@@ -538,13 +575,13 @@ class ApprovedDatasetForm(FlaskForm):
         self.dataset = None
         if dataset:
             self.dataset = dataset
-            kwargs["names"] = dataset.get_displays()
+            kwargs["names"] = dataset.display_names()
         super().__init__(*args, **kwargs)
         self.assigned_users.choices = user_list()
 
     def build_dataset(self):
         for key in self.names.data:
-            self.dataset.set_display(key, self.names.data[key])
+            self.dataset.set_display_name(key, self.names.data[key])
         self.dataset.users = self.assigned_users.data
         return self.dataset
 

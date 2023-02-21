@@ -6,6 +6,12 @@ auth_db.create_user.error_email_exists: Email exists
 auth_db.create_user.success: User created
 auth_db.create_user.title: Create User
 auth_db.display_name: Display Name
+pipeman.validation.required: Missing required field
+pipeman.validation.recommended: Missing recommended field
+pipeman.dataset_validation.title: Validation Report
+pipeman.dataset_validate.link: Validation
+pipeman.dataset_metadata.link: Edit Metadata
+pipeman.validation.success: No errors or warnings found
 auth_db.edit_myself.title: Edit My Profile
 auth_db.edit_profile: Edit Profile
 auth_db.edit_user.success: User updated successfully

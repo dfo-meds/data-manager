@@ -12,7 +12,7 @@
         </tr>
         <tr>
             <th>{{'pipeman.entity.display' | gettext}}</th>
-            <td>{{entity.get_display()}}</td>
+            <td>{{entity.label()}}</td>
         </tr>
         {% for label, value in entity.display_values() %}
         <tr>

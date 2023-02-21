@@ -295,6 +295,19 @@ def activate_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
+@core.route("/datasets/<dataset_id>/validate", methods=["GET"])
+@require_permission("datasets.view")
+@injector.inject
+def validate_dataset(dataset_id, con: DatasetController = None):
+    try:
+        dataset = con.load_dataset(dataset_id)
+        if not con.has_access(dataset, "view"):
+            return flask.abort(403)
+        return con.dataset_validation_page(dataset)
+    except DatasetNotFoundError:
+        return flask.abort(404)
+
+
 @core.route("/datasets/<dataset_id>/publish", methods=["POST", "GET"])
 @require_permission("datasets.publish")
 @injector.inject

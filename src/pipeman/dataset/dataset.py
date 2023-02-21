@@ -1,6 +1,7 @@
 from autoinject import injector
 from pipeman.util import deep_update, load_object
 from pipeman.entity import FieldContainer
+from pipeman.entity.entity import CustomValidator, RecommendedFieldValidator, RequiredFieldValidator
 import typing as t
 from pipeman.i18n import MultiLanguageString, gettext
 import copy
@@ -91,7 +92,7 @@ class MetadataRegistry:
             else:
                 deep_update(self._fields, d)
 
-    def register_profile(self, profile_name, display_names, field_list, formatters, preprocess=None):
+    def register_profile(self, profile_name, display_names, field_list, formatters, parent=None, preprocess=None):
         if profile_name in self._profiles:
             if display_names:
                 deep_update(self._profiles[profile_name]["label"], display_names)
@@ -99,6 +100,8 @@ class MetadataRegistry:
                 deep_update(self._profiles[profile_name]["fields"], field_list)
             if formatters:
                 deep_update(self._profiles[profile_name]["formatters"], formatters)
+            if parent:
+                self._profiles[profile_name]["extends"] = parent
             if preprocess:
                 self._profiles[profile_name]["preprocess"] = preprocess
         else:
@@ -106,6 +109,7 @@ class MetadataRegistry:
                 "label": display_names or {},
                 "fields": field_list or {},
                 "formatters": formatters or {},
+                "extends": parent or None,
                 "preprocess": preprocess or None
             }
 
@@ -134,7 +138,9 @@ class MetadataRegistry:
             yield load_object(formatter['preprocess'])
 
     def metadata_formats(self, profile_name):
-        return set((profile_name, x) for x in self._profiles[profile_name]['formatters'].keys()) if profile_name in self._profiles else set()
+        if 'formatters' in self._profiles[profile_name]:
+            return set((profile_name, x) for x in self._profiles[profile_name]['formatters'].keys()) if profile_name in self._profiles else set()
+        return set()
 
     def metadata_format_template(self, profile_name, format_name):
         return self._profiles[profile_name]["formatters"][format_name]["template"]
@@ -150,20 +156,40 @@ class MetadataRegistry:
         text = MultiLanguageString(self._profiles[profile_name]["formatters"][format_name]["label"])
         return link, text
 
-    def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, display_names=None, is_deprecated=False, org_id=None, extras=None, users=None):
+    def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, revision_no = None, display_names=None, is_deprecated=False, org_id=None, extras=None, users=None):
         fields = set()
         mandatory = set()
-        for profile in profiles:
-            if profile in self._profiles:
-                fields.update(self._profiles[profile]["fields"].keys())
-                mandatory.update(x for x in self._profiles[profile]["fields"].keys() if self._profiles[profile]["fields"][x])
+        ext_profiles = set()
+        while profiles:
+            p = profiles.pop()
+            if p in self._profiles and p not in ext_profiles:
+                ext_profiles.add(p)
+                if "extends" in self._profiles[p] and self._profiles[p]["extends"]:
+                    profiles.append(self._profiles[p]["extends"])
+        for profile in ext_profiles:
+            fields.update(self._profiles[profile]["fields"].keys())
+            mandatory.update(x for x in self._profiles[profile]["fields"].keys() if self._profiles[profile]["fields"][x])
         field_list = {}
         for fn in fields:
             if fn not in self._fields:
                 logging.getLogger("pipeman.fields").error(f"Field {fn} not defined, skipping")
             else:
                 field_list[fn] = self._fields[fn]
-        return Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, profiles, ds_data_id, is_deprecated, org_id, extras, users)
+        ds = Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, ext_profiles, ds_data_id, revision_no, is_deprecated, org_id, extras, users)
+        for profile in ext_profiles:
+            pn = MultiLanguageString(self._profiles[profile]["label"])
+            if "validation" in self._profiles[profile]:
+                validation = self._profiles[profile]["validation"]
+                if 'required' in validation and validation['required']:
+                    for fn in validation['required']:
+                        ds.add_field_validator(fn, RequiredFieldValidator(pn))
+                if 'recommended' in validation and validation['recommended']:
+                    for fn in validation['recommended']:
+                        ds.add_field_validator(fn, RecommendedFieldValidator(pn))
+                if 'custom' in validation and validation['custom']:
+                    for call in validation['custom']:
+                        ds.add_self_validator(CustomValidator(call, pn))
+        return ds
 
 
 class Dataset(FieldContainer):
@@ -171,12 +197,13 @@ class Dataset(FieldContainer):
     mreg: MetadataRegistry = None
 
     @injector.construct
-    def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
-        super().__init__(dataset_id, field_list, field_values, display_names, is_deprecated, org_id)
+    def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, revision_no, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
+        super().__init__("dataset", dataset_id, field_list, field_values, display_names, is_deprecated, org_id)
         self.required_fields = required_fields
         self.profiles = profiles
         self.dataset_id = dataset_id
         self.metadata_id = ds_data_id
+        self.revision_no = revision_no
         self.extras = extras or {}
         self.users = []
 
@@ -201,7 +228,7 @@ class Dataset(FieldContainer):
         for profile in self.profiles:
             formats.update(self.mreg.metadata_formats(profile))
         for f in formats:
-            yield self.mreg.metadata_format_link(*f, self.dataset_id, self.metadata_id)
+            yield self.mreg.metadata_format_link(*f, self.dataset_id, self.revision_no)
 
     def status(self):
         return self.extras["status"] if "status" in self.extras else None

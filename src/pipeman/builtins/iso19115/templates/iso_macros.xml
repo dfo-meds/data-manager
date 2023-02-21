@@ -403,7 +403,6 @@
   <cit:name xsi:type="lan:PT_FreeText_PropertyType">{{render_text(contact['organization_name'])}}</cit:name>
   {% elif contact['individual_name'] %}
     <cit:name>{{render_text(contact['individual_name'])}}</cit:name>
-    {% endif %}
   {% endif %}
   <cit:contactInfo>
     <cit:CI_Contact>
@@ -499,6 +498,7 @@
 {% endmacro %}
   {% macro render_id(code, desc, system) %}
   <mcc:MD_Identifier>
+    {{system}}
     {% if system['authority'] %}
     {{ render_citation(system['authority']) }}
     {% endif %}

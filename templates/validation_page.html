@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="validation-results">
+    {% for error in errors %}
+    <li class="validation-result result-level-{{error.level}}">
+        <p class="error_message">{{error.display_text()}}</p>
+        <p class="error_object">{{error.display_path()}}</p>
+        {% if error.profile %}
+        <p class="profile">{{error.profile}}</p>
+        {% endif %}
+    </li>
+    {% endfor %}
+    {% if not errors %}
+      <li class="validation-result result-level-success">
+          <p class="error_message">{{'pipeman.validation.success' | gettext}}</p>
+      </li>
+    {% endif %}
+</ul>
+{% endblock %}
+{% block sidebar %}
+{% if actions %}
+<div class="subnav">{{actions}}</div>
+{% endif %}
+{% endblock %}

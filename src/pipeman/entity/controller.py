@@ -261,7 +261,7 @@ class EntityController:
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
                 e.modified_date = datetime.datetime.now()
-                e.display_names = json.dumps(entity.get_displays())
+                e.display_names = json.dumps(entity.display_names())
                 e.organization_id = entity.organization_id if entity.organization_id else None
                 e.dataset_id = entity.dataset_id if entity.dataset_id else None
             else:
@@ -269,7 +269,7 @@ class EntityController:
                     entity_type=entity.entity_type,
                     modified_date=datetime.datetime.now(),
                     created_date=datetime.datetime.now(),
-                    display_names=json.dumps(entity.get_displays()),
+                    display_names=json.dumps(entity.display_names()),
                     organization_id=entity.organization_id if entity.organization_id else None,
                     dataset_id=entity.dataset_id
                 )
@@ -308,7 +308,7 @@ class EntityForm(BaseForm):
             "_name": TranslatableField(
                 wtf.StringField,
                 label=DelayedTranslationString("pipeman.entity_form.display_name"),
-                default=self.entity.get_displays()
+                default=self.entity.display_names()
             ),
             "_org": wtf.SelectField(
                 label=DelayedTranslationString("pipeman.entity.organization"),
@@ -336,7 +336,7 @@ class EntityForm(BaseForm):
                 d = self.data
                 self.entity.process_form_data(d)
                 for key in d["_name"]:
-                    self.entity.set_display(key, d["_name"][key])
+                    self.entity.set_display_name(key, d["_name"][key])
                 self.entity.dataset_id = self.dataset_id
                 if "_dataset" in d:
                     self.entity.dataset_id = d["_dataset"]

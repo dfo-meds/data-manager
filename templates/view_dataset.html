@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
+{% if for_revision %}
+<p class="revision_warning">{{'pipeman.dataset_revision.warning' | gettext}}</p>
+{% endif %}
 <h2>{{'pipeman.dataset.properties' | gettext}}</h2>
 <table class="property-list" cellpadding="0" cellspacing="0">
     <tbody>
@@ -29,6 +32,14 @@
 <li><a href="{{link}}">{{text}}</a></li>
 {% endfor %}
 </ul>
+{% if pubs %}
+<h2>{{'pipeman.dataset.published_versions' | gettext}}</h2>
+<ul>
+    {% for link, date in pubs %}
+    <li><a href="{{link}}">{{date | format_datetime}}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock %}
 {% block sidebar %}
 {% if actions %}

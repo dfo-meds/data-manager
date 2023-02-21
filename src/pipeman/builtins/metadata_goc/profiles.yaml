@@ -1,27 +1,21 @@
-erddap:
+gociso19115:
   label:
     en: Government of Canada ISO-19115
   extends: iso19115
+  validation:
+    required:
+      - publication_date
+      - author
+      - topic_category
+      - resource_maintenance_frequency
+      - metadata_maintenance_frequency
+      - status
+      - goc_collection_type
+      - goc_publisher
+      - goc_subject
   fields:
-    publication_date:
-      validation: required
-    author:
-      validation: required
-    topic_category:
-      validation: required
-    resource_maintenance_frequency:
-      validation: required
-    metadata_maintenance_frequency:
-      validation: required
-    status:
-      validation: required
     goc_collection_type:
-      validation: required
     goc_publisher:
-      validation: required
     goc_publication_place:
     goc_subject:
-      validation: required
     goc_audience:
-
-

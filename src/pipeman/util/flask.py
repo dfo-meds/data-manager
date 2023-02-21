@@ -20,8 +20,9 @@ class HtmlField(wtf.Field):
     def __init__(self, html_content=None, **kwargs):
         super().__init__(widget=BareHtmlWidget(), **kwargs)
         self.html_content = html_content
+        self.data = None
 
-    def validate(self, **kwargs):
+    def validate(self, *args, **kwargs):
         return True
 
     def process(self, *args, **kwargs):

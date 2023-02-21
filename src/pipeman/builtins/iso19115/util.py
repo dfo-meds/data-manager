@@ -1,5 +1,5 @@
 
-def validate_use_constraint(uc):
+def validate_use_constraint(uc, object_path, profile, memo):
     errors = []
     if uc['classification']:
         if uc['access_constraints']:
@@ -18,13 +18,13 @@ def validate_use_constraint(uc):
     return errors
 
 
-def validate_time_res(tr):
+def validate_time_res(tr, object_path, profile, memo):
     if not (tr['years'] or tr['months'] or tr['days'] or tr['hours'] or tr['minutes'] or tr['seconds']):
         return [("pipeman.iso19115.time_res_incomplete")]
     return []
 
 
-def validate_contact(con):
+def validate_contact(con, object_path, profile, memo):
     errors = []
     if not (con['individual_name'] or con['organization_name'] or con['position_name'] or con['logo']):
         errors.append("pipeman.iso19115.contact_name_required")
@@ -41,7 +41,7 @@ def validate_contact(con):
     return errors
 
 
-def validate_releasability(rel):
+def validate_releasability(rel, object_path, profile, memo):
     errors = []
     if not (rel['addressees'] or rel['statement']):
         errors.append("pipeman.iso19115.releasability_requires_addressee_or_statement")
@@ -51,8 +51,6 @@ def validate_releasability(rel):
 def separate_keywords(keywords):
     groups = {}
     for keyword, language, thesaurus in keywords:
-        print(keyword)
-        print(thesaurus)
         title = None
         if 'citation' in thesaurus and thesaurus['citation'] and 'title' in thesaurus['citation']:
             title_field = thesaurus['citation']['title']
@@ -63,7 +61,6 @@ def separate_keywords(keywords):
             else:
                 test_keys = ['en', 'und']
                 test_keys.extend(title_field.keys())
-                print(test_keys)
                 for k in test_keys:
                     if k in title_field:
                         title = title_field[k]
@@ -75,10 +72,7 @@ def separate_keywords(keywords):
                 'keywords': [],
                 'thesaurus': thesaurus,
             }
-        print(title)
         groups[title]['keywords'].append((keyword, language))
-        print(groups)
-    print("done")
     return groups
 
 
@@ -93,6 +87,7 @@ def preprocess_metadata(dataset, **kwargs):
     dataset_maintenance = []
     metadata_maintenance = []
     for maintenance in dataset.data("iso_maintenance"):
+        print(type(maintenance))
         if maintenance['scope']['short_name'] == "dataset":
             dataset_maintenance.append(maintenance)
         elif maintenance['scope']['short_name'] == "metadata":

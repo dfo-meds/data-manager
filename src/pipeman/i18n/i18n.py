@@ -65,8 +65,25 @@ class MultiLanguageString:
     def __str__(self):
         return self.render()
 
+    def keys(self):
+        return self.language_map.keys()
+
+    def __len__(self):
+        return len(self.language_map)
+
     def __getitem__(self, key):
+        if isinstance(key, int):
+            raise ValueError("what")
         return self.render(key)
+
+    def __contains__(self, key):
+        return key in self.language_map
+
+    def __deepcopy__(self, memodict):
+        return MultiLanguageString(self.language_map.copy(), self.default_lang)
+
+    def __copy__(self):
+        return MultiLanguageString(self.language_map, self.default_lang)
 
 
 class MultiLanguageLink(MultiLanguageString):

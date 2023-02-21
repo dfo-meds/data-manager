@@ -1,13 +1,18 @@
 iso19115:
   label:
     en: Core ISO-19115
+  validation:
+    required:
+      - contact_point
+      - title
+      - abstract
+      - creation_date
+      - default_locale
+      - licenses
   fields:
     contact_point:
-      validation: required
     title:
-      validation: required
     abstract:
-      validation: required
     purpose:
     credit:
     doi:
@@ -15,14 +20,11 @@ iso19115:
     publication_date:
     revision_date:
     creation_date:
-      validation: required
     publisher:
     author:
     contributors:
     topic_category:
     parent_metadata:
-    alt_meta_refs:
-    metadata_links:
     additional_docs:
     bbox_west:
     bbox_east:
@@ -39,7 +41,6 @@ iso19115:
     horizontal_ref_system:
     vertical_ref_system:
     default_locale:
-      validation: required
     other_locales:
     status:
     spatial_representation_type:
@@ -50,7 +51,6 @@ iso19115:
     custom_keywords:
     content_coverage_type:
     licenses:
-      validation: required
     dataset_locale:
     dataset_other_locales:
     distributors:

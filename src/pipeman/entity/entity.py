@@ -1,11 +1,14 @@
 from pipeman.entity.field_factory import FieldCreator
+from pipeman.entity.fields import Field
 from autoinject import injector
 import flask
 import flask_login
 from pipeman.i18n import MultiLanguageString
 import copy
-from pipeman.util import deep_update
+from pipeman.util import deep_update, load_object
 from functools import cache
+import markupsafe
+from pipeman.i18n import gettext
 
 
 def entity_access(entity_type: str, op: str) -> bool:
@@ -70,7 +73,7 @@ class EntityRegistry:
         return MultiLanguageString(self._entity_types[key]["display"])
 
     def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False, org_id=None, dataset_id=None):
-        return Entity(
+        ent = Entity(
             key,
             self._entity_types[key]["fields"],
             self._entity_types[key]["is_component"],
@@ -82,6 +85,17 @@ class EntityRegistry:
             org_id=org_id,
             dataset_id=dataset_id
         )
+        validation = self._entity_types[key]['validation'] or {}
+        if 'required' in validation and validation['required']:
+            for fn in validation['required']:
+                ent.add_field_validator(fn, RequiredFieldValidator())
+        if 'recommended' in validation and validation['recommended']:
+            for fn in validation['recommended']:
+                ent.add_field_validator(fn, RecommendedFieldValidator())
+        if 'custom' in validation and validation['custom']:
+            for call in validation['custom']:
+                ent.add_self_validator(CustomValidator(call))
+        return ent
 
 
 class FieldContainer:
@@ -89,13 +103,47 @@ class FieldContainer:
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, container_id: int, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
+    def __init__(self, container_type: str, container_id: int, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
         self._fields = {}
+        self.container_type = container_type
         self.container_id = container_id
         self.organization_id = org_id
         self._load_fields(field_list, field_values)
         self._display = display_names if display_names else {}
         self.is_deprecated = is_deprecated
+        self._validation_config = {"fields": {}, "self": []}
+
+    def add_field_validator(self, field_name, validator):
+        if field_name not in self._validation_config["fields"]:
+            self._validation_config["fields"][field_name] = []
+        self._validation_config["fields"][field_name].append(validator)
+
+    def add_self_validator(self, validator):
+        self._validation_config["self"].append(validator)
+
+    def validate(self, parent_path=None, memo=None):
+        my_id = f"{self.container_type}#{self.container_id}"
+        if memo is None:
+            memo = []
+        if my_id in memo:
+            return []
+        memo.append(my_id)
+        errors = []
+        if parent_path is None:
+            parent_path = [self.label()]
+        else:
+            parent_path = parent_path.copy()
+            parent_path.append(self.label())
+        for fn in self._fields:
+            obj_path = parent_path.copy()
+            obj_path.append(self._fields[fn].label())
+            if fn in self._validation_config["fields"]:
+                for validator in self._validation_config["fields"][fn]:
+                    errors.extend(validator.validate(obj_path, self._fields[fn], memo))
+            errors.extend(self._fields[fn].validate(obj_path, memo))
+        for validator in self._validation_config["self"]:
+            errors.extend(validator.validate(parent_path, self, memo))
+        return errors
 
     def _load_fields(self, field_list: dict, field_values: dict = None):
         for field_name in field_list:
@@ -132,7 +180,7 @@ class FieldContainer:
                 return self._fields[key].data(**kwargs)
             except Exception as ex:
                 print(ex)
-                return "ERROR"
+                return ""
 
     def __contains__(self, item):
         return item in self._fields
@@ -153,16 +201,67 @@ class FieldContainer:
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
             if display_group is None or display_group == self._fields[fn].display_group:
-                self._fields[fn].value = self._fields[fn].cleanup_value(form_data[fn])
+                self._fields[fn].value = self._fields[fn].sanitize_form_input(form_data[fn])
 
-    def set_display(self, lang, name):
+    def set_display_name(self, lang, name):
         self._display[lang] = name
 
-    def get_display(self):
+    def label(self):
         return MultiLanguageString(self._display)
 
-    def get_displays(self):
+    def display_names(self):
         return self._display
+
+
+class ValidationResult:
+
+    def __init__(self, str_key, object_path, level, profile=None):
+        self.level = level
+        self.object_path = object_path
+        self.str_key = str_key
+        self.profile = profile
+
+    def display_text(self):
+        return gettext(self.str_key)
+
+    def display_path(self):
+        return " > ".join(str(x) for x in self.object_path)
+
+
+class RequiredFieldValidator:
+
+    def __init__(self, profile=None):
+        self.profile = profile
+
+    def validate(self, object_path, field: Field, memo):
+        if field.is_empty():
+            return [ValidationResult("pipeman.validation.required", object_path, "error", self.profile)]
+        return []
+
+
+class RecommendedFieldValidator:
+
+    def __init__(self, profile=None):
+        self.profile = profile
+
+    def validate(self, object_path, field: Field, memo):
+        if field.is_empty():
+            return [ValidationResult("pipeman.validation.recommended", object_path, "warning", self.profile)]
+        return []
+
+
+class CustomValidator:
+
+    def __init__(self, cb, profile=None):
+        self.cb = load_object(cb)
+        self.profile = profile
+
+    def validate(self, object_path, obj, memo):
+        for error in self.cb(obj, object_path, self.profile, memo):
+            level = "error"
+            if not isinstance(error, str):
+                error, level = error[0], error[1]
+            yield ValidationResult(error, object_path, level, self.profile)
 
 
 class Entity(FieldContainer):
@@ -172,12 +271,12 @@ class Entity(FieldContainer):
     @injector.construct
     def __init__(self, entity_type, field_list: dict, is_component: bool, field_values: dict = None, display_names: dict = None,
                  db_id: int = None, ed_id: int = None, is_deprecated: bool = False, org_id: int = None, dataset_id=None):
-        super().__init__(db_id, field_list, field_values, display_names, is_deprecated, org_id)
+        super().__init__("entity", db_id, field_list, field_values, display_names, is_deprecated, org_id)
         self.is_component = is_component
         self.entity_type = entity_type
         self.db_id = db_id
         self.entity_data_id = ed_id
-        self.dataset_id=dataset_id
+        self.dataset_id = dataset_id
 
     def actions(self, for_view: bool = False):
         action_args = {

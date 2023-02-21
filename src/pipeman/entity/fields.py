@@ -36,13 +36,46 @@ class Field:
         self._use_default_repeatable = True
         self.parent_id = parent_id
 
-    def cleanup_value(self, val):
+    def sanitize_form_input(self, val):
         return val
+
+    def is_multilingual(self):
+        return "multilingual" in self.field_config and self.field_config["multilingual"]
+
+    def is_repeatable(self):
+        return "repeatable" in self.field_config and self.field_config["repeatable"]
+
+    def is_empty(self):
+        if self.value is None or self.value == "" or self.value == []:
+            return True
+        if self.is_repeatable():
+            for val in self.value:
+                if self.is_multilingual():
+                    if any(bool(val[x]) for x in val):
+                        return False
+                elif bool(val):
+                    return False
+            return True
+        elif self.is_multilingual():
+            return not any(bool(self.value[x]) for x in self.value)
+        else:
+            return not bool(self.value)
 
     def serialize(self, val):
-        return val
+        return self._unserialize(val)
 
     def unserialize(self, val):
+        if self.is_repeatable() and not isinstance(val, list):
+            return [self._unserialize(val)]
+        elif (not self.is_repeatable()) and isinstance(val, list):
+            return self._unserialize(val[0])
+        else:
+            return self._unserialize(val)
+
+    def _serialize(self, val):
+        return val
+
+    def _unserialize(self, val):
         return val
 
     def get_keywords(self, language):
@@ -64,8 +97,7 @@ class Field:
         return self._extract_keywords(language, default_thesaurus, thesaurus_field=thesaurus_field, extraction_method=extraction_method)
 
     def _extract_keywords(self, language, default_thesaurus, **kwargs):
-        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
-        if use_repeatable:
+        if self.is_repeatable():
             keywords = []
             for value in self.value:
                 keywords.extend(self._as_keyword(value, language, default_thesaurus, **kwargs))
@@ -79,8 +111,8 @@ class Field:
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
         parent_args, field_args = self._split_args()
-        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
-        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"] and self._use_default_repeatable
+        use_multilingual = self.is_multilingual()
+        use_repeatable = self.is_repeatable() and self._use_default_repeatable
         if use_repeatable and self.value is None:
             self.value = []
         if use_multilingual and use_repeatable:
@@ -113,6 +145,9 @@ class Field:
 
     def _control_class(self) -> t.Callable:
         raise NotImplementedError
+
+    def validate(self, obj_path, memo):
+        return []
 
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
@@ -156,8 +191,8 @@ class Field:
     def display(self):
         if self.value is None:
             return ""
-        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
-        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
+        use_multilingual = self.is_multilingual()
+        use_repeatable = self.is_repeatable()
         if use_repeatable and use_multilingual:
             items = [
                 MultiLanguageString({
@@ -180,8 +215,8 @@ class Field:
             return self._format_for_ui(self.value)
 
     def data(self, lang=None, index=None, **kwargs):
-        use_multilingual = "multilingual" in self.field_config and self.field_config["multilingual"]
-        use_repeatable = "repeatable" in self.field_config and self.field_config["repeatable"]
+        use_multilingual = self.is_multilingual()
+        use_repeatable = self.is_repeatable()
         value = self.value
         if value is None:
             return self._process_value(None, **kwargs)
@@ -202,7 +237,12 @@ class Field:
                 for x in value
             ]
         elif use_repeatable:
-            return [self._process_value(x, **kwargs) for x in value]
+            d = []
+            for v in value:
+                pd = self._process_value(x, **kwargs)
+                if pd is not None:
+                    d.append(pd)
+            return d
         elif use_multilingual:
             return MultiLanguageString({
                 x: self._process_value(value[x], **kwargs) for x in value
@@ -407,10 +447,8 @@ class ChoiceField(Field):
                     self._values.append((x, disp))
         return self._values
 
-    def cleanup_value(self, val):
-        if "repeatable" not in self.field_config or not self.field_config["repeatable"]:
-            return val
-        if isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
+    def sanitize_form_input(self, val):
+        if self.is_repeatable() and isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
             return val[0]
         return val
 
@@ -448,6 +486,21 @@ class ChoiceField(Field):
 class TextField(LengthValidationMixin, Field):
 
     DATA_TYPE = "text"
+
+    def _unserialize(self, val):
+        if self.is_multilingual() and not isinstance(val, dict):
+            return {"und": val}
+        elif (not self.is_multilingual()) and isinstance(val, dict):
+            if "und" in val and val["und"]:
+                return val["und"]
+            elif "en" in val and val["en"]:
+                return val["en"]
+            else:
+                for key in val:
+                    if val[key]:
+                        return val[key]
+                return ""
+        return val
 
     def _control_class(self) -> t.Callable:
         return wtf.StringField
