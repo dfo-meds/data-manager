@@ -1,14 +1,21 @@
+
 data_info:
   label:
     en: Identification
   order: 10
   fields:
-    contact_point:
-      data_type: entity_ref
-      entity_type: contact
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Point of Contact
-      order: 10
+        en: Responsible Parties (Metadata)
+      repeatable: yes
+    data_responsibles:
+      data_type: component_ref
+      entity_type: responsibility
+      label:
+        en: Responsible Parties (Data)
+      repeatable: yes
     title:
       data_type: text
       label:
@@ -60,25 +67,6 @@ data_info:
       label:
         en: Creation Date
       order: 100
-    publisher:
-      data_type: entity_ref
-      entity_type: contact
-      label:
-        en: Publisher
-      order: 110
-    author:
-      data_type: entity_ref
-      entity_type: contact
-      label:
-        en: Author
-      order: 120
-    contributors:
-      data_type: entity_ref
-      entity_type: contact
-      label:
-        en: Contributors
-      repeatable: yes
-      order: 130
     licenses:
       data_type: entity_ref
       entity_type: use_constraint
@@ -194,6 +182,12 @@ extent:
       entity_type: ref_system
       label:
         en: Horizontal Reference System
+    temporal_ref_system:
+      data_type: entity_ref
+      order: 130
+      entity_type: ref_system
+      label:
+        en: Temporal Reference System
 technical:
   label:
     en: Technical

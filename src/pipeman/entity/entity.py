@@ -43,11 +43,12 @@ class EntityRegistry:
     def type_exists(self, key):
         return key in self._entity_types
 
-    def register_type(self, key, display_names, field_config, validation, is_component: bool = None):
+    def register_type(self, key, display_names, field_config, derived_config, validation, is_component: bool = None):
         if key in self._entity_types:
             deep_update(self._entity_types[key]["display"], display_names)
             deep_update(self._entity_types[key]["fields"], field_config)
             deep_update(self._entity_types[key]["validation"], validation)
+            deep_update(self._entity_types[key]["derived_fields"], derived_config)
             if is_component is not None:
                 self._entity_types[key]['is_component'] = is_component
         else:
@@ -55,7 +56,8 @@ class EntityRegistry:
                 "display": display_names,
                 "fields": field_config,
                 "is_component": bool(is_component),
-                "validation": validation
+                "validation": validation,
+                "derived_fields": derived_config
             }
 
     def register_from_dict(self, cfg_dict):
@@ -65,12 +67,15 @@ class EntityRegistry:
                     key,
                     cfg_dict[key]["display"] if "display" in cfg_dict[key] else {},
                     cfg_dict[key]["fields"] if "fields" in cfg_dict[key] else {},
+                    cfg_dict[key]["derived_fields"] if "derived_fields" in cfg_dict[key] else {},
                     cfg_dict[key]["validation"] if "validation" in cfg_dict[key] else {},
                     cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
                 )
 
     def display(self, key):
-        return MultiLanguageString(self._entity_types[key]["display"])
+        keys = self._entity_types[key]["display"].copy()
+        keys['und'] = key
+        return MultiLanguageString(keys)
 
     def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False, org_id=None, dataset_id=None):
         ent = Entity(
@@ -85,6 +90,10 @@ class EntityRegistry:
             org_id=org_id,
             dataset_id=dataset_id
         )
+        if "derived_fields" in self._entity_types[key] and self._entity_types[key]["derived_fields"]:
+            dfns = self._entity_types[key]["derived_fields"]
+            for dfn in dfns:
+                ent.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
         validation = self._entity_types[key]['validation'] or {}
         if 'required' in validation and validation['required']:
             for fn in validation['required']:
@@ -112,6 +121,16 @@ class FieldContainer:
         self._display = display_names if display_names else {}
         self.is_deprecated = is_deprecated
         self._validation_config = {"fields": {}, "self": []}
+        self._derived_fields = {}
+
+    def field_label(self, fn):
+        return self._fields[fn].label()
+
+    def add_derived_field(self, field_name, field_label, field_cb):
+        self._derived_fields[field_name] = {
+            "label": field_label,
+            "cb": field_cb
+        }
 
     def add_field_validator(self, field_name, validator):
         if field_name not in self._validation_config["fields"]:
@@ -134,13 +153,17 @@ class FieldContainer:
         else:
             parent_path = parent_path.copy()
             parent_path.append(self.label())
-        for fn in self._fields:
+        fns = list(self._fields.keys())
+        fns.sort()
+        for fn in fns:
             obj_path = parent_path.copy()
             obj_path.append(self._fields[fn].label())
             if fn in self._validation_config["fields"]:
                 for validator in self._validation_config["fields"][fn]:
                     errors.extend(validator.validate(obj_path, self._fields[fn], memo))
             errors.extend(self._fields[fn].validate(obj_path, memo))
+            for entity in self._fields[fn].related_entities():
+                errors.extend(entity.validate(obj_path, memo))
         for validator in self._validation_config["self"]:
             errors.extend(validator.validate(parent_path, self, memo))
         return errors
@@ -153,10 +176,16 @@ class FieldContainer:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
     def display_values(self, display_group = None):
-        for fn in self._ordered_field_names(display_group):
-            if display_group is None or display_group == self._fields[fn].display_group:
-                field = self._fields[fn]
-                yield field.label(), field.display()
+        if display_group == "__derived__":
+            keys = list(self._derived_fields.keys())
+            keys.sort()
+            for key in keys:
+                yield MultiLanguageString(self._derived_fields[key]["label"], load_object(self._derived_fields[key]["cb"])(self))
+        else:
+            for fn in self._ordered_field_names(display_group):
+                if display_group is None or display_group == self._fields[fn].display_group:
+                    field = self._fields[fn]
+                    yield field.label(), field.display()
 
     def values(self) -> dict:
         return {
@@ -165,28 +194,38 @@ class FieldContainer:
         }
 
     def supports_display_group(self, display_group) -> bool:
+        if display_group == "__derived__":
+            return bool(self._derived_fields)
         return any(self._fields[fn].display_group == display_group for fn in self._fields)
 
     def supported_display_groups(self) -> set:
-        return set(self._fields[fn].display_group for fn in self._fields)
+        dg = set(self._fields[fn].display_group for fn in self._fields)
+        if self._derived_fields:
+            dg.add("__derived__")
+        return dg
 
     def __html__(self):
         return str(self)
 
     @cache
     def data(self, key, **kwargs):
+        if key in self._derived_fields:
+            try:
+                return load_object(self._derived_fields[key]['cb'])(self)
+            except Exception as ex:
+                print(ex)
         if key in self._fields:
             try:
                 return self._fields[key].data(**kwargs)
             except Exception as ex:
                 print(ex)
-                return ""
+        return ""
 
     def __contains__(self, item):
-        return item in self._fields
+        return item in self._fields or item in self._derived_fields
 
     def __getitem__(self, key):
-        if key not in self._fields:
+        if key not in self._fields and key not in self._derived_fields:
             return ""
         return self.data(key)
 
@@ -258,10 +297,13 @@ class CustomValidator:
 
     def validate(self, object_path, obj, memo):
         for error in self.cb(obj, object_path, self.profile, memo):
-            level = "error"
-            if not isinstance(error, str):
-                error, level = error[0], error[1]
-            yield ValidationResult(error, object_path, level, self.profile)
+            if isinstance(error, ValidationResult):
+                yield error
+            else:
+                level = "error"
+                if not isinstance(error, str):
+                    error, level = error[0], error[1]
+                yield ValidationResult(error, object_path, level, self.profile)
 
 
 class Entity(FieldContainer):

@@ -44,7 +44,6 @@
   <mdb:parentMetadata>
     {{ iso.render_citation(dataset['parent_metadata']) }}
   </mdb:parentMetadata>
-  {# <!-- parentMetadata --> #}
   {% endif %}
   <mdb:metadataScope>
     <mdb:MD_MetadataScope>
@@ -146,6 +145,9 @@
     {% endif %}
     {% if dataset['vertical_ref_system'] %}
      {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+    {% endif %}
+    {% if dataset['temporal_ref_system'] %}
+     {{iso.render_ref_system(dataset['temporal_ref_system'])}}
     {% endif %}
   </mdb:referenceSystemInfo>
   {# <!-- metadataExtensionInfo --> #}

@@ -1,0 +1,17 @@
+cioosv2:
+  label:
+    en: CIOOS v2
+  extends: iso19115
+  validation:
+    required:
+      - default_locale
+      - creation_date
+      - licenses
+      - meta_licenses
+      - publication_date
+      - responsibles
+    recommended:
+      - horizontal_ref_system
+      - vertical_ref_system
+    custom:
+      - pipeman.plugins.cioos.util.cioos_dataset_validation

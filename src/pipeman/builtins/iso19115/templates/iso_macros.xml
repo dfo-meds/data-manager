@@ -21,18 +21,12 @@
 {% endmacro %}
 {% macro render_resource(resource) %}
 <cit:CI_OnlineResource>
-  <cit:linkage>
-    <gco:CharacterString>{{resource['url']}}</gco:CharacterString>
-  </cit:linkage>
+  <cit:linkage>{{ render_text(resource['url']) }}</cit:linkage>
   {% if resource['protocol'] %}
-  <cit:protocol>
-    <gco:CharacterString>{{resource['protocol']['short_name']}}</gco:CharacterString>
-  </cit:protocol>
+  <cit:protocol>{{ render_text(resource['protocol']['short_name']) }}</cit:protocol>
   {% endif %}
   {% if resource['app_profile'] %}
-  <cit:applicationProfile>
-    <gco:CharacterString>{{resource['app_profile']}}</gco:CharacterString>
-  </cit:applicationProfile>
+  <cit:applicationProfile>{{ render_text(resource['app_profile']) }}</cit:applicationProfile>
   {% endif %}
   {% if resource['name'] %}
   <cit:name xsi:type="lan:PT_FreeText_PropertyType">
@@ -45,9 +39,7 @@
   </cit:description>
   {% endif %}
   {% if resource['protocol_request'] %}
-  <cit:protocolRequest>
-    <gco:CharacterString>{{resource['protocol_request']}}</gco:CharacterString>
-  </cit:protocolRequest>
+  <cit:protocolRequest>{{{ render_text(resource['protocol_request']) }}</cit:protocolRequest>
   {% endif %}
   {% if resource['function'] %}
   <cit:function>
@@ -57,51 +49,44 @@
 </cit:CI_OnlineResource>
 {% endmacro %}
 
+{% macro render_responsibility(code, contact) %}
+<cit:CI_Responsibility>
+  <cit:role>
+    <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="{{code}}"/>
+  </cit:role>
+  <cit:party>
+    {{ render_contact(contact) }}
+  </cit:party>
+</cit:CI_Responsibility>
+{% endmacro %}
+
+{% render_date(code, date) %}
+<cit:CI_Date>
+  <cit:date>
+    <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
+  </cit:date>
+  <cit:dateType>
+    <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="{{code}}" />
+  </cit:dateType>
+</cit:CI_Date>
+{% endmacro %}
+
 {% macro render_citation(citation) %}
 <cit:CI_Citation>
   <cit:title xsi:type="lan:PT_FreeText_PropertyType">
     {{ render_text(citation['title']) }}
   </cit:title>
-  <cit:alternateTitle xsi:type="lan:PT_FreeText_PropertyType">
   {% if citation['alt_title'] %}
-    {{ render_text(citation['alt_title']) }}
+  <cit:alternateTitle xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(citation['alt_title']) }}</cit:alternateTitle>
   {% endif %}
-  </cit:alternateTitle>
   {% if citation["publication_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["publication_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="publication">publication</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
+  <cit:date>{{ render_date('publication', citation['publication_date'] }}</cit:date>
   {% endif %}
   {% if citation["revision_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["revision_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
+  <cit:date>{{ render_date('revision', citation['revision_date'] }}</cit:date>
   {% endif %}
   {% if citation["creation_date"] %}
-  <cit:date>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{citation["creation_date"].strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="creation">creation</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </cit:date>
+  <cit:date>{{ render_date('creation', citation['creation_date'] }}</cit:date>
   {% endif %}
   {% if citation['edition'] %}
   <cit:edition xsi:type="lan:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</cit:edition>
@@ -112,24 +97,12 @@
   {% if citation["id_code"] %}
   <cit:identifier>
     {{ render_id(citation['id_code'], citation['id_description'], citation['id_system']) }}
-    <mcc:MD_Identifier>
-      <mcc:code>
-        <gco:CharacterString>{{citation["identifier"]}}</gco:CharacterString>
-      </mcc:code>
-    </mcc:MD_Identifier>
   </cit:identifier>
   {% endif %}
-  {% if citation['publisher'] %}
-   <cit:citedResponsibleParty>
-    <cit:CI_Responsibility>
-      <cit:role>
-        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="owner"/>
-      </cit:role>
-      <cit:party>
-        {{ render_contact(citation['publisher']) }}
-      </cit:party>
-    </cit:CI_Responsibility>
-  </cit:citedResponsibleParty>
+  {% if citation['responsibles'] %}
+  {% for resp in citation['responsibles'] %}
+  <cit:citedResponsibleParty>{{ render_responsibility(resp['type']['short_name'], resp['contact']) }}</cit:citedResponsibleParty>
+  {% endfor %}
   {% endif %}
   {% if citation['presentation_form'] %}
   <cit:presentationForm>
@@ -141,10 +114,10 @@
   <cit:otherCitationDetails xsi:type="lan:PT_FreeText_PropertyType">{{render_text(citation['details'])}}</cit:otherCitationDetails>
   {% endif %}
   {% if citation['isbn'] %}
-  <cit:ISBN><gco:CharacterString>{{citation['isbn']}}</gco:CharacterString></cit:ISBN>
+  <cit:ISBN>{{ render_text(citation['isbn']) }}</cit:ISBN>
   {% endif %}
   {% if citation['issn'] %}
-  <cit:ISSN><gco:CharacterString>{{citation['issn']}}</gco:CharacterString></cit:ISSN>
+  <cit:ISSN>{{ render_text(citation['issn'])}}</cit:ISSN>
   {% endif %}
   {% if citation['resource'] %}
   <cit:onlineResource>{{render_resource(citation['resource'])}}</cit:onlineResource>
@@ -157,9 +130,11 @@
   <lan:language>
     <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}">{{locale['language']}}</lan:LanguageCode>
   </lan:language>
+  {% if locale['country'] %}
   <lan:country>
     <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}">{{locale['country']}}</lan:CountryCode>
   </lan:country>
+  {% endif %}
   <lan:characterEncoding>
     <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
   </lan:characterEncoding>
@@ -172,23 +147,16 @@
       {{ render_text(dc['description']) }}
     </mrd:description>
     {% endif %}
-    {% if dc['distributor_contact'] %}
+    {% if dc['responsibles'] %}
+      {% for dcc in dc['responsibles'] %}
     <mrd:distributor>
-      {% for dcc in dc['distributor_contact'] %}
       <mrd:MD_Distributor>
         <mrd:distributorContact>
-          <cit:CI_Responsibility>
-            <cit:role>
-              <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="distributor"/>
-            </cit:role>
-            <cit:party>
-              {{ iso.render_contact(dcc) }}
-            </cit:party>
-          </cit:CI_Responsibility>
+          {{ render_responsibility(dcc['type']['short_name'], dcc['contact']) }}
         </mrd:distributorContact>
       </mrd:MD_Distributor>
-      {% endfor %}
     </mrd:distributor>
+      {% endfor %}
     {% endif %}
     {% if dc['links'] %}
       <mrd:transferOptions>
@@ -318,17 +286,10 @@
   {% if con['app_scope'] %}
     <mco:constraintApplicationScope>{{ render_scope(con['app_scope']) }}</mco:constraintApplicationScope>
   {% endif %}
-  {% if con['responsible_party'] %}
-    <mco:responsibleParty>
-    {% for party in con['responsible_party'] %}
-      <cit:CI_Responsibility>
-        <cit:role>
-          <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="rightsHolder"/>
-        </cit:role>
-        <cit:party>{{ render_contact(party) }}</cit:party>
-      </cit:CI_Responsibility>
+  {% if con['responsibles'] %}
+    {% for party in con['responsibles'] %}
+    <mco:responsibleParty>{{ render_responsibility(party['type']['short_name'], party['contact']) }}</mco:responsibleParty>
     {% endfor %}
-    </mco:responsibleParty>
   {% endif %}
   {% if con['releasability'] %}
     <mco:releasability>
@@ -377,16 +338,11 @@
       <mco:statement xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(r['statement']) }}</mco:statement>
     {% endif %}
     {% if r['addressees'] %}
-    <mco:addressee>
       {% for addr in r['addressees'] %}
-      <cit:CI_Responsibility>
-        <cit:role>
-          <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="dataUser"/>
-        </cit:role>
-        <cit:party>{{ render_contact(addr) }}</cit:party>
-      </cit:CI_Responsibility>
-      {% endfor %}
+    <mco:addressee>
+      {{ render_responsibility(addr['type']['short_name'], addr['contact']) }}
     </mco:addressee>
+      {% endfor %}
     {% endif %}
     {% if r['constraints'] %}
     <mco:disseminationConstraints>

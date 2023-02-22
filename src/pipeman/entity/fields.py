@@ -149,6 +149,9 @@ class Field:
     def validate(self, obj_path, memo):
         return []
 
+    def related_entities(self):
+        return []
+
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
         if isinstance(txt, dict):
@@ -239,7 +242,7 @@ class Field:
         elif use_repeatable:
             d = []
             for v in value:
-                pd = self._process_value(x, **kwargs)
+                pd = self._process_value(v, **kwargs)
                 if pd is not None:
                     d.append(pd)
             return d

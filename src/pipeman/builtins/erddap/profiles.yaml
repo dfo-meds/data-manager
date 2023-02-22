@@ -9,7 +9,7 @@ erddap:
       - publication_date
       - info_link
       - short_institution
-      - author
+      - responsibles
       - spatial_representation_type
       - variables
       - erddap_data_file_path
@@ -30,9 +30,7 @@ erddap:
     publication_date:
     info_link:
     short_institution:
-    author:
-    contributors:
-    contact_point:
+    responsibles:
     revision_date:
     creation_date:
     custom_keywords:

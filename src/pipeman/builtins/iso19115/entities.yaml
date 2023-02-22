@@ -1,3 +1,18 @@
+responsibility:
+  display:
+    en: Responsibility
+  is_component: yes
+  fields:
+    role:
+      data_type: vocabulary
+      vocabulary_name: iso19115_ci_role_code
+      label:
+        en: Role
+    contact:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Contact
 maintenance:
   display:
     en: Maintenance
@@ -90,11 +105,12 @@ citation:
       data_type: date
       label:
         en: Edition Date
-    publisher:
-      data_type: entity_ref
-      entity_type: contact
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Publisher
+        en: Responsible Parties
+      repeatable: yes
     presentation_form:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_presentation_form_code
@@ -488,11 +504,11 @@ use_constraint:
       label:
         en: Reference Link
       repeatable: yes
-    responsible_party:
-      data_type: entity_ref
-      entity_type: contact
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Responsible Party
+        en: Responsible Parties
       repeatable: yes
     app_scope:
       data_type: entity_ref
@@ -555,9 +571,10 @@ releasability:
       multilingual: yes
     addressees:
       repeatable: yes
-      data_type: contact
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Applicable Party
+        en: Applicable Parties
     constraints:
       repeatable: yes
       data_type: vocabulary
@@ -823,11 +840,11 @@ dist_channel:
       label:
         en: Description
       multilingual: yes
-    distributor_contact:
-      data_type: entity_ref
-      entity_type: contact
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Distributor Contact
+        en: Distributor Parties
     links:
       data_type: entity_ref
       entity_type: resource

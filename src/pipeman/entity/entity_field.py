@@ -1,6 +1,7 @@
 
 from pipeman.entity.fields import ChoiceField, HtmlContentField
 from pipeman.entity.controller import EntityController
+from pipeman.entity.entity import FieldContainer
 from autoinject import injector
 import json
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, MultiLanguageLink
@@ -33,18 +34,15 @@ class EntityRefMixin:
         else:
             return [(disp, "und", thesaurus), ]
 
-    def validate(self, obj_path, memo):
-        errors = []
+    def related_entities(self):
         data = self.data()
-        if data is None:
-            return []
-        elif isinstance(data, list):
-            for ent in data:
-                if ent:
-                    errors.extend(ent.validate(obj_path, memo))
-        elif data:
-            errors.extend(data.validate(obj_path, memo))
-        return errors
+        if data is not None:
+            if isinstance(data, FieldContainer):
+                yield data
+            else:
+                for ent in data:
+                    if ent:
+                        yield ent
 
 
 class ComponentReferenceField(EntityRefMixin, HtmlContentField):
@@ -67,7 +65,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
     def display(self):
         return markupsafe.Markup(self._build_html_content())
 
-    def data(self):
+    def data(self, **kwargs):
         for c, _, _ in self._component_list():
             if c.is_deprecated:
                 continue

@@ -146,3 +146,7 @@ pipeman.dataset.status: Status
 pipeman.dataset.act_workflow: Activation Workflow
 pipeman.dataset.pub_workflow: Publication Workflow
 pipeman.dataset.status.active: Active
+
+pipeman.validation_level.error: Error
+pipeman.validation_level.warning: Warning
+pipeman.validation_level: Unknown

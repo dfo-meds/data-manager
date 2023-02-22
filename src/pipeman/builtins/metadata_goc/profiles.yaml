@@ -5,7 +5,6 @@ gociso19115:
   validation:
     required:
       - publication_date
-      - author
       - topic_category
       - resource_maintenance_frequency
       - metadata_maintenance_frequency

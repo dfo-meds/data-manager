@@ -3,14 +3,14 @@ iso19115:
     en: Core ISO-19115
   validation:
     required:
-      - contact_point
+      - responsibles
       - title
       - abstract
       - creation_date
       - default_locale
       - licenses
   fields:
-    contact_point:
+    responsibles:
     title:
     abstract:
     purpose:
@@ -20,9 +20,6 @@ iso19115:
     publication_date:
     revision_date:
     creation_date:
-    publisher:
-    author:
-    contributors:
     topic_category:
     parent_metadata:
     additional_docs:
@@ -39,6 +36,7 @@ iso19115:
     spatial_resolution:
     temporal_resolution:
     horizontal_ref_system:
+    temporal_ref_system:
     vertical_ref_system:
     default_locale:
     other_locales:

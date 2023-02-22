@@ -92,7 +92,7 @@ class MetadataRegistry:
             else:
                 deep_update(self._fields, d)
 
-    def register_profile(self, profile_name, display_names, field_list, formatters, parent=None, preprocess=None):
+    def register_profile(self, profile_name, display_names, field_list, formatters, parent=None, preprocess=None, derived_fields=None):
         if profile_name in self._profiles:
             if display_names:
                 deep_update(self._profiles[profile_name]["label"], display_names)
@@ -103,18 +103,31 @@ class MetadataRegistry:
             if parent:
                 self._profiles[profile_name]["extends"] = parent
             if preprocess:
-                self._profiles[profile_name]["preprocess"] = preprocess
+                self._profiles[profile_name]["preprocess"].extend(preprocess)
+            if derived_fields:
+                deep_update(self._profiles[profile_name]["derived_fields"], derived_fields)
         else:
             self._profiles[profile_name] = {
                 "label": display_names or {},
                 "fields": field_list or {},
                 "formatters": formatters or {},
                 "extends": parent or None,
-                "preprocess": preprocess or None
+                "preprocess": preprocess or [],
+                "derived_fields": derived_fields or {}
             }
 
     def register_profiles_from_dict(self, d: dict):
         if d:
+            for pn in d:
+                self.register_profile(
+                    pn,
+                    d[pn]["label"] if "label" in d[pn] else None,
+                    d[pn]["fields"] if "fields" in d[pn] else None,
+                    d[pn]["formatters"] if "formatters" in d[pn] else None,
+                    d[pn]["extends"] if "extends" in d[pn] else None,
+                    d[pn]["preprocess"] if "preprocess" in d[pn] else None,
+                    d[pn]["derived_fields"] if "derived_fields" in d[pn] else None
+                )
             deep_update(self._profiles, d)
 
     def profiles_for_select(self):
@@ -130,9 +143,13 @@ class MetadataRegistry:
             return False
         return True
 
-    def metadata_processors(self, profile_name, format_name):
+    def metadata_processors(self, profiles, profile_name, format_name):
         for hook in self._dataset_output_processing_hooks:
             yield load_object(hook)
+        for prof in profiles:
+            if 'preprocess' in self._profiles[prof] and self._profiles[prof]['preprocess']:
+                for hook in self._profiles[prof]['preprocess']:
+                    yield load_object(hook)
         formatter = self._profiles[profile_name]["formatters"][format_name]
         if "preprocess" in formatter and formatter["preprocess"]:
             yield load_object(formatter['preprocess'])
@@ -177,6 +194,10 @@ class MetadataRegistry:
                 field_list[fn] = self._fields[fn]
         ds = Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, ext_profiles, ds_data_id, revision_no, is_deprecated, org_id, extras, users)
         for profile in ext_profiles:
+            if "derived_fields" in self._profiles[profile] and self._profiles[profile]["derived_fields"]:
+                dfns = self._profiles[profile]["derived_fields"]
+                for dfn in dfns:
+                    ds.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
             pn = MultiLanguageString(self._profiles[profile]["label"])
             if "validation" in self._profiles[profile]:
                 validation = self._profiles[profile]["validation"]
@@ -258,5 +279,4 @@ class Dataset(FieldContainer):
             ('pipeman.dataset.pub_workflow', self.pub_workflow_display()),
             ('pipeman.dataset.security_level', self.security_level_display()),
             ('pipeman.dataset.guid', self.guid()),
-
         ]
