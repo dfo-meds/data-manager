@@ -107,6 +107,14 @@ class EntityRegistry:
         return ent
 
 
+def combine_object_path(parent_path, sub_path):
+    if parent_path is None:
+        return sub_path.copy()
+    new_path = parent_path.copy()
+    new_path.extend(sub_path)
+    return new_path
+
+
 class FieldContainer:
 
     creator: FieldCreator = None
@@ -148,16 +156,11 @@ class FieldContainer:
             return []
         memo.append(my_id)
         errors = []
-        if parent_path is None:
-            parent_path = [self.label()]
-        else:
-            parent_path = parent_path.copy()
-            parent_path.append(self.label())
+        parent_path = combine_object_path(parent_path, [self.label()])
         fns = list(self._fields.keys())
         fns.sort()
         for fn in fns:
-            obj_path = parent_path.copy()
-            obj_path.append(self._fields[fn].label())
+            obj_path = combine_object_path(parent_path, [self._fields[fn].label()])
             if fn in self._validation_config["fields"]:
                 for validator in self._validation_config["fields"][fn]:
                     errors.extend(validator.validate(obj_path, self._fields[fn], memo))
@@ -254,11 +257,12 @@ class FieldContainer:
 
 class ValidationResult:
 
-    def __init__(self, str_key, object_path, level, profile=None):
+    def __init__(self, str_key, object_path, level, code, profile=None):
         self.level = level
         self.object_path = object_path
         self.str_key = str_key
         self.profile = profile
+        self.code = code
 
     def display_text(self):
         return gettext(self.str_key)
@@ -274,7 +278,7 @@ class RequiredFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.required", object_path, "error", self.profile)]
+            return [ValidationResult("pipeman.validation.required", object_path, "error", "CRE-01", self.profile)]
         return []
 
 
@@ -285,7 +289,7 @@ class RecommendedFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.recommended", object_path, "warning", self.profile)]
+            return [ValidationResult("pipeman.validation.recommended", object_path, "warning", "CRE-02", self.profile)]
         return []
 
 
@@ -301,9 +305,13 @@ class CustomValidator:
                 yield error
             else:
                 level = "error"
+                code = "CRE-00"
                 if not isinstance(error, str):
-                    error, level = error[0], error[1]
-                yield ValidationResult(error, object_path, level, self.profile)
+                    if len(error) >= 2:
+                        error, code = error[0], error[1]
+                    if len(error) >= 3:
+                        level = error[2]
+                yield ValidationResult(error, object_path, level, code, self.profile)
 
 
 class Entity(FieldContainer):

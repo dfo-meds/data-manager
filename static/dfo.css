@@ -285,3 +285,29 @@ ul li.removed .name {
     text-decoration: line-through;
     color: #FF0000;
 }
+
+#session_timeout_box {
+    display: block;
+    position: fixed;
+    background: #EEEEEE;
+    top: 150px;
+    right: 25px;
+    width: 250px;
+    padding: 5px;
+    border: 2px solid #CC0000;
+}
+#session_timeout_box p {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+#session_timeout_box p#time_left {
+    font-weight: bold;
+    text-align: center;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 1.5em;
+}
+.session_block {
+    clear: both;
+}

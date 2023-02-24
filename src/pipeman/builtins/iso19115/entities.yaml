@@ -2,6 +2,10 @@ responsibility:
   display:
     en: Responsibility
   is_component: yes
+  validation:
+    required:
+      - role
+      - contact
   fields:
     role:
       data_type: vocabulary

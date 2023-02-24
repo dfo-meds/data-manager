@@ -21,4 +21,10 @@ def logout(am: AuthenticationManager = None):
         return am.logout_success()
     return am.logout_handler()
 
+
+@auth.route("/refresh", methods=['GET'])
+def refresh_session():
+    pass
+
+
 # TODO: add group controls here?

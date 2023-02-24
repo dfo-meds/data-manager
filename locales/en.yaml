@@ -146,7 +146,11 @@ pipeman.dataset.status: Status
 pipeman.dataset.act_workflow: Activation Workflow
 pipeman.dataset.pub_workflow: Publication Workflow
 pipeman.dataset.status.active: Active
-
+pipeman.session_logout: Session Expiry
+pipeman.session_timeout_warning: Your session will expire soon
+pipeman.refresh_session: Refresh Session
+pipeman.menu.login: Login
+pipeman.menu.logout: Logout
 pipeman.validation_level.error: Error
 pipeman.validation_level.warning: Warning
 pipeman.validation_level: Unknown

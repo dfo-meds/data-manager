@@ -27,7 +27,7 @@ def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
 
 class AuthenticatedUser(fl.UserMixin):
 
-    system: System = None
+    cfg: zr.ApplicationConfig = None
 
     @injector.construct
     def __init__(self, username, display_name, permissions, organization_ids, dataset_ids):
@@ -36,12 +36,20 @@ class AuthenticatedUser(fl.UserMixin):
         self.username = username
         self.organizations = organization_ids
         self.datasets = dataset_ids
-        self.session_timeout = datetime.datetime.now() + datetime.timedelta(minutes=self.system.user_timeout)
+        to = self.cfg.as_int(("pipeman", "session_expiry"), default=44640)
+        self.session_timeout = datetime.datetime.now() + datetime.timedelta(minutes=to)
+
+    def session_time_left(self):
+        return int((self.session_timeout - datetime.datetime.now()).total_seconds())
 
     def get_id(self):
         return self.username
 
     def has_permission(self, permission_name):
+        if permission_name == "_is_anonymous":
+            return False
+        if permission_name == "_is_not_anonymous":
+            return True
         if "superuser" in self.permissions:
             return True
         return permission_name in self.permissions
@@ -64,7 +72,7 @@ class AnonymousUser(fl.AnonymousUserMixin):
         return False
 
     def has_permission(self, permission_name):
-        return False
+        return permission_name == "_is_anonymous"
 
     def works_on(self, dataset_id):
         return False

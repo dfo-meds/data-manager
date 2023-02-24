@@ -74,6 +74,7 @@
             <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
             <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
+            <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
         {% endblock %}
         {% block style %}
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
@@ -151,10 +152,25 @@
                 <div class="bottom_image">
                     <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="200" />
                 </div>
-                {% endblock %}
+                <div class="session_block">
+                {% if current_user.is_authenticated %}
+                    <p class="session_timeout">{{'pipeman.session_logout' | gettext}}: {{current_user.session_timeout | format_datetime}}</p>
+                    <script language="javascript" type="text/javascript">
+                        $(document).ready(function() {
+                            start_session_timeout("#session_timeout_box", "#time_left", {{current_user.session_time_left()}}, "{{url_for('auth.logout', _external=True)}}", "{{url_for('auth.refresh_session', _external=True)}}", "{{'pipeman.session_refresh_ajax_error' | gettext}}", 300);
+                        });
+                    </script>
+                {% endif %}
+                </div>
+            {% endblock %}
             </div>
             {% endblock %}
         </div>
         {% endblock %}
+        <div id="session_timeout_box" style="display: none;">
+            <p>{{'pipeman.session_timeout_warning' | gettext}}</p>
+            <p id="time_left">0:00</p>
+            <p><a href="javascript:refresh_session();">{{'pipeman.refresh_session' | gettext}}</a></p>
+        </div>
     </body>
 </html>

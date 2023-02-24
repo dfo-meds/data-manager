@@ -3,16 +3,16 @@ import flask_login as fl
 from flask_wtf import FlaskForm
 import wtforms as wtf
 import wtforms.validators as wtfv
-from pipeman.i18n import DelayedTranslationString as Dts
+from pipeman.i18n import DelayedTranslationString
 from pipeman.i18n import gettext
 import flask
 
 
 class LoginForm(FlaskForm):
 
-    username = wtf.StringField(Dts("pipeman.plugins.auth_form.username"))
-    password = wtf.PasswordField(Dts("pipeman.plugins.auth_form.password"))
-    submit = wtf.SubmitField(Dts("pipeman.plugins.auth_form.submit"))
+    username = wtf.StringField(DelayedTranslationString("pipeman.plugins.auth_form.username"))
+    password = wtf.PasswordField(DelayedTranslationString("pipeman.plugins.auth_form.password"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.plugins.auth_form.submit"))
 
 
 class FormAuthenticationManager(AuthenticationManager):
