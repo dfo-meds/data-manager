@@ -1,27 +1,121 @@
-
-data_info:
+metadata_info:
   label:
-    en: Identification
-  order: 10
+    en: Metadata
   fields:
-    responsibles:
-      data_type: component_ref
-      entity_type: responsibility
+    metadata_owner:
+      data_type: entity_ref
+      entity_type: contact
       label:
-        en: Responsible Parties (Metadata)
-      repeatable: yes
-    data_responsibles:
-      data_type: component_ref
-      entity_type: responsibility
+        en: Owner
+    point_of_contact:
+      data_type: entity_ref
+      entity_type: contact
       label:
-        en: Responsible Parties (Data)
+        en: Point of Contact
+    canon_urls:
+      data_type: entity_ref
+      entity_type: resource
+      label:
+        en: Canonical Metadata URLs
       repeatable: yes
+    parent_metadata:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Parent Metadata
+      order: 10
+    alt_metadata:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: citation
+      order: 45
+      label:
+        en: Alternative Metadata References
+    metadata_standards:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: citation
+      order: 50
+      label:
+        en: Metadata Standards
+    metadata_profiles:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: citation
+      order: 55
+      label:
+        en: Metadata Profile
+    default_locale:
+      data_type: entity_ref
+      order: 10
+      entity_type: locale
+      label:
+        en: Default Metadata Locale
+    other_locales:
+      data_type: entity_ref
+      order: 20
+      repeatable: yes
+      entity_type: locale
+      label:
+        en: Other Metadata Locales
+    metadata_maintenance_frequency:
+      data_type: vocabulary
+      order: 60
+      vocabulary_name: iso19115_md_maintenance_frequency_code
+      label:
+        en: Metadata Maintenance Frequency
+    meta_licenses:
+      data_type: entity_ref
+      entity_type: use_constraint
+      label:
+        en: Metadata Constaints
+      order: 150
+      repeatable: yes
+citation:
+  label:
+    en: Citation
+  order: 15
+  fields:
     title:
       data_type: text
       label:
         en: Title
       order: 20
       multilingual: yes
+    dataset_id_code:
+      data_type: text
+      label:
+        en: Dataset ID Code
+    dataset_id_desc:
+      data_type: text
+      label:
+        en: Dataset ID (Long)
+      multilingual: yes
+    dataset_id_system:
+      data_type: entity_ref
+      label:
+        en: Dataset ID System
+      entity_type: id_system
+    publication_date:
+      data_type: date
+      label:
+        en: Publication Date
+      order: 80
+    revision_date:
+      data_type: date
+      label:
+        en: Revision Date
+      order: 90
+    creation_date:
+      data_type: date
+      label:
+        en: Creation Date
+      order: 100
+data_info:
+  label:
+    en: Dataset
+  order: 10
+  fields:
     abstract:
       data_type: multitext
       label:
@@ -40,33 +134,18 @@ data_info:
         en: Credit
       order: 50
       multilingual: yes
-    doi:
-      data_type: entity_ref
-      entity_type: resource
-      label:
-        en: DOI
-      order: 60
     info_link:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Information Link
       order: 70
-    publication_date:
-      data_type: date
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
       label:
-        en: Publication Date
-      order: 80
-    revision_date:
-      data_type: date
-      label:
-        en: Revision Date
-      order: 90
-    creation_date:
-      data_type: date
-      label:
-        en: Creation Date
-      order: 100
+        en: Dataset Contacts
+      repeatable: yes
     licenses:
       data_type: entity_ref
       entity_type: use_constraint
@@ -74,6 +153,30 @@ data_info:
         en: Data Constaints
       order: 140
       repeatable: yes
+    processing_code:
+      data_type: text
+      label:
+        en: Processing Level Code
+    processing_desc:
+      data_type: multitext
+      label:
+        en: Processing Level Description
+      multilingual: yes
+    processing_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: Processing Level System
+    environment_desc:
+      data_type: multitext
+      label:
+        en: Environment Descriptino
+      multilingual: yes
+    supplemental:
+      data_type: multitext
+      label:
+        en: Supplemental
+      multilingual: yes
 keywords:
   fields:
     topic_category:
@@ -88,12 +191,6 @@ references:
     en: References
   order: 50
   fields:
-    parent_metadata:
-      data_type: entity_ref
-      entity_type: citation
-      label:
-        en: Parent Metadata
-      order: 10
     additional_docs:
       data_type: entity_ref
       repeatable: yes
@@ -101,6 +198,12 @@ references:
       order: 40
       label:
         en: Additional Documentation
+    graphics:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: graphic
+      label:
+        en: Graphic Overviews
 extent:
   label:
     en: Extent
@@ -193,19 +296,6 @@ technical:
     en: Technical
   order: 100
   fields:
-    default_locale:
-      data_type: entity_ref
-      order: 10
-      entity_type: locale
-      label:
-        en: Default Metadata Locale
-    other_locales:
-      data_type: entity_ref
-      order: 20
-      repeatable: yes
-      entity_type: locale
-      label:
-        en: Other Metadata Locales
     dataset_locale:
       data_type: entity_ref
       order: 25
@@ -239,23 +329,12 @@ technical:
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Resource Maintenance Frequency
-    metadata_maintenance_frequency:
-      data_type: vocabulary
-      order: 60
-      vocabulary_name: iso19115_md_maintenance_frequency_code
-      label:
-        en: Metadata Maintenance Frequency
     content_coverage_type:
       data_type: vocabulary
       order: 70
       vocabulary_name: iso19115_md_coverage_content_type_code
       label:
         en: Content Coverage Type
-components:
-  label:
-    en: Components
-  order: 60
-  fields:
     iso_maintenance:
       data_type: component_ref
       entity_type: maintenance
@@ -271,10 +350,4 @@ publishing:
       label:
         en: Distribution Channels
       repeatable: yes
-    meta_licenses:
-      data_type: entity_ref
-      entity_type: use_constraint
-      label:
-        en: Metadata Constaints
-      order: 150
-      repeatable: yes
+

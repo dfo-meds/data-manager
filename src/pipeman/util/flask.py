@@ -9,6 +9,16 @@ from markupsafe import Markup, escape
 from pipeman.i18n import gettext
 
 
+def get_real_remote_ip():
+    remote_ip = "no request"
+    if flask.has_request_context():
+        if "X-Forwarded-For" in flask.request.headers:
+            remote_ip = flask.request.headers.getlist("X-Forwarded-For")[0].rpartition(' ')[-1]
+        else:
+            remote_ip = flask.request.remote_addr or 'untrackable'
+    return remote_ip
+
+
 class BareHtmlWidget:
 
     def __call__(self, field, **kwargs):

@@ -30,14 +30,20 @@ class AuthenticatedUser(fl.UserMixin):
     cfg: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self, username, display_name, permissions, organization_ids, dataset_ids):
+    def __init__(self, username, display_name, permissions, organization_ids, dataset_ids, **extras):
         self.permissions = permissions
         self.display = display_name
         self.username = username
         self.organizations = organization_ids
         self.datasets = dataset_ids
+        self._extras = extras
         to = self.cfg.as_int(("pipeman", "session_expiry"), default=44640)
         self.session_timeout = datetime.datetime.now() + datetime.timedelta(minutes=to)
+
+    def property(self, name):
+        if name in self._extras:
+            return self._extras[name]
+        return None
 
     def session_time_left(self):
         return int((self.session_timeout - datetime.datetime.now()).total_seconds())
@@ -77,6 +83,9 @@ class AnonymousUser(fl.AnonymousUserMixin):
     def works_on(self, dataset_id):
         return False
 
+    def property(self, key):
+        return None
+
 
 @injector.injectable
 class AuthenticationManager:
@@ -85,9 +94,9 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
-        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="/home")
-        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="/home")
-        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="/home")
+        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="home")
+        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="home")
+        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="home")
 
     def login_handler(self):
         raise NotImplementedError()
@@ -105,14 +114,14 @@ class AuthenticationManager:
         return AnonymousUser()
 
     def login_success(self):
-        return flask.redirect(self.login_success_route)
+        return flask.redirect(flask.url_for(self.login_success_route))
 
     def logout_success(self):
-        return flask.redirect(self.logout_success_route)
+        return flask.redirect(flask.url_for(self.logout_success_route))
 
     def unauthorized_handler(self):
         if flask.request.path.startswith("/api"):
             return flask.abort(403)
         else:
             flask.flash(gettext("pipeman.auth.not_authorized"), "error")
-            return flask.redirect(self.unauthorized_route)
+            return flask.redirect(flask.url_for(self.unauthorized_route))

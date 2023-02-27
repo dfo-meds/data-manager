@@ -1,4 +1,26 @@
-<templates>
+<templates xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
+  xmlns:gml="http://www.opengis.net/gml/3.2"
+  xmlns:mpc="http://standards.iso.org/iso/19115/-3/mpc/1.0"
+  xmlns:mri="http://standards.iso.org/iso/19115/-3/mri/1.0"
+  xmlns:mrl="http://standards.iso.org/iso/19115/-3/mrl/2.0"
+  xmlns:mmi="http://standards.iso.org/iso/19115/-3/mmi/1.0"
+  xmlns:mdb="http://standards.iso.org/iso/19115/-3/mdb/2.0"
+  xmlns:mcc="http://standards.iso.org/iso/19115/-3/mcc/1.0"
+  xmlns:msr="http://standards.iso.org/iso/19115/-3/msr/2.0"
+  xmlns:mac="http://standards.iso.org/iso/19115/-3/mac/2.0"
+  xmlns:cit="http://standards.iso.org/iso/19115/-3/cit/2.0"
+  xmlns:mrs="http://standards.iso.org/iso/19115/-3/mrs/1.0"
+  xmlns:gco="http://standards.iso.org/iso/19115/-3/gco/1.0"
+  xmlns:lan="http://standards.iso.org/iso/19115/-3/lan/1.0"
+  xmlns:mco="http://standards.iso.org/iso/19115/-3/mco/1.0"
+  xmlns:gex="http://standards.iso.org/iso/19115/-3/gex/1.0"
+  xmlns:mdq="http://standards.iso.org/iso/19157/-2/mdq/1.0"
+  xmlns:mas="http://standards.iso.org/iso/19115/-3/mas/1.0"
+  xmlns:mrd="http://standards.iso.org/iso/19115/-3/mrd/1.0"
+  xmlns:mrc="http://standards.iso.org/iso/19115/-3/mrc/2.0"
+  xmlns:gmx="http://www.isotc211.org/2005/gmx"
+  xmlns:xlink="http://www.w3.org/1999/xlink">
   {% macro render_text(text) %}
   {% if text is not mapping %}
   <gco:CharacterString>{{text}}</gco:CharacterString>
@@ -38,16 +60,74 @@
     {{render_text(resource['description'])}}
   </cit:description>
   {% endif %}
-  {% if resource['protocol_request'] %}
-  <cit:protocolRequest>{{{ render_text(resource['protocol_request']) }}</cit:protocolRequest>
-  {% endif %}
   {% if resource['function'] %}
   <cit:function>
     <cit:CI_OnLineFunctionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode" codeListValue="{{resource['function']['short_name']}}">{{resource['short_name']}}</cit:CI_OnLineFunctionCode>
   </cit:function>
   {% endif %}
+  {% if resource['protocol_request'] %}
+  <cit:protocolRequest>{{ render_text(resource['protocol_request']) }}</cit:protocolRequest>
+  {% endif %}
 </cit:CI_OnlineResource>
 {% endmacro %}
+
+  {% macro render_distance(value, unit) %}
+  <gco:Distance uom="{{unit}}">{{value}}</gco:Distance>
+  {% endmacro %}
+
+  {% macro render_spatial_res(res) %}
+    {% if res['scale'] %}
+    <mri:MD_Resolution>
+      <mri:equivalentScale>
+        <mri:MD_RepresentativeFraction>
+          <mri:denominator>{{res['scale']}}</mri:denominator>
+        </mri:MD_RepresentativeFraction>
+      </mri:equivalentScale>
+    </mri:MD_Resolution>
+    {% endif %}
+    {% if res['distance'] %}
+    <mri:MD_Resolution>
+      <mri:distance>
+        {{ render_distance(res['distance'], res['distance_units']) }}
+      </mri:distance>
+    </mri:MD_Resolution>
+    {% endif %}
+    {% if res['vertical'] %}
+    <mri:MD_Resolution>
+      <mri:vertical>
+        {{ render_distance(res['vertical'], res['vertical_units']) }}
+      </mri:vertical>
+    </mri:MD_Resolution>
+    {% endif %}
+    {% if res['angular'] %}
+    <mri:MD_Resolution>
+      <mri:angularDistance>
+        <gco:Angle uom="{{res['angular_units']}}">{{res['angular']}}</gco:Angle>
+      </mri:angularDistance>
+    </mri:MD_Resolution>
+    {% endif %}
+    {% if res['level_of_detail'] %}
+    <mri:MD_Resolution>
+      <mri:levelOfDetail xsi:type="lan:PT_FreeText_PropertyType">
+        {{ render_text(res['level_of_detail']) }}
+      </mri:levelOfDetail>
+    </mri:MD_Resolution>
+    {% endif %}
+  {% endmacro %}
+  {% macro render_time_period(start, end, is_ongoing) %}
+  <gml:TimePeriod gml:id="time_period">
+    <gml:beginPosition>{{start.isoformat(timespec='milliseconds')}}</gml:beginPosition>
+    {% if is_ongoing %}
+    <gml:endPosition indeterminatePosition="now" />
+    {% else %}
+    <gml:endPosition>{{end.isoformat(timespec='milliseconds')}}</gml:endPosition>
+    {% endif %}
+  </gml:TimePeriod>
+  {% endmacro %}
+
+  {% macro render_temporal_res(res) %}
+  <gco:TM_PeriodDuration>P{{res['years']}}Y{{res['months']}}M{{res['days']}}DT{{res['hours']}}H{{res['minutes']}}M{{res['seconds']}}S</gco:TM_PeriodDuration>
+  {% endmacro %}
 
 {% macro render_responsibility(code, contact) %}
 <cit:CI_Responsibility>
@@ -60,7 +140,7 @@
 </cit:CI_Responsibility>
 {% endmacro %}
 
-{% render_date(code, date) %}
+{% macro render_date(code, date) %}
 <cit:CI_Date>
   <cit:date>
     <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
@@ -80,13 +160,13 @@
   <cit:alternateTitle xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(citation['alt_title']) }}</cit:alternateTitle>
   {% endif %}
   {% if citation["publication_date"] %}
-  <cit:date>{{ render_date('publication', citation['publication_date'] }}</cit:date>
+  <cit:date>{{ render_date('publication', citation['publication_date']) }}</cit:date>
   {% endif %}
   {% if citation["revision_date"] %}
-  <cit:date>{{ render_date('revision', citation['revision_date'] }}</cit:date>
+  <cit:date>{{ render_date('revision', citation['revision_date']) }}</cit:date>
   {% endif %}
   {% if citation["creation_date"] %}
-  <cit:date>{{ render_date('creation', citation['creation_date'] }}</cit:date>
+  <cit:date>{{ render_date('creation', citation['creation_date']) }}</cit:date>
   {% endif %}
   {% if citation['edition'] %}
   <cit:edition xsi:type="lan:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</cit:edition>
@@ -101,7 +181,7 @@
   {% endif %}
   {% if citation['responsibles'] %}
   {% for resp in citation['responsibles'] %}
-  <cit:citedResponsibleParty>{{ render_responsibility(resp['type']['short_name'], resp['contact']) }}</cit:citedResponsibleParty>
+  <cit:citedResponsibleParty>{{ render_responsibility(resp['role']['short_name'], resp['contact']) }}</cit:citedResponsibleParty>
   {% endfor %}
   {% endif %}
   {% if citation['presentation_form'] %}
@@ -208,10 +288,12 @@
   {% endif %}
 </mri:MD_Keywords>
 {% endmacro %}
-{% macro render_maintenance(record) %}
-  <mmi:maintenanceNote xsi:type="lan:PT_FreeText_PropertyType">
-    {{ render_text(record['notes']) }}
-  </mmi:maintenanceNote>
+{% macro render_maintenance_info(code, records) %}
+<mmi:MD_MaintenanceInformation>
+  <mmi:maintenanceAndUpdateFrequency>
+    <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{code}}" />
+  </mmi:maintenanceAndUpdateFrequency>
+  {% for record in records %}
   <mmi:maintenanceDate>
     <cit:CI_Date>
       <cit:date>
@@ -222,7 +304,18 @@
       </cit:dateType>
     </cit:CI_Date>
   </mmi:maintenanceDate>
+  {% endfor %}
+  {# <!-- userDefinedMaintenanceFrequency --> #}
+  {# <!-- maintenanceScope --> #}
+  {% for record in records %}
+  <mmi:maintenanceNote xsi:type="lan:PT_FreeText_PropertyType">
+    {{ render_text(record['notes']) }}
+  </mmi:maintenanceNote>
+  {% endfor %}
+  {# <!-- contact --> #}
+</mmi:MD_MaintenanceInformation>
 {% endmacro %}
+
 
 {% macro render_constraint(con) %}
   {% if con['classification'] %}
@@ -454,11 +547,12 @@
 {% endmacro %}
   {% macro render_id(code, desc, system) %}
   <mcc:MD_Identifier>
-    {{system}}
     {% if system['authority'] %}
+    <mcc:authority>
     {{ render_citation(system['authority']) }}
+    </mcc:authority>
     {% endif %}
-    <mcc:code><gco:CharacterString>{{code}}</gco:CharacterString>:</mcc:code>
+    <mcc:code><gco:CharacterString>{{code}}</gco:CharacterString></mcc:code>
     {% if system['code_space'] %}
     <mcc:codeSpace><gco:CharacterString>{{system['code_space']}}</gco:CharacterString></mcc:codeSpace>
     {% endif %}
@@ -466,7 +560,7 @@
     <mcc:version><gco:CharacterString>{{system['version']}}</gco:CharacterString>:</mcc:version>
     {% endif %}
     {% if desc %}
-    <mcc:description>{{ render_text(desc) }}</mcc:description>
+    <mcc:description xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(desc) }}</mcc:description>
     {% endif %}
   </mcc:MD_Identifier>
   {% endmacro %}

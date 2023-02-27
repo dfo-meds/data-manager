@@ -28,7 +28,7 @@
       <mcc:authority>
         <cit:CI_Citation>
           <cit:title>
-            <gco:CharacterString>ca.gc.dfo-mpo</gco:CharacterString>
+            <gco:CharacterString>ca.gc.dfo-mpo.cnodc-cndoc</gco:CharacterString>
           </cit:title>
         </cit:CI_Citation>
       </mcc:authority>
@@ -52,104 +52,57 @@
       </mdb:resourceScope>
     </mdb:MD_MetadataScope>
   </mdb:metadataScope>
+  {% for resp in responsibilities %}
   <mdb:contact>
-    <cit:CI_Responsibility>
-      <cit:role>
-        <cit:CI_RoleCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode" codeListValue="pointOfContact"/>
-      </cit:role>
-      <cit:party>
-        {{iso.render_contact(dataset['contact_point'])}}
-      </cit:party>
-    </cit:CI_Responsibility>
+    {{ iso.render_responsibility(resp['role']['short_name'], resp['contact']) }}
   </mdb:contact>
+  {% endfor %}
+  {% for date in dates %}
   <mdb:dateInfo>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{dataset.created_date().strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="created">created</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
+    {{ iso.render_date(date['type']['short_name'], date['date']) }}
   </mdb:dateInfo>
-  <mdb:dateInfo>
-    <cit:CI_Date>
-      <cit:date>
-        <gco:Date>{{dataset.modified_date().strftime("%Y-%m-%d")}}</gco:Date>
-      </cit:date>
-      <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
-      </cit:dateType>
-    </cit:CI_Date>
-  </mdb:dateInfo>
+  {% endfor %}
+  {% for standard in dataset['metadata_standards'] %}
   <mdb:metadataStandard>
-    <cit:CI_Citation>
-      <cit:title>
-        <gco:CharacterString>ISO 19115-1 Geographic information - Metadata</gco:CharacterString>
-      </cit:title>
-      <cit:edition>
-        <gco:CharacterString>First Edition 2014-04-01</gco:CharacterString>
-      </cit:edition>
-    </cit:CI_Citation>
+    {{ iso.render_citation(standard) }}
   </mdb:metadataStandard>
-  <mdb:metadataStandard>
-    <cit:CI_Citation>
-      <cit:title>
-        <gco:CharacterString>ISO 19115-2 Geographic information - Metadata</gco:CharacterString>
-      </cit:title>
-      <cit:edition>
-        <gco:CharacterString>Second Edition 2019-01</gco:CharacterString>
-      </cit:edition>
-    </cit:CI_Citation>
-  </mdb:metadataStandard>
-  <mdb:metadataStandard>
-    <cit:CI_Citation>
-      <cit:title>
-        <gco:CharacterString>ISO 19115-1 Geographic Information - Metadata Amendment 1</gco:CharacterString>
-      </cit:title>
-      <cit:edition>
-        <gco:CharacterString>2018-02</gco:CharacterString>
-      </cit:edition>
-    </cit:CI_Citation>
-  </mdb:metadataStandard>
+  {% endfor %}
+  {% for profile in dataset['metadata_profiles'] %}
   <mdb:metadataProfile>
-    <cit:CI_Citation>
-      <cit:title>
-        <gco:CharacterString>Canadian Integrated Ocean Observing System Metadata Profile of ISO 19115</gco:CharacterString>
-      </cit:title>
-      <cit:date>
-        <cit:CI_Date>
-          <cit:date>
-            <gco:Date>2019-11-06</gco:Date>
-          </cit:date>
-          <cit:dateType>
-            <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="publication">publication</cit:CI_DateTypeCode>
-          </cit:dateType>
-        </cit:CI_Date>
-      </cit:date>
-    </cit:CI_Citation>
+    {{ iso.render_citation(profile) }}
   </mdb:metadataProfile>
-  {# <!-- alternativeMetadataReference --> #}
-  {% if dataset['other_locales'] %}
-      <mdb:otherLocale>
-    {% for locale in dataset['other_locales'] %}
+  {% endfor %}
+  {% for alt_md in dataset['alt_metadata'] %}
+  <mdb:alternativeMetadataReference>
+    {{ iso.render_citation(alt_md) }}
+  </mdb:alternativeMetadataReference>
+  {% endfor %}
+  {% for locale in dataset['other_locales'] %}
+  <mdb:otherLocale>
         {{iso.render_locale(locale)}}
-    {% endfor %}
-      </mdb:otherLocale>
-  {% endif %}
-  {# <!-- metadataLinkage --> #}
+  </mdb:otherLocale>
+  {% endfor %}
+  {% for meta_url in dataset['canon_urls'] %}
+  <mdb:metadataLinkage>
+    {{ iso.render_resource(meta_url) }}
+  </mdb:metadataLinkage>
+  {% endfor %}
   {# <!-- spatialRepresentationInfo --> #}
-  <mdb:referenceSystemInfo>
     {% if dataset['horizontal_ref_system'] %}
+  <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+  </mdb:referenceSystemInfo>
     {% endif %}
     {% if dataset['vertical_ref_system'] %}
-     {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+  <mdb:referenceSystemInfo>
+     {{iso.render_ref_system(dataset['vertical_ref_system'])}}
+  </mdb:referenceSystemInfo>
     {% endif %}
     {% if dataset['temporal_ref_system'] %}
+  <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['temporal_ref_system'])}}
-    {% endif %}
   </mdb:referenceSystemInfo>
+    {% endif %}
   {# <!-- metadataExtensionInfo --> #}
   <mdb:identificationInfo>
     <mri:MD_DataIdentification>
@@ -170,14 +123,26 @@
         <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{dataset['status']['short_name']}}">{{dataset['status']['short_name']}}</mcc:MD_ProgressCode>
       </mri:status>
       {% endif %}
-      {# <!-- pointOfContact --> #}
+      {% if dataset['point_of_contact'] %}
+      <mri:pointOfContact>
+        {{ iso.render.responsibility("pointOfContact", dataset['point_of_contact']) }}
+      </mri:pointOfContact>
+      {% endif %}
       {% if dataset['spatial_representation_type'] %}
       <mri:spatialRepresentationType>
         <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{dataset['spatial_representation']['short_name']}}">{{dataset['spatial_representation']['short_name']}}</mcc:MD_SpatialRepresentationTypeCode>
       </mri:spatialRepresentationType>
       {% endif %}
-      {# <!-- spatialResolution --> #}
-      {# <!-- temporalResolution --> #}
+      {% for sr in dataset['spatial_resolution'] %}
+      <mri:spatialResolution>
+        {{ iso.render_spatial_res(sr) }}
+      </mri:spatialResolution>
+      {% endfor %}
+      {% for tr in dataset['temporal_resolution'] %}
+      <mri:temporalResolution>
+        {{ iso.render_temporal_res(sr) }}
+      </mri:temporalResolution>
+      {% endfor %}
       {% if dataset['topic_category'] %}
       {% for tc in dataset['topic_category'] %}
       <mri:topicCategory>
@@ -212,14 +177,7 @@
           <gex:temporalElement>
             <gex:EX_TemporalExtent>
               <gex:extent>
-                <gml:TimePeriod gml:id="time_period">
-                  <gml:beginPosition>{{dataset['start_time'].isoformat(timespec='milliseconds')}}</gml:beginPosition>
-                  {% if dataset['is_ongoing'] %}
-                  <gml:endPosition indeterminatePosition="now" />
-                  {% else %}
-                  <gml:endPosition>{{dataset['end_time'].isoformat(timespec='milliseconds')}}</gml:endPosition>
-                  {% endif %}
-                </gml:TimePeriod>
+                {{ iso.render_time_period(dataset['start_time'], dataset['end_time'], dataset['is_ongoing']) }}
               </gex:extent>
             </gex:EX_TemporalExtent>
           </gex:temporalElement>
@@ -241,13 +199,26 @@
             </gex:EX_VerticalExtent>
           </gex:verticalElement>
           {% endif %}
-
         </gex:EX_Extent>
       </mri:extent>
-      {# <!-- additionalDocumentation --> #}
-      {# <!-- processingLevel --> #}
-      {# <!-- resourceMaintenance --> #}
-      {# <!-- graphicOverview --> #}
+      {% for doc in dataset['additional_docs'] %}
+      <mri:additionalDocumentation>
+        {{ iso.render_citation(doc) }}
+      </mri:additionalDocumentation>
+      {% endfor %}
+      {% if dataset['processing_code'] %}
+      <mri:processingLevel>
+        {{ iso.render_id(dataset['processing_code'], dataset['processing_desc'], dataset['processing_system']) }}
+      </mri:processingLevel>
+      {% endif %}
+      <mri:resourceMaintenance>
+        {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency'], dataset_maintenance) }}
+      </mri:resourceMaintenance>
+      {% for graphic in dataset['graphics'] %}
+      <mri:graphicOverview>
+        {{ iso.render_graphic(graphic) }}
+      </mri:graphicOverview>
+      {% endfor %}
       {# <!-- resourceFormat --> #}
       {% if grouped_keywords %}
         {% for key in grouped_keywords %}
@@ -266,19 +237,23 @@
       {% endif %}
       {# <!-- associatedResource --> #}
       {% if dataset['dataset_locale'] %}
-      <mdb:defaultLocale>
+      <mri:defaultLocale>
         {{iso.render_locale(dataset['dataset_locale'])}}
-      </mdb:defaultLocale>
+      </mri:defaultLocale>
       {% endif %}
       {% if dataset['dataset_other_locales'] %}
-          <mdb:otherLocale>
+          <mri:otherLocale>
         {% for locale in dataset['dataset_other_locales'] %}
             {{iso.render_locale(locale)}}
         {% endfor %}
-          </mdb:otherLocale>
+          </mri:otherLocale>
       {% endif %}
-      {# <!-- environmentDescription --> #}
-      {# <!-- supplementalInformation --> #}
+      {% if dataset['environment_desc'] %}
+      <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
+      {% endif %}
+      {% if dataset['supplemental'] %}
+      <mri:supplementalInformation>{{ iso.render_text(dataset['supplemental']) }}</mri:supplementalInformation>
+      {% endif %}
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
   {# <!-- contentInfo --> #}
@@ -292,21 +267,14 @@
   {# <!-- portrayalCatalogueInfo --> #}
   {% if dataset['meta_licenses'] %}
   {% for license in dataset['meta_licenses'] %}
-  <mri:metadataConstraints>
+  <mdb:metadataConstraints>
     {{ iso.render_constraint(license) }}
-  </mri:metadataConstraints>
+  </mdb:metadataConstraints>
   {% endfor %}
   {% endif %}
   {# <!-- applicationSchemaInfo --> #}
   <mdb:metadataMaintenance>
-    <mmi:MD_MaintenanceInformation>
-      <mmi:maintenanceAndUpdateFrequency>
-        <mmi:MD_MaintenanceFrequencyCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode" codeListValue="{{dataset['metadata_maintenance_frequency']['short_name']}}">{{dataset['metadata_maintenance_frequency']['short_name']}}</mmi:MD_MaintenanceFrequencyCode>
-      </mmi:maintenanceAndUpdateFrequency>
-      {% for record in metadata_maintenance %}
-      {{ iso.render_maintenance(record) }}
-      {% endfor %}
-    </mmi:MD_MaintenanceInformation>
+    {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency'], metadata_maintenance) }}
   </mdb:metadataMaintenance>
   {# <!-- acquisitionInfo --> #}
 </mdb:MD_Metadata>

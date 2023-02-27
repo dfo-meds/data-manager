@@ -9,7 +9,11 @@ iso19115:
       - creation_date
       - default_locale
       - licenses
+      - metadata_owner
+    custom:
+      - pipeman.builtins.iso19115.util.validate_dataset
   fields:
+    metadata_owner:
     responsibles:
     title:
     abstract:

@@ -39,13 +39,15 @@ class EntityController:
         comp_kwargs = {
             "obj_type": ent.entity_type,
             "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id,
-            "dataset_id": ent.dataset_id
+            "parent_id": ent.parent_id,
+            "parent_type": ent.parent_type,
         }
-        for_comp = ent.dataset_id is not None
+        for_comp = ent.parent_id is not None
         if short_list:
             actions.add_action("pipeman.general.view", "core.view_entity", **kwargs)
         elif for_comp:
-            actions.add_action("pipeman.entity.view_dataset", "core.view_dataset", dataset_id=ent.dataset_id)
+            if ent.parent_type == 'dataset':
+                actions.add_action("pipeman.entity.view_dataset", "core.view_dataset", dataset_id=ent.parent_id)
         if self.has_specific_access(ent, "edit"):
             if for_comp:
                 actions.add_action("pipeman.general.edit", "core.edit_component", **comp_kwargs)
@@ -74,37 +76,37 @@ class EntityController:
             actions=self.build_action_list(ent, False)
         )
 
-    def create_component_form(self, entity_type, dataset):
-        new_ent = self.reg.new_entity(entity_type, dataset_id=dataset.dataset_id)
-        form = EntityForm(new_ent, dataset_id=dataset.dataset_id)
+    def create_component_form(self, entity_type, container):
+        new_ent = self.reg.new_entity(entity_type, parent_id=container.container_id, parent_type=container.container_type)
+        form = EntityForm(new_ent, container=container)
         if form.handle_form():
             self.save_entity(new_ent)
             flask.flash(gettext("pipeman.entity_create.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
             title=gettext('pipeman.entity_create.title')
         )
 
-    def edit_component_form(self, ent, dataset):
-        form = EntityForm(ent, dataset_id=dataset.dataset_id)
+    def edit_component_form(self, ent, container):
+        form = EntityForm(ent, container=container)
         if form.handle_form():
             self.save_entity(ent)
             flask.flash(gettext("pipeman.entity_edit.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
             title=gettext("pipeman.component_edit.title")
         )
 
-    def remove_component_form(self, ent, dataset):
+    def remove_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
             flask.flash(gettext("pipeman.entity_remove.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
@@ -112,12 +114,12 @@ class EntityController:
             title=gettext("pipeman.entity_remove.title")
         )
 
-    def restore_component_form(self, ent, dataset):
+    def restore_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
             flask.flash(gettext("pipeman.entity_restore.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
@@ -193,10 +195,10 @@ class EntityController:
             query = self._entity_query(entity_type, session)
             return self._entity_iterator(query)
 
-    def list_components(self, entity_type, dataset_id):
+    def list_components(self, entity_type, parent_id, parent_type):
         with self.db as session:
             query = self._entity_query(entity_type, session)
-            query.filter_by(dataset_id=dataset_id)
+            query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
             return self._entity_iterator(query, True)
 
     def _entity_query(self, entity_type, session):
@@ -245,16 +247,18 @@ class EntityController:
             if not e:
                 raise EntityNotFoundError(entity_id)
             entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
-            return self.reg.new_entity(
+            x = self.reg.new_entity(
                 entity_type,
-                json.loads(entity_data.data) if entity_data else {},
-                json.loads(e.display_names) if e.display_names else None,
-                e.id,
-                entity_data.id if entity_data else None,
-                e.is_deprecated,
-                e.organization_id,
-                dataset_id=e.dataset_id
+                field_values=json.loads(entity_data.data) if entity_data else {},
+                display_names=json.loads(e.display_names) if e.display_names else None,
+                db_id=e.id,
+                ed_id=entity_data.id if entity_data else None,
+                is_deprecated=e.is_deprecated,
+                org_id=e.organization_id,
+                parent_id=e.parent_id,
+                parent_type=e.parent_type
             )
+            return x
 
     def save_entity(self, entity):
         with self.db as session:
@@ -263,7 +267,8 @@ class EntityController:
                 e.modified_date = datetime.datetime.now()
                 e.display_names = json.dumps(entity.display_names())
                 e.organization_id = entity.organization_id if entity.organization_id else None
-                e.dataset_id = entity.dataset_id if entity.dataset_id else None
+                e.parent_id = entity.parent_id if entity.parent_id else None
+                e.parent_type = entity.parent_type if entity.parent_type else None
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
@@ -271,7 +276,8 @@ class EntityController:
                     created_date=datetime.datetime.now(),
                     display_names=json.dumps(entity.display_names()),
                     organization_id=entity.organization_id if entity.organization_id else None,
-                    dataset_id=entity.dataset_id
+                    parent_id=entity.parent_id,
+                    parent_type=entity.parent_type
                 )
                 session.add(e)
             session.commit()
@@ -302,7 +308,7 @@ class EntityForm(BaseForm):
     dcontroller: "pipeman.dataset.controller.DatasetController" = None
 
     @injector.construct
-    def __init__(self, entity, *args, dataset_id: int = None, **kwargs):
+    def __init__(self, entity, *args, container=None, **kwargs):
         self.entity = entity
         controls = {
             "_name": TranslatableField(
@@ -316,16 +322,16 @@ class EntityForm(BaseForm):
                 default=self.entity.organization_id if self.entity.organization_id else ""
             ),
         }
-        self.dataset_id = dataset_id
-        if entity.is_component and dataset_id is None:
+        self.container = container
+        if entity.is_component and container is None:
             controls["_dataset"] = wtf.SelectField(
                 label=DelayedTranslationString("pipeman.entity.dataset"),
                 choices=self.dcontroller.list_datasets_for_component(),
-                default=self.entity.dataset_id if self.entity.dataset_id else "",
+                default=self.entity.parent_id if self.entity.parent_id else "",
                 validators=[wtfv.InputRequired()]
             )
         controls.update(self.entity.controls())
-        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.entity_form.submit"))
+        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
         super().__init__(controls, *args, **kwargs)
         self.process()
 
@@ -337,9 +343,12 @@ class EntityForm(BaseForm):
                 self.entity.process_form_data(d)
                 for key in d["_name"]:
                     self.entity.set_display_name(key, d["_name"][key])
-                self.entity.dataset_id = self.dataset_id
-                if "_dataset" in d:
-                    self.entity.dataset_id = d["_dataset"]
+                if self.container:
+                    self.entity.parent_id = self.container.container_id
+                    self.entity.parent_type = self.container.container_type
+                elif self.entity.is_component and "_dataset" in d and d["_dataset"]:
+                    self.entity.parent_id = d["_dataset"]
+                    self.entity.parent_type = "dataset"
                 self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
                 return True
             else:

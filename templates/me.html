@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-{{ 'pipeman.welcome' | gettext }}
-
+<h2>{{'pipeman.user_info.header' | gettext}}</h2>
+<table class="property-list" cellpadding="0" cellspacing="0">
+    <tbody>
+    <tr><th>{{'pipeman.display_name' | gettext}}</th><td>{{current_user.display}}</td></tr>
+    <tr><th>{{'pipeman.username' | gettext}}</th><td>{{current_user.username}}</td></tr>
+    <tr><th>{{'auth_db.last_success' | gettext}}</th><td>{% if current_user.property('last_success') %}{{current_user.property('last_success') | format_datetime}}{% else %}{{'auth_db.no_recent_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'auth_db.last_success_ip' | gettext}}</th><td>{% if current_user.property('last_success_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.general.na' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'auth_db.last_error' | gettext}}</th><td>{% if current_user.property('last_error') %}{{current_user.property('last_error') | format_datetime}}{% else %}{{'auth_db.no_recent_failed_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'auth_db.last_error_ip' | gettext}}</th><td>{% if current_user.property('last_error_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.general.na' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'auth_db.total_errors' | gettext}}</th><td>{{current_user.property('total_errors')}}</td></tr>
+    </tbody>
+</table>
 {% endblock %}

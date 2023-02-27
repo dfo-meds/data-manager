@@ -340,7 +340,7 @@ class DatasetController:
         args = {
             "dataset": dataset
         }
-        for processor in self.reg.metadata_processors(profile_name, format_name):
+        for processor in self.reg.metadata_processors(dataset.profiles, profile_name, format_name):
             updates = processor(**args)
             if updates:
                 args.update(updates)
@@ -377,14 +377,14 @@ class DatasetController:
             if revision_no and not ds_data:
                 raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
             return self.reg.build_dataset(
-                ds.profiles.replace("\r", "").split("\n"),
-                json.loads(ds_data.data) if ds_data else {},
-                ds.id,
-                ds_data.id if ds_data else None,
-                ds_data.revision_no if ds_data else None,
-                json.loads(ds.display_names) if ds.display_names else None,
-                ds.is_deprecated,
-                ds.organization_id,
+                profiles=ds.profiles.replace("\r", "").split("\n"),
+                field_values=json.loads(ds_data.data) if ds_data else {},
+                dataset_id=ds.id,
+                ds_data_id=ds_data.id if ds_data else None,
+                revision_no=ds_data.revision_no if ds_data else None,
+                display_names=json.loads(ds.display_names) if ds.display_names else None,
+                is_deprecated=ds.is_deprecated,
+                org_id=ds.organization_id,
                 extras={
                     "pub_workflow": ds.pub_workflow,
                     "act_workflow": ds.act_workflow,
@@ -531,6 +531,7 @@ class DatasetForm(FlaskForm):
             for key in self.names.data:
                 self.dataset.set_display_name(key, self.names.data[key])
             self.dataset.profiles = self.profiles.data
+            self.dataset.extras = self.dataset.extras or {}
             self.dataset.extras["pub_workflow"] = self.pub_workflow.data
             self.dataset.extras["act_workflow"] = self.act_workflow.data
             self.dataset.extras["security_level"] = self.security_level.data
@@ -539,20 +540,16 @@ class DatasetForm(FlaskForm):
             return self.dataset
         else:
             return self.reg.build_dataset(
-                self.profiles.data,
-                None,
-                None,
-                None,
-                self.names.data,
-                False,
-                self.organization.data,
-                {
+                profiles=self.profiles.data,
+                display_names=self.names.data,
+                org_id=self.organization.data,
+                extras={
                     "pub_workflow": self.pub_workflow.data,
                     "act_workflow": self.act_workflow.data,
                     "security_level": self.security_level.data,
                     "status": "DRAFT",
                 },
-                self.assigned_users.data
+                users=self.assigned_users.data
             )
 
 

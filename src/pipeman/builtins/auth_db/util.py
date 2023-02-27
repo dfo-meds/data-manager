@@ -4,6 +4,7 @@ from autoinject import injector
 import logging
 import pipeman.db.orm as orm
 
+
 @injector.inject
 def remove_from_group(group_name, username, db: Database = None):
     with db as session:

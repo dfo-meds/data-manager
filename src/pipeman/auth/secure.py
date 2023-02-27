@@ -7,6 +7,7 @@ import math
 import base64
 import logging
 from pipeman.util import UserInputError
+import binascii
 
 
 @injector.injectable_global
@@ -60,7 +61,12 @@ class SecurityHelper:
 
     def parse_auth_header(self, auth_header):
         pieces = auth_header.split(".", maxsplit=2)
-        return pieces[0], pieces[1], base64.b64decode(pieces[2])
+        if len(pieces) != 3:
+            return None, None, None
+        try:
+            return pieces[0], pieces[1], base64.b64decode(pieces[2])
+        except binascii.Error:
+            return None, None, None
 
     def generate_secret(self, secret_length_bytes):
         return secrets.token_hex(secret_length_bytes)

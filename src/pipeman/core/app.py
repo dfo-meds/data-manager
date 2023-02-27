@@ -52,29 +52,45 @@ def create_entity(obj_type, con: EntityController = None):
     return con.create_entity_form(obj_type)
 
 
-@core.route("/objects/<obj_type>/new/<dataset_id>", methods=["POST", "GET"])
+def _get_container(parent_id, parent_type, dcon, econ):
+    if parent_type == "dataset":
+        try:
+            ds = dcon.load_dataset(parent_id)
+        except DatasetNotFoundError:
+            return flask.abort(404)
+        if not dcon.has_access(ds, "edit"):
+            return flask.abort(403)
+        return ds
+    elif parent_type == "entity":
+        try:
+            ent = econ.load_entity(None, parent_id)
+        except EntityNotFoundError:
+            return flask.abort(404)
+        if not econ.has_specific_access(ent, "edit"):
+            return flask.abort(403)
+        return ent
+    else:
+        return flask.abort(404)
+
+
+@core.route("/objects/<obj_type>/new/<parent_type>/<parent_id>", methods=["POST", "GET"])
 @require_permission("entities.create")
 @require_permission("datasets.edit")
 @injector.inject
-def create_component(obj_type, dataset_id, dcon: DatasetController = None, econ: EntityController = None):
+def create_component(obj_type, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if not econ.reg.type_exists(obj_type):
         return flask.abort(404)
     if not econ.has_access(obj_type, "create"):
         return flask.abort(403)
-    try:
-        dataset = dcon.load_dataset(dataset_id)
-        if not dcon.has_access(dataset, "edit"):
-            return flask.abort(403)
-        return econ.create_component_form(obj_type, dataset)
-    except DatasetNotFoundError:
-        return flask.abort(404)
+    container = _get_container(parent_id, parent_type, dcon, econ)
+    return econ.create_component_form(obj_type, container)
 
 
-@core.route("/objects/<obj_type>/<obj_id>/edit/<dataset_id>", methods=["POST", "GET"])
+@core.route("/objects/<obj_type>/<obj_id>/edit/<parent_type>/<parent_id>", methods=["POST", "GET"])
 @require_permission("entities.edit")
 @require_permission("datasets.edit")
 @injector.inject
-def edit_component(obj_type, obj_id, dataset_id, dcon: DatasetController = None, econ: EntityController = None):
+def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if not econ.reg.type_exists(obj_type):
         return flask.abort(404)
     if not econ.has_access(obj_type, "edit"):
@@ -86,21 +102,15 @@ def edit_component(obj_type, obj_id, dataset_id, dcon: DatasetController = None,
         return flask.abort(404)
     if not econ.has_specific_access(entity, "edit"):
         return flask.abort(403)
-    dataset = None
-    try:
-        dataset = dcon.load_dataset(dataset_id)
-    except DatasetNotFoundError:
-        return flask.abort(404)
-    if not dcon.has_access(dataset, "edit"):
-        return flask.abort(403)
-    return econ.edit_component_form(entity, dataset)
+    container = _get_container(parent_id, parent_type, dcon, econ)
+    return econ.edit_component_form(entity, container)
 
 
-@core.route("/objects/<obj_type>/<obj_id>/remove/<dataset_id>", methods=["POST", "GET"])
+@core.route("/objects/<obj_type>/<obj_id>/remove/<parent_type>/<parent_id>", methods=["POST", "GET"])
 @require_permission("entities.remove")
 @require_permission("datasets.edit")
 @injector.inject
-def remove_component(obj_type, obj_id, dataset_id, dcon: DatasetController = None, econ: EntityController = None):
+def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if not econ.reg.type_exists(obj_type):
         return flask.abort(404)
     if not econ.has_access(obj_type, "remove"):
@@ -112,21 +122,15 @@ def remove_component(obj_type, obj_id, dataset_id, dcon: DatasetController = Non
         return flask.abort(404)
     if not econ.has_specific_access(entity, "remove"):
         return flask.abort(403)
-    dataset = None
-    try:
-        dataset = dcon.load_dataset(dataset_id)
-    except DatasetNotFoundError:
-        return flask.abort(404)
-    if not dcon.has_access(dataset, "edit"):
-        return flask.abort(403)
-    return econ.remove_component_form(entity, dataset)
+    container = _get_container(parent_id, parent_type, dcon, econ)
+    return econ.remove_component_form(entity, container)
 
 
-@core.route("/objects/<obj_type>/<obj_id>/restore/<dataset_id>", methods=["POST", "GET"])
+@core.route("/objects/<obj_type>/<obj_id>/restore/<parent_type>/<parent_id>", methods=["POST", "GET"])
 @require_permission("entities.restore")
 @require_permission("datasets.edit")
 @injector.inject
-def restore_component(obj_type, obj_id, dataset_id, dcon: DatasetController = None, econ: EntityController = None):
+def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if not econ.reg.type_exists(obj_type):
         return flask.abort(404)
     if not econ.has_access(obj_type, "restore"):
@@ -138,14 +142,8 @@ def restore_component(obj_type, obj_id, dataset_id, dcon: DatasetController = No
         return flask.abort(404)
     if not econ.has_specific_access(entity, "restore"):
         return flask.abort(403)
-    dataset = None
-    try:
-        dataset = dcon.load_dataset(dataset_id)
-    except DatasetNotFoundError:
-        return flask.abort(404)
-    if not dcon.has_access(dataset, "edit"):
-        return flask.abort(403)
-    return econ.restore_component_form(entity, dataset)
+    container = _get_container(parent_id, parent_type, dcon, econ)
+    return econ.restore_component_form(entity, container)
 
 
 @core.route("/objects/<obj_type>/<obj_id>")

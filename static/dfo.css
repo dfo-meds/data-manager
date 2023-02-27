@@ -128,6 +128,8 @@ a:hover {
     align-items: stretch;
     background-color: #CCC;
     padding: 0;
+    min-width: 200px;
+    min-height: 500px;
 }
 .nav ul {
     list-style: none;
@@ -285,7 +287,77 @@ ul li.removed .name {
     text-decoration: line-through;
     color: #FF0000;
 }
-
+ul.messages {
+    padding: 0;
+    margin: 0;
+    margin-bottom: 6px;
+}
+ul.messages li {
+    list-style: none;
+    margin: 0;
+    padding: 6px 10px;
+    background-color: #2196F3;
+    color: #FFFFFF;
+}
+ul.messages li.error {
+    background-color: #CC0000;
+    color: #FFFFFF;
+}
+ul.messages li.warning {
+    background-color: #FBEB3B;
+    color: #333333;
+}
+ul.messages li.success {
+    background-color: #4CAF50;
+    color: #FFFFFF;
+}
+.choices_outer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: table;
+}
+.choices_inner {
+    display: table-cell;
+    vertical-align: middle;
+}
+.choices_innermost {
+    width: 650px;
+    margin: 0 auto;
+    border: 3px solid #005A9B;
+}
+.choices_innermost img {
+    width: 350px;
+}
+.choices {
+    margin-top: 30px;
+    display: flex;
+}
+.choices div {
+    flex-grow: 1;
+    text-align: center;
+    width: 300px;
+    padding: 10px;
+}
+.choices div h2 {
+    margin: 0;
+    font-size: 16px;
+    color: #005A9B;
+}
+.choices div.choice_en {
+    margin-right: 25px;
+}
+.choices div.choice_fr {
+    margin-left: 25px;
+}
+.choices p.tos {
+    font-size: 13px;
+}
+.choices p.continue {
+    font-weight: bold;
+}
 #session_timeout_box {
     display: block;
     position: fixed;

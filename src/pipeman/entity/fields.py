@@ -27,7 +27,7 @@ class HtmlList:
 
 class Field:
 
-    def __init__(self, field_name, field_config, parent_id=None):
+    def __init__(self, field_name, field_config, parent_type=None, parent_id=None):
         self.field_name = field_name
         self.field_config = field_config
         self.display_group = field_config['display_group'] if 'display_group' in field_config else ""
@@ -35,6 +35,7 @@ class Field:
         self.value = None
         self._use_default_repeatable = True
         self.parent_id = parent_id
+        self.parent_type = parent_type
 
     def sanitize_form_input(self, val):
         return val
@@ -199,7 +200,7 @@ class Field:
         if use_repeatable and use_multilingual:
             items = [
                 MultiLanguageString({
-                    y: self._format_for_ui(self.value[x][y])
+                    y: self._format_for_ui(x[y])
                     for y in x
                 })
                 for x in self.value
@@ -310,8 +311,8 @@ class DateField(Field):
 
     DATA_TYPE = "date"
 
-    def __init__(self, field_name, field_config, container_id, default_format="%Y-%m-%d"):
-        super().__init__(field_name, field_config, container_id)
+    def __init__(self, field_name, field_config, container_type, container_id, default_format="%Y-%m-%d"):
+        super().__init__(field_name, field_config, container_type, container_id)
         if "storage_format" not in self.field_config:
             self.field_config["storage_format"] = default_format
 
@@ -343,8 +344,8 @@ class DateTimeField(DateField):
 
     DATA_TYPE = "datetime"
 
-    def __init__(self, field_name, field_config, container_id):
-        super().__init__(field_name, field_config, container_id, "%Y-%m-%d %H:%M:%S")
+    def __init__(self, field_name, field_config, container_type, container_id):
+        super().__init__(field_name, field_config, container_type, container_id, "%Y-%m-%d %H:%M:%S")
 
     def _control_class(self) -> t.Callable:
         return wtf.DateTimeField
@@ -529,8 +530,8 @@ class TimeField(DateField):
 
     DATA_TYPE = "time"
 
-    def __init__(self, field_name, field_config, container_id):
-        super().__init__(field_name, field_config, container_id, default_format="%H:%M")
+    def __init__(self, field_name, field_config, container_type, container_id):
+        super().__init__(field_name, field_config, container_type, container_id, default_format="%H:%M")
 
     def _extra_wtf_arguments(self) -> dict:
         return {
@@ -591,6 +592,28 @@ class HtmlContentField(Field):
         raise NotImplementedError()
 
 
+class VocabularyTerm:
+
+    def __init__(self, term_key=None, term_label=None):
+        self._short_name = term_key
+        self._display = term_label
+
+    def __bool__(self):
+        return self._short_name is not None
+
+    def short_name(self):
+        return self._short_name
+
+    def display(self):
+        return MultiLanguageString(json.loads(self._display)) if self._display else ""
+
+    def __getitem__(self, key):
+        if key == "short_name":
+            return self.short_name()
+        if key == "display":
+            return self.display()
+
+
 class VocabularyReferenceField(ChoiceField):
 
     DATA_TYPE = "vocabulary"
@@ -624,12 +647,9 @@ class VocabularyReferenceField(ChoiceField):
                 values.append((term.short_name, MultiLanguageString(dns)))
         return values
 
-    def _process_value(self, val, none_as_blank=True, **kwargs):
+    def _process_value(self, val, none_as_blank=False, **kwargs):
         with self.db as session:
             term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config["vocabulary_name"], short_name=val).first()
             if term is not None:
-                return {
-                    "short_name": term.short_name,
-                    "display": MultiLanguageString(json.loads(term.display_names))
-                }
-        return {"short_name": "", "display": ""} if none_as_blank else None
+                return VocabularyTerm(term.short_name, term.display_names)
+        return VocabularyTerm()

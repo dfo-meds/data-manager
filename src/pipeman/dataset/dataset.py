@@ -173,9 +173,8 @@ class MetadataRegistry:
         text = MultiLanguageString(self._profiles[profile_name]["formatters"][format_name]["label"])
         return link, text
 
-    def build_dataset(self, profiles, dataset_values = None, dataset_id = None, ds_data_id = None, revision_no = None, display_names=None, is_deprecated=False, org_id=None, extras=None, users=None):
+    def build_dataset(self, profiles, **kwargs):
         fields = set()
-        mandatory = set()
         ext_profiles = set()
         while profiles:
             p = profiles.pop()
@@ -185,14 +184,13 @@ class MetadataRegistry:
                     profiles.append(self._profiles[p]["extends"])
         for profile in ext_profiles:
             fields.update(self._profiles[profile]["fields"].keys())
-            mandatory.update(x for x in self._profiles[profile]["fields"].keys() if self._profiles[profile]["fields"][x])
         field_list = {}
         for fn in fields:
             if fn not in self._fields:
                 logging.getLogger("pipeman.fields").error(f"Field {fn} not defined, skipping")
             else:
                 field_list[fn] = self._fields[fn]
-        ds = Dataset(field_list, dataset_values, display_names, mandatory, dataset_id, ext_profiles, ds_data_id, revision_no, is_deprecated, org_id, extras, users)
+        ds = Dataset(field_list=field_list, profiles=ext_profiles, **kwargs)
         for profile in ext_profiles:
             if "derived_fields" in self._profiles[profile] and self._profiles[profile]["derived_fields"]:
                 dfns = self._profiles[profile]["derived_fields"]
@@ -218,15 +216,17 @@ class Dataset(FieldContainer):
     mreg: MetadataRegistry = None
 
     @injector.construct
-    def __init__(self, field_list: dict, field_values: t.Optional[dict], display_names: t.Optional[dict], required_fields, dataset_id, profiles, ds_data_id, revision_no, is_deprecated: bool = False, org_id: int = None, extras: dict = None, users: list = None):
-        super().__init__("dataset", dataset_id, field_list, field_values, display_names, is_deprecated, org_id)
-        self.required_fields = required_fields
+    def __init__(self, profiles, dataset_id=None, ds_data_id=None, revision_no=None, extras: dict = None, users: list = None, **kwargs):
+        super().__init__("dataset", dataset_id, **kwargs)
         self.profiles = profiles
         self.dataset_id = dataset_id
         self.metadata_id = ds_data_id
         self.revision_no = revision_no
         self.extras = extras or {}
-        self.users = []
+        self.users = users
+
+    def view_link(self):
+        return flask.url_for("core.view_dataset", dataset_id=self.container_id)
 
     def guid(self):
         return self.extras['guid'] if 'guid' in self.extras else ""

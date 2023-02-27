@@ -3,7 +3,7 @@
 <ul class="component-list">
     {% for ent, txt, actions in entities %}
     {% if ent.is_deprecated %}
-    <li class="removed"><span class="name">{{'pipeman.variable.removed' | gettext}} {{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
+    <li class="removed"><span class="name">{{'pipeman.component.removed' | gettext}} {{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
     {% else %}
     <li><span class="name">{{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
     {% endif %}

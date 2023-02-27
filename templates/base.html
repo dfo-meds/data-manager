@@ -14,7 +14,7 @@
 {%- endmacro %}
 {% macro showmenu(menu_items) -%}
     <ul class="menu">
-        {% for txt, pth, subitems in menu_items %}
+        {% for txt, pth, subitems, _ in menu_items %}
             <li class="menu-item">
                 <a href="{{url_for(pth)}}">{{txt}}</a>
                 {% if subitems %}
@@ -146,8 +146,7 @@
             <div class="footer">
                 {% block footer %}
                 <ul class="bottom_links">
-                    <li><a href="{{url_for('dfo.tos')}}">{{'dfo.tos.label' | gettext}}</a></li>
-                    <li><a href="{{url_for('dfo.privacy')}}">{{'dfo.privacy.label' | gettext}}</a></li>
+                    <li><a href="{{url_for('dfo.help')}}">{{'dfo.help.link' | gettext}}</a></li>
                 </ul>
                 <div class="bottom_image">
                     <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="200" />

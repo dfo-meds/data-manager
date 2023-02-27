@@ -20,8 +20,10 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
     system.register_nav_item("entities", "pipeman.entities", "core.list_entities", "entities.view_entities")
     system.register_nav_item("action-items", "pipeman.action-items", "core.list_workflow_items", "action_items.view")
     system.register_nav_item("organizations", "pipeman.organizations", "core.list_organizations", "organizations.view")
-    system.register_nav_item("logout", "pipeman.menu.logout", "auth.logout", "_is_not_anonymous", "user")
-    system.register_nav_item("login", "pipeman.menu.login", "auth.login", "_is_anonymous", "user")
+    system.register_nav_item("home", "pipeman.home", "home", "_is_not_anonymous", "user", weight=-500)
+    system.register_nav_item("logout", "pipeman.menu.logout", "auth.logout", "_is_not_anonymous", "user", weight=10000)
+    system.register_nav_item("login", "pipeman.menu.login", "auth.login", "_is_anonymous", "user", weight=10000)
+
     root = pathlib.Path(__file__).parent
     with open(root / "steps.yaml", "r") as h:
         wreg.register_steps_from_dict(yaml.safe_load(h))

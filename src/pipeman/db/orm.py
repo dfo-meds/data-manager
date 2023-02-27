@@ -102,10 +102,24 @@ class User(_BaseModel, Base):
     phash = sa.Column(sa.String(128), nullable=True)
     email = sa.Column(sa.String(1024), nullable=False, index=True)
     allowed_api_access = sa.Column(sa.Boolean, nullable=False, default=False)
+    locked_until = sa.Column(sa.DateTime, nullable=True)
+    properties = sa.Column(sa.Text, nullable=True)
 
     groups = orm.relationship("Group", secondary=user_group, back_populates="users")
     organizations = orm.relationship("Organization", secondary=user_organization, back_populates="users")
     datasets = orm.relationship("Dataset", secondary=user_dataset, back_populates="users")
+
+
+class UserLoginRecord(_BaseModel, Base):
+
+    username = sa.Column(sa.String(255), nullable=True, index=True)
+    attempt_time = sa.Column(sa.DateTime, nullable=False)
+    remote_ip = sa.Column(sa.String(16), nullable=False)
+    from_api = sa.Column(sa.Boolean, nullable=False)
+    error_message = sa.Column(sa.String(255), nullable=True)
+    was_success = sa.Column(sa.Boolean, nullable=False)
+    was_since_last_clear = sa.Column(sa.Boolean, nullable=False)
+    lockable = sa.Column(sa.Boolean, nullable=False)
 
 
 class APIKey(_BaseModel, Base):
@@ -149,11 +163,11 @@ class Entity(_BaseModel, Base):
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
-    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True, index=True)
+    parent_id = sa.Column(sa.Integer, nullable=True)
+    parent_type = sa.Column(sa.String(255), nullable=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
     organization = orm.relationship("Organization", back_populates="entities")
-    dataset = orm.relationship("Dataset", back_populates="components")
 
     def latest_revision(self):
         latest = None
@@ -243,7 +257,6 @@ class Dataset(_BaseModel, Base):
     organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("MetadataEdition", back_populates="dataset")
     users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
-    components = orm.relationship("Entity", back_populates="dataset")
 
     def latest_revision(self):
         latest = None

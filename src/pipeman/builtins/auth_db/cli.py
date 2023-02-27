@@ -62,6 +62,14 @@ def create(username, email, display="", password=None, password_entry="", no_err
 
 
 @user.command
+@click.argument("username")
+@injector.inject
+def unlock(username, duc: DatabaseUserController = None):
+    """Unlock a user account."""
+    duc.unlock_user_account(username)
+
+
+@user.command
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.option("--password-entry", default="argument")
 @click.option("--password", default=None)

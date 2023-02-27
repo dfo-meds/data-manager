@@ -126,11 +126,36 @@ pipeman.organization.global: Global
 pipeman.organization.name: Name
 pipeman.organization.short_name: Short Name
 pipeman.organizations: Organizations
-pipeman.plugins.auth_db.blank_password: Password is blank
-pipeman.plugins.auth_db.short_password: Password is too short
-pipeman.plugins.auth_db.username_does_not_exist: No such user
-pipeman.plugins.auth_form.login_error: Error while logging in
-pipeman.plugins.auth_form.login_success: Login succes
+pipeman.display_name: Display Name
+pipeman.username: Username
+pipeman.user_info.header: User Information
+auth_db.last_success: Last Successful Login
+auth_db.last_success_ip: IP
+auth_db.last_error: Last Unsuccessful Login
+auth_db.last_error_ip: IP
+auth_db.total_errors: Unsuccessful Attempts
+pipeman.auth_form.username: Username
+pipeman.auth_form.password: Password
+pipeman.auth_form.login.title: Login
+dfo.help.link: User Manual
+pipeman.general.add: Add
+pipeman.general.remove: Remove
+pipeman.component.removed: Removed
+pipeman.general.restore: Restore
+pipeman.home: Home
+pipeman.welcome.title: Welcome
+dfo.welcome.header: Welcome
+dfo.welcome: Welcome to the CNODC's data management dashboard.
+dfo.usage_warning.header: Usage Warning
+dfo.usage_warning: Use of this tool is restricted to those working with the CNODC on managing datasets.
+dfo.recent_activity.header: Recent Activity
+auth_db.no_recent_failed_logins: No recent failed logins
+auth_db.no_recent_logins: No recent logins
+pipeman.auth_db.blank_password: Password is blank
+pipeman.auth_db.short_password: Password is too short
+pipeman.auth_db.username_does_not_exist: No such user
+pipeman.auth_form.login_error: Error while logging in
+pipeman.auth_form.login_success: Login succes
 pipeman.status.unknown: Unknown
 pipeman.view_organization.title: View Organization
 pipeman.welcome: Welcome

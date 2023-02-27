@@ -81,9 +81,11 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
 
     def _build_html_content(self):
         create_link = None
-        if self.ec.has_access(self.field_config["entity_type"], "create"):
+        if not self.parent_id:
+            return gettext("pipeman.component.add_later")
+        if self.parent_id and self.ec.has_access(self.field_config["entity_type"], "create"):
             # TODO: dataset access to edit??
-            create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], dataset_id=self.parent_id)
+            create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], parent_id=self.parent_id, parent_type=self.parent_type)
         return flask.render_template(
             "component_ref.html",
             create_link=create_link,
@@ -93,7 +95,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
     def _component_list(self):
         if not self.parent_id:
             return
-        return self.ec.list_components(self.field_config["entity_type"], self.parent_id)
+        return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)
 
 
 class EntityReferenceField(EntityRefMixin, ChoiceField):
@@ -173,8 +175,9 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         pieces = val.split("-", maxsplit=1)
         if not len(pieces) == 2:
             return None
-        return self.ec.load_entity(
+        res = self.ec.load_entity(
             None,
             int(pieces[0]),
             int(pieces[1])
         )
+        return res

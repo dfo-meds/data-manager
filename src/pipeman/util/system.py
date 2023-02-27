@@ -6,7 +6,7 @@ import zrlog
 import pkgutil
 from pipeman.i18n import gettext
 import pathlib
-from flask import session
+from flask import session, render_template
 import datetime
 
 
@@ -63,7 +63,7 @@ class System:
                         cls_def["weight"] = 1
                     injector.override(cls_name, cls_def.pop("constructor"), *a, **cls_def)
 
-    def register_nav_item(self, hierarchy, item_text, item_link, permission, nav_group='main'):
+    def register_nav_item(self, hierarchy, item_text, item_link, permission, nav_group='main', weight=None):
         levels = hierarchy.split(".")
         levels.reverse()
         if nav_group not in self._nav_menu:
@@ -78,7 +78,8 @@ class System:
         working[levels[0]] = {
             "_label": item_text,
             "_link": item_link,
-            "_permission": permission
+            "_permission": permission,
+            "_weight": len(working) if weight is None else weight
         }
 
     def _build_nav(self, items):
@@ -90,8 +91,10 @@ class System:
             nav.append((
                 gettext(item["_label"]),
                 item["_link"],
-                self._build_nav({i: item[i] for i in item if not i.startswith("_")})
+                self._build_nav({i: item[i] for i in item if not i.startswith("_")}),
+                item["_weight"]
             ))
+        nav.sort(key=lambda x: x[3])
         return nav
 
     def register_init_app(self, init_app_cb):
@@ -161,6 +164,14 @@ class System:
             for key in self._nav_menu:
                 items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])
             return items
+
+        @app.route("/home")
+        def home():
+            return render_template("welcome.html", title=gettext("pipeman.welcome.title"))
+
+        @app.route("/")
+        def splash():
+            return render_template("splash.html")
 
         return app
 

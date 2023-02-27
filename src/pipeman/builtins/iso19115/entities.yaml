@@ -160,6 +160,8 @@ citation:
   validation:
     required:
       - title
+    custom:
+      - pipeman.builtins.iso19115.util.validate_citation
 graphic:
   display:
     en: Graphic
@@ -494,7 +496,6 @@ use_constraint:
       data_type: multitext
       label:
         en: Limitation Description
-      repeatable: yes
       multilingual: yes
     graphic:
       data_type: entity_ref
@@ -654,9 +655,9 @@ id_system:
       label:
         en: Code Space
     version:
-      data_type:
-        label:
-          en: Code Space Version
+      data_type: text
+      label:
+        en: Code Space Version
 contact:
   display:
     en: Contact
@@ -743,6 +744,7 @@ contact:
       entity_type: contact
       label:
         en: Individuals (Orgs Only)
+      repeatable: yes
     logo:
       data_type: entity_ref
       entity_type: graphic
@@ -752,15 +754,8 @@ spatial_res:
   display:
     en: Spatial Resolution
   validation:
-    required:
-      - scale
-      - distance
-      - distance_units
-      - vertical
-      - vertical_units
-      - angular
-      - angular_units
-      - level_of_detail
+    custom:
+      - pipeman.builtins.iso19115.util.validate_spatial_res
   fields:
     scale:
       data_type: integer

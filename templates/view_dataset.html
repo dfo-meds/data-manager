@@ -26,6 +26,7 @@
     {% endfor %}</tbody>
 </table>
 {% endfor %}
+{% if dataset.revision_no %}
 <h2>{{'pipeman.dataset.metadata_files' | gettext}}</h2>
 <ul>
 {% for link, text in dataset.metadata_format_links() %}
@@ -39,6 +40,7 @@
     <li><a href="{{link}}">{{date | format_datetime}}</a></li>
     {% endfor %}
 </ul>
+{% endif %}
 {% endif %}
 {% endblock %}
 {% block sidebar %}

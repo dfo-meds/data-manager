@@ -77,18 +77,12 @@ class EntityRegistry:
         keys['und'] = key
         return MultiLanguageString(keys)
 
-    def new_entity(self, key, values=None, display_names=None, db_id=None, data_id=None, is_deprecated=False, org_id=None, dataset_id=None):
+    def new_entity(self, key, **kwargs):
         ent = Entity(
             key,
-            self._entity_types[key]["fields"],
-            self._entity_types[key]["is_component"],
-            values,
-            display_names=display_names,
-            db_id=db_id,
-            ed_id=data_id,
-            is_deprecated=is_deprecated,
-            org_id=org_id,
-            dataset_id=dataset_id
+            field_list=self._entity_types[key]["fields"],
+            is_component=self._entity_types[key]["is_component"],
+            **kwargs
         )
         if "derived_fields" in self._entity_types[key] and self._entity_types[key]["derived_fields"]:
             dfns = self._entity_types[key]["derived_fields"]
@@ -174,7 +168,7 @@ class FieldContainer:
     def _load_fields(self, field_list: dict, field_values: dict = None):
         for field_name in field_list:
             field_config = copy.deepcopy(field_list[field_name])
-            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_id)
+            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_type, self.container_id)
             if field_values and field_name in field_values:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
@@ -304,14 +298,15 @@ class CustomValidator:
             if isinstance(error, ValidationResult):
                 yield error
             else:
+                str_error = ""
                 level = "error"
                 code = "CRE-00"
                 if not isinstance(error, str):
                     if len(error) >= 2:
-                        error, code = error[0], error[1]
+                        str_error, code = error[0], error[1]
                     if len(error) >= 3:
                         level = error[2]
-                yield ValidationResult(error, object_path, level, code, self.profile)
+                yield ValidationResult(str_error, object_path, level, code, self.profile)
 
 
 class Entity(FieldContainer):
@@ -319,14 +314,17 @@ class Entity(FieldContainer):
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, entity_type, field_list: dict, is_component: bool, field_values: dict = None, display_names: dict = None,
-                 db_id: int = None, ed_id: int = None, is_deprecated: bool = False, org_id: int = None, dataset_id=None):
-        super().__init__("entity", db_id, field_list, field_values, display_names, is_deprecated, org_id)
+    def __init__(self, entity_type, is_component: bool, db_id: int = None, ed_id: int = None, parent_id=None, parent_type=None, **kwargs):
+        super().__init__("entity", db_id, **kwargs)
         self.is_component = is_component
         self.entity_type = entity_type
         self.db_id = db_id
         self.entity_data_id = ed_id
-        self.dataset_id = dataset_id
+        self.parent_id = parent_id
+        self.parent_type = parent_type
+
+    def view_link(self):
+        return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.db_id)
 
     def actions(self, for_view: bool = False):
         action_args = {

@@ -1,5 +1,20 @@
 {% extends "base.html" %}
-{% block content %}
-{{ 'pipeman.welcome' | gettext }}
 
+{% block body %}
+<div class="choices_outer">
+    <div class="choices_inner">
+
+        <div class="choices_innermost">
+        <img class="header-image" src="{{url_for('static', filename='sig-blk-en.svg')}}" />
+    <div class="choices">
+
+    <div class="choice_en">
+        <h2>MEDS<br />Data Management Dashboard</h2>
+        <p class="continue"><a href="{{url_for('auth.login', lang='en')}}">Continue in English</a></p>
+    </div>
+    <div class="choice_fr">
+        <h2>SDMM<br />Gestion des données</h2>
+        <p class="continue"><a href="{{url_for('auth.login', lang='fr')}}">Continuez en français</a></p>
+    </div></div></div>
+</div></div>
 {% endblock %}
