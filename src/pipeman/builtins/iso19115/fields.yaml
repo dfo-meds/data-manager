@@ -1,182 +1,222 @@
 metadata_info:
-  label:
-    en: Metadata
   fields:
     metadata_owner:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Owner
+        fr: Propriétaire
+      order: 10
     point_of_contact:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Point of Contact
+        fr: Point de contact
+      order: 20
     canon_urls:
       data_type: entity_ref
       entity_type: resource
+      order: 990
       label:
         en: Canonical Metadata URLs
+        fr: URLs des métadonnées canoniques
       repeatable: yes
     parent_metadata:
       data_type: entity_ref
       entity_type: citation
       label:
         en: Parent Metadata
-      order: 10
+        fr: Métadonnées parentes
+      order: 1000
     alt_metadata:
       data_type: entity_ref
       repeatable: yes
       entity_type: citation
-      order: 45
+      order: 1010
       label:
         en: Alternative Metadata References
+        fr: Autres références de métadonnées
     metadata_standards:
       data_type: entity_ref
       repeatable: yes
       entity_type: citation
-      order: 50
+      order: 2000
       label:
         en: Metadata Standards
+        fr: Normes relatives aux métadonnées
     metadata_profiles:
       data_type: entity_ref
       repeatable: yes
       entity_type: citation
-      order: 55
+      order: 2010
       label:
-        en: Metadata Profile
+        en: Metadata Profiles
+        fr: Profils de métadonnées
     default_locale:
       data_type: entity_ref
-      order: 10
+      order: 100
       entity_type: locale
       label:
-        en: Default Metadata Locale
+        en: Default Locale (Metadata)
+        fr: Paramètres régionaux par défaut (métadonnées)
+      description:
+        en: Choose the locale that most of the metadata is filled out in, or English if they are the same.
+        fr: Choisissez les paramètres régionaux dans lesquels la plupart des metadonnées sont remplies, ou en anglais s’ils sont identiques.
     other_locales:
       data_type: entity_ref
-      order: 20
+      order: 110
       repeatable: yes
       entity_type: locale
       label:
-        en: Other Metadata Locales
+        en: Other Locales (Metadata)
+        fr: Autre paramètres régionaux (métadonnées)
     metadata_maintenance_frequency:
       data_type: vocabulary
-      order: 60
+      order: 500
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
-        en: Metadata Maintenance Frequency
+        en: Maintenance Frequency (Metadata)
+        fr: Fréquence de maintenance (métadonnées)
     meta_licenses:
       data_type: entity_ref
       entity_type: use_constraint
       label:
-        en: Metadata Constaints
-      order: 150
+        en: Usage Constaints (metadata)
+        fr: Contraintes d'utilisation (métadonnées)
+      order: 30
       repeatable: yes
 citation:
   label:
     en: Citation
+    fr: Citation
   order: 15
   fields:
     title:
       data_type: text
       label:
         en: Title
-      order: 20
+        fr: Titre
+      order: 10
       multilingual: yes
     dataset_id_code:
       data_type: text
       label:
-        en: Dataset ID Code
+        en: Dataset ID
+        fr: Code d'identification
+      order: 500
     dataset_id_desc:
       data_type: text
       label:
-        en: Dataset ID (Long)
+        en: Dataset ID Description
+        fr: Description de l'identificateur
       multilingual: yes
+      order: 510
     dataset_id_system:
       data_type: entity_ref
       label:
         en: Dataset ID System
+        fr: Système d'identification
       entity_type: id_system
+      order: 520
     publication_date:
       data_type: date
       label:
         en: Publication Date
-      order: 80
+        fr: Date de publication
+      order: 20
     revision_date:
       data_type: date
       label:
         en: Revision Date
-      order: 90
+        fr: Date de révision
+      order: 30
     creation_date:
       data_type: date
       label:
         en: Creation Date
-      order: 100
+        fr: Date de création
+      order: 40
 data_info:
-  label:
-    en: Dataset
-  order: 10
   fields:
     abstract:
       data_type: multitext
       label:
         en: Abstract
-      order: 30
+        fr: Abstrait
+      order: 10
       multilingual: yes
     purpose:
       data_type: multitext
       label:
         en: Purpose
-      order: 40
+        fr: But
+      order: 20
       multilingual: yes
     credit:
       data_type: multitext
       label:
-        en: Credit
-      order: 50
+        en: Acknowledgements
+        fr: Remerciements
+      order: 30
       multilingual: yes
     info_link:
       data_type: entity_ref
       entity_type: resource
       label:
-        en: Information Link
-      order: 70
+        en: Primary Link
+        fr: Lien principal
+      order: 40
     responsibles:
       data_type: component_ref
       entity_type: responsibility
       label:
-        en: Dataset Contacts
+        en: Data Contacts
+        fr: Contacts pour les données
       repeatable: yes
+      order: 10000000
     licenses:
       data_type: entity_ref
       entity_type: use_constraint
       label:
-        en: Data Constaints
-      order: 140
+        en: Usage Constraints (Data)
+        fr: Contraintes d'utilisation (données)
+      order: 50
       repeatable: yes
     processing_code:
       data_type: text
       label:
         en: Processing Level Code
+        fr: Code de niveau de traitement
+      order: 1000
     processing_desc:
       data_type: multitext
       label:
         en: Processing Level Description
+        fr: Description du niveau de traitement
       multilingual: yes
+      order: 1010
     processing_system:
       data_type: entity_ref
       entity_type: id_system
       label:
         en: Processing Level System
+        fr: Système du niveau de traitement
+      order: 1020
     environment_desc:
       data_type: multitext
       label:
         en: Environment Descriptino
+        fr: Description de l'environnement
       multilingual: yes
+      order: 2000
     supplemental:
       data_type: multitext
       label:
-        en: Supplemental
+        en: Supplemental Information
+        fr: Renseignements supplémentaires
       multilingual: yes
+      order: 2010
 keywords:
   fields:
     topic_category:
@@ -185,10 +225,111 @@ keywords:
       repeatable: yes
       label:
         en: Topic Category
+        fr: Catégorie de sujet
       order: 10
+extent:
+  fields:
+    bbox_west:
+      order: 10
+      data_type: decimal
+      label:
+        en: West
+        fr: Ouest
+    bbox_east:
+      data_type: decimal
+      order: 20
+      label:
+        en: East
+        fr: Est
+    bbox_north:
+      data_type: decimal
+      order: 30
+      label:
+        en: North
+        fr: Nord
+    bbox_south:
+      data_type: decimal
+      order: 40
+      label:
+        en: South
+        fr: Sud
+    wkt_polygon:
+      data_type: multitext
+      order: 50
+      label:
+        en: Polygon Boundary (WKT)
+        fr: Limite polygonale (WKT)
+    vertical_min:
+      data_type: decimal
+      order: 150
+      label:
+        en: Vertical Minimum
+        fr: Minimum vertical
+    vertical_max:
+      data_type: decimal
+      order: 160
+      label:
+        en: Vertical Maximum
+        fr: Maximum vertical
+    vertical_ref_system:
+      data_type: entity_ref
+      entity_type: ref_system
+      label:
+        en: Vertical Reference System
+        fr: Système de référence vertical
+      order: 170
+    start_time:
+      data_type: datetime
+      order: 200
+      label:
+        en: Start Time
+        fr: Début
+    end_time:
+      data_type: datetime
+      order: 210
+      label:
+        en: End Time
+        fr: Fin
+    is_ongoing:
+      data_type: boolean
+      order: 220
+      label:
+        en: Is On-Going
+        fr: En cours
+    spatial_resolution:
+      data_type: entity_ref
+      order: 70
+      entity_type: spatial_res
+      label:
+        en: Spatial Resolution
+        fr: Résolution spatiale
+      repeatable: yes
+    temporal_resolution:
+      data_type: entity_ref
+      order: 240
+      entity_type: time_res
+      label:
+        en: Temporal Resolution
+        fr: Résolution temporelle
+      repeatable: yes
+    horizontal_ref_system:
+      data_type: entity_ref
+      order: 60
+      entity_type: ref_system
+      label:
+        en: Horizontal Reference System
+        fr: Système de référence horizontal
+    temporal_ref_system:
+      data_type: entity_ref
+      order: 230
+      entity_type: ref_system
+      label:
+        en: Temporal Reference System
+        fr: Système de référence temporelle
 references:
   label:
     en: References
+    fr: Références
   order: 50
   fields:
     additional_docs:
@@ -198,116 +339,31 @@ references:
       order: 40
       label:
         en: Additional Documentation
+        fr: Documentation supplémentaire
     graphics:
       data_type: entity_ref
       repeatable: yes
       entity_type: graphic
+      order: 1000
       label:
         en: Graphic Overviews
-extent:
-  label:
-    en: Extent
-  order: 30
-  fields:
-    bbox_west:
-      order: 10
-      data_type: decimal
-      label:
-        en: West
-    bbox_east:
-      data_type: decimal
-      order: 20
-      label:
-        en: East
-    bbox_north:
-      data_type: decimal
-      order: 30
-      label:
-        en: North
-    bbox_south:
-      data_type: decimal
-      order: 40
-      label:
-        en: South
-    wkt_polygon:
-      data_type: multitext
-      order: 50
-      label:
-        en: Polygon Boundary (WKT)
-    vertical_min:
-      data_type: decimal
-      order: 60
-      label:
-        en: Vertical Minimum
-    vertical_max:
-      data_type: decimal
-      order: 70
-      label:
-        en: Vertical
-    vertical_ref_system:
-      data_type: entity_ref
-      entity_type: ref_system
-      label:
-        en: Vertical Reference System
-      order: 75
-    start_time:
-      data_type: datetime
-      order: 80
-      label:
-        en: Start Time
-    end_time:
-      data_type: datetime
-      order: 90
-      label:
-        en: End Time
-    is_ongoing:
-      data_type: boolean
-      order: 100
-      label:
-        en: Is On-Going
-    spatial_resolution:
-      data_type: entity_ref
-      order: 110
-      entity_type: spatial_res
-      label:
-        en: Spatial Resolution
-      repeatable: yes
-    temporal_resolution:
-      data_type: entity_ref
-      order: 120
-      entity_type: time_res
-      label:
-        en: Temporal Resolution
-      repeatable: yes
-    horizontal_ref_system:
-      data_type: entity_ref
-      order: 130
-      entity_type: ref_system
-      label:
-        en: Horizontal Reference System
-    temporal_ref_system:
-      data_type: entity_ref
-      order: 130
-      entity_type: ref_system
-      label:
-        en: Temporal Reference System
+        fr: Vues d'ensemble graphique
 technical:
-  label:
-    en: Technical
-  order: 100
   fields:
     dataset_locale:
       data_type: entity_ref
       order: 25
       entity_type: locale
       label:
-        en: Dataset Primary Language
+        en: Primary Locale (Dataset)
+        fr: Paramètres régionaux par défaut (données)
     dataset_other_locales:
       data_type: entity_ref
       order: 26
       entity_type: locale
       label:
-        en: Dataset Other Languages
+        en: Other Locales (Dataset)
+        fr: Autre paramètres régionaux (données)
       repeatable: yes
     status:
       data_type: vocabulary
@@ -341,8 +397,6 @@ technical:
       label:
         en: Maintenance Records
 publishing:
-  label:
-    en: Publishing Info
   fields:
     distributors:
       data_type: component_ref

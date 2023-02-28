@@ -3,19 +3,31 @@ iso19115:
     en: Core ISO-19115
   validation:
     required:
-      - responsibles
       - title
       - abstract
       - creation_date
       - default_locale
       - licenses
-      - metadata_owner
     custom:
       - pipeman.builtins.iso19115.util.validate_dataset
   fields:
     metadata_owner:
+    point_of_contact:
+    canon_urls:
+    alt_metadata:
+    metadata_standards:
+    metadata_profiles:
+    dataset_id_code:
+    dataset_id_desc:
+    dataset_id_system:
     responsibles:
     title:
+    supplemental:
+    environment_desc:
+    processing_system:
+    processing_desc:
+    processing_code:
+    graphics:
     abstract:
     purpose:
     credit:

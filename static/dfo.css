@@ -123,6 +123,11 @@ a:hover {
     display: flex;
     flex-direction: row;
 }
+.form-description {
+    clear: both;
+    font-size: 12px;
+    font-style: italic;
+}
 .nav {
     flex-grow: 0;
     align-items: stretch;
@@ -231,9 +236,10 @@ ul.table_actions li:last-child {
     padding: 0;
 }
 .form-field .form-label {
-    width: 200px;
+    width: 250px;
     float: left;
     font-weight: bold;
+    font-size: 14px;
 }
 .form-field {
     margin-top: 10px;
@@ -241,6 +247,7 @@ ul.table_actions li:last-child {
     border-top: 1px solid #CCCCCC;
     padding-top: 10px;
     max-width: 90%;
+    font-size: 14px;
 }
 .form-field .form-control {
     float: left;

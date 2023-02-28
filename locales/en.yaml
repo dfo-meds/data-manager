@@ -124,6 +124,9 @@ pipeman.organization.display: Display
 pipeman.organization.display_names: Display Name
 pipeman.organization.global: Global
 pipeman.organization.name: Name
+languages.short.und: UND
+languages.short.en: EN
+languages.short.fr: FR
 pipeman.organization.short_name: Short Name
 pipeman.organizations: Organizations
 pipeman.display_name: Display Name

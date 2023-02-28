@@ -111,6 +111,49 @@ iso19115_md_topic_category_code:
   display:
     en: Topic Categories
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_TopicCategoryCode
+  terms:
+    farming:
+      en: Farming
+    biota:
+      en: Biota
+    boundaries:
+      en: Boundaries
+    climatologyMeteorologyAtmosphere:
+      en: Climatology, Meteorology, Atmosphere
+    economy:
+      en: Economy
+    elevation:
+      en: Elevation
+    environment:
+      en: Environment
+    geoscientificInformation:
+      en: Geoscientific Information
+    health:
+      en: Health
+    imageryBaseMapsEarthCover:
+      en: Imagery, Base Maps, Earth Cover
+    intelligenceMilitary:
+      en: Intelligence, Military
+    inlandWaters:
+      en: Inland Waters
+    location:
+      en: Location
+    oceans:
+      en: Oceans
+    planningCadastre:
+      en: Planning, Cadastre
+    society:
+      en: Society
+    structure:
+      en: Structure
+    transportation:
+      en: Transportation
+    utilitiesCommunication:
+      en: Utilities, Communication
+    extraTerrestrial:
+      en: Extra-Terrestrial
+    disaster:
+      en: Disaster
 iso19115_md_topology_level_code:
   display:
     en: Topology Levels

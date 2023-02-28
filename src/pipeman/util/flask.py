@@ -131,9 +131,9 @@ class TranslatableField(DynamicFormField):
     def _build_field_list(self):
         fields = {}
         if self.use_undefined:
-            fields['und'] = self.template_field(label='UND', **self.template_args)
+            fields['und'] = self.template_field(label=DelayedTranslationString("languages.short.und"), **self.template_args)
         fields.update({
-            lang: self.template_field(label=lang.upper(), **self.template_args)
+            lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
             for lang in self.tm.supported_languages()
         })
         return fields

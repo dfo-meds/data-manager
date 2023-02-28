@@ -1,0 +1,17 @@
+pipeman.general.empty_select: << aucun sélectionné >>
+forms.back: Retour
+dfo.cnodc: Centre nationale des données océanographique du Canada
+language_names.en: Anglais
+pipeman.home: Acceuil
+auth_db.me: Mon compte
+auth_db.change_password: Changer mot de passe
+pipeman.datasets: Ensembles des données
+languages.short.und: NDF
+languages.short.en: AN
+languages.short.fr: FR
+pipeman.general.view: Voir
+pipeman.general.edit: Modifier
+pipeman.general.remove: Supprimer
+pipeman.general.restore: Restaurer
+pipeman.general.add: Ajouter
+pipeman.general.submit: Soumettre

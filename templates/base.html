@@ -34,6 +34,9 @@
             </div>
             <div class="form-control">
                 {{control}} {{control.label}}
+                {% if control.description %}
+                <div class="form-description">{{control.description}}</div>
+                {% endif %}
             </div>
             <br style="clear: both" />
         </div>
@@ -54,6 +57,9 @@
             </div>
             <div class="form-control">
                 {{control}}
+            {% if control.description %}
+            <div class="form-description">{{control.description}}</div>
+            {% endif %}
             </div>
             <br style="clear: both" />
         </div>

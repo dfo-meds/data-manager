@@ -25,17 +25,17 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
     system.register_nav_item("login", "pipeman.menu.login", "auth.login", "_is_anonymous", "user", weight=10000)
 
     root = pathlib.Path(__file__).parent
-    with open(root / "steps.yaml", "r") as h:
+    with open(root / "steps.yaml", "r", encoding="utf-8") as h:
         wreg.register_steps_from_dict(yaml.safe_load(h))
-    with open(root / "workflows.yaml", "r") as h:
+    with open(root / "workflows.yaml", "r", encoding="utf-8") as h:
         wreg.register_workflows_from_dict(yaml.safe_load(h))
-    with open(root / "security.yaml", "r") as h:
+    with open(root / "security.yaml", "r", encoding="utf-8") as h:
         reg.register_security_labels_from_dict(yaml.safe_load(h))
-    with open(root / "vocabs.yaml", "r") as h:
+    with open(root / "vocabs.yaml", "r", encoding="utf-8") as h:
         vreg.register_from_dict(yaml.safe_load(h))
-    with open(root / "entities.yaml", "r") as h:
+    with open(root / "entities.yaml", "r", encoding="utf-8") as h:
         ereg.register_from_dict(yaml.safe_load(h))
-    with open(root / "fields.yaml") as h:
+    with open(root / "fields.yaml", encoding="utf-8") as h:
         reg.register_fields_from_dict(yaml.safe_load(h))
     dsr.register_data_store("test-store", {"en": "Test Store"}, "C:/my/local_store", True, 'basic', 'basic', True)
 

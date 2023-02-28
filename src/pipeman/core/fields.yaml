@@ -1,18 +1,18 @@
-variables:
+metadata_info:
   label:
-    en: Variables
-  order: 200
-  fields:
-    variables:
-      data_type: component_ref
-      order: 10
-      entity_type: variable
-      label:
-        en: Variables
+    en: Metadata
+    fr: Métadonnées
+  order: 0
+data_info:
+  label:
+    en: Dataset
+    fr: Ensemble de données
+  order: 20
 keywords:
   label:
     en: Keywords
-  order: 20
+    fr: Mots-clé
+  order: 25
   fields:
     custom_keywords:
       data_type: entity_ref
@@ -20,10 +20,38 @@ keywords:
       order: 1000000000
       entity_type: keyword
       label:
-        en: Custom Keywords
+        en: Keywords
+        fr: Mots-clé
       keyword_config:
         is_keyword: yes
         default_mode: translated
         thesaurus_field: thesaurus
         keyword_field: keyword
-
+extent:
+  label:
+    en: Extent
+    fr: Etendue
+  order: 30
+technical:
+  label:
+    en: Technical
+    fr: Technique
+  order: 100
+publishing:
+  label:
+    en: Distribution
+    fr: Acheminement
+  order: 150
+variables:
+  label:
+    en: Variables
+    fr: Variables
+  order: 200
+  fields:
+    variables:
+      data_type: component_ref
+      order: 0
+      entity_type: variable
+      label:
+        en: Variables
+        fr: Variables

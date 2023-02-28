@@ -33,8 +33,8 @@ class ISO19115VocabularyManager:
                 vocab_name += c.lower()
             vocab_terms = {}
             for entry in actual_codelist.findall("{http://standards.iso.org/iso/19115/-3/cat/1.0}codeEntry"):
-                name = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}name")[0].text
-                desc = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}description")[0].text
+                name = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}name")[0].text.strip()
+                desc = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}description")[0].text.strip()
                 vocab_terms[name] = {
                     "display": {
                         "en": name,

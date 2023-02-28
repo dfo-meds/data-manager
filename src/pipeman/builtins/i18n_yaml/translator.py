@@ -25,7 +25,7 @@ class YamlTranslationManager:
 
     def _ensure_dictionary(self, lang):
         if lang not in self._dictionaries:
-            with open(self._dictionary_lookup[lang], "r") as h:
+            with open(self._dictionary_lookup[lang], "r", encoding="utf-8") as h:
                 self._dictionaries[lang] = yaml.safe_load(h)
                 if self._dictionaries[lang] is None:
                     self._dictionaries[lang] = {}
