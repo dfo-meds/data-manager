@@ -85,7 +85,74 @@
             <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
+            <script type="text/javascript">
 
+                let overflow_error = '{{'pipeman.html_error.overflow' | gettext}}';
+                let underflow_error = '{{'pipeman.html_error.underflow' | gettext}}';
+                let no_value_error = '{{'pipeman.html_error.missing_value' | gettext}}';
+                let too_long_error = '{{'pipeman.html_error.too_long' | gettext}}';
+                let too_short_error = '{{'pipeman.html_error.too_short' | gettext}}';
+                let step_error = '{{'pipeman.html_error.step_error' | gettext}}';
+                let pattern_error = '{{'pipeman.html_error.pattern_error' | gettext}}';
+                let input_error = '{{'pipeman.html_error.input_error' | gettext}}';
+                let email_format = '{{'pipeman.html_error.email_format_error' | gettext}}';
+                let url_format = '{{'pipeman.html_error.url_format_error' | gettext}}';
+                let tel_format = '{{'pipeman.html_error.tel_format_error' | gettext}}';
+
+                $(document).ready(function() {
+                    $("input").each(function() {
+                        $(this).on("input", function(e) {
+                            let obj = $(this).get(0);
+                            original_message = obj.validationMessage;
+                            obj.setCustomValidity("");
+                            if (obj.validity.valueMissing) {
+                                obj.setCustomValidity(no_value_error);
+                            } else if (obj.validity.tooShort) {
+                                obj.setCustomValidity(too_short_error.replace("{min}", $(this).attr("minlength")));
+                            } else if (obj.validity.tooLong) {
+                                obj.setCustomValidity(too_long_error.replace("{max}", $(this).attr("maxlength")));
+                            } else if (obj.validity.rangeOverflow) {
+                                obj.setCustomValidity(overflow_error.replace("{max}", $(this).attr("max")));
+                            } else if (obj.validity.rangeUnderflow) {
+                                obj.setCustomValidity(underflow_error.replace("{min}", $(this).attr("min")));
+                            } else if (obj.validity.stepMismatch) {
+                                obj.setCustomValidity(step_error.replace("{step}", $(this).attr("step")));
+                            } else if (obj.validity.patternMismatch) {
+                                obj.setCustomValidity(pattern_error.replace("{pattern}", $(this).attr("pattern")));
+                            } else if (obj.validity.badInput) {
+                                obj.setCustomValidity(input_error);
+                            } else if (!obj.validity.valid) {
+                                if ($(this).attr("type") == "email") {
+                                    obj.setCustomValidity(email_format);
+                                }
+                                else if ($(this).attr("type") == "url") {
+                                    obj.setCustomValidity(url_format);
+                                }
+                                else if ($(this).attr("type") == "tel") {
+                                    obj.setCustomValidity(tel_format);
+                                }
+                                else {
+                                    obj.setCustomValidity(original_message);
+                                    window.alert(original_message);
+                                }
+                            }
+                            obj.title = obj.validationMessage;
+                            if (obj.validationMessage) {
+                                $(this).addClass("form-error");
+                                let box_count = $(this).parent().find(".form-error-message").length;
+                                if (box_count > 0) {
+                                    $(this).parent().find(".form-error-message").text(obj.validationMessage);
+                                } else {
+                                    $(this).parent().append("<div class='form-error-message'>" + obj.validationMessage + "</div>");
+                                }
+                            } else {
+                                $(this).removeClass("form-error");
+                                $(this).parent().find(".form-error-message").remove();
+                            }
+                        });
+                    });
+                });
+            </script>
         {% endblock %}
         {% block style %}
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />

@@ -5,6 +5,14 @@ data_info:
       data_type: text
       label:
         en: Institution (Short)
+    project:
+      data_type: text
+      label:
+        en: Project
+    program:
+      data_type: text
+      label:
+        en: Program
 technical:
   fields:
     erddap_dataset_id:
@@ -33,15 +41,3 @@ technical:
       label:
         en: CDM Data Type
       vocabulary_name: cdm_data_types
-    processing_level:
-      data_type: text
-      label:
-        en: Processing Level
-    project:
-      data_type: text
-      label:
-        en: Project
-    program:
-      data_type: text
-      label:
-        en: Program

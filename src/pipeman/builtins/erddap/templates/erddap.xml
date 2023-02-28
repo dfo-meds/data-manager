@@ -41,8 +41,8 @@
         {% if dataset['credit'] %}
         <att name="acknowledgement">{{dataset['credit']['und']}}</att>
         {% endif %}
-        {% if dataset['processing_level'] %}
-        <att name="processing_level">{{dataset['processing_level']}}</att>
+        {% if dataset['processing_code'] %}
+        <att name="processing_level">{{dataset['processing_code']}}</att>
         {% endif %}
         {% if dataset['project'] %}
         <att name="project">{{dataset['project']}}</att>

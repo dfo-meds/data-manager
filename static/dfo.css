@@ -241,8 +241,15 @@ ul.table_actions li:last-child {
     font-weight: bold;
     font-size: 14px;
 }
-.form-control-select2 {
-    min-width: 200px;
+span.select2-container {
+    min-width: 400px;
+}
+.form-error-message {
+    font-size: 12px;
+    color: #CC0000;
+}
+.form-error {
+    border-color: #CC0000;
 }
 .form-field {
     margin-top: 10px;

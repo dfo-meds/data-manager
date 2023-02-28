@@ -13,11 +13,11 @@ from wtforms.form import BaseForm
 import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
-from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList
+from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
-from xml.dom import minidom
+import wtforms.validators as wtfv
 import re
 import uuid
 
@@ -470,37 +470,63 @@ class DatasetForm(FlaskForm):
     organization = wtf.SelectField(
         DelayedTranslationString("pipeman.dataset.organization"),
         choices=[],
-        coerce=int
+        coerce=int,
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        validators=[
+            wtfv.DataRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
+        ]
     )
 
     profiles = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.dataset.profiles"),
         choices=[],
-        coerce=str
+        coerce=str,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
     )
 
     pub_workflow = wtf.SelectField(
         DelayedTranslationString("pipeman.dataset.publication_workflow"),
         choices=[],
-        coerce=str
+        coerce=str,
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        validators=[
+            wtfv.DataRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
+        ]
     )
 
     act_workflow = wtf.SelectField(
         DelayedTranslationString("pipeman.dataset.activation_workflow"),
         choices=[],
-        coerce=str
+        coerce=str,
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        validators=[
+            wtfv.DataRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
+        ]
     )
 
     assigned_users = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.dataset.assigned_users"),
         choices=[],
-        coerce=int
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
     )
 
     security_level = wtf.SelectField(
         DelayedTranslationString("pipeman.dataset.security_level"),
         choices=[],
-        coerce=str
+        coerce=str,
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        validators=[
+            wtfv.DataRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
+        ]
     )
 
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
@@ -603,5 +629,8 @@ class DatasetMetadataForm(BaseForm):
             else:
                 for key in self.errors:
                     for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error") % (self._fields[key].label.text, m), "error")
+                        flask.flash(gettext("pipeman.entity.form_error").format(
+                            field=self._fields[key].label.text,
+                            error=m
+                        ), "error")
         return False

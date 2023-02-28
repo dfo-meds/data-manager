@@ -9,6 +9,7 @@ from pipeman.i18n import DelayedTranslationString, MultiLanguageString
 import json
 import flask
 from flask_wtf import FlaskForm
+import wtforms.validators as wtfv
 import wtforms as wtf
 from pipeman.util.flask import TranslatableField, ActionList
 
@@ -115,7 +116,14 @@ class OrganizationController:
 
 class OrganizationForm(FlaskForm):
 
-    short_name = wtf.StringField(DelayedTranslationString("pipeman.organization.short_name"))
+    short_name = wtf.StringField(
+        DelayedTranslationString("pipeman.organization.short_name"),
+        validators=[
+            wtfv.DataRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
+        ]
+    )
 
     display_names = TranslatableField(wtf.StringField, label=DelayedTranslationString("pipeman.organization.display_names"))
 

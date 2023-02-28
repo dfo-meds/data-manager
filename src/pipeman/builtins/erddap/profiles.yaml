@@ -21,7 +21,6 @@ erddap:
   fields:
     erddap_dataset_id:
     cdm_data_type:
-    processing_level:
     project:
     program:
     title:

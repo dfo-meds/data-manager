@@ -3,7 +3,7 @@ from pipeman.auth import AuthenticatedUser, SecurityHelper
 from pipeman.db.db import Database
 from autoinject import injector
 import pipeman.db.orm as orm
-from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, get_real_remote_ip
+from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, get_real_remote_ip, Select2Widget
 from pipeman.i18n import gettext, DelayedTranslationString
 import flask
 import flask_login
@@ -376,26 +376,40 @@ class CreateUserForm(FlaskForm):
     username = wtf.StringField(
         DelayedTranslationString("auth_db.username"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
     display = wtf.StringField(
         DelayedTranslationString("auth_db.display_name"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
     email = wtf.EmailField(
         DelayedTranslationString("auth_db.email"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
-    groups = wtf.SelectMultipleField(DelayedTranslationString("auth_db.groups"), coerce=int)
-    organizations = wtf.SelectMultipleField(DelayedTranslationString("auth_db.organizations"), coerce=int)
+    groups = wtf.SelectMultipleField(
+        DelayedTranslationString("auth_db.groups"),
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+    )
+    organizations = wtf.SelectMultipleField(
+        DelayedTranslationString("auth_db.organizations"),
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+    )
 
     submit = wtf.SubmitField("pipeman.general.submit")
 
@@ -414,19 +428,32 @@ class EditUserForm(FlaskForm):
     display = wtf.StringField(
         DelayedTranslationString("auth_db.display_name"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
     email = wtf.EmailField(
         DelayedTranslationString("auth_db.email"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
-    groups = wtf.SelectMultipleField(DelayedTranslationString("auth_db.groups"), coerce=int)
-    organizations = wtf.SelectMultipleField(DelayedTranslationString("auth_db.organizations"), coerce=int)
+    groups = wtf.SelectMultipleField(
+        DelayedTranslationString("auth_db.groups"),
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+    )
+    organizations = wtf.SelectMultipleField(
+        DelayedTranslationString("auth_db.organizations"),
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+    )
+
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
 
     @injector.construct
@@ -448,7 +475,9 @@ class EditMyselfForm(FlaskForm):
     display = wtf.StringField(
         DelayedTranslationString("auth_db.display_name"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
@@ -465,14 +494,19 @@ class ChangePasswordForm(FlaskForm):
     password = wtf.PasswordField(
         DelayedTranslationString("auth_db.password"),
         validators=[
-            wtfv.InputRequired()
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.fields.required")
+            )
         ]
     )
 
     repeat_password = wtf.PasswordField(
         DelayedTranslationString("auth_db.repeat_password"),
         validators=[
-            wtfv.EqualTo("password")
+            wtfv.EqualTo(
+                "password",
+                message=DelayedTranslationString("pipeman.fields.passwords_match")
+            )
         ]
     )
 

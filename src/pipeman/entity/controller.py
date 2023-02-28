@@ -14,7 +14,7 @@ import datetime
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList
+from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, Select2Widget
 import flask_login
 import wtforms.validators as wtfv
 
@@ -319,7 +319,8 @@ class EntityForm(BaseForm):
             "_org": wtf.SelectField(
                 label=DelayedTranslationString("pipeman.entity.organization"),
                 choices=self.ocontroller.list_organizations(),
-                default=self.entity.organization_id if self.entity.organization_id else ""
+                default=self.entity.organization_id if self.entity.organization_id else "",
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select"))
             ),
         }
         self.container = container
@@ -328,7 +329,10 @@ class EntityForm(BaseForm):
                 label=DelayedTranslationString("pipeman.entity.dataset"),
                 choices=self.dcontroller.list_datasets_for_component(),
                 default=self.entity.parent_id if self.entity.parent_id else "",
-                validators=[wtfv.InputRequired()]
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+                validators=[wtfv.InputRequired(
+                    message=DelayedTranslationString("pipeman.fields.required")
+                )]
             )
         controls.update(self.entity.controls())
         controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
@@ -354,7 +358,10 @@ class EntityForm(BaseForm):
             else:
                 for key in self.errors:
                     for m in self.errors[key]:
-                        flask.flash(f"{gettext('pipeman.entity.form_error')}: {m} [{self._fields[key].label.text}]")
+                        flask.flash(gettext("pipeman.entity.form_error").format(
+                            field=self._fields[key].label.text,
+                            error=m
+                        ), "error")
         return False
 
     def validate(self, extra_validators=None):

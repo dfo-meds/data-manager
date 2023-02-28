@@ -5,7 +5,7 @@ import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget
+from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
@@ -168,7 +168,7 @@ class Field:
     def validators(self) -> list:
         validators = []
         if "is_required" in self.field_config and self.field_config["is_required"]:
-            validators.append(wtfv.InputRequired())
+            validators.append(wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required", "Field is required")))
         else:
             validators.append(wtfv.Optional())
         return validators
@@ -268,12 +268,23 @@ class LengthValidationMixin:
     def validators(self):
         validators = super().validators()
         if "min" in self.field_config or "max" in self.field_config:
-            args = {}
-            if "min" in self.field_config:
-                args["min"] = self.field_config["min"]
-            if "max" in self.field_config:
-                args["max"] = self.field_config["max"]
-            validators.append(wtfv.Length(**args))
+            if "min" in self.field_config and "max" in self.field_config:
+                validators.append(wtfv.Length(
+                    min=self.field_config["min"],
+                    max=self.field_config["max"],
+                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
+                ))
+            elif "min" in self.field_config:
+                validators.append(wtfv.Length(
+                    min=self.field_config["min"],
+                    message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
+                ))
+            elif "max" in self.field_config:
+                validators.append(wtfv.Length(
+                    min=self.field_config["min"],
+                    max=self.field_config["max"],
+                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be less than %(max)")
+                ))
         return validators
 
 
@@ -282,12 +293,23 @@ class NumberValidationMixin:
     def validators(self):
         validators = super().validators()
         if "min" in self.field_config or "max" in self.field_config:
-            args = {}
-            if "min" in self.field_config:
-                args["min"] = self.field_config["min"]
-            if "max" in self.field_config:
-                args["max"] = self.field_config["max"]
-            validators.append(wtfv.NumberRange(**args))
+            if "min" in self.field_config and "max" in self.field_config:
+                validators.append(wtfv.NumberRange(
+                    min=self.field_config["min"],
+                    max=self.field_config["max"],
+                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
+                ))
+            elif "min" in self.field_config:
+                validators.append(wtfv.NumberRange(
+                    min=self.field_config["min"],
+                    message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
+                ))
+            elif "max" in self.field_config:
+                validators.append(wtfv.NumberRange(
+                    min=self.field_config["min"],
+                    max=self.field_config["max"],
+                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be less than %(max)")
+                ))
         return validators
 
 
@@ -463,7 +485,11 @@ class ChoiceField(Field):
     def _extra_wtf_arguments(self) -> dict:
         args = {
             "choices": self.choices,
-            "coerce": str
+            "coerce": str,
+            "widget": Select2Widget(
+                allow_multiple=self.is_repeatable(),
+                placeholder=DelayedTranslationString("pipeman.general.empty_select")
+            )
         }
         if "coerce" in self.field_config and self.field_config["coerce"] == "int":
             args["coerce"] = int

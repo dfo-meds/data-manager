@@ -128,6 +128,8 @@ languages.short.und: UND
 languages.short.en: EN
 languages.short.fr: FR
 pipeman.organization.short_name: Short Name
+pipeman.html_error.overflow: "Value should be less than {max}"
+pipeman.html_error.underflow: "Value should be greater than {min}"
 pipeman.organizations: Organizations
 pipeman.display_name: Display Name
 pipeman.username: Username

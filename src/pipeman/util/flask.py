@@ -16,6 +16,10 @@ import sqlalchemy as sa
 import flask_login
 
 
+def flash_wrap(message, category):
+    flask.flash(str(message), str(category))
+
+
 def get_real_remote_ip():
     remote_ip = "no request"
     if flask.has_request_context():
@@ -142,7 +146,7 @@ class FlatPickrWidget:
         return markupsafe.Markup(markup)
 
 
-class Select2AjaxWidget:
+class Select2Widget:
 
     def __init__(self, ajax_callback=None, allow_multiple=False, query_delay=None, placeholder=None, min_input=None):
         self.ajax_callback = ajax_callback
@@ -161,15 +165,16 @@ class Select2AjaxWidget:
         markup += '</select><script language="javascript" type="text/javascript">'
         markup += '$(document).ready(function() {\n'
         markup += f"  $('#{field.id}').select2(" + "{\n"
-        markup += "    ajax: {\n"
-        markup += f"      url: '{self.ajax_callback}',\n"
-        markup += "      dataType: 'json'\n"
-        markup += "    },\n"
+        if self.ajax_callback:
+            markup += "    ajax: {\n"
+            markup += f"      url: '{self.ajax_callback}',\n"
+            markup += "      dataType: 'json'\n"
+            markup += "    },\n"
+            if self.min_input:
+                markup += f"    minimumInputLength: {int(self.min_input)},\n"
         if self.placeholder:
             markup += "    allowClear: true,\n"
             markup += f"    placeholder: '{self.placeholder}',\n"
-        if self.min_input:
-            markup += f"    minimumInputLength: {int(self.min_input)},\n"
         markup += f"    delay: {int(self.query_delay)}\n"
         markup += "  });\n"
         markup += "});\n"
@@ -195,7 +200,7 @@ class EntitySelectField(wtf.Field):
         self.include_empty = False
         self.by_revision = bool(by_revision)
         if widget is None:
-            widget = Select2AjaxWidget(
+            widget = Select2Widget(
                 ajax_callback=flask.url_for(
                     "core.api_entity_select_field_list",
                     entity_types="|".join(self.entity_types),
