@@ -34,6 +34,16 @@ def create_jinja_filters(app):
     app.jinja_env.filters["format_datetime"] = _jinja_context_wrapper(format_datetime)
 
 
+def add_lang_cb(app):
+    @app.context_processor
+    @injector.inject
+    def add_lang_variable(ld: LanguageDetector = None, tm: TranslationManager = None):
+        return {
+            'language': ld.detect_language(tm.supported_languages())
+        }
+
+
 def init(system):
     system.register_init_app(create_jinja_filters)
+    system.register_init_app(add_lang_cb)
     system.register_cli("pipeman.i18n.cli", "i18n")

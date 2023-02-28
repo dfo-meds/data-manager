@@ -66,27 +66,35 @@
     {% endif %}
 {%- endmacro %}
 {% macro showform(form) -%}
-    <form action="" method="POST"{% if with_file_upload %} enctype="multipart/form-data"{% endif %}>
+    <form action="" lang={{language}} method="POST"{% if with_file_upload %} enctype="multipart/form-data"{% endif %}>
         {% for control in form %}
             {{ showformcontrol(control) }}
         {% endfor %}
     </form>
 {%- endmacro %}
 <!DOCTYPE html>
-<html>
+<html lang="{{language}}" xml:lang="{{language}}">
     <head>
         <title>{{title}}</title>
         {% block scripts %}
             <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/fr.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+            <script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
             <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
+
         {% endblock %}
         {% block style %}
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
             <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dfo.css')}}" />
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
         {% endblock %}
         <meta charset="utf-8" />
+        <meta http-equiv="content-language" content="{{language}}" />
     </head>
     <body>
         {% block body %}

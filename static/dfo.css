@@ -241,6 +241,9 @@ ul.table_actions li:last-child {
     font-weight: bold;
     font-size: 14px;
 }
+.form-control-select2 {
+    min-width: 200px;
+}
 .form-field {
     margin-top: 10px;
     margin-bottom: 10px;

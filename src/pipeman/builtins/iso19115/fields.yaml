@@ -22,6 +22,7 @@ metadata_info:
         en: Canonical Metadata URLs
         fr: URLs des métadonnées canoniques
       repeatable: yes
+      min_chars_to_search: 2
     parent_metadata:
       data_type: entity_ref
       entity_type: citation
@@ -235,24 +236,32 @@ extent:
       label:
         en: West
         fr: Ouest
+      min: -180
+      max: 180
     bbox_east:
       data_type: decimal
       order: 20
       label:
         en: East
         fr: Est
+      min: -180
+      max: 180
     bbox_north:
       data_type: decimal
       order: 30
       label:
         en: North
         fr: Nord
+      min: -90
+      max: 90
     bbox_south:
       data_type: decimal
       order: 40
       label:
         en: South
         fr: Sud
+      min: -90
+      max: 90
     wkt_polygon:
       data_type: multitext
       order: 50

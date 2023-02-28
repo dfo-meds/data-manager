@@ -9,6 +9,7 @@ from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
 from pipeman.files import FileController
 from pipeman.i18n import gettext
+from pipeman.util.flask import EntitySelectField
 
 core = flask.Blueprint("core", __name__)
 
@@ -399,6 +400,13 @@ def approve_item(item_id, wfc: WorkflowController = None):
 @injector.inject
 def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
+
+
+@core.route("/api/entity-select-field/<entity_types>/<by_revision>")
+@require_permission("_is_authenticated")
+@injector.inject
+def api_entity_select_field_list(entity_types, by_revision):
+    return EntitySelectField.results_list(entity_types.split("|"), flask.request.args.get("term"), by_revision == "1")
 
 
 @core.route("/api/pop-remote-item/<pipeline_name>")

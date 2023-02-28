@@ -5,7 +5,7 @@ import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField, HtmlField
+from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
@@ -311,10 +311,12 @@ class DateField(Field):
 
     DATA_TYPE = "date"
 
-    def __init__(self, field_name, field_config, container_type, container_id, default_format="%Y-%m-%d"):
-        super().__init__(field_name, field_config, container_type, container_id)
+    def __init__(self, *args, default_format="%Y-%m-%d", with_cal=True, with_time=False, **kwargs):
+        super().__init__(*args, **kwargs)
         if "storage_format" not in self.field_config:
             self.field_config["storage_format"] = default_format
+        self.with_time = with_time
+        self.with_cal = with_cal
 
     def serialize(self, val):
         if val is None:
@@ -330,7 +332,12 @@ class DateField(Field):
 
     def _extra_wtf_arguments(self) -> dict:
         return {
-            "format": self.field_config["storage_format"]
+            "format": self.field_config["storage_format"],
+            "widget": FlatPickrWidget(
+                with_time=self.with_time,
+                with_calendar=self.with_cal,
+                placeholder=DelayedTranslationString("pipeman.general.empty_date")
+            )
         }
 
     def _control_class(self) -> t.Callable:
@@ -344,11 +351,8 @@ class DateTimeField(DateField):
 
     DATA_TYPE = "datetime"
 
-    def __init__(self, field_name, field_config, container_type, container_id):
-        super().__init__(field_name, field_config, container_type, container_id, "%Y-%m-%d %H:%M:%S")
-
-    def _control_class(self) -> t.Callable:
-        return wtf.DateTimeField
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, default_format="%Y-%m-%d %H:%M:%S", with_time=True)
 
     def _format_for_ui(self, val):
         return format_datetime(val)
@@ -530,8 +534,8 @@ class TimeField(DateField):
 
     DATA_TYPE = "time"
 
-    def __init__(self, field_name, field_config, container_type, container_id):
-        super().__init__(field_name, field_config, container_type, container_id, default_format="%H:%M")
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs, default_format="%H:%M", with_cal=False, with_time=True)
 
     def _extra_wtf_arguments(self) -> dict:
         return {

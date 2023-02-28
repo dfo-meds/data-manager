@@ -1,4 +1,4 @@
-from pipeman.i18n import TranslationManager
+from pipeman.i18n import TranslationManager, DelayedTranslationString
 from autoinject import injector
 
 
@@ -14,6 +14,12 @@ class TranslatableError(PipemanError):
     @injector.construct
     def __init__(self, error_str_key, *subs):
         super().__init__(self.tm.get_text(error_str_key) % subs)
+
+
+class FormValueError(ValueError, PipemanError):
+
+    def __init__(self, error_str):
+        super(ValueError, self).__init__(DelayedTranslationString(error_str))
 
 
 class MetadataError(PipemanError):

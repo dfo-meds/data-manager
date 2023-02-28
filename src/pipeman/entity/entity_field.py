@@ -2,9 +2,9 @@
 from pipeman.entity.fields import ChoiceField, HtmlContentField
 from pipeman.entity.controller import EntityController
 from pipeman.entity.entity import FieldContainer
+from pipeman.util.flask import EntitySelectField
 from autoinject import injector
-import json
-from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, MultiLanguageLink
+from pipeman.i18n import gettext, MultiLanguageLink
 import flask
 import markupsafe
 
@@ -109,10 +109,17 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         super().__init__(*args, **kwargs)
         self._value_cache = None
 
-    def choices(self):
-        if self._value_cache is None:
-            self._value_cache = self._load_values()
-        return self._value_cache
+    def _control_class(self):
+        return EntitySelectField
+
+    def _extra_wtf_arguments(self) -> dict:
+        args = {
+            "entity_types": self.field_config["entity_type"],
+            "allow_multiple": self.is_repeatable()
+        }
+        if "min_chars_to_search" in self.field_config and self.field_config["min_chars_to_search"]:
+            args["min_chars_to_search"] = int(self.field_config["min_chars_to_search"])
+        return args
 
     def entity_revisions(self):
         refs = []
@@ -136,48 +143,14 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
             return ""
         return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.display_names())
 
-    def _load_values(self):
-        values = []
-        if not ('repeatable' in self.field_config and self.field_config['repeatable']):
-            values.append(("", DelayedTranslationString("pipeman.general.empty_select")))
-        revisions = self.entity_revisions()
-        old_rev_text = gettext("pipeman.general.outdated")
-        dep_rev_text = gettext("pipeman.general.deprecated")
-        loop_types = [self.field_config['entity_type']] if isinstance(self.field_config['entity_type'], str) else self.field_config['entity_type']
-        for ent_type in loop_types:
-            for entity, display, _ in self.ec.list_entities(ent_type):
-                dep_text = f"{dep_rev_text}:" if entity.is_deprecated else ""
-                latest_rev = entity.latest_revision()
-                val_key = f"{entity.id}-{latest_rev.revision_no}"
-                dn = json.loads(entity.display_names) if entity.display_names else {}
-                if not entity.is_deprecated:
-                    values.append((val_key, MultiLanguageString(dn)))
-                for rev in revisions:
-                    if rev[0] == entity.id and not rev[1] == latest_rev.revision_no:
-                        specific_rev = entity.specific_revision(rev[1])
-                        if specific_rev:
-                            dep_val_key = f"{entity.id}-{specific_rev.revision_no}"
-                            dn_dep = {
-                                key: dn[key] + f" [{dep_text}{old_rev_text}:{specific_rev.revision_no}]"
-                                for key in dn
-                            }
-                            values.append((dep_val_key, MultiLanguageString(dn_dep)))
-                    elif rev[0] == entity.id and rev[1] == latest_rev.id and entity.is_deprecated:
-                        dep_dn = {
-                            key: f"{dn[key]} [{dep_text[:-1]}" for key in dn
-                        }
-                        values.append((val_key, MultiLanguageString(dep_dn)))
-        return values if values else []
-
     def _process_value(self, val, **kwargs):
-        if val is None or "-" not in val == '-' or val == "-":
+        try:
+            ent_id, rev_no = EntitySelectField.parse_entity_option(val, False)
+            return self.ec.load_entity(None, ent_id, rev_no)
+        except ValueError:
             return None
-        pieces = val.split("-", maxsplit=1)
-        if not len(pieces) == 2:
-            return None
-        res = self.ec.load_entity(
-            None,
-            int(pieces[0]),
-            int(pieces[1])
-        )
-        return res
+
+    def sanitize_form_input(self, val):
+        if self.is_repeatable() and isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
+            return val[0]
+        return val
