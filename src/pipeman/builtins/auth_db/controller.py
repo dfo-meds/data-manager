@@ -698,10 +698,10 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             else:
                 total_errors += 1
         props = json.loads(user.properties) if user.properties else {}
-        props['last_success'] = last_success.strftime("%Y-%m-%d %H:%M:%S")
-        props['last_error'] = last_error.strftime("%Y-%m-%d %H:%M:%S")
-        props['last_success_ip'] = last_success_ip
-        props['last_error_ip'] = last_error_ip
+        props['last_success'] = last_success.strftime("%Y-%m-%d %H:%M:%S") if last_success else ""
+        props['last_error'] = last_error.strftime("%Y-%m-%d %H:%M:%S") if last_error else ""
+        props['last_success_ip'] = last_success_ip if last_success_ip else ""
+        props['last_error_ip'] = last_error_ip if last_error_ip else ""
         props['total_errors'] = total_errors
         user.properties = json.dumps(props)
         session.commit()
@@ -713,8 +713,8 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
         organizations = [x.id for x in user.organizations]
         datasets = [x.id for x in user.datasets]
         props = json.loads(user.properties) if user.properties else {}
-        props['last_success'] = datetime.datetime.strptime(props['last_success'], "%Y-%m-%d %H:%M:%S")
-        props['last_error'] = datetime.datetime.strptime(props['last_error'], "%Y-%m-%d %H:%M:%S")
+        props['last_success'] = datetime.datetime.strptime(props['last_success'], "%Y-%m-%d %H:%M:%S") if props['last_success'] else None
+        props['last_error'] = datetime.datetime.strptime(props['last_error'], "%Y-%m-%d %H:%M:%S") if props['last_error'] else None
         return AuthenticatedUser(
             user.username,
             user.display,

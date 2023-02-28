@@ -25,7 +25,7 @@
         <tr class="workflow-step-{{status}}">
             <td>{{name}}</td>
             <td>{{notes}}</td>
-            <td>{{'pipeman.workflow_item.core_steps.' + status | gettext}}</td>
+            <td>{{('pipeman.workflow_item.core_steps.' + status.lower()) | gettext}}</td>
         </tr>
         {% endfor %}
     </tbody>

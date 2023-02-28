@@ -10,6 +10,7 @@ class TranslatableStringFinder:
             re.compile(r'gettext\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
             re.compile(r'UserInputError\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
             re.compile(r'DelayedTranslationString\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
+            re.compile(r'FormValueError\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
             re.compile(r'\.add_action\([\'"]([A-Za-z_\.]*?)[\'"]')
         ]
         self._jinja_res = [

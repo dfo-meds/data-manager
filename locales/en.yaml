@@ -1,3 +1,4 @@
+auth_db.account_locked: ''
 auth_db.change_password: Change Password
 auth_db.change_password.title: Change Password
 auth_db.cli.user_already_exists: User already exists
@@ -6,50 +7,84 @@ auth_db.create_user.error_email_exists: Email exists
 auth_db.create_user.success: User created
 auth_db.create_user.title: Create User
 auth_db.display_name: Display Name
-pipeman.validation.required: Missing required field
-pipeman.validation.recommended: Missing recommended field
-pipeman.dataset_validation.title: Validation Report
-pipeman.dataset_validate.link: Validation
-pipeman.dataset_metadata.link: Edit Metadata
-pipeman.validation.success: No errors or warnings found
 auth_db.edit_myself.title: Edit My Profile
 auth_db.edit_profile: Edit Profile
 auth_db.edit_user.success: User updated successfully
 auth_db.edit_user.title: Edit User
 auth_db.email: Email
 auth_db.groups: Groups
+auth_db.last_error: Last Unsuccessful Login
+auth_db.last_error_ip: IP
+auth_db.last_success: Last Successful Login
+auth_db.last_success_ip: IP
 auth_db.list_users: List Users
 auth_db.list_users.title: List Users
 auth_db.me: My Account
+auth_db.no_recent_failed_logins: No recent failed logins
+auth_db.no_recent_logins: No recent logins
 auth_db.organizations: Organizations
 auth_db.password: Password
 auth_db.repeat_password: Repeat Password
+auth_db.reset_password: Reset Password
 auth_db.reset_password.instructions: Reset the users password
 auth_db.reset_password.success: Password reset to {}
 auth_db.reset_password.title: Reset PAssword
+auth_db.too_many_recent_logins: ''
+auth_db.total_errors: Unsuccessful Attempts
 auth_db.user.display: User
 auth_db.user.groups: Groups
 auth_db.user.organizations: Organizations
 auth_db.user.username: Username
+auth_db.user_create.title: ''
+auth_db.user_edit.title: ''
+auth_db.user_list.title: ''
+auth_db.user_reset_password.title: ''
 auth_db.username: Username
 auth_db.username_does_not_exist: Username does not exist
+dfo.cnodc: Canadian National Oceanographic Data Centre
+dfo.help.link: User Manual
+dfo.help.title: User Manual
+dfo.privacy.label: Privacy Policy
+dfo.recent_activity.header: Recent Activity
+dfo.tos.label: Terms and Conditions
+dfo.usage_warning: Use of this tool is restricted to those working with the CNODC
+  on managing datasets.
+dfo.usage_warning.header: Usage Warning
+dfo.welcome: Welcome to the CNODC's data management dashboard.
+dfo.welcome.header: Welcome
 forms.back: Back
 language_names.en: English
 language_names.fr: French
+languages.short.en: EN
+languages.short.fr: FR
+languages.short.und: UND
 pipeman.action-items: Action Items
 pipeman.auth.group_does_not_exist: Group does not exist
 pipeman.auth.hash_not_available: Hash function not available
 pipeman.auth.not_authorized: User not authorized for access
 pipeman.auth.org_does_not_exist: Organization does not exist
 pipeman.auth.password_too_long: Password is too long
+pipeman.auth_db.blank_password: Password is blank
+pipeman.auth_db.short_password: Password is too short
+pipeman.auth_db.username_does_not_exist: No such user
+pipeman.auth_form.login.title: Login
+pipeman.auth_form.login_error: Error while logging in
+pipeman.auth_form.login_success: Login success
+pipeman.auth_form.logout_success: Logout success
+pipeman.auth_form.password: Password
+pipeman.auth_form.username: Username
+pipeman.component.add_later: Components should be added after creating the entity
+pipeman.component.removed: Removed
+pipeman.component_edit.title: Edit Component
 pipeman.core.org_not_found: Organization not found
 pipeman.create_dataset: Create Dataset
 pipeman.create_entity: Create Entity
 pipeman.create_organization: Create Organization
 pipeman.create_organization.title: Create Organization
+pipeman.create_user: Create User
+pipeman.dataset.act_workflow: Activation Workflow
 pipeman.dataset.activate_dataset_form: Activate Dataset
-pipeman.dataset.activate_dataset_form.confirmation: Are you sure you want to activate
-  this dataset?
+pipeman.dataset.activate_dataset_form.confirmation: Are you sure you want to activate this dataset?
 pipeman.dataset.activated: Dataset activated
 pipeman.dataset.activation_error: Error while activating dataset
 pipeman.dataset.activation_in_progress: Activation process started
@@ -63,9 +98,11 @@ pipeman.dataset.edit_metadata_form: Edit Metadata
 pipeman.dataset.edit_metadata_link: Edit Metadata
 pipeman.dataset.id: ID
 pipeman.dataset.metadata: Metadata
+pipeman.dataset.metadata_files: Metadata Files
 pipeman.dataset.organization: Organization
 pipeman.dataset.profiles: Metadata Profiles
 pipeman.dataset.properties: Properties
+pipeman.dataset.pub_workflow: Publication Workflow
 pipeman.dataset.publication_error: An error occurred during publication
 pipeman.dataset.publication_in_progress: Publication is in progress
 pipeman.dataset.publication_workflow: Publication Workflow
@@ -74,113 +111,168 @@ pipeman.dataset.publish_dataset_form.confirmation: Are you sure you want to publ
 pipeman.dataset.publish_dataset_form.title: Publish Dataset
 pipeman.dataset.publish_link: Publish
 pipeman.dataset.published: Published
-pipeman.dataset.remove_link: Remove
+pipeman.dataset.published_versions: Published Versions
 pipeman.dataset.remove_dataset_form: Remove Dataset
 pipeman.dataset.remove_dataset_form.confirmation: Are you sure you want to remove
   this dataset?
+pipeman.dataset.remove_link: Remove
 pipeman.dataset.restore_dataset_form: Restore Dataset
 pipeman.dataset.restore_dataset_form.confirmation: Are you sure you want to remove
   this dataset?
 pipeman.dataset.security_level: Security Level
 pipeman.dataset.state: State
+pipeman.dataset.status: Status
+pipeman.dataset.status.active: Active
+pipeman.dataset_activate.confirmation: Are you sure you want to submit this dataset for approval?
+pipeman.dataset_activate.link: Submit for Approval
+pipeman.dataset_activate.title: Submit for Approval
+pipeman.dataset_create.title: Create Dataset
+pipeman.dataset_edit.title: Edit Dataset
+pipeman.dataset_list.title: List Dataset
+pipeman.dataset_metadata.link: Edit Metadata
+pipeman.dataset_metadata.success: Metadata saved
+pipeman.dataset_metadata.title: Edit Metadata
+pipeman.dataset_publish.confirmation: Are you sure you want to submit this metadata for publication?
+pipeman.dataset_publish.link: Publish Metadata
+pipeman.dataset_publish.title: Publish Metadata
+pipeman.dataset_remove.confirmation: Are you sure you want to remove this dataset?
+pipeman.dataset_remove.title: Remove
 pipeman.dataset_remove_link: Remove
+pipeman.dataset_restore.confirmation: Are you sure you want to remove this dataset?
+pipeman.dataset_restore.title: Restore
+pipeman.dataset_revision.warning: Restore
+pipeman.dataset_validate.link: Validation
+pipeman.dataset_validation.title: Validation Report
+pipeman.dataset_view_current.link: View Current Version
 pipeman.datasets: Datasets
+pipeman.display_name: Display Name
 pipeman.edit_organization.title: Title
 pipeman.entities: Entities
+pipeman.entity.dataset: Dataset
 pipeman.entity.display: Display
-pipeman.entity.form_error: "An error has occurred"
+pipeman.entity.form_error: An error has occurred
 pipeman.entity.id: ID
 pipeman.entity.is_deprecated: Is Deprecated
 pipeman.entity.organization: Organization
 pipeman.entity.remove_confirmation: Remove Entity
 pipeman.entity.restore_confirmation: Restore Entity
 pipeman.entity.state: State
+pipeman.entity.status: Status
+pipeman.entity.view_dataset: View Dataset
+pipeman.entity_create.success: Entity created
+pipeman.entity_create.title: Create Entity
+pipeman.entity_edit.success: Entity saved
+pipeman.entity_edit.title: Edit Entity
+pipeman.entity_field.bad_entity_id: Invalid entity ID
+pipeman.entity_field.bad_revision_no: Invalid revision number
+pipeman.entity_field.malformed_revision_str: Bad revision format
+pipeman.entity_field.missing_revision_piece: Missing revision number
+pipeman.entity_field.no_entity_access: You do not have permissions to use this entity
+pipeman.entity_field.no_such_entity: No such entity
+pipeman.entity_field.no_such_revision: No such revision
+pipeman.entity_field_missing_entity_id: Missing entity ID
 pipeman.entity_form.display_name: Display Name
 pipeman.entity_form.submit: Submit
+pipeman.entity_list.title: List Entities
+pipeman.entity_remove.confirmation: Are you sure you want to remove this object?
+pipeman.entity_remove.success: Object removed
+pipeman.entity_remove.title: Remove
+pipeman.entity_restore.confirmation: Are you sure you want to restore this object?
+pipeman.entity_restore.success: Object restored
+pipeman.entity_restore.title: Restore
 pipeman.entity_type.list: Entity Types
+pipeman.entity_view.title: View Entity
 pipeman.events.title: Events
+pipeman.fields.passwords_match: Passwords do not match
+pipeman.fields.required: Field is required
 pipeman.fire_event.title: Fire Event
 pipeman.general.actions: Actions
 pipeman.general.active: Active
+pipeman.general.add: Add
+pipeman.general.clear: Clear
 pipeman.general.deprecated: Deprecated
 pipeman.general.display_name: Display Name
+pipeman.general.edit: Edit
+pipeman.general.empty_date: <None>
 pipeman.general.empty_select: <None>
 pipeman.general.na: N/A
 pipeman.general.no: 'No'
-pipeman.general.edit: 'Edit'
-auth_db.reset_password: 'Reset Password'
-dfo.cnodc: Canadian National Oceanographic Data Centre
-dfo.tos.label: Terms and Conditions
-dfo.privacy.label: Privacy Policy
+pipeman.general.none: <None>
 pipeman.general.outdated: Outdated
 pipeman.general.pages: Page
+pipeman.general.remove: Remove
+pipeman.general.restore: Restore
 pipeman.general.submit: Submit
 pipeman.general.unknown: Unknown
 pipeman.general.view: View
 pipeman.general.yes: 'Yes'
+pipeman.home: Home
+pipeman.html_error.email_format_error: Invalid email address
+pipeman.html_error.input_error: Invalid format
+pipeman.html_error.missing_value: Missing value
+pipeman.html_error.overflow: Value should be less than {max}
+pipeman.html_error.pattern_error: Invalid pattern {pattern}
+pipeman.html_error.step_error: Invalid step {step}
+pipeman.html_error.tel_format_error: Invalid telephone number
+pipeman.html_error.too_long: Value is too long, should be less than {max}
+pipeman.html_error.too_short: Valid is too short, should be more than {min}
+pipeman.html_error.underflow: Value should be greater than {min}
+pipeman.html_error.url_format_error: Invalid URL format
 pipeman.list_organizations.title: Title
+pipeman.menu.login: Login
+pipeman.menu.logout: Logout
 pipeman.organization.already_exists: This organization already exists
 pipeman.organization.display: Display
 pipeman.organization.display_names: Display Name
 pipeman.organization.global: Global
 pipeman.organization.name: Name
-languages.short.und: UND
-languages.short.en: EN
-languages.short.fr: FR
 pipeman.organization.short_name: Short Name
-pipeman.html_error.overflow: "Value should be less than {max}"
-pipeman.html_error.underflow: "Value should be greater than {min}"
+pipeman.organization_create.title: Create Organization
+pipeman.organization_edit.title: Edit Organization
+pipeman.organization_list.title: Organizations
+pipeman.organization_view.title: View Organization
 pipeman.organizations: Organizations
-pipeman.display_name: Display Name
-pipeman.username: Username
-pipeman.user_info.header: User Information
-auth_db.last_success: Last Successful Login
-auth_db.last_success_ip: IP
-auth_db.last_error: Last Unsuccessful Login
-auth_db.last_error_ip: IP
-auth_db.total_errors: Unsuccessful Attempts
-pipeman.auth_form.username: Username
-pipeman.auth_form.password: Password
-pipeman.auth_form.login.title: Login
-dfo.help.link: User Manual
-pipeman.general.add: Add
-pipeman.general.remove: Remove
-pipeman.component.removed: Removed
-pipeman.general.restore: Restore
-pipeman.home: Home
-pipeman.welcome.title: Welcome
-dfo.welcome.header: Welcome
-dfo.welcome: Welcome to the CNODC's data management dashboard.
-dfo.usage_warning.header: Usage Warning
-dfo.usage_warning: Use of this tool is restricted to those working with the CNODC on managing datasets.
-dfo.recent_activity.header: Recent Activity
-auth_db.no_recent_failed_logins: No recent failed logins
-auth_db.no_recent_logins: No recent logins
-pipeman.auth_db.blank_password: Password is blank
-pipeman.auth_db.short_password: Password is too short
-pipeman.auth_db.username_does_not_exist: No such user
-pipeman.auth_form.login_error: Error while logging in
-pipeman.auth_form.login_success: Login succes
+pipeman.plugins.auth_db.blank_password: Password cannot be blank
+pipeman.plugins.auth_db.short_password: Password is too short
+pipeman.plugins.auth_db.username_does_not_exist: Username does not exist
+pipeman.refresh_session: Refresh Session
+pipeman.session_logout: Session Expiry
+pipeman.session_refresh_ajax_error: AJAX error while refreshing session
+pipeman.session_timeout_warning: Your session will expire soon
 pipeman.status.unknown: Unknown
+pipeman.user_info.header: User Information
+pipeman.username: Username
+pipeman.validation.recommended: Missing recommended field
+pipeman.validation.required: Missing required field
+pipeman.validation.success: No errors or warnings found
+pipeman.validation_level.error: Error
+pipeman.validation_level.warning: Warning
+pipeman.validation_level.success: Success
 pipeman.view_organization.title: View Organization
 pipeman.welcome: Welcome
+pipeman.welcome.title: Welcome
+pipeman.workflow_item.approve: Approve
+pipeman.workflow_item.cancel: Cancel
+pipeman.workflow_item.created: Workflow item created
 pipeman.workflow_item.logs: Logs
+pipeman.workflow_item.name: Name
+pipeman.workflow_item.object: Object
+pipeman.workflow_item.object_link: Object Link
 pipeman.workflow_item.properties: Properties
+pipeman.workflow_item.status: Status
 pipeman.workflow_item.step.name: Step Name
 pipeman.workflow_item.step.notes: Notes
 pipeman.workflow_item.step.status: Status
 pipeman.workflow_item.type: Type
 pipeman.workflow_list.title: List Workflows
 pipeman.workflow_view.title: View Workflow
-pipeman.dataset.status: Status
-pipeman.dataset.act_workflow: Activation Workflow
-pipeman.dataset.pub_workflow: Publication Workflow
-pipeman.dataset.status.active: Active
-pipeman.session_logout: Session Expiry
-pipeman.session_timeout_warning: Your session will expire soon
-pipeman.refresh_session: Refresh Session
-pipeman.menu.login: Login
-pipeman.menu.logout: Logout
-pipeman.validation_level.error: Error
-pipeman.validation_level.warning: Warning
-pipeman.validation_level: Unknown
+pipeman.workflow_types.dataset_activation: Dataset Activation
+pipeman.workflow_types.dataset_publication: Dataset Publication
+pipeman.workflow_types.receive_send_item: Send Request
+pipeman.workflow_types.send_file: Send Files
+pipeman.workflow_statuses.decision_required: Decision Required
+pipeman.workflow_item.core_steps.complete: Complete
+pipeman.workflow_item.core_steps.in-progress: In Progress
+pipeman.workflow_item.core_steps.pending: Pending
+pipeman.workflow_item.gate_completed: Approved by {decider} on {date}
+pipeman.workflow_item.gate_cancelled: Rejected by {decider} on {date}

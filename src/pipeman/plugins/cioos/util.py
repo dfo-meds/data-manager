@@ -3,8 +3,9 @@ from pipeman.entity.entity import ValidationResult, combine_object_path
 
 def cioos_dataset_validation(ds, object_path, profile, memo):
     errors = []
-    owner_path = combine_object_path(object_path, [ds.field_label("metadata_owner")])
-    errors.extend(_verify_cioos_contact(ds.data("metadata_owner"), owner_path, profile, memo))
+    if ds.data("metadata_owner"):
+        owner_path = combine_object_path(object_path, [ds.field_label("metadata_owner")])
+        errors.extend(_verify_cioos_contact(ds.data("metadata_owner"), owner_path, profile, memo))
     return errors
 
 

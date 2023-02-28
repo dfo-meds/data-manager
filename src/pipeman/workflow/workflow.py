@@ -214,20 +214,19 @@ class ItemDisplayWrapper:
         for idx, step in enumerate(step_list):
             data = [self.reg.step_display(step)]
             if step in decision_list:
-                template = gettext("pipeman.workflow_item.gate_completed" if decision_list[step].decision else "pipeman.workflow_item.gate_cancelled")
-                occurances = template.count("{")
-                if occurances > 1:
-                    template = template.format(decision_list[step].decider_id, format_datetime(decision_list[step].decision_date))
-                elif occurances == 1:
-                    template = template.format(decision_list[step].decider_id)
+                template = gettext("pipeman.workflow_item.gate_completed") if decision_list[step].decision else gettext("pipeman.workflow_item.gate_cancelled")
+                template = template.format(
+                    decider=decision_list[step].decider_id,
+                    date=format_datetime(decision_list[step].decision_date)
+                )
                 data.append(template)
             else:
                 data.append("")
             if self.item.completed_index is None and idx == 0:
                 data.append("in-progress")
-            elif self.item.completed_index >= idx:
+            elif self.item.completed_index > idx:
                 data.append("complete")
-            elif self.item.completed_index == (idx - 1):
+            elif self.item.completed_index == idx:
                 data.append("in-progress")
             else:
                 data.append("pending")
@@ -530,19 +529,26 @@ class WorkflowController:
     def _handle_step_result(self, result, item, session, steps, ctx):
         if result == ItemResult.FAILURE:
             item.status = "FAILURE"
+            "gettext('pipeman.workflow_statuses.failure')"
         elif result == ItemResult.DECISION_REQUIRED:
             item.status = "DECISION_REQUIRED"
+            "gettext('pipeman.workflow_statuses.decision_required')"
         elif result == ItemResult.BATCH_EXECUTE:
             item.status = "BATCH_EXECUTE"
+            "gettext('pipeman.workflow_statuses.batch_execute')"
         elif result == ItemResult.ASYNC_EXECUTE:
             item.status = "ASYNC_EXECUTE"
+            "gettext('pipeman.workflow_statuses.async_execute')"
         elif result == ItemResult.CANCELLED:
             item.status = "CANCELLED"
+            "gettext('pipeman.workflow_statuses.cancelled')"
         elif result == ItemResult.REMOTE_EXECUTE_REQUIRED:
             item.status = "REMOTE_EXEC_QUEUED"
+            "gettext('pipeman.workflow_statuses.remote_exec_queued')"
         else:
             item.completed_index += 1
             item.status = "IN_PROGRESS"
+            "gettext('pipeman.workflow_statuses.in_progress')"
         item.context = json.dumps(ctx)
         session.commit()
         if item.status == "IN_PROGRESS":
@@ -553,6 +559,7 @@ class WorkflowController:
         next_index = item.completed_index
         if next_index >= len(steps):
             item.status = "COMPLETE"
+            "gettext('pipeman.workflow_statuses.cancelled')"
             return None, None
         return self.reg.construct_step(steps[next_index]), steps
 

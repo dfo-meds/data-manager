@@ -11,7 +11,7 @@
     <tbody>
         {% for item, actions in items %}
         <tr>
-            <td>{{'pipeman.workflow_types.' + item.workflow_type | gettext}}</td>
+            <td>{{('pipeman.workflow_types.' + item.workflow_type) | gettext}}</td>
             <td><a href="{{item.object_link()}}">{{item.object_link_text()}}</a></td>
             <td>{{action_list(actions)}}</td>
         </tr>
