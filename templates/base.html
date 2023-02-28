@@ -103,6 +103,13 @@
                     $("input").each(function() {
                         $(this).on("input", function(e) {
                             let obj = $(this).get(0);
+                            obj.setCustomValidity("");
+                            obj.title = "";
+                            $(this).removeClass("form-error");
+                            $(this).parent().find(".form-error-message").remove();
+                        });
+                        $(this).on("invalid blur", function(e) {
+                            let obj = $(this).get(0);
                             original_message = obj.validationMessage;
                             obj.setCustomValidity("");
                             if (obj.validity.valueMissing) {
