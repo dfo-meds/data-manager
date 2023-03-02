@@ -207,7 +207,7 @@ data_info:
     environment_desc:
       data_type: multitext
       label:
-        en: Environment Descriptino
+        en: Environment Description
         fr: Description de l'environnement
       multilingual: yes
       order: 2000

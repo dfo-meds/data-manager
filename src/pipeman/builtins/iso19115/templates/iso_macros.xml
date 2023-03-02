@@ -22,23 +22,25 @@
   xmlns:gmx="http://www.isotc211.org/2005/gmx"
   xmlns:xlink="http://www.w3.org/1999/xlink">
   {% macro render_text(text) %}
-  {% if text is not mapping %}
+  {% if text is string %}
   <gco:CharacterString>{{text}}</gco:CharacterString>
   {% else %}
   {% if default_locale in text %}
-  <gco:CharacterString>{{text['default_locale']}}</gco:CharacterString>
+  <gco:CharacterString>{{text[default_locale]}}</gco:CharacterString>
   {% elif "und" in text %}
   <gco:CharacterString>{{text['und']}}</gco:CharacterString>
   {% endif %}
+  {% if check_alt_langs(text, default_locale) %}
   <lan:PT_FreeText>
     <lan:textGroup>
-  {% for a2l, a3l in locale_mapping %}
-      {% if a2l in text %}
-      <lan:LocalisedCharacterString locale="#{{a3l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
+  {% for a2l in locale_mapping %}
+      {% if a2l in text and text[a2l] and (not a2l == "und") and (not a2l == default_locale) %}
+      <lan:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{text[a2l]}}</lan:LocalisedCharacterString>
       {% endif %}
   {% endfor %}
     </lan:textGroup>
   </lan:PT_FreeText>
+  {% endif %}
   {% endif %}
 {% endmacro %}
 {% macro render_resource(resource) %}
@@ -62,7 +64,7 @@
   {% endif %}
   {% if resource['function'] %}
   <cit:function>
-    <cit:CI_OnLineFunctionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode" codeListValue="{{resource['function']['short_name']}}">{{resource['short_name']}}</cit:CI_OnLineFunctionCode>
+    <cit:CI_OnLineFunctionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode" codeListValue="{{resource['function']['short_name']}}" />
   </cit:function>
   {% endif %}
   {% if resource['protocol_request'] %}
@@ -80,7 +82,7 @@
     <mri:MD_Resolution>
       <mri:equivalentScale>
         <mri:MD_RepresentativeFraction>
-          <mri:denominator>{{res['scale']}}</mri:denominator>
+          <mri:denominator><gco:Integer>{{res['scale']}}</gco:Integer></mri:denominator>
         </mri:MD_RepresentativeFraction>
       </mri:equivalentScale>
     </mri:MD_Resolution>
@@ -126,7 +128,7 @@
   {% endmacro %}
 
   {% macro render_temporal_res(res) %}
-  <gco:TM_PeriodDuration>P{{res['years']}}Y{{res['months']}}M{{res['days']}}DT{{res['hours']}}H{{res['minutes']}}M{{res['seconds']}}S</gco:TM_PeriodDuration>
+  <gco:TM_PeriodDuration>P{{res['years'] or 0}}Y{{res['months'] or 0}}M{{res['days'] or 0}}DT{{res['hours'] or 0}}H{{res['minutes'] or 0}}M{{res['seconds'] or 0}}S</gco:TM_PeriodDuration>
   {% endmacro %}
 
 {% macro render_responsibility(code, contact) %}
@@ -172,7 +174,7 @@
   <cit:edition xsi:type="lan:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</cit:edition>
   {% endif %}
   {% if citation['edition_date'] %}
-  <cit:editionDate><gco:DateTime>{{citation['edition_date'].strftime("%Y-%m-%dT%H:%m:%s")}}</gco:DateTime></cit:editionDate>
+  <cit:editionDate><gco:DateTime>{{citation['edition_date'].isoformat(timespec='milliseconds')}}</gco:DateTime></cit:editionDate>
   {% endif %}
   {% if citation["id_code"] %}
   <cit:identifier>
@@ -208,11 +210,11 @@
 {% macro render_locale(locale) %}
 <lan:PT_Locale>
   <lan:language>
-    <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}">{{locale['language']}}</lan:LanguageCode>
+    <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}" />
   </lan:language>
   {% if locale['country'] %}
   <lan:country>
-    <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}">{{locale['country']}}</lan:CountryCode>
+    <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}" />
   </lan:country>
   {% endif %}
   <lan:characterEncoding>
@@ -232,7 +234,7 @@
     <mrd:distributor>
       <mrd:MD_Distributor>
         <mrd:distributorContact>
-          {{ render_responsibility(dcc['type']['short_name'], dcc['contact']) }}
+          {{ render_responsibility(dcc['role']['short_name'], dcc['contact']) }}
         </mrd:distributorContact>
       </mrd:MD_Distributor>
     </mrd:distributor>
@@ -257,16 +259,16 @@
     {{ render_id(ref_system['code'], ref_system['description'], ref_system['id_system']) }}
   </mrs:referenceSystemIdentifier>
   <mrs:referenceSystemType>
-    <mrs:MD_ReferenceSystemTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ReferenceSystemTypeCode" codeListValue="{{ref_system['system_type']['short_name']}}">{{ref_system['system_type']['short_name']}}</mrs:MD_ReferenceSystemTypeCode>
+    <mrs:MD_ReferenceSystemTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ReferenceSystemTypeCode" codeListValue="{{ref_system['system_type']['short_name']}}" />
   </mrs:referenceSystemType>
 </mrs:MD_ReferenceSystem>
 {% endmacro %}
-{% macro render_keywords(keywords, thesaurus) %}
+{% macro render_keywords(kwgroup) %}
 <mri:MD_Keywords>
-  {% for keyword, lang in keywords %}
+  {% for keyword, lang in kwgroup.keywords(["und", default_locale]) %}
   <mri:keyword>
     {% if lang == default_locale or lang == 'und' %}
-    <gco:CharacterString>{{text}}</gco:CharacterString>
+    <gco:CharacterString>{{keyword}}</gco:CharacterString>
     {% elif lang in locale_mapping %}
     <lan:PT_FreeText>
       <lan:textGroup>
@@ -276,14 +278,14 @@
     {% endif %}
   </mri:keyword>
   {% endfor %}
-  {% if thesaurus['type'] %}
+  {% if kwgroup.thesaurus['type'] %}
   <mri:type>
-    <mri:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="{{thesaurus['type']['short_name']}}">{{thesaurus['type']['short_name']}}</mri:MD_KeywordTypeCode>
+    <mri:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="{{kwgroup.thesaurus['type']['short_name']}}" />
   </mri:type>
   {% endif %}
-  {% if thesaurus['citation'] %}
+  {% if kwgroup.thesaurus['citation'] %}
   <mri:thesaurusName>
-    {{ render_citation(thesaurus['citation']) }}
+    {{ render_citation(kwgroup.thesaurus['citation']) }}
   </mri:thesaurusName>
   {% endif %}
 </mri:MD_Keywords>
@@ -300,7 +302,7 @@
         <gco:Date>{{record['date'].strftime('%Y-%m-%d')}}</gco:Date>
       </cit:date>
       <cit:dateType>
-        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision">revision</cit:CI_DateTypeCode>
+        <cit:CI_DateTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="revision" />
       </cit:dateType>
     </cit:CI_Date>
   </mmi:maintenanceDate>
@@ -381,7 +383,7 @@
   {% endif %}
   {% if con['responsibles'] %}
     {% for party in con['responsibles'] %}
-    <mco:responsibleParty>{{ render_responsibility(party['type']['short_name'], party['contact']) }}</mco:responsibleParty>
+    <mco:responsibleParty>{{ render_responsibility(party['role']['short_name'], party['contact']) }}</mco:responsibleParty>
     {% endfor %}
   {% endif %}
   {% if con['releasability'] %}
@@ -453,6 +455,7 @@
   {% elif contact['individual_name'] %}
     <cit:name>{{render_text(contact['individual_name'])}}</cit:name>
   {% endif %}
+  {% if contact['phone'] or contact['web_resource'] or contact['service_hours'] or contact['instructions'] or contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
   <cit:contactInfo>
     <cit:CI_Contact>
       {% if contact['phone'] %}
@@ -464,13 +467,16 @@
         </cit:CI_Telephone>
       </cit:phone>
       {% endif %}
+      {% if contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
       <cit:address>
         <cit:CI_Address>
+          {% if contact['delivery_point'] %}
           <cit:deliveryPoint>
           {% for dp in contact['delivery_point'] %}
             <gco:CharacterString>{{dp}}</gco:CharacterString>
           {% endfor %}
           </cit:deliveryPoint>
+          {% endif %}
           {% if contact['city'] %}
           <cit:city>
             <gco:CharacterString>{{contact['city']}}</gco:CharacterString>
@@ -498,6 +504,7 @@
           {% endif %}
         </cit:CI_Address>
       </cit:address>
+      {% endif %}
       {% if contact['web_resource'] %}
         {% for res in contact['web_resource'] %}
       <cit:onlineResource>
@@ -517,6 +524,7 @@
       {% endif %}
     </cit:CI_Contact>
   </cit:contactInfo>
+  {% endif %}
   {% if contact['id_code'] %}
   <cit:partyIdentifier>
     {{ render_id(contact['id_code'], contact['id_description'], contact['id_system']) }}

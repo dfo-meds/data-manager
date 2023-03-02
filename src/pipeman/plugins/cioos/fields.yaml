@@ -1,0 +1,17 @@
+keywords:
+  fields:
+    cioos_eovs:
+      data_type: vocabulary
+      vocabulary_name: cioos_eovs
+      label:
+        en: Essential Ocean Variables
+      repeatable: yes
+      keyword_config:
+        is_keyword: yes
+        extraction_method: both
+        thesaurus:
+          citation:
+            title:
+              und: eov
+          type:
+            short_name: theme

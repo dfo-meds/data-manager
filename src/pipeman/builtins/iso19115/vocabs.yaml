@@ -1,6 +1,6 @@
 iso19115_maintenance_scope:
   display:
-    en: ISO 19115 Maintenance Record Scopes
+    en: ISO-19115 - Maintenance Record Scopes
   uri:
   terms:
     dataset:
@@ -9,107 +9,107 @@ iso19115_maintenance_scope:
       en: Metadata
 iso19115_ci_date_type_code:
   display:
-    en: Date Types
+    en: ISO-19115 - Date Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode
 iso19115_ci_on_line_function_code:
   display:
-    en: Link Functions
+    en: ISO-19115 - Link Functions
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_OnLineFunctionCode
 iso19115_ci_presentation_form_code:
   display:
-    en: Presentation Forms
+    en: ISO-19115 - Presentation Forms
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_PresentationFormCode
 iso19115_ci_role_code:
   display:
-    en: Roles
+    en: ISO-19115 - Roles
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode
 iso19115_ci_telephone_type_code:
   display:
-    en: Telephone Types
+    en: ISO-19115 - Telephone Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode
 iso19115_ds_association_type_code:
   display:
-    en: Association Types
+    en: ISO-19115 - Association Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#DS_AssociationTypeCode
 iso19115_dcplist:
   display:
-    en: DCP List
+    en: ISO-19115 - DCP List
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#DCPList
 iso19115_ds_initiative_type_code:
   display:
-    en: Initiative Types
+    en: ISO-19115 - Initiative Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#DS_InitiativeTypeCode
 iso19115_md_cell_geometry_code:
   display:
-    en: Cell Geometries
+    en: ISO-19115 - Cell Geometries
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_CellGeometryCode
 iso19115_md_classification_code:
   display:
-    en: Classifications
+    en: ISO-19115 - Classifications
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ClassificationCode
 iso19115_md_coverage_content_type_code:
   display:
-    en: Coverage Content Types
+    en: ISO-19115 - Coverage Content Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_CoverageContentTypeCode
 iso19115_md_datatype_code:
   display:
-    en: Data Types
+    en: ISO-19115 - Data Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_DatatypeCode
 iso19115_md_dimension_name_type_code:
   display:
-    en: Dimension Name Types
+    en: ISO-19115 - Dimension Name Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_DimensionNameTypeCode
 iso19115_md_geometric_object_type_code:
   display:
-    en: Geometric Object Types
+    en: ISO-19115 - Geometric Object Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_GeometricObjectTypeCode
 iso19115_md_imaging_condition_code:
   display:
-    en: Imaging Conditions
+    en: ISO-19115 - Imaging Conditions
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ImagingConditionCode
 iso19115_md_keyword_type_code:
   display:
-    en: Keyword Types
+    en: ISO-19115 - Keyword Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_KeywordTypeCode
 iso19115_md_maintenance_frequency_code:
   display:
-    en: Maintenance Frequencies
+    en: ISO-19115 - Maintenance Frequencies
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MaintenanceFrequencyCode
 iso19115_md_medium_format_code:
   display:
-    en: Medium Formats
+    en: ISO-19115 - Medium Formats
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_MediumFormatCode
 iso19115_md_obligation_code:
   display:
-    en: Obligations
+    en: ISO-19115 - Obligations
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ObligationCode
 iso19115_md_pixel_orientation_code:
   display:
-    en: Pixel Orientations
+    en: ISO-19115 - Pixel Orientations
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_PixelOrientationCode
 iso19115_md_progress_code:
   display:
-    en: Prgress Codes
+    en: ISO-19115 - Progress Codes
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode
 iso19115_md_reference_system_type_code:
   display:
-    en: Reference System Types
+    en: ISO-19115 - Reference System Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ReferenceSystemTypeCode
 iso19115_md_restriction_code:
   display:
-    en: Restrictions
+    en: ISO-19115 - Restrictions
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_RestrictionCode
 iso19115_md_scope_code:
   display:
-    en: Scopes
+    en: ISO-19115 - Scopes
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode
 iso19115_md_spatial_representation_type_code:
   display:
-    en: Spatial Representation Types
+    en: ISO-19115 - Spatial Representation Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_SpatialRepresentationTypeCode
 iso19115_md_topic_category_code:
   display:
-    en: Topic Categories
+    en: ISO-19115 - Topic Categories
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_TopicCategoryCode
   terms:
     farming:
@@ -156,23 +156,23 @@ iso19115_md_topic_category_code:
       en: Disaster
 iso19115_md_topology_level_code:
   display:
-    en: Topology Levels
+    en: ISO-19115 - Topology Levels
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_TopologyLevelCode
 iso19115_sv_coupling_type:
   display:
-    en: Coupling Types
+    en: ISO-19115 - Coupling Types
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#SV_CouplingType
 iso19115_sv_parameter_direction:
   display:
-    en: Parameter Directions
+    en: ISO-19115 - Parameter Directions
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#SV_ParameterDirection
 iso19115_link_protocols:
   display:
-    en: Link Protocols
+    en: ISO-19115 - Link Protocols
   uri: https://github.com/OSGeo/Cat-Interop/blob/master/LinkPropertyLookupTable.csv
 iso19115_units:
   display:
-    en: Units
+    en: ISO-19115 - Units
   uri:
   terms:
     kg:
@@ -181,7 +181,7 @@ iso19115_units:
       en: Kilometers
 iso19115_distance_units:
   display:
-    en: Distance Units
+    en: ISO-19115 - Distance Units
   uri:
   terms:
     m:
@@ -190,7 +190,7 @@ iso19115_distance_units:
       en: Kilometers
 iso19115_angular_units:
   display:
-    en: Angular Units
+    en: ISO-19115 - Angular Units
   uri:
   terms:
     radian:

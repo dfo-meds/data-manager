@@ -182,10 +182,12 @@ class Select2Widget:
         return markupsafe.Markup(markup)
 
     def render_option(self, val, label, selected, **kwargs):
-        if val is True:
-            value = str(val)
+        if val is True or val is False:
+            val = str(val)
+        if val is None:
+            val = ""
         sel_text = " selected=\"selected\"" if selected else ""
-        return f'<option{sel_text}>{markupsafe.escape(label)}</option>'
+        return f'<option{sel_text} value="{val}">{markupsafe.escape(label)}</option>'
 
 
 class EntitySelectField(wtf.Field):

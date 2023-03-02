@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="vocabulary-list">
+{% for name, display, uri, link in i18n_sort(vocabularies, key=1) %}
+    <li><a href="{{link}}">{{display}}</a>{% if uri %}<br /><span class="vocabulary-uri">{{uri}}</span>{% endif %}</li>
+{% endfor %}
+</ul>
+{% endblock %}

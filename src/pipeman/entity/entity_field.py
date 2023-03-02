@@ -1,5 +1,4 @@
-
-from pipeman.entity.fields import ChoiceField, HtmlContentField
+from pipeman.entity.fields import ChoiceField, HtmlContentField, Keyword
 from pipeman.entity.controller import EntityController
 from pipeman.entity.entity import FieldContainer
 from pipeman.util.flask import EntitySelectField
@@ -11,28 +10,11 @@ import markupsafe
 
 class EntityRefMixin:
 
-    def extract_entity_keyword(self, value, language, default_thesaurus, extraction_method=None, thesaurus_field=None, **kwargs):
-        field_name = self.field_config['keyword_config']['keyword_field'] if 'keyword_field' in self.field_config['keyword_config'] else None
-        disp = value.display_names() if not field_name else value.data(field_name)
-        thesaurus = default_thesaurus if not thesaurus_field else value.data(thesaurus_field)
-        if isinstance(disp, dict):
-            if language == "*":
-                keys = [disp.keys()]
-                omit_und = len(keys) > 1 or keys[0] != "und"
-                keywords = []
-                for key in disp:
-                    if omit_und and key == "und":
-                        continue
-                    keywords.append((disp[key], key, thesaurus))
-                return keywords
-            elif language in disp:
-                return [(disp[language], language, thesaurus), ]
-            elif "und" in disp:
-                return [(disp["und"], "und", thesaurus), ]
-            else:
-                return []
-        else:
-            return [(disp, "und", thesaurus), ]
+    def _extract_keywords(self):
+        keywords = []
+        for ent in self.data():
+            keywords.append(Keyword(ent.container_id, ent.display_names(), self.build_thesaurus(ent)))
+        return keywords
 
     def related_entities(self):
         data = self.data()
@@ -72,12 +54,6 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
             ent = self.ec.load_entity(c.entity_type, c.id)
             if ent:
                 yield ent
-
-    def _extract_keywords(self, language, default_thesaurus, **kwargs):
-        keywords = set()
-        for value in self.data():
-            keywords.update(self.extract_entity_keyword(value, language, default_thesaurus, **kwargs))
-        return keywords
 
     def _build_html_content(self):
         create_link = None
@@ -120,22 +96,6 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         if "min_chars_to_search" in self.field_config and self.field_config["min_chars_to_search"]:
             args["min_chars_to_search"] = int(self.field_config["min_chars_to_search"])
         return args
-
-    def entity_revisions(self):
-        refs = []
-        if self.value and isinstance(self.value, list):
-            for ref in self.value:
-                if isinstance(ref, list):
-                    print(ref)
-                elif ref:
-                    refs.append([int(x) for x in ref.split("-", maxsplit=1)])
-        elif self.value:
-            refs.append([int(x) for x in self.value.split("-", maxsplit=1)])
-        return refs
-
-    def _as_keyword(self, str_value, *args, **kwargs):
-        value = self._process_value(str_value)
-        return self.extract_entity_keyword(value, *args, **kwargs)
 
     def _format_for_ui(self, val):
         entity = self._process_value(val)

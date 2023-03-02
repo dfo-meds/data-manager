@@ -5,6 +5,7 @@ from pipeman.entity import EntityController, EntityRegistry
 from pipeman.dataset import DatasetController
 from pipeman.auth import require_permission
 from pipeman.util.errors import DatasetNotFoundError, EntityNotFoundError
+from pipeman.vocab import VocabularyTermController
 from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
 from pipeman.files import FileController
@@ -517,3 +518,19 @@ def file_upload(data_store_name, filename, fc: FileController = None):
 @injector.inject
 def file_upload_status(item_id, fc: FileController = None):
     return fc.upload_status(item_id)
+
+
+@core.route("/vocabulary")
+@require_permission("vocabularies.view")
+@injector.inject
+def list_vocabularies(vtc: VocabularyTermController = None):
+    return vtc.list_vocabularies_page()
+
+
+@core.route("/vocabulary/<vocab_name>")
+@require_permission("vocabularies.view")
+@injector.inject
+def vocabulary_term_list(vocab_name, vtc: VocabularyTermController = None):
+    if not vtc.reg.vocabulary_exists(vocab_name):
+        return flask.abort(404)
+    return vtc.list_terms_page(vocab_name)

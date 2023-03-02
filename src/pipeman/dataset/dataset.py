@@ -76,21 +76,18 @@ class MetadataRegistry:
         else:
             self._fields[field_name] = field_config
 
-    def register_fields_from_dict(self, d: dict, with_display_group_parents: bool = True):
+    def register_fields_from_dict(self, d: dict):
         if d:
-            if with_display_group_parents:
-                for dg_name in d:
-                    self.register_display_group(
-                        dg_name,
-                        d[dg_name]["label"] if "label" in d[dg_name] else {},
-                        d[dg_name]["order"] if "order" in d[dg_name] else None
-                    )
-                    if "fields" in d[dg_name]:
-                        for fn in d[dg_name]["fields"]:
-                            d[dg_name]["fields"][fn]["display_group"] = dg_name
-                            self.register_field(fn, d[dg_name]["fields"][fn])
-            else:
-                deep_update(self._fields, d)
+            for dg_name in d:
+                self.register_display_group(
+                    dg_name,
+                    d[dg_name]["label"] if "label" in d[dg_name] else {},
+                    d[dg_name]["order"] if "order" in d[dg_name] else None
+                )
+                if "fields" in d[dg_name]:
+                    for fn in d[dg_name]["fields"]:
+                        d[dg_name]["fields"][fn]["display_group"] = dg_name
+                        self.register_field(fn, d[dg_name]["fields"][fn])
 
     def register_profile(self, profile_name, display_names, field_list, formatters, parent=None, preprocess=None, derived_fields=None):
         if profile_name in self._profiles:
@@ -237,11 +234,10 @@ class Dataset(FieldContainer):
     def modified_date(self):
         return self.extras['modified_date']
 
-    def keywords(self, language=None):
+    def keywords(self):
         keywords = []
         for fn in self._fields:
-            keywords.extend(self._fields[fn].get_keywords(language))
-        # TODO: unique filter of keywords by name and thesaurus
+            keywords.extend(self._fields[fn].get_keywords())
         return keywords
 
     def metadata_format_links(self):

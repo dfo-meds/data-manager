@@ -1,6 +1,6 @@
 erddap_dataset_types:
   display:
-    en: ERDDAP Dataset Types
+    en: ERDDAP - Dataset Types
   uri:
   terms:
     EDDTableFromNcFiles:
@@ -9,7 +9,7 @@ erddap_dataset_types:
       en: Table from ASCII
 erddap_data_types:
   display:
-    en: ERDDAP Variable Data Types
+    en: ERDDAP - Variable Data Types
   uri:
   terms:
     boolean:
@@ -40,7 +40,7 @@ erddap_data_types:
       en: Characters (UCS-2)
 erddap_encodings:
   display:
-    en: ERDDAP Encodings
+    en: ERDDAP - Encodings
   uri:
   terms:
     none:
@@ -53,7 +53,7 @@ erddap_encodings:
       und: UCS-2
 ioos_categories:
   display:
-    en: IOOS Categories
+    en: IOOS - Categories
   uri:
   terms:
     Bathymetry:
@@ -136,7 +136,7 @@ ioos_categories:
       en: Zooplankton Abundance
 erddap_time_precisions:
   display:
-    en: ERDDAP Time Precisions
+    en: ERDDAP - Time Precisions
   uri:
   terms:
     month:
@@ -157,7 +157,7 @@ erddap_time_precisions:
       en: Millisecond
 erddap_roles:
   display:
-    en: ERDDAP Variable Roles
+    en: ERDDAP - Variable Roles
   uri:
   terms:
     profile_id:
@@ -174,7 +174,7 @@ erddap_roles:
       en: Trajectory Extra Info
 cdm_data_types:
   display:
-    en: CDM Data Types
+    en: CDM - Data Types
   uri:
   terms:
     Point:

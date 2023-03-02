@@ -216,7 +216,7 @@ class FieldContainer:
                 return self._fields[key].data(**kwargs)
             except Exception as ex:
                 print(ex)
-        return ""
+        return None
 
     def __contains__(self, item):
         return item in self._fields or item in self._derived_fields

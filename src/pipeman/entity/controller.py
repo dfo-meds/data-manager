@@ -319,8 +319,10 @@ class EntityForm(BaseForm):
             "_org": wtf.SelectField(
                 label=DelayedTranslationString("pipeman.entity.organization"),
                 choices=self.ocontroller.list_organizations(),
+                coerce=int,
                 default=self.entity.organization_id if self.entity.organization_id else "",
-                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+                validators=[wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required"))]
             ),
         }
         self.container = container

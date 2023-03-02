@@ -1,4 +1,5 @@
 from pipeman.entity.entity import ValidationResult, combine_object_path
+from pipeman.entity.fields import KeywordGroup
 
 
 def validate_use_constraint(uc, object_path, profile, memo):
@@ -55,7 +56,6 @@ def validate_contact(con, object_path, profile, memo):
             errors.append(("pipeman.iso19115.org_has_individual_name", "ISO19115-031"))
         if con['position_name']:
             errors.append(("pipeman.iso19115.org_has_position_name", "ISO19115-032"))
-        print(con['individuals'])
         if any(x['organization_name'] or x['logo'] for x in con['individuals']):
             errors.append(("pipeman.iso19115.org_has_orgs", "ISO19115-033"))
     else:
@@ -96,34 +96,24 @@ def validate_dataset(ds, object_path, profile, memo):
 
 def separate_keywords(keywords):
     groups = {}
-    for keyword, language, thesaurus in keywords:
-        title = None
-        if 'citation' in thesaurus and thesaurus['citation'] and 'title' in thesaurus['citation']:
-            title_field = thesaurus['citation']['title']
-            if isinstance(title_field, str):
-                title = title_field
-            elif title_field is None:
-                title = None
-            else:
-                test_keys = ['en', 'und']
-                test_keys.extend(title_field.keys())
-                for k in test_keys:
-                    if k in title_field:
-                        title = title_field[k]
-                        break
-        if title is None:
-            title = ''
-        if title not in groups:
-            groups[title] = {
-                'keywords': [],
-                'thesaurus': thesaurus,
-            }
-        groups[title]['keywords'].append((keyword, language))
+    for keyword in keywords:
+        group = keyword.thesaurus_group()
+        if group not in groups:
+            groups[group] = KeywordGroup(keyword.thesaurus)
+        groups[group].append(keyword)
     return groups
 
 
-def preprocess_metadata(dataset, **kwargs):
+def _has_other_languages(language_dict, default_locale):
+    for key in language_dict:
+        if key == "und" or key == default_locale:
+            continue
+        if language_dict[key]:
+            return True
+    return False
 
+
+def preprocess_metadata(dataset, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
     default_locale = def_loc['a2_language']
@@ -168,5 +158,6 @@ def preprocess_metadata(dataset, **kwargs):
         },
         "dataset_maintenance": dataset_maintenance,
         "metadata_maintenance": metadata_maintenance,
-        "grouped_keywords": separate_keywords(dataset.keywords())
+        "grouped_keywords": separate_keywords(dataset.keywords()),
+        "check_alt_langs": _has_other_languages,
     }

@@ -5,6 +5,26 @@ body {
     color: #333333;
     margin: 0;
 }
+ul.vocabulary-list li a {
+    font-weight: bold;
+}
+ul.vocabulary-list li .vocabulary-uri {
+    color: #888888;
+    font-size: 0.9em;
+}
+dl.term-list dt {
+    font-weight: bold;
+}
+dl.term-list dt span.term-code {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #888888;
+}
+dl.term-list dd {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    max-width: 500px;
+}
 ul.validation-results li {
     list-style: none;
     margin-top: 6px;

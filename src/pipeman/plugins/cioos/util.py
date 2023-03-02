@@ -1,6 +1,10 @@
 from pipeman.entity.entity import ValidationResult, combine_object_path
 
 
+def load_eovs():
+    eov_url = "https://raw.githubusercontent.com/cioos-siooc/metadata-entry-form/main/src/eovs.json"
+
+
 def cioos_dataset_validation(ds, object_path, profile, memo):
     errors = []
     if ds.data("metadata_owner"):

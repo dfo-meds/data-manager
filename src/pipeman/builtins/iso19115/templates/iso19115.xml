@@ -22,7 +22,7 @@
   xmlns:mrc="http://standards.iso.org/iso/19115/-3/mrc/2.0"
   xmlns:gmx="http://www.isotc211.org/2005/gmx"
   xmlns:xlink="http://www.w3.org/1999/xlink">
-  {% import 'iso_macros.xml' as iso %}
+  {% import 'iso_macros.xml' as iso with context %}
   <mdb:metadataIdentifier>
     <mcc:MD_Identifier>
       <mcc:authority>
@@ -119,19 +119,23 @@
       <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['credit'])}}</mri:credit>
       {% endif %}
       {% if dataset['status'] %}
+      {% for stat in dataset['status'] %}
       <mri:status>
-        <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{dataset['status']['short_name']}}">{{dataset['status']['short_name']}}</mcc:MD_ProgressCode>
+        <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{stat['short_name']}}" />
       </mri:status>
+      {% endfor %}
       {% endif %}
       {% if dataset['point_of_contact'] %}
       <mri:pointOfContact>
-        {{ iso.render.responsibility("pointOfContact", dataset['point_of_contact']) }}
+        {{ iso.render_responsibility("pointOfContact", dataset['point_of_contact']) }}
       </mri:pointOfContact>
       {% endif %}
       {% if dataset['spatial_representation_type'] %}
+      {% for srt in dataset['spatial_representation_type'] %}
       <mri:spatialRepresentationType>
-        <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{dataset['spatial_representation']['short_name']}}">{{dataset['spatial_representation']['short_name']}}</mcc:MD_SpatialRepresentationTypeCode>
+        <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{srt['short_name']}}" />
       </mri:spatialRepresentationType>
+      {% endfor %}
       {% endif %}
       {% for sr in dataset['spatial_resolution'] %}
       <mri:spatialResolution>
@@ -140,7 +144,7 @@
       {% endfor %}
       {% for tr in dataset['temporal_resolution'] %}
       <mri:temporalResolution>
-        {{ iso.render_temporal_res(sr) }}
+        {{ iso.render_temporal_res(tr) }}
       </mri:temporalResolution>
       {% endfor %}
       {% if dataset['topic_category'] %}
@@ -212,7 +216,7 @@
       </mri:processingLevel>
       {% endif %}
       <mri:resourceMaintenance>
-        {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency'], dataset_maintenance) }}
+        {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency']['short_name'], dataset_maintenance) }}
       </mri:resourceMaintenance>
       {% for graphic in dataset['graphics'] %}
       <mri:graphicOverview>
@@ -223,7 +227,7 @@
       {% if grouped_keywords %}
         {% for key in grouped_keywords %}
       <mri:descriptiveKeywords>
-        {{ iso.render_keywords(grouped_keywords[key]['keywords'], grouped_keywords[key]['thesaurus']) }}
+        {{ iso.render_keywords(grouped_keywords[key]) }}
       </mri:descriptiveKeywords>
         {% endfor %}
       {% endif %}
@@ -274,7 +278,7 @@
   {% endif %}
   {# <!-- applicationSchemaInfo --> #}
   <mdb:metadataMaintenance>
-    {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency'], metadata_maintenance) }}
+    {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency']['short_name'], metadata_maintenance) }}
   </mdb:metadataMaintenance>
   {# <!-- acquisitionInfo --> #}
 </mdb:MD_Metadata>

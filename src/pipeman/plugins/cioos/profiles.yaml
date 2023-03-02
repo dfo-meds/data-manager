@@ -10,8 +10,12 @@ cioosv2:
       - meta_licenses
       - publication_date
       - responsibles
+      - cioos_eovs
+      - status
     recommended:
       - horizontal_ref_system
       - vertical_ref_system
     custom:
       - pipeman.plugins.cioos.util.cioos_dataset_validation
+  fields:
+    cioos_eovs:

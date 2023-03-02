@@ -137,6 +137,8 @@ pipeman.dataset_publish.link: Publish Metadata
 pipeman.dataset_publish.title: Publish Metadata
 pipeman.dataset_remove.confirmation: Are you sure you want to remove this dataset?
 pipeman.dataset_remove.title: Remove
+pipeman.vocabularies_list.title: Taxonomies
+pipeman.vocabularies: Taxonomies
 pipeman.dataset_remove_link: Remove
 pipeman.dataset_restore.confirmation: Are you sure you want to remove this dataset?
 pipeman.dataset_restore.title: Restore
@@ -150,7 +152,7 @@ pipeman.edit_organization.title: Title
 pipeman.entities: Entities
 pipeman.entity.dataset: Dataset
 pipeman.entity.display: Display
-pipeman.entity.form_error: An error has occurred
+pipeman.entity.form_error: "An error has occurred [{field}]: {error}"
 pipeman.entity.id: ID
 pipeman.entity.is_deprecated: Is Deprecated
 pipeman.entity.organization: Organization

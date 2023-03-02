@@ -113,6 +113,9 @@ class MultiLanguageString(BaseTranslatableString):
             return self.render(language=key)
         raise KeyError(key)
 
+    def __iter__(self):
+        return iter(self.language_map.keys())
+
     def __contains__(self, key):
         return key in self.language_map
 

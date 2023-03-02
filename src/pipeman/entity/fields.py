@@ -36,6 +36,7 @@ class Field:
         self._use_default_repeatable = True
         self.parent_id = parent_id
         self.parent_type = parent_type
+        self._default_thesaurus = None
 
     def sanitize_form_input(self, val):
         return val
@@ -79,35 +80,45 @@ class Field:
     def _unserialize(self, val):
         return val
 
-    def get_keywords(self, language):
+    def get_keywords(self):
         if not self.value:
             return set()
         if "keyword_config" not in self.field_config:
             return set()
         if "is_keyword" not in self.field_config["keyword_config"] or not self.field_config["keyword_config"]["is_keyword"]:
             return set()
-        default_thesaurus = None
-        thesaurus_field = None
-        extraction_method = "value"
-        if "thesaurus" in self.field_config["keyword_config"]:
-            default_thesaurus = self.field_config['keyword_config']['thesaurus']
-        if "thesaurus_field" in self.field_config["keyword_config"]:
-            thesaurus_field = self.field_config["keyword_config"]["thesaurus_field"]
-        if "extraction_method" in self.field_config["keyword_config"]:
-            extraction_method = self.field_config["keyword_config"]["extraction_method"]
-        return self._extract_keywords(language, default_thesaurus, thesaurus_field=thesaurus_field, extraction_method=extraction_method)
+        return self._extract_keywords()
 
-    def _extract_keywords(self, language, default_thesaurus, **kwargs):
+    def extraction_method(self):
+        method = "value"
+        if "keyword_config" in self.field_config and "extraction_method" in self.field_config["keyword_config"]:
+            method = self.field_config["keyword_config"]["extraction_method"]
+            if method not in ("value", "translated", "both"):
+                method = "value"
+        return method
+
+    def get_default_thesaurus(self):
+        if "keyword_config" in self.field_config and "thesaurus" in self.field_config["keyword_config"]:
+            return self.field_config["keyword_config"]["thesaurus"]
+        return None
+
+    def build_thesaurus(self, loaded_obj=None):
+        thesaurus = None
+        if loaded_obj is not None and "keyword_config" in self.field_config and "thesaurus_field" in self.field_config["keyword_config"]:
+            thesaurus = loaded_obj.data(self.field_config["keyword_config"]["thesaurus_field"])
+        return thesaurus if thesaurus else self.get_default_thesaurus()
+
+    def _extract_keywords(self):
         if self.is_repeatable():
             keywords = []
             for value in self.value:
-                keywords.extend(self._as_keyword(value, language, default_thesaurus, **kwargs))
+                keywords.append(self._value_to_keyword(value))
             return keywords
         else:
-            return self._as_keyword(self.value, language, default_thesaurus, **kwargs)
+            return [self._value_to_keyword(self.value)]
 
-    def _as_keyword(self, value, language, default_thesaurus, **kwargs):
-        return [(str(value), "und", default_thesaurus),]
+    def _value_to_keyword(self, value):
+        return Keyword(str(value), {"und": str(value)}, self.build_thesaurus())
 
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
@@ -430,6 +441,68 @@ class IntegerField(NumberValidationMixin, Field):
         return wtf.IntegerField
 
 
+class KeywordGroup:
+
+    def __init__(self, thesaurus):
+        self.thesaurus = thesaurus
+        self._keywords = []
+
+    def append(self, keyword):
+        self._keywords.append(keyword)
+
+    def keywords(self, lang_order=None):
+        by_lang = {}
+        for kw in self._keywords:
+            for kwt, lang in kw.list_keywords():
+                if lang not in by_lang:
+                    by_lang[lang] = set()
+                by_lang[lang].add(kwt)
+        lang_order = lang_order or []
+        lang_order.extend(list(by_lang.keys()))
+        complete = set()
+        for lang in lang_order:
+            if lang in complete:
+                continue
+            complete.add(lang)
+            keywords = list(by_lang[lang]) if lang in by_lang else []
+            keywords.sort()
+            for kw in keywords:
+                yield kw, lang
+
+class Keyword:
+
+    def __init__(self, raw_value, translated_values, thesaurus):
+        self._value = raw_value
+        self._translations = translated_values
+        self.thesaurus = thesaurus
+
+    def list_keywords(self):
+        if not self._translations:
+            yield self._value, "und"
+        for lang in self._translations:
+            yield self._translations[lang], lang
+
+    def thesaurus_group(self):
+        if not self.thesaurus:
+            return ''
+        if 'citation' not in self.thesaurus:
+            return ''
+        if not self.thesaurus['citation']:
+            return ''
+        if 'title' not in self.thesaurus['citation']:
+            return ''
+        if not self.thesaurus['citation']['title']:
+            return ''
+        if isinstance(self.thesaurus['citation']['title'], str):
+            return self.thesaurus['citation']['title']
+        keys = ['en', 'und']
+        keys.extend(self.thesaurus['citation']['title'].keys())
+        for key in keys:
+            if key in self.thesaurus['citation']['title'] and self.thesaurus['citation']['title'][key]:
+                return self.thesaurus['citation']['title'][key]
+        return ''
+
+
 class ChoiceField(Field):
 
     DATA_TYPE = "choice"
@@ -439,31 +512,15 @@ class ChoiceField(Field):
         self._values = None
         self._use_default_repeatable = False
 
-    def _as_keyword(self, value, language, default_thesaurus, extraction_method, **kwargs):
-        if extraction_method == "translated":
-            disp = self._get_display(value)
-            if isinstance(disp, dict):
-                if language == "*":
-                    keys = [disp.keys()]
-                    omit_und = len(keys) > 1 or keys[0] != "und"
-                    keywords = []
-                    for key in disp:
-                        if omit_und and key == "und":
-                            continue
-                        keywords.append((disp[key], key, default_thesaurus))
-                    return keywords
-                elif language in disp:
-                    return [(disp[language], language, default_thesaurus), ]
-                elif "und" in disp:
-                    return [(disp["und"], "und", default_thesaurus), ]
-                else:
-                    return []
-            else:
-                return [(disp, "und", default_thesaurus), ]
-        else:
-            return [(value, "und", default_thesaurus), ]
+    def _value_to_keyword(self, value):
+        display = {}
+        if self.extraction_method() in ("translated", "both"):
+            display.update(self._get_display_text(value))
+        if self.extraction_method() in ("both", "value"):
+            display["und"] = value
+        return Keyword(value, display, self.build_thesaurus())
 
-    def _get_display(self, value):
+    def _get_display_text(self, value):
         return self.field_config["values"][value]
 
     def choices(self):
@@ -533,11 +590,16 @@ class TextField(LengthValidationMixin, Field):
                 for key in val:
                     if val[key]:
                         return val[key]
-                return ""
-        return val
+                return None
+        return val if not val == "" else None
 
     def _control_class(self) -> t.Callable:
         return wtf.StringField
+
+    def _process_value(self, val, none_as_blank=True, **kwargs):
+        if val == "" or val is None:
+            return None
+        return val
 
 
 class MultiLineTextField(TextField):
@@ -655,13 +717,15 @@ class VocabularyReferenceField(ChoiceField):
         super().__init__(*args, **kwargs)
         self._value_cache = None
 
-    def _get_display(self, value):
+    def _get_display_text(self, value):
         with self.db as session:
-            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name'], short_name=value).first()
-            if term:
-                dns = json.loads(term.display_names)
-                dns['und'] = value
-                return dns
+            term = session.query(orm.VocabularyTerm).filter_by(
+                vocabulary_name=self.field_config["vocabulary_name"],
+                short_name=value
+            ).first()
+            if term and term.display_names:
+                return json.loads(term.display_names)
+        return {}
 
     def choices(self):
         if self._value_cache is None:
