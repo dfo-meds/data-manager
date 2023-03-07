@@ -1,8 +1,10 @@
 import typing as t
 import decimal
+import uuid
+
 import wtforms as wtf
 import wtforms.validators as wtfv
-from pipeman.i18n import MultiLanguageString, DelayedTranslationString
+from pipeman.i18n import MultiLanguageString, DelayedTranslationString, MultiLanguageLink
 from pipeman.db import Database
 from autoinject import injector
 from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget
@@ -10,7 +12,9 @@ import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
+import flask
 import datetime
+
 
 
 class HtmlList:
@@ -19,8 +23,9 @@ class HtmlList:
         self.items = items
 
     def __str__(self):
+        print(self.items)
         h = '<ul>'
-        h += ''.join(f'<li>{item}</li>' for item in self.items)
+        h += ''.join(f'<li>{item}</li>' for item in self.items if item)
         h += '</ul>'
         return markupsafe.Markup(h)
 
@@ -38,14 +43,22 @@ class Field:
         self.parent_type = parent_type
         self._default_thesaurus = None
 
+    def config(self, *keys, default=None):
+        working = self.field_config
+        for k in keys:
+            if not (isinstance(working, dict) and k in working):
+                return default
+            working = working[k]
+        return working
+
     def sanitize_form_input(self, val):
         return val
 
     def is_multilingual(self):
-        return "multilingual" in self.field_config and self.field_config["multilingual"]
+        return self.config("multilingual", default=False)
 
     def is_repeatable(self):
-        return "repeatable" in self.field_config and self.field_config["repeatable"]
+        return self.config("repeatable", default=False)
 
     def is_empty(self):
         if self.value is None or self.value == "" or self.value == []:
@@ -83,29 +96,26 @@ class Field:
     def get_keywords(self):
         if not self.value:
             return set()
-        if "keyword_config" not in self.field_config:
-            return set()
-        if "is_keyword" not in self.field_config["keyword_config"] or not self.field_config["keyword_config"]["is_keyword"]:
+        if not self.config("keyword_config", "is_keyword", default=False):
             return set()
         return self._extract_keywords()
 
-    def extraction_method(self):
+    def keyword_mode(self):
         method = "value"
-        if "keyword_config" in self.field_config and "extraction_method" in self.field_config["keyword_config"]:
-            method = self.field_config["keyword_config"]["extraction_method"]
-            if method not in ("value", "translated", "both"):
-                method = "value"
+        method = self.config("keyword_config", "extraction_method", default=method)
+        method = self.config("keyword_config", "mode", default=method)
+        if method not in ("value", "translate", "both"):
+            method = "value"
         return method
 
     def get_default_thesaurus(self):
-        if "keyword_config" in self.field_config and "thesaurus" in self.field_config["keyword_config"]:
-            return self.field_config["keyword_config"]["thesaurus"]
-        return None
+        return self.config("keyword_config", "thesaurus", default=None)
 
     def build_thesaurus(self, loaded_obj=None):
         thesaurus = None
-        if loaded_obj is not None and "keyword_config" in self.field_config and "thesaurus_field" in self.field_config["keyword_config"]:
-            thesaurus = loaded_obj.data(self.field_config["keyword_config"]["thesaurus_field"])
+        thesaurus_field = self.config("keyword_config", "thesaurus_field", default=None)
+        if loaded_obj is not None and thesaurus_field is not None:
+            thesaurus = loaded_obj.data(thesaurus_field)
         return thesaurus if thesaurus else self.get_default_thesaurus()
 
     def _extract_keywords(self):
@@ -118,7 +128,7 @@ class Field:
             return [self._value_to_keyword(self.value)]
 
     def _value_to_keyword(self, value):
-        return Keyword(str(value), {"und": str(value)}, self.build_thesaurus())
+        return Keyword(str(value), str(value), None, self.build_thesaurus())
 
     def control(self) -> wtf.Field:
         ctl_class = self._control_class()
@@ -165,20 +175,20 @@ class Field:
         return []
 
     def label(self) -> t.Union[str, MultiLanguageString]:
-        txt = self.field_config["label"] if "label" in self.field_config else ""
+        txt = self.config("label", default="")
         if isinstance(txt, dict):
             return MultiLanguageString(txt)
         return txt
 
     def description(self) -> t.Union[str, MultiLanguageString]:
-        txt = self.field_config["description"] if "description" in self.field_config else ""
+        txt = self.config("description", default="")
         if isinstance(txt, dict):
             return MultiLanguageString(txt)
         return txt
 
     def validators(self) -> list:
         validators = []
-        if "is_required" in self.field_config and self.field_config["is_required"]:
+        if self.config("is_required", default=False):
             validators.append(wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required", "Field is required")))
         else:
             validators.append(wtfv.Optional())
@@ -278,24 +288,24 @@ class LengthValidationMixin:
 
     def validators(self):
         validators = super().validators()
-        if "min" in self.field_config or "max" in self.field_config:
-            if "min" in self.field_config and "max" in self.field_config:
-                validators.append(wtfv.Length(
-                    min=self.field_config["min"],
-                    max=self.field_config["max"],
-                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
-                ))
-            elif "min" in self.field_config:
-                validators.append(wtfv.Length(
-                    min=self.field_config["min"],
-                    message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
-                ))
-            elif "max" in self.field_config:
-                validators.append(wtfv.Length(
-                    min=self.field_config["min"],
-                    max=self.field_config["max"],
-                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be less than %(max)")
-                ))
+        min_val = self.config("min", default=None)
+        max_val = self.config("min", default=None)
+        if min_val is not None and max_val is not None:
+            validators.append(wtfv.Length(
+                min=min_val,
+                max=max_val,
+                message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
+            ))
+        elif min_val is not None:
+            validators.append(wtfv.Length(
+                min=min_val,
+                message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
+            ))
+        elif max_val is not None:
+            validators.append(wtfv.Length(
+                max=max_val,
+                message=DelayedTranslationString("pipeman.fields.length_greater_than_max", "Length must be less than %(max)")
+            ))
         return validators
 
 
@@ -303,24 +313,27 @@ class NumberValidationMixin:
 
     def validators(self):
         validators = super().validators()
-        if "min" in self.field_config or "max" in self.field_config:
-            if "min" in self.field_config and "max" in self.field_config:
-                validators.append(wtfv.NumberRange(
-                    min=self.field_config["min"],
-                    max=self.field_config["max"],
-                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
-                ))
-            elif "min" in self.field_config:
-                validators.append(wtfv.NumberRange(
-                    min=self.field_config["min"],
-                    message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
-                ))
-            elif "max" in self.field_config:
-                validators.append(wtfv.NumberRange(
-                    min=self.field_config["min"],
-                    max=self.field_config["max"],
-                    message=DelayedTranslationString("pipeman.fields.length_between", "Length must be less than %(max)")
-                ))
+        min_val = self.config("min", default=None)
+        max_val = self.config("min", default=None)
+        if min_val is not None and max_val is not None:
+            validators.append(wtfv.NumberRange(
+                min=min_val,
+                max=max_val,
+                message=DelayedTranslationString("pipeman.fields.range_between",
+                                                 "Number must be between %(min) and %(max)")
+            ))
+        elif min_val is not None:
+            validators.append(wtfv.NumberRange(
+                min=min_val,
+                message=DelayedTranslationString("pipeman.fields.range_less_than_min",
+                                                 "Number must be greater than %(min)")
+            ))
+        elif max_val is not None:
+            validators.append(wtfv.NumberRange(
+                max=max_val,
+                message=DelayedTranslationString("pipeman.fields.range_greater_than_max",
+                                                 "Number must be less than %(max)")
+            ))
         return validators
 
 
@@ -355,17 +368,17 @@ class DateField(Field):
         if val is None:
             return ""
         if not isinstance(val, str):
-            return val.strftime(self.field_config["storage_format"])
+            return val.strftime(self.config("storage_format"))
         return val
 
     def unserialize(self, val):
         if val is None or val == "":
             return None
-        return datetime.datetime.strptime(val, self.field_config["storage_format"])
+        return datetime.datetime.strptime(val, self.config("storage_format"))
 
     def _extra_wtf_arguments(self) -> dict:
         return {
-            "format": self.field_config["storage_format"],
+            "format": self.config("storage_format"),
             "widget": FlatPickrWidget(
                 with_time=self.with_time,
                 with_calendar=self.with_cal,
@@ -441,46 +454,32 @@ class IntegerField(NumberValidationMixin, Field):
         return wtf.IntegerField
 
 
-class KeywordGroup:
-
-    def __init__(self, thesaurus):
-        self.thesaurus = thesaurus
-        self._keywords = []
-
-    def append(self, keyword):
-        self._keywords.append(keyword)
-
-    def keywords(self, lang_order=None):
-        by_lang = {}
-        for kw in self._keywords:
-            for kwt, lang in kw.list_keywords():
-                if lang not in by_lang:
-                    by_lang[lang] = set()
-                by_lang[lang].add(kwt)
-        lang_order = lang_order or []
-        lang_order.extend(list(by_lang.keys()))
-        complete = set()
-        for lang in lang_order:
-            if lang in complete:
-                continue
-            complete.add(lang)
-            keywords = list(by_lang[lang]) if lang in by_lang else []
-            keywords.sort()
-            for kw in keywords:
-                yield kw, lang
-
 class Keyword:
 
-    def __init__(self, raw_value, translated_values, thesaurus):
-        self._value = raw_value
-        self._translations = translated_values
+    def __init__(self, identifier, machine_key=None, translated_values=None, thesaurus=None, mode=None):
+        self._identifier = identifier
+        self.machine_key = machine_key
+        self.translations = translated_values or {}
         self.thesaurus = thesaurus
+        self.mode = mode or "value"
 
-    def list_keywords(self):
-        if not self._translations:
-            yield self._value, "und"
-        for lang in self._translations:
-            yield self._translations[lang], lang
+    def __str__(self):
+        dns = self.translations.copy()
+        if self.machine_key:
+            dns["und"] = self.machine_key
+        return str(MultiLanguageString(dns))
+
+    def use_machine_key(self):
+        return self.machine_key and self.mode == "both"
+
+    def use_value_only(self):
+        return self.machine_key and self.mode == "value"
+
+    def key_identifier(self):
+        if self._identifier:
+            return self._identifier
+        if self.machine_key:
+            return self.machine_key
 
     def thesaurus_group(self):
         if not self.thesaurus:
@@ -503,6 +502,22 @@ class Keyword:
         return ''
 
 
+class KeywordGroup:
+
+    def __init__(self, thesaurus):
+        self.thesaurus = thesaurus
+        self._keywords = {}
+
+    def append(self, keyword: Keyword):
+        self._keywords[keyword.key_identifier()] = keyword
+
+    def keywords(self):
+        key_names = list(self._keywords.keys())
+        key_names.sort()
+        for name in key_names:
+            yield self._keywords[name]
+
+
 class ChoiceField(Field):
 
     DATA_TYPE = "choice"
@@ -513,12 +528,13 @@ class ChoiceField(Field):
         self._use_default_repeatable = False
 
     def _value_to_keyword(self, value):
-        display = {}
-        if self.extraction_method() in ("translated", "both"):
-            display.update(self._get_display_text(value))
-        if self.extraction_method() in ("both", "value"):
-            display["und"] = value
-        return Keyword(value, display, self.build_thesaurus())
+        return Keyword(
+            value,
+            value,
+            self._get_display_text(value),
+            self.build_thesaurus(),
+            self.keyword_mode()
+        )
 
     def _get_display_text(self, value):
         return self.field_config["values"][value]
@@ -726,6 +742,13 @@ class VocabularyReferenceField(ChoiceField):
             if term and term.display_names:
                 return json.loads(term.display_names)
         return {}
+
+    def label(self) -> t.Union[str, MultiLanguageString]:
+        txt = self.field_config["label"] if "label" in self.field_config else ""
+        link = flask.url_for("core.vocabulary_term_list", vocab_name=self.field_config["vocabulary_name"])
+        if isinstance(txt, dict):
+            return MultiLanguageLink(link, txt, new_tab=True)
+        return MultiLanguageLink(link, {"und": txt}, new_tab=True)
 
     def choices(self):
         if self._value_cache is None:

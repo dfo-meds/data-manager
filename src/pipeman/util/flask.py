@@ -9,15 +9,66 @@ from flask_wtf import FlaskForm
 import flask
 import math
 import json
+import typing as t
 from markupsafe import Markup, escape
 from pipeman.i18n import gettext, LanguageDetector
 from pipeman.util.errors import FormValueError
 import sqlalchemy as sa
 import flask_login
+import zirconium as zr
+import yaml
 
 
-def flash_wrap(message, category):
-    flask.flash(str(message), str(category))
+@injector.injectable_global
+class PathMapper:
+
+    cfg: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self):
+        self._path_map = {}
+        path_map_file = self.cfg.as_path(("pipeman", "i18n_paths_file"))
+        if path_map_file and path_map_file.exists():
+            with open(path_map_file, "r", encoding="utf-8") as h:
+                self._path_map = yaml.safe_load(h) or {}
+
+    def get_path_translations(self, path):
+        if path in self._path_map and self._path_map[path]:
+            for lang in self._path_map[path]:
+                yield lang, self._path_map[path][lang]
+
+
+class MultiLanguageBlueprint(flask.Blueprint):
+
+    mapper: PathMapper = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _register_i18n_route(self, fn, route: str, **kwargs):
+        all_langs = []
+        for lang, path in self.mapper.get_path_translations(route):
+            all_langs.append(lang)
+            self.route(path, accept_languages=lang, **kwargs)(fn)
+        if all_langs:
+            self.route(route, ignore_languages=all_langs, **kwargs)(fn)
+        else:
+            self.route(route, **kwargs)(fn)
+
+    def i18n_route(self, route: str, **kwargs):
+        def wrapper(fn):
+            self._register_i18n_route(fn, route, **kwargs)
+            return fn
+        return wrapper
+
+
+def self_url(**kwargs):
+    ep = flask.request.endpoint
+    args = flask.request.view_args.copy() or {}
+    args.update(flask.request.args)
+    args.update(kwargs)
+    return flask.url_for(ep, **args)
 
 
 def get_real_remote_ip():
@@ -378,3 +429,426 @@ class TranslatableField(DynamicFormField):
             for lang in self.tm.supported_languages()
         })
         return fields
+
+
+class DataColumn:
+
+    def __init__(self, name, header_text, allow_order: bool = False, allow_search: bool = False, show_column: bool = True):
+        self.name = name
+        self.allow_order = allow_order
+        self.allow_search = allow_search
+        self.show_column = show_column
+        self._header = header_text
+
+    def header(self):
+        return self._header
+
+    def value(self, data_row):
+        raise NotImplementedError()
+
+    def build_filter(self, dq, filter_text):
+        return None
+
+    def order_by(self, dq, query, direction):
+        return query
+
+
+class ActionListColumn(DataColumn):
+
+    def __init__(self, action_callback=None):
+        super().__init__(
+            name="_actions",
+            header_text=gettext("pipeman.general.actions")
+        )
+        self._callback = action_callback
+
+    def value(self, data_row):
+        return self._callback(data_row).render("table_actions")
+
+
+class DatabaseColumn(DataColumn):
+
+    def value(self, data_row):
+        return getattr(data_row, self.name)
+
+    def build_filter(self, dq, filter_text):
+        if self.allow_search:
+            return getattr(dq.orm_entity, self.name).like(f"%{filter_text}%")
+
+    def order_by(self, dq, query, direction):
+        if self.allow_order:
+            col = getattr(dq.orm_entity, self.name)
+            if direction == "desc":
+                col = col.desc()
+            return query.order_by(col)
+        return query
+
+
+class DisplayNameColumn(DatabaseColumn):
+
+    def __init__(self):
+        super().__init__("display_names", gettext("pipeman.general.display_name"), allow_search=True)
+
+    def value(self, data_row):
+        return MultiLanguageString(json.loads(data_row.display_names))
+
+
+class DataQuery:
+
+    def __init__(self, orm_entity, wrapper_func=None, extra_filters=None, **filter_by):
+        self.orm_entity = orm_entity
+        self._filters = filter_by
+        self._wrapper_func = wrapper_func
+        self._extra_filters = extra_filters
+
+    @injector.inject
+    def rows(self, data_table, db: Database = None):
+        with db as session:
+            query = self._base_query(session)
+            query = self._apply_filters(query, data_table)
+            query = self._order_query(query, data_table)
+            query = self._paginate_query(query, data_table)
+            for row in query:
+                if self._wrapper_func:
+                    yield self._wrapper_func(row)
+                else:
+                    yield row
+
+    @injector.inject
+    def count_all(self, data_table, db: Database = None):
+        with db as session:
+            query = self._base_query(session)
+            return query.count()
+
+    @injector.inject
+    def count_filtered(self, data_table, db: Database = None):
+        with db as session:
+            query = self._base_query(session)
+            query = self._apply_filters(query, data_table)
+            query = self._paginate_query(query, data_table)
+            return query.count()
+
+    def _paginate_query(self, query, data_table):
+        return query.offset(data_table.current_index()).limit(data_table.page_size())
+
+    def _order_query(self, query, data_table):
+        for cname, direction in data_table.order_columns():
+            query = data_table.column(cname).order_by(self, query, direction)
+        return query
+
+    def _apply_filters(self, query, data_table):
+        text = data_table.search_text()
+        if text:
+            filters = []
+            for col in data_table.columns():
+                filt = col.build_filter(self, text)
+                if filt is not None:
+                    filters.append(filt)
+            if filters:
+                return query.filter(sa.or_(*filters))
+        return query
+
+    def _base_query(self, session):
+        query = session.query(self.orm_entity)
+        if self._filters:
+            query = query.filter_by(**self._filters)
+        if self._extra_filters:
+            for f in self._extra_filters:
+                query = query.filter(f)
+        return query
+
+
+""" ""
+    def _data_query(self, st) -> list:
+        ""Retrieve the data rows for the query.""
+        data = []
+        for row in st:
+            data_row = {}
+            # Handle data wrapping which lets us use a class to do stuff instead
+            wrapped = None
+            if self.wrapper_func:
+                wrapped = self.wrapper_func(row)
+            # Build each column
+            for c in self.columns:
+                # Action items via callback
+                if "display" in self.columns[c] and not self.columns[c]["display"]:
+                    continue
+                elif "action_callback" in self.columns[c]:
+                    m = '<ul class="action_items">'
+                    args = []
+                    if wrapped:
+                        cb = getattr(wrapped, self.columns[c]["action_callback"])
+                    else:
+                        cb = self.columns[c]["action_callback"]
+                        args = [row]
+                    if "action_arguments" in self.columns[c]:
+                        args.extend(self.columns[c]["action_arguments"])
+                    for path, pieces, txt in cb(*args):
+                        m += '<li><a href="{}">{}</a></li>'.format(
+                            flask.url_for(path, **pieces), txt
+                        )
+                    m += "</ul>"
+                    data_row[c] = Markup(m)
+                # Action items via list
+                elif "actions" in self.columns[c]:
+                    m = '<ul class="action_items">'
+                    for info in self.columns[c]["actions"]:
+                        path, id_arg, txt = info[:3]
+                        extra = {}
+                        if len(info) > 3:
+                            extra = info[3]
+                        if id_arg:
+                            extra[id_arg] = row.id
+                        m += '<li><a href="{}">{}</a></li>'.format(
+                            flask.url_for(path, **extra), txt
+                        )
+                    m += "</ul>"
+                    data_row[c] = Markup(m)
+                # Use the wrap function
+                elif wrapped and "wrap" in self.columns[c]:
+                    wrap_call = getattr(wrapped, self.columns[c]["wrap"])
+                    data_row[c] = wrap_call() if callable(wrap_call) else wrap_call
+                # Use the convert function
+                elif "convert" in self.columns[c]:
+                    if "attribute" in self.columns[c]:
+                        data_row[c] = self.columns[c]["convert"](
+                            getattr(row, self.columns[c]["attribute"])
+                        )
+                    else:
+                        data_row[c] = self.columns[c]["convert"](row)
+                elif "lal" in self.columns[c]:
+                    data_row[c] = str(
+                        LanguageAwareLabel(
+                            {
+                                "en": getattr(row, self.columns[c]["lal"]["en"]),
+                                "fr": getattr(row, self.columns[c]["lal"]["fr"]),
+                            }
+                        )
+                    )
+                # Use raw DB values
+                elif "attribute" in self.columns[c]:
+                    data_row[c] = getattr(row, self.columns[c]["attribute"])
+                else:
+                    data_row[c] = "?"
+            data.append(data_row)
+        return data
+""" ""
+class DataTable:
+    """Represents a datatable to be displayed using the datatable jQuery plugin.
+    Basically, wraps around a SQLAlchemy query to provide data in a tabular format with paging, searching, etc.
+    Columns should be specified as a dictionary where the key is an arbitrary string for the column name with
+    entries similar to this one:
+    col_name:
+        searchable: true to enable searching, must support LIKE expressions
+        orderable: true to enable ordering
+        default_orderable: specify True for one column only to be the default sort order
+        attribute: attribute name on the entity
+        action_callback: method name on the wrapper object to get a list of actions
+        action_arguments: extra arguments if action_callback is used
+        actions: a list of actions to display
+        wrap: method on the wrapper object to call to get a value
+        convert: function to call with the attribute value
+        header: the header text to display
+    Action items are a tuple which must contain three elements at least:
+    - The path to pass to flask.url_for()
+    - The name of the parameter to pass the object ID to (this only works for entity.id values)
+    - The translated text to display
+    Additional arguments can be specified and will be passed through to flask.url_for().
+    Parameters
+    ----------
+    table_id: str
+        The ID of the HTML table.
+    entity:
+        The entity class to query.
+    columns: dict
+        A dictionary of columns (see documentation).
+    page_size: t.Union[None, int], optional
+        The page size (defaults to 50).
+    ajax_route: t.Union[None, str], optional
+        The route of the AJAX callback for dynamic content loading.
+    wrapper_func: t.Union[t.Callable, None], optional
+        If specified, the function will be called to wrap each row.
+    sql_clause: optional
+        If specified, the session query will be filter()'d by this expression first.
+    **base_filters
+        If specified, the session query will have filter_by() called with these keyword arguments.
+    """
+
+    def __init__(
+        self,
+        table_id: str,
+        base_query: DataQuery,
+        page_size: t.Union[None, int] = None,
+        ajax_route: t.Union[None, str] = None,
+        default_order=None
+    ):
+        """Implement __init__()."""
+        self._query = base_query
+        self._table_id = table_id
+        self._paginate = page_size is not None
+        self._page_size = page_size if page_size else None
+        self._ajax_route = ajax_route
+        self._can_search = False
+        self._can_order = False
+        self._columns = {}
+        self._default_order = default_order
+
+    def add_column(self, col: DataColumn):
+        self._columns[col.name] = col
+        if col.allow_order:
+            self._can_order = True
+        if col.allow_search:
+            self._can_search = True
+
+    def __str__(self) -> str:
+        """Generate the HTML content for the datatable."""
+        return self.to_html()
+
+    def __html__(self) -> str:
+        return self.to_html()
+
+    def to_javascript(self) -> str:
+        """Generate the JavaScript content for the datatable."""
+        config = {
+            "columns": [],
+            "searching": False,
+            "ordering": False,
+            "paging": False,
+            "lengthChange": False,
+            "autoWidth": False,
+            "language": {
+                "decimal": gettext("datatable.decimal"),
+                "emptyTable": gettext("datatable.emptyTable"),
+                "info": gettext("datatable.info"),
+                "infoEmpty": gettext("datatable.infoEmpty"),
+                "infoFiltered": gettext("datatable.infoFiltered"),
+                "infoPostFix": "",
+                "thousands": gettext("datatable.thousands"),
+                "lengthMenu": gettext("datatable.lengthMenu"),
+                "loadingRecords": gettext("datatable.loadingRecords"),
+                "processing": "",
+                "search": gettext("datatable.search"),
+                "zeroRecords": gettext("datatable.zeroRecords"),
+                "paginate": {
+                    "first": gettext("datatable.paginate.first"),
+                    "last": gettext("datatable.paginate.last"),
+                    "next": gettext("datatable.paginate.next"),
+                    "previous": gettext("datatable.paginate.previous"),
+                },
+                "aria": {
+                    "sortAscending": gettext("datatable.aria.sortAscending"),
+                    "sortDescending": gettext("datatable.aria.sortDescending"),
+                },
+            },
+        }
+        if self._paginate:
+            config["paging"] = True
+            config["pageLength"] = self._page_size
+        if self._ajax_route:
+            config["ajax"] = self._ajax_route
+            config["serverSide"] = True
+        if self._can_search:
+            config["searching"] = True
+        if self._can_order:
+            config["ordering"] = True
+        for cname in self._columns:
+            col = self._columns[cname]
+            if not col.show_column:
+                continue
+            config["columns"].append(
+                {
+                    "data": cname,
+                    "searchable": col.allow_search,
+                    "orderable": col.allow_order,
+                }
+            )
+        block = "<script>"
+        block += "$(document).ready(function() {\n"
+        block += "  $('#{}').DataTable({});".format(self._table_id, json.dumps(self._json_safe(config)))
+        block += "});</script>"
+        return Markup(block)
+
+    def columns(self):
+        for col in self._columns:
+            yield self._columns[col]
+
+    def column(self, cname):
+        return self._columns[cname]
+
+    def search_text(self):
+        if self._can_search:
+            return flask.request.args.get("search[value]", default=None)
+        return None
+
+    def current_index(self):
+        return flask.request.args.get("start", type=int, default=0)
+
+    def page_size(self):
+        return flask.request.args.get("length", type=int, default=self._page_size)
+
+    def order_columns(self):
+        order = []
+        if self._can_order:
+            i = 0
+            while True:
+                col_index = flask.request.args.get(f"order[{i}][column]")
+                if col_index is None:
+                    break
+                col_name = flask.request.args.get(f"columns[{col_index}][data]")
+                col_order = "asc"
+                if flask.request.args.get(f"order[{i}][dir]") == "desc":
+                    col_order = "desc"
+                order.append((col_name, col_order))
+                i += 1
+        return order or self._default_order
+
+    def to_html(self) -> str:
+        """Generate the HTML for the data table."""
+        html = f'<table id="{self._table_id}" class="data_table" cellpadding="0" cellspacing="0" border="0"><thead><tr>'
+        for cname in self._columns:
+            if self._columns[cname].show_column:
+                html += f'<th>{self._columns[cname].header()}</th>'
+        html += "</tr></thead><tbody>"
+        for row in self._query.rows(self):
+            html += "<tr>"
+            for cname in self._columns:
+                if self._columns[cname].show_column:
+                    html += "<td>{}</td>".format(str(self._columns[cname].value(row)))
+            html += "</tr>"
+        html += "</tbody></table>"
+        return Markup(html)
+
+    def ajax_response(self) -> dict:
+        """Generate the AJAX JSON response for searches and paginating."""
+        total_records = self._query.count_all(self)
+        total_filtered = self._query.count_filtered(self)
+        data = [
+            {
+                cname: self._columns[cname].value(row)
+                for cname in self._columns
+            }
+            for row in self._query.rows(self)
+        ]
+        return {
+            "data": self._json_safe(data),
+            "recordsFiltered": total_filtered,
+            "recordsTotal": total_records,
+            "draw": flask.request.args.get("draw", type=int),
+        }
+
+    def _json_safe(self, json):
+        if isinstance(json, dict):
+            for key in json:
+                json[key] = self._json_safe(json[key])
+            return json
+        elif isinstance(json, list):
+            new_list = [self._json_safe(x) for x in json]
+            return new_list
+        elif json is True or json is False or json is None:
+            return json
+        elif isinstance(json, object):
+            if hasattr(json, "__str__"):
+                return str(json)
+            raise ValueError(f"cannot serialize: {json}")
+        else:
+            return json

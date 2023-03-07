@@ -9,6 +9,7 @@ url = "sqlite:///./test.db"
 [pipeman.i18n_yaml]
 dictionary_path = "C:/my/data-manager/locales"
 
+
 [pipeman.authentication]
 login_route = "home"
 logout_route = "logged_out"
@@ -18,3 +19,4 @@ SECRET_KEY = "VeryModernMajorGeneral"
 
 [pipeman]
 holding_dir = "C:/my/test_upload"
+i18n_paths_file = "C:/my/data-manager/paths.yaml"

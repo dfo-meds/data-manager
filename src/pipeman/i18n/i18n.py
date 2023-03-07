@@ -68,7 +68,7 @@ class BaseTranslatableString:
 class DelayedTranslationString(BaseTranslatableString):
 
     def __init__(self, text_key, default=None, *args, **kwargs):
-        super().__init__(args, kwargs)
+        super().__init__(*args, **kwargs)
         self.text_key = text_key
         self.default = default
 
@@ -83,7 +83,7 @@ class DelayedTranslationString(BaseTranslatableString):
 class MultiLanguageString(BaseTranslatableString):
 
     def __init__(self, language_map: dict, *args, **kwargs):
-        super().__init__(args, kwargs)
+        super().__init__(*args, **kwargs)
         self.language_map = language_map
 
     def __bool__(self):
@@ -128,10 +128,13 @@ class MultiLanguageString(BaseTranslatableString):
 
 class MultiLanguageLink(MultiLanguageString):
 
-    def __init__(self, link, *args, **kwargs):
+    def __init__(self, link, language_map, *args, new_tab: bool = False, **kwargs):
         self.link = link
-        super().__init__(*args, **kwargs)
+        self.new_tab = new_tab
+        super().__init__(language_map, *args, **kwargs)
 
     def render(self, **kwargs):
         text = super().render(**kwargs)
-        return markupsafe.Markup(f'<a href="{markupsafe.escape(self.link)}">{markupsafe.escape(text)}</a>')
+        target = "" if not self.new_tab else " target='_blank'"
+        print(target)
+        return markupsafe.Markup(f'<a href="{markupsafe.escape(self.link)}"{target}>{markupsafe.escape(text)}</a>')

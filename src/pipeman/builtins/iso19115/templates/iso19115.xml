@@ -38,7 +38,7 @@
     </mcc:MD_Identifier>
   </mdb:metadataIdentifier>
   <mdb:defaultLocale>
-    {{iso.render_locale(dataset['default_locale'])}}
+    {{iso.render_locale(dataset['default_locale'], True)}}
   </mdb:defaultLocale>
   {% if dataset['parent_metadata'] %}
   <mdb:parentMetadata>
@@ -79,7 +79,7 @@
   {% endfor %}
   {% for locale in dataset['other_locales'] %}
   <mdb:otherLocale>
-        {{iso.render_locale(locale)}}
+        {{iso.render_locale(locale, True)}}
   </mdb:otherLocale>
   {% endfor %}
   {% for meta_url in dataset['canon_urls'] %}
@@ -246,11 +246,11 @@
       </mri:defaultLocale>
       {% endif %}
       {% if dataset['dataset_other_locales'] %}
-          <mri:otherLocale>
+      <mri:otherLocale>
         {% for locale in dataset['dataset_other_locales'] %}
-            {{iso.render_locale(locale)}}
+        {{iso.render_locale(locale)}}
         {% endfor %}
-          </mri:otherLocale>
+      </mri:otherLocale>
       {% endif %}
       {% if dataset['environment_desc'] %}
       <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>

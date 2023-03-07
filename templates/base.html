@@ -1,9 +1,9 @@
-{% macro pager(current_page, page_count) %}
+{% macro pager(current_page, page_count, page_size) %}
 <div class="pager_control">
     <p>{{'pipeman.general.pages' | gettext}} {{current_page}} / {{page_count}}</p>
     <ul class="table_actions">
         {% for i in range(0, page_count) %}
-        <li><a href="?page={{i+1}}">{{i+1}}</a></li>
+        <li><a href="{{self_url(page=i+1, size=page_size)}}">{{i+1}}</a></li>
         {% endfor %}
     </ul>
     <br style="clear: both" />
@@ -73,7 +73,7 @@
     </form>
 {%- endmacro %}
 <!DOCTYPE html>
-<html lang="{{language}}" xml:lang="{{language}}">
+<html lang="{{language}}" xml:lang="{{language}}" dir="ltr">
     <head>
         <title>{{title}}</title>
         {% block scripts %}
@@ -161,6 +161,8 @@
                 });
             </script>
         {% endblock %}
+        {% block customScripts %}
+        {% endblock %}
         {% block style %}
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
             <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -169,6 +171,7 @@
         {% endblock %}
         <meta charset="utf-8" />
         <meta http-equiv="content-language" content="{{language}}" />
+        <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}" />
     </head>
     <body>
         {% block body %}
@@ -230,24 +233,25 @@
                 {% endblock %}
                 {% endblock %}
             </div>
-            <hr style="clear: both" />
-            <div class="footer">
-                {% block footer %}
+            <div class="separator_block">
                 <ul class="bottom_links">
                     <li><a href="{{url_for('dfo.help')}}">{{'dfo.help.link' | gettext}}</a></li>
                 </ul>
-                <div class="bottom_image">
-                    <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="200" />
-                </div>
-                <div class="session_block">
+            </div>
+            <div class="footer">
+                {% block footer %}
                 {% if current_user.is_authenticated %}
+                <div class="session_block">
                     <p class="session_timeout">{{'pipeman.session_logout' | gettext}}: {{current_user.session_timeout | format_datetime}}</p>
                     <script language="javascript" type="text/javascript">
                         $(document).ready(function() {
                             start_session_timeout("#session_timeout_box", "#time_left", {{current_user.session_time_left()}}, "{{url_for('auth.logout', _external=True)}}", "{{url_for('auth.refresh_session', _external=True)}}", "{{'pipeman.session_refresh_ajax_error' | gettext}}", 300);
                         });
                     </script>
+                </div>
                 {% endif %}
+                <div class="bottom_image">
+                    <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="150" />
                 </div>
             {% endblock %}
             </div>

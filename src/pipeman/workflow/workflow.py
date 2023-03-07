@@ -3,7 +3,7 @@ from enum import Enum
 import importlib
 import flask_login
 import flask
-from pipeman.util.flask import ConfirmationForm, ActionList
+from pipeman.util.flask import ConfirmationForm, ActionList, paginate_query
 from pipeman.util import deep_update
 from pipeman.util.errors import StepNotFoundError, StepConfigurationError, WorkflowNotFoundError, WorkflowItemNotFoundError
 from autoinject import injector
@@ -453,12 +453,16 @@ class WorkflowController:
                 actions=actions
             )
 
-    def list_workflow_items_page(self):
-        return flask.render_template(
-            "list_workflow_items.html",
-            items=self._iterate_workflow_items(),
-            title=gettext("pipeman.workflow_list.title")
-        )
+    def list_workflow_items_page(self, active_only: bool = True):
+        with self.db as session:
+            query = self._item_query(session, active_only)
+            query, page_args = paginate_query(query)
+            return flask.render_template(
+                "list_workflow_items.html",
+                items=self._iterate_workflow_items(query),
+                title=gettext("pipeman.workflow_list.title"),
+                **page_args
+            )
 
     def _build_action_list(self, item, short_mode: bool = True):
         actions = ActionList()
@@ -470,14 +474,17 @@ class WorkflowController:
             actions.add_action('pipeman.workflow_item.cancel', 'core.cancel_item', **kwargs)
         return actions
 
-    def _iterate_workflow_items(self):
-        with self.db as session:
-            items = session.query(orm.WorkflowItem).filter_by(status='DECISION_REQUIRED')
-            for item in items:
-                if not self._has_access(item, 'view'):
-                    continue
-                actions = self._build_action_list(item, True)
-                yield ItemDisplayWrapper(item), actions
+    def _item_query(self, session, only_active: bool = True):
+        query = session.query(orm.WorkflowItem)
+        if only_active:
+            query = query.filter_by(status='DECISION_REQUIRED')
+        return query
+
+    def _iterate_workflow_items(self, items):
+        for item in items:
+            if not self._has_access(item, 'view'):
+                continue
+            yield ItemDisplayWrapper(item), self._build_action_list(item, True)
 
     def _has_access(self, item, mode):
         step, steps = self._build_next_step(item)

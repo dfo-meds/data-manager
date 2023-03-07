@@ -1,17 +1,235 @@
-pipeman.general.empty_select: << aucun sélectionné >>
-forms.back: Retour
-dfo.cnodc: Centre nationale des données océanographique du Canada
-language_names.en: Anglais
-pipeman.home: Acceuil
-auth_db.me: Mon compte
+auth_db.account_locked: Votre compte a été verrouillé
 auth_db.change_password: Changer mot de passe
-pipeman.datasets: Ensembles des données
-languages.short.und: NDF
+auth_db.change_password.title: Changer mot de passe
+auth_db.cli.user_already_exists: L'utilisateur existe déjà
+auth_db.create_user.error_already_exists: Le nom d'utilisateur existe déjà
+auth_db.create_user.error_email_exists: L'e-mail existe déjà
+auth_db.create_user.success: Utilisateur créé
+auth_db.create_user.title: Créer un utilisateur
+auth_db.display_name: Nom d'affichage
+auth_db.edit_myself.title: Modifier mon profil
+auth_db.edit_user.success: Les informations utilisateur ont été mises à jour avec succès
+auth_db.email: E-mail
+auth_db.groups: Groupes
+auth_db.last_error: Dernière connexion infructueuse
+auth_db.last_error_ip: Adresse IP
+auth_db.last_success: Dernière connexion réussie
+auth_db.last_success_ip: Adresse IP
+auth_db.list_users: Utilisateurs
+auth_db.list_users.title: Utilisateurs
+auth_db.me: Mon compte
+auth_db.no_recent_failed_logins: Aucun échec récent de connexion
+auth_db.no_recent_logins: Aucune connexion récente
+auth_db.organizations: Organisations
+auth_db.password: Mot de passe
+auth_db.repeat_password: Répéter
+auth_db.reset_password: Réinitialiser le mot de passe
+auth_db.reset_password.instructions: En soumettant ce formulaire, un nouveau mot de passe aléatoire sera généré pour l'utilisateur.
+auth_db.reset_password.success: Le nouveau mot de passe est {}
+auth_db.reset_password.title: Réinitialiser le mot de passe
+auth_db.too_many_recent_logins: Trop de connexions récentes
+auth_db.total_errors: Nombre total d'erreurs
+auth_db.user.display: Utilisateur
+auth_db.user.groups: Groupes
+auth_db.user.organizations: Organisations
+auth_db.user.username: Nom d'utilisateur
+auth_db.user_create.title: Créer un utilisateur
+auth_db.user_edit.title: Modifier un utilisateur
+auth_db.user_list.title: Utilisateurs
+auth_db.user_reset_password.title: Réinitialiser ton mot de passe
+auth_db.username: Nom d'utilisateur
+auth_db.username_does_not_exist: Le nom d'utilisateur n'existe pas
+cioos.validation.metadata_owner_ind_no_orcid: ORCID est requis
+cioos.validation.metadata_owner_no_email: L'adresse e-mail est vide
+cioos.validation.metadata_owner_no_id_code: Le code d'identification est vide
+cioos.validation.metadata_owner_no_id_code_or_name: Un code ou un nom d'identification est requis
+cioos.validation.metadata_owner_no_id_code_space: Le système d'identificateurs n'a pas d'espace de code
+cioos.validation.metadata_owner_no_id_system: Le système d'identification est vide
+cioos.validation.metadata_owner_org_no_ror: ROR est requis
+dfo.cnodc: Centre nationale des données océanographique du Canada
+dfo.help.link: Manuel
+dfo.help.title: Manuel
+dfo.recent_activity.header: Activité récente
+dfo.usage_warning: L'utilisation non autorisée de cet outil n'est pas autorisée.
+dfo.usage_warning.header: Avertissement d'utilisation
+dfo.welcome: Bienvenue dans le tableau de bord de gestion des ensembles du CNODC.
+forms.back: Retour
+language_names.en: Anglais
+language_names.fr: Français
 languages.short.en: AN
 languages.short.fr: FR
-pipeman.general.view: Voir
+languages.short.und: NDF
+pipeman.action-items: Mesures de suivi
+pipeman.auth.group_does_not_exist: Ce groupe n’existe pas
+pipeman.auth.group_exists: Ce group existe déjà.
+pipeman.auth.hash_not_available: Fonction de hachage non disponible
+pipeman.auth.not_authorized: Accès refusé
+pipeman.auth.login_required: Connexion requise
+pipeman.auth.org_does_not_exist: Cette organisation n'existe pas
+pipeman.auth.password_too_long: Le mot de passe est trop long
+pipeman.auth_form.login.title: Connexion
+pipeman.auth_form.login_error: ''
+pipeman.auth_form.logout_success: ''
+pipeman.auth_form.password: ''
+pipeman.auth_form.username: ''
+pipeman.component.add_later: ''
+pipeman.component.removed: ''
+pipeman.component_edit.title: ''
+pipeman.core.org_not_found: ''
+pipeman.create_dataset: ''
+pipeman.create_entity: ''
+pipeman.create_organization: ''
+pipeman.create_user: ''
+pipeman.dataset.activated: ''
+pipeman.dataset.activation_error: ''
+pipeman.dataset.activation_in_progress: ''
+pipeman.dataset.activation_workflow: ''
+pipeman.dataset.assigned_users: ''
+pipeman.dataset.display: ''
+pipeman.dataset.id: ''
+pipeman.dataset.metadata: ''
+pipeman.dataset.metadata_files: ''
+pipeman.dataset.organization: ''
+pipeman.dataset.profiles: ''
+pipeman.dataset.properties: ''
+pipeman.dataset.publication_error: ''
+pipeman.dataset.publication_in_progress: ''
+pipeman.dataset.publication_workflow: ''
+pipeman.dataset.published: ''
+pipeman.dataset.published_versions: ''
+pipeman.dataset.security_level: ''
+pipeman.dataset.state: ''
+pipeman.dataset_activate.confirmation: ''
+pipeman.dataset_activate.link: ''
+pipeman.dataset_activate.title: ''
+pipeman.dataset_create.title: ''
+pipeman.dataset_edit.title: ''
+pipeman.dataset_list.title: ''
+pipeman.dataset_metadata.link: ''
+pipeman.dataset_metadata.success: ''
+pipeman.dataset_metadata.title: ''
+pipeman.dataset_publish.confirmation: ''
+pipeman.dataset_publish.link: ''
+pipeman.dataset_publish.title: ''
+pipeman.dataset_remove.confirmation: ''
+pipeman.dataset_remove.title: ''
+pipeman.dataset_restore.confirmation: ''
+pipeman.dataset_restore.title: ''
+pipeman.dataset_revision.warning: ''
+pipeman.dataset_validate.link: ''
+pipeman.dataset_validation.title: ''
+pipeman.dataset_view_current.link: ''
+pipeman.datasets: Ensembles des données
+pipeman.display_name: ''
+pipeman.entity.dataset: ''
+pipeman.entity.display: ''
+pipeman.entity.form_error: ''
+pipeman.entity.id: ''
+pipeman.entity.organization: ''
+pipeman.entity.state: ''
+pipeman.entity.status: ''
+pipeman.entity.view_dataset: ''
+pipeman.entity_create.success: ''
+pipeman.entity_create.title: ''
+pipeman.entity_edit.success: ''
+pipeman.entity_edit.title: ''
+pipeman.entity_field.bad_entity_id: ''
+pipeman.entity_field.bad_revision_no: ''
+pipeman.entity_field.malformed_revision_str: ''
+pipeman.entity_field.missing_revision_piece: ''
+pipeman.entity_field.no_entity_access: ''
+pipeman.entity_field.no_such_entity: ''
+pipeman.entity_field.no_such_revision: ''
+pipeman.entity_field_missing_entity_id: ''
+pipeman.entity_form.display_name: ''
+pipeman.entity_list.title: ''
+pipeman.entity_remove.confirmation: ''
+pipeman.entity_remove.success: ''
+pipeman.entity_remove.title: ''
+pipeman.entity_restore.confirmation: ''
+pipeman.entity_restore.success: ''
+pipeman.entity_restore.title: ''
+pipeman.entity_type.list: ''
+pipeman.entity_view.title: ''
+pipeman.events.title: ''
+pipeman.fields.passwords_match: ''
+pipeman.fields.required: ''
+pipeman.fire_event.title: ''
+pipeman.general.actions: ''
+pipeman.general.active: ''
+pipeman.general.add: Ajouter
+pipeman.general.clear: ''
+pipeman.general.deprecated: ''
+pipeman.general.display_name: ''
 pipeman.general.edit: Modifier
+pipeman.general.empty_date: ''
+pipeman.general.empty_select: <aucun sélectionné>
+pipeman.general.na: ''
+pipeman.general.no: ''
+pipeman.general.none: ''
+pipeman.general.pages: ''
 pipeman.general.remove: Supprimer
 pipeman.general.restore: Restaurer
-pipeman.general.add: Ajouter
 pipeman.general.submit: Soumettre
+pipeman.general.unknown: ''
+pipeman.general.view: Voir
+pipeman.general.yes: ''
+pipeman.home: Acceuil
+pipeman.html_error.email_format_error: ''
+pipeman.html_error.input_error: ''
+pipeman.html_error.missing_value: ''
+pipeman.html_error.overflow: ''
+pipeman.html_error.pattern_error: ''
+pipeman.html_error.step_error: ''
+pipeman.html_error.tel_format_error: ''
+pipeman.html_error.too_long: ''
+pipeman.html_error.too_short: ''
+pipeman.html_error.underflow: ''
+pipeman.html_error.url_format_error: ''
+pipeman.organization.already_exists: ''
+pipeman.organization.display: ''
+pipeman.organization.display_names: ''
+pipeman.organization.global: ''
+pipeman.organization.name: ''
+pipeman.organization.short_name: ''
+pipeman.organization_create.title: ''
+pipeman.organization_edit.title: ''
+pipeman.organization_list.title: ''
+pipeman.organization_view.title: ''
+pipeman.plugins.auth_db.blank_password: ''
+pipeman.plugins.auth_db.short_password: ''
+pipeman.plugins.auth_db.username_does_not_exist: ''
+pipeman.refresh_session: ''
+pipeman.session_logout: ''
+pipeman.session_refresh_ajax_error: ''
+pipeman.session_timeout_warning: ''
+pipeman.status.unknown: ''
+pipeman.user_info.header: ''
+pipeman.username: ''
+pipeman.validation.success: ''
+pipeman.vocabularies_list.title: ''
+pipeman.welcome.title: ''
+pipeman.workflow_item.approve: ''
+pipeman.workflow_item.cancel: ''
+pipeman.workflow_item.created: ''
+pipeman.workflow_item.gate_cancelled: ''
+pipeman.workflow_item.gate_completed: ''
+pipeman.workflow_item.logs: ''
+pipeman.workflow_item.name: ''
+pipeman.workflow_item.object: ''
+pipeman.workflow_item.object_link: ''
+pipeman.workflow_item.properties: ''
+pipeman.workflow_item.status: ''
+pipeman.workflow_item.step.name: ''
+pipeman.workflow_item.step.notes: ''
+pipeman.workflow_item.step.status: ''
+pipeman.workflow_item.type: ''
+pipeman.workflow_list.title: ''
+pipeman.workflow_statuses.async_execute: ''
+pipeman.workflow_statuses.batch_execute: ''
+pipeman.workflow_statuses.cancelled: ''
+pipeman.workflow_statuses.decision_required: ''
+pipeman.workflow_statuses.failure: ''
+pipeman.workflow_statuses.in_progress: ''
+pipeman.workflow_statuses.remote_exec_queued: ''
+pipeman.workflow_view.title: ''

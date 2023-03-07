@@ -3,7 +3,8 @@ from pipeman.entity.controller import EntityController
 from pipeman.entity.entity import FieldContainer
 from pipeman.util.flask import EntitySelectField
 from autoinject import injector
-from pipeman.i18n import gettext, MultiLanguageLink
+from pipeman.i18n import gettext, MultiLanguageLink, MultiLanguageString
+import typing as t
 import flask
 import markupsafe
 
@@ -12,8 +13,16 @@ class EntityRefMixin:
 
     def _extract_keywords(self):
         keywords = []
+        keyword_display_field = self.config("keyword_config", "display_field", default=None)
+        keyword_machine_field = self.config("keyword_config", "machine_name_field", default=None)
         for ent in self.data():
-            keywords.append(Keyword(ent.container_id, ent.display_names(), self.build_thesaurus(ent)))
+            keywords.append(Keyword(
+                ent.container_id,
+                ent.data(keyword_machine_field) if keyword_machine_field else None,
+                ent.data(keyword_display_field) if keyword_display_field else ent.display_names(),
+                self.build_thesaurus(ent),
+                self.keyword_mode()
+            ))
         return keywords
 
     def related_entities(self):
@@ -87,6 +96,16 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
 
     def _control_class(self):
         return EntitySelectField
+
+    def label(self) -> t.Union[str, MultiLanguageString]:
+        return super().label()
+        """""
+        txt = self.field_config["label"] if "label" in self.field_config else ""
+        link = flask.url_for("core.vocabulary_term_list", vocab_name=self.field_config["vocabulary_name"])
+        if isinstance(txt, dict):
+            return MultiLanguageLink(link, txt, new_tab=True)
+        return MultiLanguageLink(link, {"und": txt}, new_tab=True)
+        """
 
     def _extra_wtf_arguments(self) -> dict:
         args = {

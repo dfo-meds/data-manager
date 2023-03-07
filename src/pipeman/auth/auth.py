@@ -5,7 +5,6 @@ from autoinject import injector
 import typing as t
 from functools import wraps
 from pipeman.i18n import gettext
-from pipeman.util import System
 import datetime
 
 
@@ -97,6 +96,7 @@ class AuthenticationManager:
         self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="home")
         self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="home")
         self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="home")
+        self.not_logged_in_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="auth.login")
 
     def login_handler(self):
         raise NotImplementedError()
@@ -122,6 +122,9 @@ class AuthenticationManager:
     def unauthorized_handler(self):
         if flask.request.path.startswith("/api"):
             return flask.abort(403)
+        elif not fl.current_user.is_authenticated():
+            flask.flash(gettext("pipeman.auth.login_required"), "error")
+            return flask.redirect(flask.url_for(self.not_logged_in_route))
         else:
             flask.flash(gettext("pipeman.auth.not_authorized"), "error")
             return flask.redirect(flask.url_for(self.unauthorized_route))

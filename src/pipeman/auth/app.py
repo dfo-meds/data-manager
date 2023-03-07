@@ -2,11 +2,12 @@ import flask
 import flask_login as fl
 from autoinject import injector
 from pipeman.auth.auth import AuthenticationManager
+from pipeman.util.flask import MultiLanguageBlueprint
 
-auth = flask.Blueprint("auth", __name__)
+auth = MultiLanguageBlueprint("auth", __name__)
 
 
-@auth.route("/login", methods=["GET", "POST"])
+@auth.i18n_route("/login", methods=["GET", "POST"])
 @injector.inject
 def login(am: AuthenticationManager = None):
     if fl.current_user.is_authenticated:
@@ -14,7 +15,7 @@ def login(am: AuthenticationManager = None):
     return am.login_handler()
 
 
-@auth.route("/logout", methods=["GET", "POST"])
+@auth.i18n_route("/logout", methods=["GET", "POST"])
 @injector.inject
 def logout(am: AuthenticationManager = None):
     if not fl.current_user.is_authenticated:
@@ -22,9 +23,9 @@ def logout(am: AuthenticationManager = None):
     return am.logout_handler()
 
 
-@auth.route("/refresh", methods=['GET'])
+@auth.i18n_route("/api/refresh", methods=['GET'])
 def refresh_session():
-    pass
+    return {}
 
 
 # TODO: add group controls here?

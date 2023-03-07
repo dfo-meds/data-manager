@@ -15,8 +15,10 @@ import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
 from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, Select2Widget
+from pipeman.util.flask import ActionListColumn, DatabaseColumn, DataQuery, DataTable, DisplayNameColumn
 import flask_login
 import wtforms.validators as wtfv
+import functools
 
 
 @injector.injectable
@@ -211,19 +213,40 @@ class EntityController:
         return q.order_by(orm.Entity.id)
 
     def list_entities_page(self, entity_type):
-        with self.db as session:
-            query = self._entity_query(entity_type, session)
-            query, page_args = paginate_query(query)
-            create_link = ""
-            if self.has_access(entity_type, "create"):
-                create_link = flask.url_for("core.create_entity", obj_type=entity_type)
-            return flask.render_template(
-                "list_entities.html",
-                entities=self._entity_iterator(query),
-                create_link=create_link,
-                title=gettext("pipeman.entity_list.title"),
-                **page_args
-            )
+        create_link = ""
+        if self.has_access(entity_type, "create"):
+            create_link = flask.url_for("core.create_entity", obj_type=entity_type)
+        return flask.render_template(
+            "list_entities.html",
+            table=self._list_entities_table(entity_type),
+            side_links=[
+                (create_link, gettext("pipeman.create_entity.link"))
+            ],
+            title=gettext("pipeman.entity_list.title")
+        )
+
+    def list_entities_ajax(self, entity_type):
+        table = self._list_entities_table(entity_type)
+        return table.ajax_response()
+
+    def _list_entities_table(self, entity_type):
+        filters = []
+        if not flask_login.current_user.has_permission("organization.manage_any"):
+            filters.append(sa.or_(
+                orm.Entity.organization_id.in_(flask_login.current_user.organizations),
+                orm.Entity.organization_id == None
+            ))
+        dq = DataQuery(orm.Entity, entity_type=entity_type, extra_filters=filters)
+        dt = DataTable(
+            table_id="entity_list",
+            base_query=dq,
+            ajax_route=flask.url_for("core.list_entities_by_type_ajax", obj_type=entity_type),
+            default_order=[("id", "asc")]
+        )
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.entity.id"), allow_order=True))
+        dt.add_column(DisplayNameColumn())
+        dt.add_column(ActionListColumn(action_callback=functools.partial(self.build_action_list, short_list=True)))
+        return dt
 
     def remove_entity(self, entity):
         with self.db as session:

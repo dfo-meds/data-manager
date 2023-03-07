@@ -20,7 +20,7 @@
         {% endfor %}
     </tbody>
 </table>
-{{ pager(current_page, page_count) }}
+{{ pager(current_page, page_count, page_size) }}
 {% endblock %}
 {% block sidebar %}
 {% if create_link %}

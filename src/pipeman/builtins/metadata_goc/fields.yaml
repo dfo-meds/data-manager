@@ -7,7 +7,7 @@ keywords:
         en: GoC Subject
       keyword_config:
         is_keyword: yes
-        extraction_method: translated
+        mode: translate
         thesaurus:
           citation:
             title:

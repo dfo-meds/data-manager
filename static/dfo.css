@@ -4,6 +4,7 @@ body {
     line-height: 1.4375;
     color: #333333;
     margin: 0;
+    padding: 0;
 }
 ul.vocabulary-list li a {
     font-weight: bold;
@@ -63,9 +64,11 @@ a {
 a:hover {
     color: #0000CC;
 }
+.header {
+    padding-top: 20px;
+}
 .sig_block {
-    padding: 20px;
-    margin-top: 20px;
+    margin-left: 20px;
 }
 .site_title {
     font-weight: bold;
@@ -127,6 +130,14 @@ a:hover {
     float: left;
     margin-right: 20px;
 }
+.separator_block {
+    height: 180px;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    margin-bottom: 10px;
+    background: #26374A url("/static/landscape.png") no-repeat right bottom;
+}
 .bottom_links li {
     list-style: none;
     float: left;
@@ -136,7 +147,7 @@ a:hover {
     width: 25%;
     float: right;
     text-align: right;
-    margin-right: 10px;
+    margin-right: 20px;
     margin-top: 10px;
 }
 .main_body {
@@ -361,15 +372,15 @@ ul.messages li.success {
     vertical-align: middle;
 }
 .choices_innermost {
-    width: 650px;
+    width: 750px;
     margin: 0 auto;
     border: 3px solid #005A9B;
 }
 .choices_innermost img {
     width: 350px;
+    margin: 20px;
 }
 .choices {
-    margin-top: 30px;
     display: flex;
 }
 .choices div {
@@ -378,10 +389,19 @@ ul.messages li.success {
     width: 300px;
     padding: 10px;
 }
-.choices div h2 {
+.choices div p.title {
     margin: 0;
-    font-size: 16px;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
     color: #005A9B;
+}
+.choices div p.subtitle {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    font-weight: bold;
+    color: #444444;
 }
 .choices div.choice_en {
     margin-right: 25px;
@@ -405,6 +425,18 @@ ul.messages li.success {
     padding: 5px;
     border: 2px solid #CC0000;
 }
+.content {
+    padding-left: 20px;
+}
+.session_block {
+    padding-left: 50px;
+    font-size: 0.9em;
+    color: #666666;
+}
+.right_block p {
+    margin: 0;
+    padding: 0;
+}
 #session_timeout_box p {
     text-align: center;
     margin: 0;
@@ -419,4 +451,14 @@ ul.messages li.success {
 }
 .session_block {
     clear: both;
+}
+.separator_block a {
+    color: #FFFFFF;
+}
+h1 {
+    margin: 0;
+    padding: 0;
+    border-bottom: 3px solid #AF3C43;
+    padding-right: 100px;
+    margin-bottom: 20px;
 }

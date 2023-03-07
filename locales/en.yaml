@@ -1,4 +1,4 @@
-auth_db.account_locked: ''
+auth_db.account_locked: Your account has been locked
 auth_db.change_password: Change Password
 auth_db.change_password.title: Change Password
 auth_db.cli.user_already_exists: User already exists
@@ -14,11 +14,11 @@ auth_db.edit_user.title: Edit User
 auth_db.email: Email
 auth_db.groups: Groups
 auth_db.last_error: Last Unsuccessful Login
-auth_db.last_error_ip: IP
+auth_db.last_error_ip: IP Address
 auth_db.last_success: Last Successful Login
-auth_db.last_success_ip: IP
-auth_db.list_users: List Users
-auth_db.list_users.title: List Users
+auth_db.last_success_ip: IP Address
+auth_db.list_users: Users
+auth_db.list_users.title: Users
 auth_db.me: My Account
 auth_db.no_recent_failed_logins: No recent failed logins
 auth_db.no_recent_logins: No recent logins
@@ -26,32 +26,35 @@ auth_db.organizations: Organizations
 auth_db.password: Password
 auth_db.repeat_password: Repeat Password
 auth_db.reset_password: Reset Password
-auth_db.reset_password.instructions: Reset the users password
+auth_db.reset_password.instructions: By submitting this form, a new random password will be generated for the user.
 auth_db.reset_password.success: Password reset to {}
-auth_db.reset_password.title: Reset PAssword
-auth_db.too_many_recent_logins: ''
+auth_db.reset_password.title: Reset Password
+auth_db.too_many_recent_logins: Too many recent logins
 auth_db.total_errors: Unsuccessful Attempts
 auth_db.user.display: User
 auth_db.user.groups: Groups
 auth_db.user.organizations: Organizations
 auth_db.user.username: Username
-auth_db.user_create.title: ''
-auth_db.user_edit.title: ''
-auth_db.user_list.title: ''
-auth_db.user_reset_password.title: ''
+auth_db.user_create.title: Create User
+auth_db.user_edit.title: Edit User
+auth_db.user_list.title: Users
+auth_db.user_reset_password.title: Reset Password
 auth_db.username: Username
 auth_db.username_does_not_exist: Username does not exist
+cioos.validation.metadata_owner_ind_no_orcid: ORCID is required
+cioos.validation.metadata_owner_no_email: Email address is empty
+cioos.validation.metadata_owner_no_id_code: Identifier code is empty
+cioos.validation.metadata_owner_no_id_code_or_name: One of the identifier code or name is required
+cioos.validation.metadata_owner_no_id_code_space: Identifier system has no codespace
+cioos.validation.metadata_owner_no_id_system: Identifier system is empty
+cioos.validation.metadata_owner_org_no_ror: ROR is required
 dfo.cnodc: Canadian National Oceanographic Data Centre
 dfo.help.link: User Manual
 dfo.help.title: User Manual
-dfo.privacy.label: Privacy Policy
 dfo.recent_activity.header: Recent Activity
-dfo.tos.label: Terms and Conditions
-dfo.usage_warning: Use of this tool is restricted to those working with the CNODC
-  on managing datasets.
+dfo.usage_warning: Unauthorized use of this tool is not allowed.
 dfo.usage_warning.header: Usage Warning
 dfo.welcome: Welcome to the CNODC's data management dashboard.
-dfo.welcome.header: Welcome
 forms.back: Back
 language_names.en: English
 language_names.fr: French
@@ -60,10 +63,14 @@ languages.short.fr: FR
 languages.short.und: UND
 pipeman.action-items: Action Items
 pipeman.auth.group_does_not_exist: Group does not exist
+pipeman.auth.group_exists: Group already exists
 pipeman.auth.hash_not_available: Hash function not available
-pipeman.auth.not_authorized: User not authorized for access
+pipeman.auth.not_authorized: Access denied
+pipeman.auth.login_required: Login required
 pipeman.auth.org_does_not_exist: Organization does not exist
 pipeman.auth.password_too_long: Password is too long
+pipeman.auth.blank_password: Password cannot be blank
+pipeman.auth.short_password: Password is too short
 pipeman.auth_db.blank_password: Password is blank
 pipeman.auth_db.short_password: Password is too short
 pipeman.auth_db.username_does_not_exist: No such user
@@ -84,7 +91,8 @@ pipeman.create_organization.title: Create Organization
 pipeman.create_user: Create User
 pipeman.dataset.act_workflow: Activation Workflow
 pipeman.dataset.activate_dataset_form: Activate Dataset
-pipeman.dataset.activate_dataset_form.confirmation: Are you sure you want to activate this dataset?
+pipeman.dataset.activate_dataset_form.confirmation: Are you sure you want to activate
+  this dataset?
 pipeman.dataset.activated: Dataset activated
 pipeman.dataset.activation_error: Error while activating dataset
 pipeman.dataset.activation_in_progress: Activation process started
@@ -123,22 +131,22 @@ pipeman.dataset.security_level: Security Level
 pipeman.dataset.state: State
 pipeman.dataset.status: Status
 pipeman.dataset.status.active: Active
-pipeman.dataset_activate.confirmation: Are you sure you want to submit this dataset for approval?
+pipeman.dataset_activate.confirmation: Are you sure you want to submit this dataset
+  for approval?
 pipeman.dataset_activate.link: Submit for Approval
 pipeman.dataset_activate.title: Submit for Approval
 pipeman.dataset_create.title: Create Dataset
 pipeman.dataset_edit.title: Edit Dataset
-pipeman.dataset_list.title: List Dataset
+pipeman.dataset_list.title: List Datasets
 pipeman.dataset_metadata.link: Edit Metadata
 pipeman.dataset_metadata.success: Metadata saved
 pipeman.dataset_metadata.title: Edit Metadata
-pipeman.dataset_publish.confirmation: Are you sure you want to submit this metadata for publication?
+pipeman.dataset_publish.confirmation: Are you sure you want to submit this metadata
+  for publication?
 pipeman.dataset_publish.link: Publish Metadata
 pipeman.dataset_publish.title: Publish Metadata
 pipeman.dataset_remove.confirmation: Are you sure you want to remove this dataset?
 pipeman.dataset_remove.title: Remove
-pipeman.vocabularies_list.title: Taxonomies
-pipeman.vocabularies: Taxonomies
 pipeman.dataset_remove_link: Remove
 pipeman.dataset_restore.confirmation: Are you sure you want to remove this dataset?
 pipeman.dataset_restore.title: Restore
@@ -146,13 +154,14 @@ pipeman.dataset_revision.warning: Restore
 pipeman.dataset_validate.link: Validation
 pipeman.dataset_validation.title: Validation Report
 pipeman.dataset_view_current.link: View Current Version
+pipeman.dataset.guid: Unique ID
 pipeman.datasets: Datasets
 pipeman.display_name: Display Name
 pipeman.edit_organization.title: Title
 pipeman.entities: Entities
 pipeman.entity.dataset: Dataset
 pipeman.entity.display: Display
-pipeman.entity.form_error: "An error has occurred [{field}]: {error}"
+pipeman.entity.form_error: 'An error has occurred [{field}]: {error}'
 pipeman.entity.id: ID
 pipeman.entity.is_deprecated: Is Deprecated
 pipeman.entity.organization: Organization
@@ -185,6 +194,8 @@ pipeman.entity_restore.title: Restore
 pipeman.entity_type.list: Entity Types
 pipeman.entity_view.title: View Entity
 pipeman.events.title: Events
+pipeman.fields.length_between: Length must be between {min} and {max}
+pipeman.fields.length_less_than_min: Length must be greater than {min}
 pipeman.fields.passwords_match: Passwords do not match
 pipeman.fields.required: Field is required
 pipeman.fire_event.title: Fire Event
@@ -234,9 +245,7 @@ pipeman.organization_edit.title: Edit Organization
 pipeman.organization_list.title: Organizations
 pipeman.organization_view.title: View Organization
 pipeman.organizations: Organizations
-pipeman.plugins.auth_db.blank_password: Password cannot be blank
-pipeman.plugins.auth_db.short_password: Password is too short
-pipeman.plugins.auth_db.username_does_not_exist: Username does not exist
+pipeman.builtins.auth_db.username_does_not_exist: Username does not exist
 pipeman.refresh_session: Refresh Session
 pipeman.session_logout: Session Expiry
 pipeman.session_refresh_ajax_error: AJAX error while refreshing session
@@ -248,14 +257,21 @@ pipeman.validation.recommended: Missing recommended field
 pipeman.validation.required: Missing required field
 pipeman.validation.success: No errors or warnings found
 pipeman.validation_level.error: Error
-pipeman.validation_level.warning: Warning
 pipeman.validation_level.success: Success
+pipeman.validation_level.warning: Warning
 pipeman.view_organization.title: View Organization
+pipeman.vocabularies: Taxonomies
+pipeman.vocabularies_list.title: Taxonomies
 pipeman.welcome: Welcome
 pipeman.welcome.title: Welcome
 pipeman.workflow_item.approve: Approve
 pipeman.workflow_item.cancel: Cancel
+pipeman.workflow_item.core_steps.complete: Complete
+pipeman.workflow_item.core_steps.in-progress: In Progress
+pipeman.workflow_item.core_steps.pending: Pending
 pipeman.workflow_item.created: Workflow item created
+pipeman.workflow_item.gate_cancelled: Rejected by {decider} on {date}
+pipeman.workflow_item.gate_completed: Approved by {decider} on {date}
 pipeman.workflow_item.logs: Logs
 pipeman.workflow_item.name: Name
 pipeman.workflow_item.object: Object
@@ -266,15 +282,34 @@ pipeman.workflow_item.step.name: Step Name
 pipeman.workflow_item.step.notes: Notes
 pipeman.workflow_item.step.status: Status
 pipeman.workflow_item.type: Type
-pipeman.workflow_list.title: List Workflows
-pipeman.workflow_view.title: View Workflow
+pipeman.workflow_list.title: List Action Items
+pipeman.workflow_statuses.async_execute: Executing Async Job
+pipeman.workflow_statuses.batch_execute: Executing Batch Job
+pipeman.workflow_statuses.cancelled: Cancelled
+pipeman.workflow_statuses.decision_required: Decision Required
+pipeman.workflow_statuses.failure: Failed
+pipeman.workflow_statuses.in_progress: In Progress
+pipeman.workflow_statuses.remote_exec_queued: Executing Remote Process
 pipeman.workflow_types.dataset_activation: Dataset Activation
 pipeman.workflow_types.dataset_publication: Dataset Publication
 pipeman.workflow_types.receive_send_item: Send Request
 pipeman.workflow_types.send_file: Send Files
-pipeman.workflow_statuses.decision_required: Decision Required
-pipeman.workflow_item.core_steps.complete: Complete
-pipeman.workflow_item.core_steps.in-progress: In Progress
-pipeman.workflow_item.core_steps.pending: Pending
-pipeman.workflow_item.gate_completed: Approved by {decider} on {date}
-pipeman.workflow_item.gate_cancelled: Rejected by {decider} on {date}
+pipeman.workflow_view.title: View Workflow
+pipeman.workflow_statuses.complete: Complete
+pipeman.workflow_history.title: Historical Action Items
+datatable.decimal: "."
+datatable.emptyTable: "No data available in table"
+datatable.info: "Showing _START_ to _END_ of _TOTAL_ entries"
+datatable.infoEmpty: "Showing 0 to 0 of 0 entries"
+datatable.infoFiltered: "(filtered from _MAX_ total entries)"
+datatable.thousands: ","
+datatable.lengthMenu: "Show _MENU_ entries"
+datatable.loadingRecords: "Loading..."
+datatable.search: "Search:"
+datatable.zeroRecords: "No matching records found"
+datatable.paginate.first: "First"
+datatable.paginate.last: "Last"
+datatable.paginate.next: "Next"
+datatable.paginate.previous: "Previous"
+datatable.aria.sortAscending: ": activate to sort column ascending"
+datatable.aria.sortDescending: ": activate to sort column descending"

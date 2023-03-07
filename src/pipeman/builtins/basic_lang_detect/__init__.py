@@ -1,5 +1,6 @@
 from .detector import BasicRequestLanguageDetector
 from pipeman.util.system import System as _System
+from pipeman.util.flask import self_url
 from autoinject import injector as _injector
 from pipeman.i18n import LanguageDetector, TranslationManager, gettext
 import flask
@@ -22,8 +23,8 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
             "language_switchers": {}
         }
         for lang in supported_languages:
-            # TODO: should update second parameter to be the full language link to the current page
-            ctx["language_switchers"][lang] = (gettext(f"language_names.{lang}"), f"?lang={lang}", current_lang != lang)
+            link = self_url(lang=lang)
+            ctx["language_switchers"][lang] = (gettext(f"language_names.{lang}"), link, current_lang != lang)
         return ctx
 
 

@@ -3,16 +3,17 @@ from pipeman.i18n.i18n import LanguageDetector, TranslationManager, DelayedTrans
 from jinja2 import pass_context
 import functools
 
+
+def gettext(text_key: str, default_text: str = None) -> DelayedTranslationString:
+    return DelayedTranslationString(text_key, default_text)
+
+
 @injector.inject
-def gettext(text_key: str, default_text: str = None, tm: TranslationManager = None) -> str:
-    return tm.get_text(text_key, default_text)
-
-
-def format_datetime(dt, format_str: str = "pipeman.formats.datetime", na_str="pipeman.general.na", default_format="%Y-%m-%d %H:%M:%S"):
+def format_datetime(dt, format_str: str = "pipeman.formats.datetime", na_str="pipeman.general.na", default_format="%Y-%m-%d %H:%M:%S", tm: TranslationManager = None):
     if dt is None:
         return gettext(na_str)
     else:
-        return dt.strftime(gettext(format_str, default_format))
+        return dt.strftime(tm.get_text(format_str, default_format))
 
 
 def format_date(dt, format_str: str = "pipeman.formats.date", na_str="pipeman.general.na", default_format="%Y-%m-%d"):

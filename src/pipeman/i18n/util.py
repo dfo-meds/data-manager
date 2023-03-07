@@ -1,17 +1,19 @@
 import re
 import os
 import pathlib
+import yaml
 
 
 class TranslatableStringFinder:
 
     def __init__(self):
         self._py_res = [
-            re.compile(r'gettext\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
-            re.compile(r'UserInputError\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
-            re.compile(r'DelayedTranslationString\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
-            re.compile(r'FormValueError\([\'"]([A-Za-z_\.-]*?)[\'"]\)'),
-            re.compile(r'\.add_action\([\'"]([A-Za-z_\.]*?)[\'"]')
+            re.compile(r'gettext\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'UserInputError\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'DelayedTranslationString\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'FormValueError\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'ValidationResult\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'\.add_action\([ \t\r\n]{0,}[\'"]([A-Za-z_\.]*?)[\'"]')
         ]
         self._jinja_res = [
             re.compile(r'\{\{[ ]{0,}\'([A-Za-z_\.-]*?)\'[ ]{0,}\|[ ]{0,}gettext[ ]{0,}\}\}'),
@@ -34,9 +36,24 @@ class TranslatableStringFinder:
                     search.append(file.path)
         return results
 
+    def search_locale_files(self, directory: str):
+        results = set()
+        for file in os.scandir(directory):
+            if file.name.endswith(".yaml") or file.name.endswith(".yml"):
+                results.update(self.search_in_yaml_file(file.path))
+        return results
+
+    def search_in_yaml_file(self, yaml_file: str):
+        results = set()
+        with open(yaml_file, "r", encoding="utf-8") as h:
+            contents = yaml.safe_load(h)
+            if isinstance(contents, dict):
+                results.update(contents.keys())
+        return results
+
     def search_in_jinja_template(self, template_file: str):
         results = set()
-        with open(template_file, "r") as h:
+        with open(template_file, "r", encoding="utf-8") as h:
             contents = h.read()
             for regex in self._jinja_res:
                 for result in regex.findall(contents):
@@ -46,7 +63,7 @@ class TranslatableStringFinder:
 
     def search_in_python_file(self, py_file: str):
         results = set()
-        with open(py_file, "r") as h:
+        with open(py_file, "r", encoding="utf-8") as h:
             contents = h.read()
             for regex in self._py_res:
                 for result in regex.findall(contents):

@@ -7,3 +7,8 @@
 {% endfor %}
 </dl>
 {% endblock %}
+{% block sidebar %}
+<div class="subnav">
+    <ul class="action_list"><li><a href="{{url_for('core.list_vocabularies')}}">{{'forms.back' | gettext}}</a></li></ul>
+</div>
+{% endblock %}

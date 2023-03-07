@@ -1,29 +1,16 @@
 {% extends "base.html" %}
+{% block customScripts %}
+{{ table.to_javascript() }}
+{% endblock %}
 {% block content %}
-<table cellpadding="0" cellspacing="0" border="0" class="data_table entities_table">
-    <thead>
-        <tr>
-            <th>{{'pipeman.entity.id' | gettext}}</th>
-            <th>{{'pipeman.entity.state' | gettext}}</th>
-            <th>{{'pipeman.entity.display' | gettext}}</th>
-            <th>{{'pipeman.general.actions' | gettext}}</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entity, label, actions in entities %}
-        <tr>
-            <td>{{entity.id}}</td>
-            <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
-            <td>{{label}}</td>
-            <td>{{action_list(actions)}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{{ pager(current_page, page_count) }}
+{{ table }}
 {% endblock %}
 {% block sidebar %}
-{% if create_link %}
-<div class="subnav"><ul class="action_list"><li><a href="{{create_link}}">{{'pipeman.create_entity' | gettext}}</a></li></ul></div>
+{% if side_links %}
+<div class="subnav"><ul class="action_list">
+    {% for link, txt in side_links %}
+    <li><a href="{{link}}">{{txt}}</a></li>
+    {% endfor %}
+</ul></div>
 {% endif %}
 {% endblock %}

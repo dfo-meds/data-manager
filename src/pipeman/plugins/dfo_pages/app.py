@@ -1,10 +1,11 @@
 import flask
 from pipeman.i18n import gettext
+from pipeman.util.flask import MultiLanguageBlueprint
 
-dfo = flask.Blueprint("dfo", __name__)
+dfo = MultiLanguageBlueprint("dfo", __name__)
 
 
-@dfo.route("/help")
+@dfo.i18n_route("/help")
 def help():
     return _render_dfo_template("dfo_help", gettext("dfo.help.title"))
 

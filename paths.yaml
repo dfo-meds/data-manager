@@ -1,0 +1,92 @@
+/logout:
+  fr: /deconnexioner
+/login:
+  fr: /connexioner
+/objects:
+  fr: /objets
+/objects/<obj_type>:
+  fr: /objets/<obj_type>
+/objects/<obj_type>/new:
+  fr: /objets/<obj_type>/nouveau
+/objects/<obj_type>/new/<parent_type>/<parent_id>:
+  fr: /objets/<obj_type>/nouveau/<parent_type>/<parent_id>
+/objects/<obj_type>/<obj_id>/edit/<parent_type>/<parent_id>:
+  fr: /objets/<obj_type>/modifier/<parent_type>/<parent_id>
+/objects/<obj_type>/<obj_id>/remove/<parent_type>/<parent_id>:
+  fr: /objets/<obj_type>/supprimer/<parent_type>/<parent_id>
+/objects/<obj_type>/<obj_id>/restore/<parent_type>/<parent_id>:
+  fr: /objets/<obj_type>/retrouver/<parent_type>/<parent_id>
+/objects/<obj_type>/<obj_id>:
+  fr: /objets/<obj_type>/<obj_id>
+/objects/<obj_type>/<obj_id>/edit:
+  fr: /objets/<obj_type>/<obj_id>/modifier
+/objects/<obj_type>/<obj_id>/remove:
+  fr: /objets/<obj_type>/<obj_id>/supprimer
+/objects/<obj_type>/<obj_id>/restore:
+  fr: /objets/<obj_type>/<obj_id>/retrouver
+/datasets:
+  fr: /ensembles
+/datasets/new:
+  fr: /ensembles/nouveau
+/datasets/<dataset_id>:
+  fr: /ensembles/<dataset_id>
+/datasets/<dataset_id>/edit:
+  fr: /ensembles/<dataset_id>/modifier
+/datasets/<dataset_id>/metadata:
+  fr: /ensembles/<dataset_id>/metadonnees
+/datasets/<dataset_id>/metadata/<display_group>:
+  fr: /ensembles/<dataset_id>/metadonnees/<display_group>
+/datasets/<dataset_id>/activate:
+  fr: /ensembles/<dataset_id>/activer
+/datasets/<dataset_id>/validate:
+  fr: /ensembles/<dataset_id>/valider
+/datasets/<dataset_id>/publish:
+  fr: /ensembles/<dataset_id>/publier
+/datasets/<dataset_id>/remove:
+  fr: /ensembles/<dataset_id>/supprimer
+/datasets/<dataset_id>/restore:
+  fr: /ensembles/<dataset_id>/retrouver
+/datasets/<dataset_id>/<revision_no>:
+  fr: /ensembles/<dataset_id>/<revision_no>
+/datasets/<dataset_id>/<revision_no>/<profile_name>/<format_name>:
+  fr: /ensembles/<dataset_id>/<revision_no>/<profile_name>/<format_name>
+/action-items:
+  fr: /taches
+/action-history:
+  fr: /taches-historiques
+/action-items/<item_id>:
+  fr: /taches/<item_id>
+/action-items/<item_id>/approve:
+  fr: /taches/<item_id>/approuver
+/action-items/<item_id>/cancel:
+  fr: /taches/<item_id>/annuler
+/organizations:
+  fr: /organisations
+/organizations/create:
+  fr: /organisations/nouveau
+/organizations/<org_id>:
+  fr: /organisations/<org_id>
+/organizations/<org_id>/edit:
+  fr: /organisations/<org_id>/modifier
+/vocabulary:
+  fr: /taxonomie
+/vocabulary/<vocab_name>:
+  fr: /taxonomie/<vocab_name>
+/me:
+  fr: /moi
+/me/edit:
+  fr: /moi/modifier
+/me/change-password:
+  fr: /moi/changer-mot-passe
+/users:
+  fr: /utilisateurs
+/users/create:
+  fr: /utilisateurs/nouveau
+/users/<username>:
+  fr: /utilisateurs/<username>
+/users/<username>/edit:
+  fr: /utilisateurs/<username>/modifier
+/users/<username>/reset:
+  fr: /utilisateurs/<username>/reinitialiser
+/help:
+  fr: /aide-moi

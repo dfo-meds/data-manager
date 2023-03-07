@@ -35,7 +35,7 @@
     <lan:textGroup>
   {% for a2l in locale_mapping %}
       {% if a2l in text and text[a2l] and (not a2l == "und") and (not a2l == default_locale) %}
-      <lan:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{text[a2l]}}</lan:LocalisedCharacterString>
+      <lan:LocalisedCharacterString locale="#{{a2l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
       {% endif %}
   {% endfor %}
     </lan:textGroup>
@@ -207,8 +207,18 @@
   {# <!-- graphics --> #}
 </cit:CI_Citation>
 {% endmacro %}
-{% macro render_locale(locale) %}
+{% macro render_locale(locale, with_id=False) %}
+  {% if with_id %}
+<lan:PT_Locale id="{{locale['a2_language']}}">
+  {{ render_locale_details(locale) }}
+</lan:PT_Locale>
+  {% else %}
 <lan:PT_Locale>
+  {{ render_locale_details(locale) }}
+</lan:PT_Locale>
+  {% endif %}
+{% endmacro %}
+{% macro render_locale_details(locale) %}
   <lan:language>
     <lan:LanguageCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml" codeListValue="{{locale['language']}}" />
   </lan:language>
@@ -220,7 +230,6 @@
   <lan:characterEncoding>
     <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
   </lan:characterEncoding>
-</lan:PT_Locale>
 {% endmacro %}
 {% macro render_distribution(dc) %}
   <mrd:MD_Distribution>
@@ -265,16 +274,25 @@
 {% endmacro %}
 {% macro render_keywords(kwgroup) %}
 <mri:MD_Keywords>
-  {% for keyword, lang in kwgroup.keywords(["und", default_locale]) %}
-  <mri:keyword>
-    {% if lang == default_locale or lang == 'und' %}
-    <gco:CharacterString>{{keyword}}</gco:CharacterString>
-    {% elif lang in locale_mapping %}
+  {% for keyword in kwgroup.keywords() %}
+  <mri:keyword xsi:type="lan:PT_FreeText_PropertyType">
+    {% if keyword.use_machine_key() %}
+    <gco:CharacterString>{{keyword.machine_key}}</gco:CharacterString>
+      {% if keyword.translations %}
     <lan:PT_FreeText>
+        {% for key in keyword.translations %}
       <lan:textGroup>
-        <lan:LocalisedCharacterString locale="#{{locale_mapping[lang]}}">{{keyword}}</lan:LocalisedCharacterString>
+          {% if keyword.translations[key] and not key == "und" %}
+        <lan:LocalisedCharacterString locale="#{{key}}">{{keyword.translations[key]}}</lan:LocalisedCharacterString>
+          {% endif %}
       </lan:textGroup>
+        {% endfor %}
     </lan:PT_FreeText>
+      {% endif %}
+    {% elif keyword.use_value_only() %}
+      {{ render_text(keyword.machine_key) }}
+    {% else %}
+      {{ render_text(keyword.translations) }}
     {% endif %}
   </mri:keyword>
   {% endfor %}

@@ -1,3 +1,4 @@
+import flask
 import flask_login
 from autoinject import injector
 import zirconium as zr
@@ -7,7 +8,40 @@ import pkgutil
 from pipeman.i18n import gettext
 import pathlib
 from flask import session, render_template
+from pipeman.util.flask import self_url
+from werkzeug.routing import Rule
+import typing as t
 import datetime
+
+
+class CustomRule(Rule):
+
+    ld: "pipeman.i18n.i18n.LanguageDetector" = None
+    tm: "pipeman.i18n.i18n.TranslationManager" = None
+
+    @injector.construct
+    def __init__(self, *args, accept_languages=None, ignore_languages=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._accept_languages = [accept_languages] if isinstance(accept_languages, str) else accept_languages
+        self._ignore_languages = [ignore_languages] if isinstance(ignore_languages, str) else ignore_languages
+
+    def suitable_for(
+        self,
+        values: t.Mapping[str, t.Any],
+        method: t.Optional[str] = None
+    ) -> bool:
+        if not super().suitable_for(values, method):
+            return False
+        if not (self._ignore_languages or self._accept_languages):
+            return True
+        lang = "und"
+        if "lang" in values:
+            lang = values["lang"]
+        elif flask.has_request_context():
+            lang = self.ld.detect_language(self.tm.supported_languages())
+        if self._ignore_languages and lang in self._ignore_languages:
+            return False
+        return lang in self._accept_languages if self._accept_languages else True
 
 
 def load_dynamic_class(cls_name):
@@ -39,6 +73,7 @@ class System:
         self._user_nav_menu = {}
         self.i18n_dirs = set()
         self.user_timeout = 0
+        self.i18n_locale_dirs = []
 
     def init(self):
         zrlog.init_logging()
@@ -135,6 +170,7 @@ class System:
             self.plugins.add(name)
 
     def init_app(self, app):
+        app.url_rule_class = CustomRule
         @app.before_request
         def make_session_permanent():
             session.permanent = True
@@ -160,12 +196,14 @@ class System:
 
         @app.context_processor
         def add_menu_item():
-            items = {}
+            items = {
+                'self_url': self_url
+            }
             for key in self._nav_menu:
                 items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])
             return items
 
-        @app.route("/home")
+        @app.route("/h")
         def home():
             return render_template("welcome.html", title=gettext("pipeman.welcome.title"))
 
