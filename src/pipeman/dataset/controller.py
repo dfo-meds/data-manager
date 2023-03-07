@@ -14,10 +14,12 @@ import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
 import wtforms.validators as wtfv
+import functools
 import re
 import uuid
 
@@ -72,18 +74,35 @@ class DatasetController:
 
     def list_datasets_page(self):
         with self.db as session:
-            query = self._dataset_query(session)
-            query, page_args = paginate_query(query)
-            create_link = ""
+            links = []
             if flask_login.current_user.has_permission("datasets.create"):
-                create_link = flask.url_for("core.create_dataset")
+                links.append((
+                    flask.url_for("core.create_dataset"),
+                    gettext("pipeman.create_dataset.link")
+                ))
             return flask.render_template(
-                "list_datasets.html",
-                datasets=self._dataset_iterator(query),
-                create_link=create_link,
-                title=gettext('pipeman.dataset_list.title'),
-                **page_args
+                "data_table.html",
+                table=self._list_datasets_table(),
+                side_links=links,
+                title=gettext('pipeman.dataset_list.title')
             )
+
+    def list_datasets_ajax(self):
+        return self._list_datasets_table().ajax_response()
+
+    def _list_datasets_table(self):
+        filters = self._base_filters()
+        dq = DataQuery(orm.Dataset, extra_filters=filters)
+        dt = DataTable(
+            table_id="dataset_list",
+            base_query=dq,
+            ajax_route=flask.url_for("core.list_datasets_ajax"),
+            default_order=[("id", "asc")]
+        )
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.dataset.id"), allow_order=True))
+        dt.add_column(DisplayNameColumn())
+        dt.add_column(ActionListColumn(action_callback=functools.partial(self._build_action_list, short_list=True)))
+        return dt
 
     def _build_action_list(self, ds, short_list: bool = True, for_revision: bool = False):
         actions = ActionList()
@@ -126,8 +145,13 @@ class DatasetController:
 
     def _dataset_query(self, session, op="view"):
         q = session.query(orm.Dataset)
+        for filter in self._base_filters(op):
+            q = q.filter(filter)
+        return q.order_by(orm.Dataset.id)
+
+    def _base_filters(self, op="view"):
         if not flask_login.current_user.has_permission("datasets.deprecated_access"):
-            q = q.filter_by(is_deprecated=False)
+            yield orm.Dataset.is_deprecated == False
         if flask_login.current_user.has_permission(f"datasets.{op}.all"):
             pass
         elif flask_login.current_user.has_permission(f"datasets.{op}.organization") and flask_login.current_user.has_permission("organization.manage_any"):
@@ -141,10 +165,9 @@ class DatasetController:
             if flask_login.current_user.has_permission(f"datasets.{op}.assigned") and flask_login.current_user.datasets:
                 sql_ors.append(orm.Dataset.organization_id.in_(flask_login.current_user.datasets))
             if len(sql_ors) == 1:
-                q = q.filter(sql_ors[0])
+                yield sql_ors[0]
             else:
-                q = q.filter(sa.or_(*sql_ors))
-        return q.order_by(orm.Dataset.id)
+                yield sa.or_(*sql_ors)
 
     def create_dataset_form(self):
         form = DatasetForm()

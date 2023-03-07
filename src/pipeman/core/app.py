@@ -234,6 +234,13 @@ def list_datasets(con: DatasetController = None):
     return con.list_datasets_page()
 
 
+@core.i18n_route("/api/datasets-ajax")
+@require_permission("datasets.view")
+@injector.inject
+def list_datasets_ajax(con: DatasetController = None):
+    return con.list_datasets_ajax()
+
+
 @core.i18n_route("/datasets/new", methods=["POST", "GET"])
 @require_permission("datasets.create")
 @injector.inject
