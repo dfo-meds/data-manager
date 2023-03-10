@@ -1,11 +1,13 @@
 import markupsafe
 import wtforms as wtf
-from wtforms.form import BaseForm
 from pipeman.i18n import TranslationManager, DelayedTranslationString, MultiLanguageString
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from autoinject import injector
 from flask_wtf import FlaskForm
+from wtforms.form import BaseForm
+from wtforms.meta import DefaultMeta
+from flask_wtf.csrf import _FlaskFormCSRF
 import flask
 import math
 import json
@@ -16,7 +18,11 @@ from pipeman.util.errors import FormValueError
 import sqlalchemy as sa
 import flask_login
 import zirconium as zr
+import subprocess
+import os
+import shutil
 import yaml
+import datetime
 
 
 @injector.injectable_global
@@ -63,22 +69,110 @@ class MultiLanguageBlueprint(flask.Blueprint):
         return wrapper
 
 
+@injector.injectable
+class RequestInfo:
+
+    def __init__(self):
+        self._remote_ip = None
+        self._proxy_ip = None
+        self._correl_id = None
+        self._client_id = None
+        self._request_url = None
+        self._user_agent = None
+        self._username = None
+        self._referrer = None
+        self._proc_info_loaded = False
+        self._system_username = None
+        self._emulated_user = None
+        self._logon_time = None
+        self._system_remote_addr = None
+
+    def remote_ip(self):
+        if self._remote_ip is None and flask.has_request_context():
+            if "X-Forwarded-For" in flask.request.headers:
+                self._remote_ip = flask.request.headers.getlist("X-Forwarded-For")[0].rpartition(' ')[-1]
+            else:
+                self._remote_ip = flask.request.remote_addr or 'untrackable'
+        return self._remote_ip
+
+    def proxy_ip(self):
+        if self._proxy_ip is None and flask.has_request_context():
+            if "X-Forwarded-For" in flask.request.headers:
+                self._proxy_ip = flask.request.remote_addr or 'untrackable'
+        return self._proxy_ip
+
+    def correlation_id(self):
+        if self._correl_id is None and flask.has_request_context():
+            self._correl_id = flask.request.headers.get("X-Correlation-ID", "")
+        return self._correl_id
+
+    def client_id(self):
+        if self._client_id is None and flask.has_request_context():
+            self._client_id = flask.request.headers.get("X-Client-ID", "")
+        return self._client_id
+
+    def request_url(self):
+        if self._request_url is None and flask.has_request_context():
+            self._request_url = flask.request.url
+        return self._request_url
+
+    def user_agent(self):
+        if self._user_agent is None and flask.has_request_context():
+            self._user_agent = flask.request.user_agent.string
+        return self._user_agent
+
+    def username(self):
+        if self._username is None and flask.has_request_context():
+            self._username = flask_login.current_user.get_id()
+        return self._username
+
+    def referrer(self):
+        if self._referrer is None and flask.has_request_context():
+            self._referrer = flask.request.referrer
+        return self._referrer
+
+    def _load_process_info(self):
+        if self._proc_info_loaded is False and not flask.has_app_context():
+            res = subprocess.run([shutil.which("whoami")], capture_output=True)  # noqa: S603
+            txt = res.stdout.decode("utf-8").replace("\t", " ").strip("\r\n\t ")
+            while "  " in txt:
+                txt = txt.replace("  ", " ")
+            pieces = txt.split(" ")
+            self._system_username = pieces[0]
+            self._emulated_user = pieces[0]
+            if len(pieces) > 2:
+                self._logon_time = pieces[2] + " " + pieces[3]
+            if len(pieces) > 4:
+                self._system_remote_addr = pieces[4].strip("()")
+            if os.name == "posix":
+                res = subprocess.run([shutil.which("who")], capture_output=True)  # noqa: S603
+                if res.returncode == 0 and res.stdout:
+                    self._emulated_user = res.stdout.decode("utf-8")
+            self._proc_info_loaded = True
+
+    def sys_username(self):
+        self._load_process_info()
+        return self._system_username
+
+    def sys_emulated_username(self):
+        self._load_process_info()
+        return self._emulated_user
+
+    def sys_logon_time(self):
+        self._load_process_info()
+        return self._logon_time
+
+    def sys_remote_addr(self):
+        self._load_process_info()
+        return self._system_remote_addr
+
+
 def self_url(**kwargs):
     ep = flask.request.endpoint
     args = flask.request.view_args.copy() or {}
     args.update(flask.request.args)
     args.update(kwargs)
     return flask.url_for(ep, **args)
-
-
-def get_real_remote_ip():
-    remote_ip = "no request"
-    if flask.has_request_context():
-        if "X-Forwarded-For" in flask.request.headers:
-            remote_ip = flask.request.headers.getlist("X-Forwarded-For")[0].rpartition(' ')[-1]
-        else:
-            remote_ip = flask.request.remote_addr or 'untrackable'
-    return remote_ip
 
 
 class BareHtmlWidget:
@@ -118,7 +212,7 @@ class ActionList:
     def render(self, html_cls="action_list"):
         mu = f'<ul class="{html_cls}">'
         for path, txt in self.action_items:
-            mu += f'<li><a href="{escape(path)}">{gettext(txt)}</a></li>'
+            mu += f'<li><a href="{escape(path)}">{escape(gettext(txt))}</a></li>'
         mu += '</ul>'
         return Markup(mu)
 
@@ -154,6 +248,32 @@ def paginate_query(query, min_page_size=10, max_page_size=250, default_page_size
             "item_count": count
         }
     )
+
+
+class SecureBaseForm(BaseForm):
+
+    class Meta(DefaultMeta):
+        csrf_class = _FlaskFormCSRF
+
+        @property
+        def csrf(self):
+            return flask.current_app.config.get("WTF_CSRF_ENABLED", True)
+
+        @property
+        def csrf_context(self):
+            return flask.session
+
+        @property
+        def csrf_secret(self):
+            return flask.current_app.config.get("WTF_CSRF_SECRET_KEY", flask.current_app.secret_key)
+
+        @property
+        def csrf_time_limit(self):
+            return flask.current_app.config.get("WTF_CSRF_TIME_LIMIT", flask.current_app.config["PERMANENT_SESSION_LIFETIME"])
+
+    def __init__(self, controls, *args, **kwargs):
+        meta = SecureBaseForm.Meta()
+        super().__init__(controls, *args, meta=meta, **kwargs)
 
 
 class ConfirmationForm(FlaskForm):
@@ -293,7 +413,7 @@ class EntitySelectField(wtf.Field):
             q = q.order_by(orm.Entity.id)
             for ent in q:
                 results['results'].append(EntitySelectField._build_entry(ent, by_revision))
-        return results
+        return safe_json(results)
 
     @staticmethod
     def _build_entry(entity, by_revision, revision_no = None):
@@ -433,12 +553,13 @@ class TranslatableField(DynamicFormField):
 
 class DataColumn:
 
-    def __init__(self, name, header_text, allow_order: bool = False, allow_search: bool = False, show_column: bool = True):
+    def __init__(self, name, header_text, allow_order: bool = False, allow_search: bool = False, show_column: bool = True, formatter: callable = None):
         self.name = name
         self.allow_order = allow_order
         self.allow_search = allow_search
         self.show_column = show_column
         self._header = header_text
+        self._formatter = formatter
 
     def header(self):
         return self._header
@@ -451,6 +572,16 @@ class DataColumn:
 
     def order_by(self, dq, query, direction):
         return query
+
+
+class CustomDisplayColumn(DataColumn):
+
+    def __init__(self, name, header_text, display_callback=None):
+        super().__init__(name=name, header_text=header_text)
+        self._callback = display_callback
+
+    def value(self, data_row):
+        return self._callback(data_row)
 
 
 class ActionListColumn(DataColumn):
@@ -469,7 +600,10 @@ class ActionListColumn(DataColumn):
 class DatabaseColumn(DataColumn):
 
     def value(self, data_row):
-        return getattr(data_row, self.name)
+        val = getattr(data_row, self.name)
+        if self._formatter and val is not None:
+            return self._formatter(val)
+        return val
 
     def build_filter(self, dq, filter_text):
         if self.allow_search:
@@ -558,81 +692,6 @@ class DataQuery:
         return query
 
 
-""" ""
-    def _data_query(self, st) -> list:
-        ""Retrieve the data rows for the query.""
-        data = []
-        for row in st:
-            data_row = {}
-            # Handle data wrapping which lets us use a class to do stuff instead
-            wrapped = None
-            if self.wrapper_func:
-                wrapped = self.wrapper_func(row)
-            # Build each column
-            for c in self.columns:
-                # Action items via callback
-                if "display" in self.columns[c] and not self.columns[c]["display"]:
-                    continue
-                elif "action_callback" in self.columns[c]:
-                    m = '<ul class="action_items">'
-                    args = []
-                    if wrapped:
-                        cb = getattr(wrapped, self.columns[c]["action_callback"])
-                    else:
-                        cb = self.columns[c]["action_callback"]
-                        args = [row]
-                    if "action_arguments" in self.columns[c]:
-                        args.extend(self.columns[c]["action_arguments"])
-                    for path, pieces, txt in cb(*args):
-                        m += '<li><a href="{}">{}</a></li>'.format(
-                            flask.url_for(path, **pieces), txt
-                        )
-                    m += "</ul>"
-                    data_row[c] = Markup(m)
-                # Action items via list
-                elif "actions" in self.columns[c]:
-                    m = '<ul class="action_items">'
-                    for info in self.columns[c]["actions"]:
-                        path, id_arg, txt = info[:3]
-                        extra = {}
-                        if len(info) > 3:
-                            extra = info[3]
-                        if id_arg:
-                            extra[id_arg] = row.id
-                        m += '<li><a href="{}">{}</a></li>'.format(
-                            flask.url_for(path, **extra), txt
-                        )
-                    m += "</ul>"
-                    data_row[c] = Markup(m)
-                # Use the wrap function
-                elif wrapped and "wrap" in self.columns[c]:
-                    wrap_call = getattr(wrapped, self.columns[c]["wrap"])
-                    data_row[c] = wrap_call() if callable(wrap_call) else wrap_call
-                # Use the convert function
-                elif "convert" in self.columns[c]:
-                    if "attribute" in self.columns[c]:
-                        data_row[c] = self.columns[c]["convert"](
-                            getattr(row, self.columns[c]["attribute"])
-                        )
-                    else:
-                        data_row[c] = self.columns[c]["convert"](row)
-                elif "lal" in self.columns[c]:
-                    data_row[c] = str(
-                        LanguageAwareLabel(
-                            {
-                                "en": getattr(row, self.columns[c]["lal"]["en"]),
-                                "fr": getattr(row, self.columns[c]["lal"]["fr"]),
-                            }
-                        )
-                    )
-                # Use raw DB values
-                elif "attribute" in self.columns[c]:
-                    data_row[c] = getattr(row, self.columns[c]["attribute"])
-                else:
-                    data_row[c] = "?"
-            data.append(data_row)
-        return data
-""" ""
 class DataTable:
     """Represents a datatable to be displayed using the datatable jQuery plugin.
     Basically, wraps around a SQLAlchemy query to provide data in a tabular format with paging, searching, etc.
@@ -764,7 +823,7 @@ class DataTable:
             )
         block = "<script>"
         block += "$(document).ready(function() {\n"
-        block += "  $('#{}').DataTable({});".format(self._table_id, json.dumps(self._json_safe(config)))
+        block += "  $('#{}').DataTable({});".format(self._table_id, json.dumps(safe_json(config)))
         block += "});</script>"
         return Markup(block)
 
@@ -813,7 +872,7 @@ class DataTable:
             html += "<tr>"
             for cname in self._columns:
                 if self._columns[cname].show_column:
-                    html += "<td>{}</td>".format(str(self._columns[cname].value(row)))
+                    html += "<td>{}</td>".format(escape(self._columns[cname].value(row)))
             html += "</tr>"
         html += "</tbody></table>"
         return Markup(html)
@@ -824,31 +883,39 @@ class DataTable:
         total_filtered = self._query.count_filtered(self)
         data = [
             {
-                cname: self._columns[cname].value(row)
+                cname: escape(self._columns[cname].value(row))
                 for cname in self._columns
             }
             for row in self._query.rows(self)
         ]
         return {
-            "data": self._json_safe(data),
+            "data": safe_json(data),
             "recordsFiltered": total_filtered,
             "recordsTotal": total_records,
             "draw": flask.request.args.get("draw", type=int),
         }
 
-    def _json_safe(self, json):
-        if isinstance(json, dict):
-            for key in json:
-                json[key] = self._json_safe(json[key])
-            return json
-        elif isinstance(json, list):
-            new_list = [self._json_safe(x) for x in json]
-            return new_list
-        elif json is True or json is False or json is None:
-            return json
-        elif isinstance(json, object):
-            if hasattr(json, "__str__"):
-                return str(json)
-            raise ValueError(f"cannot serialize: {json}")
-        else:
-            return json
+
+def safe_json(json):
+    if isinstance(json, dict):
+        for key in json:
+            json[key] = safe_json(json[key])
+        return json
+    elif isinstance(json, list):
+        new_list = [safe_json(x) for x in json]
+        return new_list
+    elif json is True or json is False or json is None:
+        return json
+    elif isinstance(json, str) or isinstance(json, int) or isinstance(json, float):
+        return json
+    # Fallback to ISO string encoding for easy parsing in Javascript
+    elif isinstance(json, datetime.datetime):
+        return json.isoformat()
+    elif isinstance(json, datetime.date):
+        return json.isoformat()
+    elif isinstance(json, object):
+        if hasattr(json, "__html__"):
+            return str(json.__html__())
+        if hasattr(json, "__str__"):
+            return str(json)
+    raise ValueError(f"cannot serialize: {json}")

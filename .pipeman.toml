@@ -1,6 +1,15 @@
 [database]
 url = "sqlite:///./test.db"
 
+[pipeman]
+holding_dir = "C:/my/test_upload"
+i18n_paths_file = "C:/my/data-manager/paths.yaml"
+
+[pipeman.plugins]
+#first = ["plugin1", "plugin2"]
+#last = ["plugin3", "plugin4"]
+#skip = ["plugin5"]
+
 [autoinject]
 "pipeman.auth.auth.AuthenticationManager" = "pipeman.builtins.auth_db.DatabaseEntityAuthenticationManager"
 "pipeman.i18n.i18n.TranslationManager" = "pipeman.builtins.i18n_yaml.translator.YamlTranslationManager"
@@ -17,6 +26,18 @@ logout_route = "logged_out"
 [flask]
 SECRET_KEY = "VeryModernMajorGeneral"
 
-[pipeman]
-holding_dir = "C:/my/test_upload"
-i18n_paths_file = "C:/my/data-manager/paths.yaml"
+[logging]
+version = 1
+
+[logging.root]
+level = "INFO"
+handlers = ["console"]
+
+[logging.handlers.console]
+class = "logging.StreamHandler"
+formatter = "brief"
+level = "INFO"
+stream = "ext://sys.stdout"
+
+[logging.formatters.brief]
+format = "%(name)s [%(levelname)s]: %(message)s [%(username)s; %(remote_ip)s]"

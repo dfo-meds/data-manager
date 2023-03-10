@@ -36,6 +36,13 @@ def list_users(duc: DatabaseUserController = None):
     return duc.list_users_page()
 
 
+@users.route("/api/users-ajax")
+@require_permission("auth_db.view_users")
+@injector.inject
+def list_users_ajax(duc: DatabaseUserController = None):
+    return duc.list_users_ajax()
+
+
 @users.i18n_route("/users/create", methods=['GET', 'POST'])
 @require_permission("auth_db.create_users")
 @injector.inject

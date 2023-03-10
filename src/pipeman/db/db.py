@@ -6,6 +6,7 @@ from autoinject import injector
 
 from .orm import Base
 
+
 class SessionWrapper:
     """Wrapper for a session to allow users to call methods on either the transaction or session object.
     Parameters
@@ -13,7 +14,7 @@ class SessionWrapper:
     db: metadb.db.Database
         The Database object.
     session: orm.Session
-        The session object/
+        The session object.
     transaction: orm.SessionTransaction
         The transaction object.
     """
@@ -108,6 +109,12 @@ class Database:
             self._session = None
 
     def close(self):
+        while self._transaction_stack:
+            self._transaction_stack[-1].rollback()
+            del self._transaction_stack[-1]
+        if self._session:
+            self._session.close()
+            self._session = None
         if self.engine is not None:
             self.engine.dispose()
             self.engine = None

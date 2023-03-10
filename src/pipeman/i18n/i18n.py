@@ -39,7 +39,7 @@ class BaseTranslatableString:
         return self.copy()
 
     def __html__(self):
-        return self.render()
+        return markupsafe.escape(self.render())
 
     def __str__(self):
         return self.render()

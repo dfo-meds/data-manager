@@ -98,6 +98,15 @@
                 let email_format = '{{'pipeman.html_error.email_format_error' | gettext}}';
                 let url_format = '{{'pipeman.html_error.url_format_error' | gettext}}';
                 let tel_format = '{{'pipeman.html_error.tel_format_error' | gettext}}';
+                let csrf_token = "{{ csrf_token() }}";
+
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                        }
+                    }
+                });
 
                 $(document).ready(function() {
                     $("input").each(function() {

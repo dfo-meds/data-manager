@@ -407,6 +407,16 @@ def list_workflow_history(wfc: WorkflowController = None):
     return wfc.list_workflow_items_page(False)
 
 
+@core.route("/api/action-list/<active_only>")
+@require_permission("action_items.view")
+@injector.inject
+def list_items_ajax(active_only: str, wfc: WorkflowController = None):
+    is_active_only = active_only == "1"
+    if is_active_only and not flask_login.current_user.has_permission("action_items.history"):
+        raise flask.abort(403)
+    return wfc.list_workflow_items_ajax(is_active_only)
+
+
 @core.i18n_route("/action-items/<item_id>")
 @require_permission("action_items.view")
 @injector.inject

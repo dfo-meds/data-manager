@@ -14,7 +14,7 @@ import datetime
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, Select2Widget
+from pipeman.util.flask import ConfirmationForm, SecureBaseForm, ActionList, Select2Widget
 from pipeman.util.flask import ActionListColumn, DatabaseColumn, DataQuery, DataTable, DisplayNameColumn
 import flask_login
 import wtforms.validators as wtfv
@@ -327,7 +327,7 @@ class EntityController:
                     continue
 
 
-class EntityForm(BaseForm):
+class EntityForm(SecureBaseForm):
 
     ocontroller: OrganizationController = None
     dcontroller: "pipeman.dataset.controller.DatasetController" = None

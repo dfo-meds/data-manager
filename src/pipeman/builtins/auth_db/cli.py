@@ -2,12 +2,13 @@ import click
 import getpass
 from autoinject import injector
 from .controller import DatabaseUserController
-from pipeman.util import UserInputError
 from pipeman.util.cli import no_error_wrapper
+import typing as t
 
 
 @click.group
 def user():
+    """User commands"""
     pass
 
 
@@ -47,7 +48,7 @@ def _get_password(password_entry: str, arg_password: str) -> str:
 @click.argument("username")
 @click.argument("email")
 @injector.inject
-def create(username, email, display="", password=None, password_entry="", no_error=False, duc: DatabaseUserController = None):
+def create(username: str, email: str, display: str = "", password: t.Optional[str] = None, password_entry="", no_error=False, duc: DatabaseUserController = None):
     """Create a user account."""
     if display == "":
         display = username
@@ -76,7 +77,7 @@ def unlock(username, duc: DatabaseUserController = None):
 @click.argument("username")
 @injector.inject
 def set_password(username, password=None, password_entry="", no_error=False, duc: DatabaseUserController = None):
-    """Create a user account."""
+    """Set the password for a user."""
     no_error_wrapper(
         no_error,
         duc.set_password_cli,

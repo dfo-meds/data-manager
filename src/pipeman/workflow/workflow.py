@@ -23,6 +23,7 @@ import markupsafe
 from wtforms.form import BaseForm
 from pipeman.entity import FieldContainer
 import asyncio
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, CustomDisplayColumn, ActionListColumn
 
 
 class ItemResult(Enum):
@@ -454,15 +455,49 @@ class WorkflowController:
             )
 
     def list_workflow_items_page(self, active_only: bool = True):
-        with self.db as session:
-            query = self._item_query(session, active_only)
-            query, page_args = paginate_query(query)
-            return flask.render_template(
-                "list_workflow_items.html",
-                items=self._iterate_workflow_items(query),
-                title=gettext("pipeman.workflow_list.title"),
-                **page_args
-            )
+        return flask.render_template(
+            "data_table.html",
+            table=self._item_table(active_only),
+            title=gettext("pipeman.workflow_list.title")
+        )
+
+    def list_workflow_items_ajax(self, active_only: bool = True):
+        return self._item_table(active_only).ajax_response()
+
+    def _format_object_link(self, data_row):
+        return data_row.object_id
+
+    def _item_table(self, active_only: bool = True):
+        filters = []
+        if active_only:
+            filters.append(orm.WorkflowItem.status == 'DECISION_REQUIRED')
+        dq = DataQuery(orm.WorkflowItem, extra_filters=filters)
+        dt = DataTable(
+            table_id="action_list",
+            base_query=dq,
+            ajax_route=flask.url_for("core.list_items_ajax", active_only = "1" if active_only else "0"),
+            default_order=[("created_date", "asc")]
+        )
+        dt.add_column(DatabaseColumn(
+            "id",
+            gettext("pipeman.item.id"),
+            allow_order=True
+        ))
+        dt.add_column(DatabaseColumn(
+            "created_date",
+            gettext("pipeman.item.created"),
+            allow_order=True,
+            formatter=format_datetime
+        ))
+        dt.add_column(CustomDisplayColumn(
+            "object_link",
+            gettext("pipeman.item.object_link"),
+            self._format_object_link
+        ))
+        dt.add_column(ActionListColumn(
+            action_callback=self._build_action_list
+        ))
+        return dt
 
     def _build_action_list(self, item, short_mode: bool = True):
         actions = ActionList()

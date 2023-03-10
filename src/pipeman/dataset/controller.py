@@ -9,11 +9,11 @@ from sqlalchemy.exc import IntegrityError
 import flask_login
 import flask
 import sqlalchemy as sa
-from wtforms.form import BaseForm
+from wtforms.csrf.core import CSRFTokenField
 import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
-from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget
+from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget, SecureBaseForm
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
@@ -496,7 +496,7 @@ class DatasetForm(FlaskForm):
         coerce=int,
         widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
         validators=[
-            wtfv.DataRequired(
+            wtfv.InputRequired(
                 message=DelayedTranslationString("pipeman.fields.required")
             )
         ]
@@ -515,7 +515,7 @@ class DatasetForm(FlaskForm):
         coerce=str,
         widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
         validators=[
-            wtfv.DataRequired(
+            wtfv.InputRequired(
                 message=DelayedTranslationString("pipeman.fields.required")
             )
         ]
@@ -527,7 +527,7 @@ class DatasetForm(FlaskForm):
         coerce=str,
         widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
         validators=[
-            wtfv.DataRequired(
+            wtfv.InputRequired(
                 message=DelayedTranslationString("pipeman.fields.required")
             )
         ]
@@ -546,7 +546,7 @@ class DatasetForm(FlaskForm):
         coerce=str,
         widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
         validators=[
-            wtfv.DataRequired(
+            wtfv.InputRequired(
                 message=DelayedTranslationString("pipeman.fields.required")
             )
         ]
@@ -574,6 +574,18 @@ class DatasetForm(FlaskForm):
         self.pub_workflow.choices = self.wreg.list_workflows("dataset_publication")
         self.security_level.choices = self.reg.security_labels_for_select()
         self.assigned_users.choices = user_list()
+
+    def validate_on_submit(self):
+        if super().validate_on_submit():
+            return True
+        elif self.errors:
+            for key in self.errors:
+                for m in self.errors[key]:
+                    flask.flash(gettext("pipeman.entity.form_error").format(
+                        field=self._fields[key].label.text,
+                        error=m
+                    ), "error")
+        return False
 
     def build_dataset(self):
         if self.dataset:
@@ -632,7 +644,7 @@ class ApprovedDatasetForm(FlaskForm):
         return self.dataset
 
 
-class DatasetMetadataForm(BaseForm):
+class DatasetMetadataForm(SecureBaseForm):
 
     def __init__(self, entity, display_group, *args, **kwargs):
         self.entity = entity

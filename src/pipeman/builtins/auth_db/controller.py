@@ -3,7 +3,7 @@ from pipeman.auth import AuthenticatedUser, SecurityHelper
 from pipeman.db.db import Database
 from autoinject import injector
 import pipeman.db.orm as orm
-from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, get_real_remote_ip, Select2Widget
+from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, Select2Widget, RequestInfo
 from pipeman.i18n import gettext, DelayedTranslationString
 import flask
 import flask_login
@@ -20,6 +20,7 @@ import binascii
 import sqlalchemy as sa
 import zirconium as zr
 import json
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn
 
 
 @injector.injectable
@@ -133,19 +134,37 @@ class DatabaseUserController:
             return flask.render_template("form.html", form=form, title=gettext("auth_db.change_password.title"))
 
     def list_users_page(self):
-        with self.db as session:
-            query = session.query(orm.User)
-            query, page_args = paginate_query(query)
-            create_link = ""
-            if flask_login.current_user.has_permission("auth_db.create_users"):
-                create_link = flask.url_for("users.create_user")
-            return flask.render_template(
-                "list_users.html",
-                users=self._user_iterator(query),
-                create_link=create_link,
-                title=gettext("auth_db.user_list.title"),
-                **page_args
-            )
+        links = []
+        if flask_login.current_user.has_permission("auth_db.create_users"):
+            links.append((
+                flask.url_for("users.create_user"),
+                gettext("auth_db.create_user.link")
+            ))
+        return flask.render_template(
+            "data_table.html",
+            table=self._users_table(),
+            side_links=links,
+            title=gettext("auth_db.user_list.title"),
+        )
+
+    def list_users_ajax(self):
+        return self._users_table().ajax_response()
+
+    def _users_table(self):
+        dq = DataQuery(orm.User)
+        dt = DataTable(
+            table_id="user_list",
+            base_query=dq,
+            ajax_route=flask.url_for("users.list_users_ajax"),
+            default_order=[("username", "asc")]
+        )
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.user.id"), allow_order=True))
+        dt.add_column(DatabaseColumn("username", gettext("pipeman.user.username"), allow_order=True, allow_search=True))
+        dt.add_column(DatabaseColumn("display", gettext("pipeman.user.display_name"), allow_order=True, allow_search=True))
+        dt.add_column(ActionListColumn(
+            action_callback=self._build_action_list
+        ))
+        return dt
 
     def _build_action_list(self, user, short_mode: bool = True):
         actions = ActionList()
@@ -518,6 +537,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
     db: Database = None
     sh: SecurityHelper = None
     cfg: zr.ApplicationConfig = None
+    rinfo: RequestInfo = None
 
     @injector.construct
     def __init__(self, form_template_name: str = "form.html"):
@@ -559,7 +579,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
                 was_success=not error_message,
                 error_message=error_message or None,
                 from_api=from_api,
-                remote_ip=get_real_remote_ip()
+                remote_ip=self.rinfo.remote_ip()
             )
             session.add(ulr)
             session.commit()
