@@ -50,7 +50,7 @@ class DatabaseUserController:
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
             auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
-            key_hash = self.sh.hash_password(auth_header, key_salt)
+            key_hash = self.sh.hash_secret(auth_header, key_salt)
             key = orm.APIKey(
                 user_id=user.id,
                 display=display,
@@ -83,7 +83,7 @@ class DatabaseUserController:
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
             auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
-            key_hash = self.sh.hash_password(auth_header, key_salt)
+            key_hash = self.sh.hash_secret(auth_header, key_salt)
             if leave_old_active_days > 0:
                 key.old_key_hash = key.key_hash
                 key.old_key_salt = key.key_salt
@@ -376,7 +376,7 @@ class DatabaseUserController:
         if not skip_check:
             self.sh.check_password_strength(password)
         user.salt = self.sh.generate_salt()
-        user.phash = self.sh.hash_password(password, user.salt)
+        user.phash = self.sh.hash_secret(password, user.salt)
 
     def unlock_user_account(self, username):
         with self.db as session:
@@ -628,8 +628,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             if user.phash is None:
                 self._record_login_attempt(username, from_api, "no password set", False)
                 return None
-            pw_hash = self.sh.hash_password(password, user.salt)
-            if not self.sh.compare_digest(pw_hash, user.phash):
+            if not self.sh.check_secret(password, user.salt, user.phash):
                 self._record_login_attempt(username, from_api, "bad password")
                 return None
             self._record_login_attempt(username, from_api)
@@ -687,15 +686,19 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             error = "expired api key"
             if key.expiry > gate_date:
                 error = "invalid api token"
-                key_hash = self.sh.hash_password(auth_header, key.key_salt)
-                if self.sh.compare_digest(key_hash, key.key_hash):
+                if self.sh.check_secret(auth_header, key.key_salt, key.key_hash):
                     self._record_login_attempt(username, True)
+                    if self.sh.is_hash_outdated(auth_header, key.key_salt, key.key_hash):
+                        key.key_hash = self.sh.hash_secret(auth_header, key.key_salt)
+                        session.commit()
                     return self._build_user(user, session)
             if key.old_expiry > gate_date:
                 error = "invalid api token"
-                key_hash = self.sh.hash_password(auth_header, key.old_key_salt)
-                if self.sh.compare_digest(key_hash, key.old_key_hash):
+                if self.sh.check_secret(auth_header, key.old_key_salt, key.old_key_hash):
                     self._record_login_attempt(username, True)
+                    if self.sh.is_hash_outdated(auth_header, key.old_key_salt, key.old_key_hash):
+                        key.old_key_hash = self.sh.hash_secret(auth_header, key.old_key_salt)
+                        session.commit()
                     return self._build_user(user, session)
             self._record_login_attempt(username, True, error)
         return None

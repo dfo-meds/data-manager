@@ -1,3 +1,4 @@
+"""Utility functions for managing groups"""
 from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
@@ -9,6 +10,7 @@ from pipeman.i18n import MultiLanguageString
 
 @injector.inject
 def groups_select(db: Database = None):
+    """Retrieve a list of groups suitable for a select list."""
     with db as session:
         return [
             (group.id, MultiLanguageString(json.loads(group.display_names) if group.display_names else {"und": group.short_name}))
@@ -17,11 +19,12 @@ def groups_select(db: Database = None):
 
 
 @injector.inject
-def create_group(group_name, db: Database = None):
+def create_group(group_name: str, db: Database = None):
+    """Create a new group."""
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if g:
-            raise UserInputError("pipeman.auth.group_exists", group_name)
+            raise UserInputError("pipeman.auth.group_already_exists", group_name)
         g = orm.Group(
             short_name=group_name,
             permissions=""
@@ -32,7 +35,8 @@ def create_group(group_name, db: Database = None):
 
 
 @injector.inject
-def grant_permission(group_name, perm_name, db: Database = None):
+def grant_permission(group_name: str, perm_name: str, db: Database = None):
+    """Grant a permission to a group."""
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if not g:
@@ -43,7 +47,8 @@ def grant_permission(group_name, perm_name, db: Database = None):
 
 
 @injector.inject
-def revoke_permission(group_name, perm_name, db: Database = None):
+def revoke_permission(group_name: str, perm_name: str, db: Database = None):
+    """Revoke a permission from a group."""
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if not g:

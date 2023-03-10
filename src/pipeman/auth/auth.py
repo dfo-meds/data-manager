@@ -109,7 +109,7 @@ class AuthenticationManager:
         self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="home")
         self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="home")
         self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="home")
-        self.not_logged_in_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="auth.login")
+        self.not_logged_in_route = self.config.as_str(("pipeman", "authentication", "login_required"), default="auth.login")
 
     def login_handler(self):
         """Display the login form or redirect to a third-party authorization page."""
