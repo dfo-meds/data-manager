@@ -1,7 +1,9 @@
+"""Base classes for the CLI for pipeman"""
 import click
 
 
 class CommandLineInterface(click.MultiCommand):
+    """Implements multicommand by storing a dictionary of commands to call."""
 
     def __init__(self, commands: dict, *args, **kwargs):
         self.commands = commands
