@@ -116,9 +116,10 @@ def _has_other_languages(language_dict, default_locale):
 def preprocess_metadata(dataset, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
-    default_locale = def_loc['a2_language']
-    locale_mapping[def_loc['a2_language']] = def_loc['language']
-    for other_loc in dataset.data("other_locales"):
+    default_locale = def_loc['a2_language'] if def_loc else "en"
+    locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
+    olocales = dataset.data("other_locales") or []
+    for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
     dataset_maintenance = []
     metadata_maintenance = []

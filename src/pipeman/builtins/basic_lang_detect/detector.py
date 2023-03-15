@@ -1,12 +1,23 @@
+"""Language detection implementation
+
+The basic implementation relies on the following
+
+- The value of the "lang" query string argument.
+- The languages in the Accept-Language header, in order given there
+- A default fallback set when constructing this class
+"""
 import flask
+import typing as t
 
 
 class BasicRequestLanguageDetector:
+    """Responsible for detecting languages."""
 
     def __init__(self, default_language='en'):
         self._default_lang = default_language
 
-    def detect_language(self, supported_languages) -> str:
+    def detect_language(self, supported_languages: t.List[str]) -> str:
+        """Returns a selection from supported_languages that the user wants to see."""
         if not supported_languages:
             raise ValueError("At least one supported language required")
         if flask.has_request_context():
