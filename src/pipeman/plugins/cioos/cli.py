@@ -9,6 +9,10 @@ def cioos():
 
 
 @cioos.command
+def update():
+    do_update()
+
+
 @injector.inject
-def update(vm: CIOOSVocabularyManager = None):
+def do_update(vm: CIOOSVocabularyManager = None):
     vm.fetch()

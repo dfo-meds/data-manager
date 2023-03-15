@@ -10,6 +10,7 @@ import yaml
 def init_plugin(reg: MetadataRegistry = None, vreg: VocabularyRegistry = None, system: System = None):
     root = pathlib.Path(__file__).parent
     system.register_cli("pipeman.plugins.cioos.cli", "cioos")
+    system.register_setup_fn("pipeman.plugins.cioos.cli.do_update")
     with open(root / "fields.yaml", "r", encoding="utf-8") as h:
         reg.register_fields_from_dict(yaml.safe_load(h))
     with open(root / "profiles.yaml", "r", encoding="utf-8") as h:

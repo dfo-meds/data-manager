@@ -56,3 +56,15 @@ def revoke_permission(group_name: str, perm_name: str, db: Database = None):
         g.remove_permission(perm_name)
         session.commit()
         logging.getLogger("pipeman.auth").out(f"Revoked permission {perm_name} from {group_name}")
+
+
+@injector.inject
+def clear_permissions(group_name: str, db: Database = None):
+    """Revoke a permission from a group."""
+    with db as session:
+        g = session.query(orm.Group).filter_by(short_name=group_name).first()
+        if not g:
+            raise UserInputError("pipeman.auth.group_does_not_exist", group_name)
+        g.clear_permissions()
+        session.commit()
+        logging.getLogger("pipeman.auth").out(f"Cleared all permissions from {group_name}")

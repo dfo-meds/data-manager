@@ -2,6 +2,7 @@ import click
 from autoinject import injector
 from pipeman.org import OrganizationController
 from pipeman.workflow import WorkflowController
+from pipeman.util import System
 import asyncio
 
 
@@ -32,3 +33,14 @@ def batch(wfc: WorkflowController):
 @injector.inject
 def async_batch(wfs: WorkflowController):
     asyncio.run(wfs.async_batch_process_items())
+
+
+@click.group
+def core():
+    pass
+
+
+@core.command
+@injector.inject
+def setup(system: System = None):
+    system.setup()

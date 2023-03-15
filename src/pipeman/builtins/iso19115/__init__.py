@@ -11,6 +11,7 @@ from autoinject import injector
 def init_plugin(system: System = None, reg: EntityRegistry = None, vreg: VocabularyRegistry = None, mreg: MetadataRegistry = None):
     system.register_cli("pipeman.builtins.iso19115.cli", "iso19115")
     system.register_blueprint("pipeman.builtins.iso19115.app", "iso19115")
+    system.register_setup_fn("pipeman.builtins.iso19115.cli.do_update")
     my_parent = pathlib.Path(__file__).absolute().parent
     with open(my_parent / "entities.yaml", "r", encoding="utf-8") as h:
         reg.register_from_dict(yaml.safe_load(h))

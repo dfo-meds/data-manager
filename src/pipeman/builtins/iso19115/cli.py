@@ -9,6 +9,10 @@ def iso19115():
 
 
 @iso19115.command
+def update():
+    do_update()
+
+
 @injector.inject
-def update(vm: ISO19115VocabularyManager = None):
+def do_update(vm: ISO19115VocabularyManager = None):
     vm.fetch()

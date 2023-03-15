@@ -54,3 +54,18 @@ def revoke(group_name: str, perm_name: str, no_error: bool = False):
             print(str(ex))
         else:
             raise ex
+
+
+@group.command
+@click.option("--no-error", default=False, is_flag=True, type=bool)
+@click.argument("group_name")
+def clear_permissions(group_name: str, no_error: bool = False):
+    """Revoke a permission from a group."""
+    from .util import clear_permissions
+    try:
+        clear_permissions(group_name)
+    except UserInputError as ex:
+        if no_error:
+            print(str(ex))
+        else:
+            raise ex

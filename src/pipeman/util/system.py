@@ -98,6 +98,7 @@ class System:
         self.globals = {}
         self._load_init = []
         self._flask_init_cb = []
+        self._setup_cb = []
         self._cli_init_cb = []
         self._flask_blueprints = []
         self._click_groups = []
@@ -129,6 +130,10 @@ class System:
             fn()
         self._log.out("Init complete")
 
+    def register_setup_fn(self, setup_cb: callable):
+        """Register a function to call on setup."""
+        self._setup_cb.append(setup_cb)
+
     def register_init_app(self, init_app_cb: callable):
         """Register a function to call when init_app() is called."""
         self._flask_init_cb.append(init_app_cb)
@@ -140,6 +145,12 @@ class System:
     def on_load(self, load_cb: callable):
         """Register a function to call when init() is done."""
         self._load_init.append(load_cb)
+
+    def setup(self):
+        """Run all the setup scripts."""
+        for cb in self._setup_cb:
+            obj = load_object(cb)
+            obj()
 
     def register_blueprint(self, module: str, blueprint_name: str, prefix: str = ""):
         """Register a blueprint to add to the main Flask application."""

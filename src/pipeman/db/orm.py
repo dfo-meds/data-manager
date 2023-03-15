@@ -153,6 +153,9 @@ class Group(_DisplayNameModel, Base):
             p.remove(perm_name)
         self.permissions = ";".join(p)
 
+    def clear_permissions(self):
+        self.permissions = ""
+
 
 class Entity(_BaseModel, Base):
 

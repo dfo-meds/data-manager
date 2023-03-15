@@ -3,9 +3,11 @@ set -e
 
 cd /srv/metadb/app || exit
 
-python cli.py setup
+python cli.py core setup
 
-python cli.py user create "${METADB_USERNAME:-admin}" "${METADB_EMAIL:-meds.erddap@gmail.com}" --display "Administrator" --no-error --password "${METADB_PASSWORD:-modernmajorgeneral}"
+python cli.py user create --display "Administrator" --no-error --password "${METADB_PASSWORD:-modernmajorgeneral}" "${METADB_USERNAME:-admin}" "${METADB_EMAIL:-meds.erddap@gmail.com}"
+
+python cli.py user group --no-error assign "${METADB_USERNAME:-admin}" superadmin
 
 # If there's a prestart.sh script in the /app directory, run it before starting
 PRE_START_PATH=/srv/metadb/prestart.sh

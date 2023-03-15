@@ -14,8 +14,10 @@ import yaml
 def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vreg: VocabularyRegistry = None, dsr: DataStoreRegistry = None, ereg: EntityRegistry = None):
     system.register_cli("pipeman.core.cli", "org")
     system.register_cli("pipeman.core.cli", "workflow")
+    system.register_cli("pipeman.core.cli", "core")
     system.register_blueprint("pipeman.core.app", "core")
     system.register_init_app(create_jinja_filters)
+    system.register_setup_fn("pipeman.core.util.setup_core_groups")
     system.register_nav_item("datasets", "pipeman.datasets", "core.list_datasets", "datasets.view")
     system.register_nav_item("entities", "pipeman.entities", "core.list_entities", "entities.view_entities")
     system.register_nav_item("action-items", "pipeman.action-items", "core.list_workflow_items", "action_items.view")
