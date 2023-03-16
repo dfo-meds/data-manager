@@ -2,7 +2,7 @@
 {% block content %}
 <dl class="term-list">
 {% for short_name, display, description in i18n_sort(terms, key=1) %}
-    <dt>{{display}} <span class="term-code">[{{short_name}}]</span></dt>
+    <dt id="#{{short_name}}">{{display}} <span class="term-code">[{{short_name}}]</span></dt>
     <dd>{{description}}</dd>
 {% endfor %}
 </dl>
