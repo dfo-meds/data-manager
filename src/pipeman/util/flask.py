@@ -840,10 +840,18 @@ class DataTable:
         return None
 
     def current_index(self):
-        return flask.request.args.get("start", type=int, default=0)
+        index = flask.request.args.get("start", type=int, default=0)
+        if index < 0:
+            return 0
+        return index
 
     def page_size(self):
-        return flask.request.args.get("length", type=int, default=self._page_size)
+        page_size = flask.request.args.get("length", type=int, default=self._page_size)
+        if page_size < 10:
+            return 10
+        if page_size > 250:
+            return 250
+        return page_size
 
     def order_columns(self):
         order = []
