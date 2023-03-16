@@ -10,9 +10,9 @@ RUN apt-get install libpq-dev build-essential -y
 WORKDIR /srv/metadb
 
 ENV PYTHONPATH=/srv/metadb/app
-ENV MODULE_NAME=main
+ENV MODULE_NAME=app
 ENV VARIABLE_NAME=app
-ENV APP_MODULE=main:app
+ENV APP_MODULE=app:app
 ENV GUNICORN_CONF=/srv/metadb/gunicorn_conf.py
 
 COPY requirements-docker.txt requirements-docker.txt
