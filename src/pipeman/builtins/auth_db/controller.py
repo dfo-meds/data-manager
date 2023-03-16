@@ -248,7 +248,7 @@ class DatabaseUserController:
             orm.user_organization.c.organization_id == org_id)
         res = session.execute(st).first()
         if not res:
-            q = orm.user_organization.insert({
+            q = orm.user_organization.insert().values({
                 "organization_id": org_id,
                 "user_id": user_id
             })
@@ -285,7 +285,7 @@ class DatabaseUserController:
         st = orm.user_group.select().where(orm.user_group.c.user_id == user_id).where(orm.user_group.c.group_id == group_id)
         res = session.execute(st).first()
         if not res:
-            q = orm.user_group.insert({
+            q = orm.user_group.insert().values({
                 "group_id": group_id,
                 "user_id": user_id
             })
