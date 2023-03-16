@@ -17,3 +17,4 @@ universalio
 zirconium
 zrlog
 psycopg2
+gunicorn
