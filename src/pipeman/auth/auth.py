@@ -7,19 +7,87 @@ import typing as t
 from functools import wraps
 from pipeman.i18n import gettext
 import datetime
+from urllib.parse import urlparse
 
 
-def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable]):
+@injector.injectable_global
+class RequestSecurity:
+    """Global security handler for requests"""
+
+    cfg: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self):
+        self._allowed_hosts = self.cfg.get(("pipeman", "security", "allowed_hosts"), default=[])
+        self._require_https = self.cfg.as_bool(("pipeman", "security", "require_https"), default=False)
+        self._check_get_refs = self.cfg.as_bool(("pipeman", "security", "check_get_referrers"), default=False)
+        self._check_refs_default = self.cfg.as_bool(("pipeman", "security", "check_refs_default"), default=True)
+        self._check_https_default = self.cfg.as_bool(("pipeman", "security", "check_https_default"), default=True)
+
+    def is_authenticated(self) -> bool:
+        """Check if the user is authenticated."""
+        if flask.has_request_context():
+            return fl.current_user.is_authenticated
+        return False
+
+    def require_permissions(self, perm_names: t.Union[t.AnyStr, t.Iterable]) -> bool:
+        """Check if the user has at least one of the given permissions."""
+        if flask.has_request_context():
+            cu = fl.current_user
+            return any(cu.has_permission(x) for x in perm_names)
+        return False
+
+    def check_referrer(self):
+        """Check that the referer is good."""
+        if not flask.has_request_context():
+            return False
+        if flask.request.method == "HEAD":
+            return True
+        if (not self._check_get_refs) and flask.request.method == "GET":
+            return True
+        ref = flask.request.headers.get("Referer")
+        org = flask.request.headers.get("Origin")
+        if org is None:
+            org = ref
+        pieces = urlparse(org)
+        if self._allowed_hosts and pieces.netloc not in self._allowed_hosts:
+            return False
+        return True
+
+    def check_for_https(self):
+        """Check for HTTPS."""
+        if not flask.has_request_context():
+            return False
+        if not self._require_https:
+            return True
+        pieces = urlparse(flask.request.url)
+        return pieces.scheme == "https"
+
+    def check_access(self, perm_names: t.Iterable, check_referrer: bool = None, check_https: bool = None):
+        """Check all configured requirements to access the page."""
+        if not self.require_permissions(perm_names):
+            return False
+        if check_referrer is None:
+            check_referrer = self._check_refs_default
+        if check_referrer and not self.check_referrer():
+            return False
+        if check_https is None:
+            check_https = self._check_https_default
+        if check_https and not self.check_for_https():
+            return False
+        return True
+
+
+def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable], **perm_args):
     """Ensure the current user is logged in and has one of the given permissions before allowing the request."""
     if isinstance(perm_names, str):
         perm_names = [perm_names]
 
     def _decorator(func: t.Callable) -> t.Callable:
         @wraps(func)
-        def _decorated(*args, **kwargs):
-            if not fl.current_user.is_authenticated:
-                return flask.current_app.login_manager.unauthorized()
-            if not any(fl.current_user.has_permission(x) for x in perm_names):
+        @injector.inject
+        def _decorated(*args, rs: RequestSecurity = None, **kwargs):
+            if not rs.check_access(perm_names, **perm_args):
                 return flask.current_app.login_manager.unauthorized()
             return flask.current_app.ensure_sync(func)(*args, **kwargs)
         return _decorated
@@ -145,7 +213,7 @@ class AuthenticationManager:
         if flask.request.path.startswith("/api"):
             return flask.abort(403)
         # Error for if the user is not authenticated
-        elif not fl.current_user.is_authenticated():
+        elif not fl.current_user.is_authenticated:
             flask.flash(gettext("pipeman.auth.login_required"), "error")
             return flask.redirect(flask.url_for(self.not_logged_in_route))
         # Error for if the user is authenticated but doesn't have sufficient access

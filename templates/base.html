@@ -179,8 +179,10 @@
             <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dfo.css')}}" />
         {% endblock %}
         <meta charset="utf-8" />
+        <meta name="Referrer-Policy" content="strict-origin-when-cross-origin" />
         <meta http-equiv="content-language" content="{{language}}" />
-        <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}" />
+        <link rel="icon" type="image/x-icon" href="{{url_for('static', filename='favicon.ico')}}" />
+        <link rel="shortcut icon" type="image/x-icon" href="{{url_for('static', filename='favicon.ico')}}" />
     </head>
     <body>
         {% block body %}
