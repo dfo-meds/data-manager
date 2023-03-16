@@ -36,7 +36,7 @@ def list_users(duc: DatabaseUserController = None):
     return duc.list_users_page()
 
 
-@users.route("/api/users-ajax")
+@users.route("/api/users-ajax", methods=["POST", "GET"])
 @require_permission("auth_db.view_users")
 @injector.inject
 def list_users_ajax(duc: DatabaseUserController = None):

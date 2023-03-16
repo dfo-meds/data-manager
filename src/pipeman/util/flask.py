@@ -769,6 +769,9 @@ class DataTable:
     def to_javascript(self) -> str:
         """Generate the JavaScript content for the datatable."""
         config = {
+            "ajax": {
+                "type": "POST"
+            },
             "columns": [],
             "searching": False,
             "ordering": False,
@@ -804,7 +807,7 @@ class DataTable:
             config["paging"] = True
             config["pageLength"] = self._page_size
         if self._ajax_route:
-            config["ajax"] = self._ajax_route
+            config["ajax"]["url"] = self._ajax_route
             config["serverSide"] = True
         if self._can_search:
             config["searching"] = True

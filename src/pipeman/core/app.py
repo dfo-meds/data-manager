@@ -43,7 +43,7 @@ def list_entities_by_type(obj_type, con: EntityController):
     return con.list_entities_page(obj_type)
 
 
-@core.route("/api/objects/<obj_type>")
+@core.route("/api/objects/<obj_type>", methods=["POST", "GET"])
 @require_permission("entities.view_entities")
 @injector.inject
 def list_entities_by_type_ajax(obj_type, con: EntityController):
@@ -234,7 +234,7 @@ def list_datasets(con: DatasetController = None):
     return con.list_datasets_page()
 
 
-@core.i18n_route("/api/datasets-ajax")
+@core.i18n_route("/api/datasets-ajax", methods=["POST", "GET"])
 @require_permission("datasets.view")
 @injector.inject
 def list_datasets_ajax(con: DatasetController = None):
@@ -407,7 +407,7 @@ def list_workflow_history(wfc: WorkflowController = None):
     return wfc.list_workflow_items_page(False)
 
 
-@core.route("/api/action-list/<active_only>")
+@core.route("/api/action-list/<active_only>", methods=["POST", "GET"])
 @require_permission("action_items.view")
 @injector.inject
 def list_items_ajax(active_only: str, wfc: WorkflowController = None):
@@ -438,7 +438,7 @@ def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
 
 
-@core.i18n_route("/api/entity-select-field/<entity_types>/<by_revision>")
+@core.i18n_route("/api/entity-select-field/<entity_types>/<by_revision>", methods=["POST", "GET"])
 @require_permission("_is_authenticated")
 @injector.inject
 def api_entity_select_field_list(entity_types, by_revision):
