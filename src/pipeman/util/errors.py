@@ -12,8 +12,8 @@ class TranslatableError(PipemanError):
     tm: TranslationManager = None
 
     @injector.construct
-    def __init__(self, error_str_key, *subs):
-        super().__init__(self.tm.get_text(error_str_key) % subs)
+    def __init__(self, error_str_key, *subs, **kwargs):
+        super().__init__(DelayedTranslationString(error_str_key, None, *subs, **kwargs))
 
 
 class FormValueError(ValueError, PipemanError):

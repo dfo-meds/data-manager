@@ -16,3 +16,4 @@ toml
 universalio
 zirconium
 zrlog
+psycopg2
