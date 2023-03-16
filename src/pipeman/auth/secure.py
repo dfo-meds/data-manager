@@ -47,7 +47,7 @@ class SecurityHelper:
     def __init__(self):
         self.log = logging.getLogger("pipeman.auth")
         self.default_algo = self.cfg.as_str(("pipeman", "security", "hash_algorithm"), default="sha256")
-        self.rounds = min(100000, self.cfg.as_int(("pipeman", "security", "hash_rounds"), default=521931))
+        self.rounds = max(100000, self.cfg.as_int(("pipeman", "security", "hash_rounds"), default=521931))
         self.salt_size = self.cfg.as_int(("pipeman", "security", "salt_length"), default=32)
         self.max_password_length = self.cfg.as_int(("pipeman", "security", "max_length"), default=1024)
         self.pepper = self.cfg.as_str(("pipeman", "security", "pepper"), default="")
