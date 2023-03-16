@@ -841,16 +841,18 @@ class DataTable:
 
     def current_index(self):
         index = flask.request.args.get("start", type=int, default=0)
-        if index < 0:
+        if index is None or index < 0:
+            index = 0
+        elif index < 0:
             return 0
         return index
 
     def page_size(self):
         page_size = flask.request.args.get("length", type=int, default=self._page_size)
-        if page_size < 10:
-            return 10
-        if page_size > 250:
-            return 250
+        if page_size is None or page_size < 10:
+            page_size = self._page_size
+        elif page_size > 250:
+            page_size = 250
         return page_size
 
     def order_columns(self):
