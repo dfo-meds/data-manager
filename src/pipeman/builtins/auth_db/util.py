@@ -32,7 +32,7 @@ def assign_to_organization(organization_name, username, db: Database = None):
         st = orm.user_organization.select().where(orm.user_organization.c.user_id == user.id).where(orm.user_organization.c.organization_id == org.id)
         res = session.execute(st).first()
         if not res:
-            q = orm.user_organization.insert({
+            q = orm.user_organization.insert().values({
                 "organization_id": org.id,
                 "user_id": user.id
             })

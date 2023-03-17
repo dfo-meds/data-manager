@@ -9,7 +9,6 @@ from sqlalchemy.exc import IntegrityError
 import flask_login
 import flask
 import sqlalchemy as sa
-from wtforms.csrf.core import CSRFTokenField
 import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
@@ -450,7 +449,7 @@ class DatasetController:
             dataset.dataset_id = ds.id
             session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
             for user_id in dataset.users:
-                q = orm.user_dataset.insert({
+                q = orm.user_dataset.insert().values({
                     "user_id": user_id,
                     "dataset_id": ds.id
                 })

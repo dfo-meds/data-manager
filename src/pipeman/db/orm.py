@@ -248,7 +248,7 @@ class Dataset(_BaseModel, Base):
     created_date = sa.Column(sa.DateTime)
     modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
-    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=False)
+    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     profiles = sa.Column(sa.Text)
     pub_workflow = sa.Column(sa.String(255), nullable=False)
