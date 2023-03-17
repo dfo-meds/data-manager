@@ -428,14 +428,14 @@ class DatasetController:
                     raise DatasetNotFoundError(dataset.dataset_id)
                 ds.modified_date = datetime.datetime.now()
                 ds.is_deprecated = dataset.is_deprecated
-                ds.organization_id = dataset.organization_id
+                ds.organization_id = int(dataset.organization_id) or None
                 ds.display_names = json.dumps(dataset.display_names())
                 ds.profiles = "\n".join(dataset.profiles)
                 if not ds.guid:
                     ds.guid = str(uuid.uuid4())
             else:
                 ds = orm.Dataset(
-                    organization_id=dataset.organization_id,
+                    organization_id=int(dataset.organization_id) or None,
                     created_date=datetime.datetime.now(),
                     modified_date=datetime.datetime.now(),
                     is_deprecated=dataset.is_deprecated,

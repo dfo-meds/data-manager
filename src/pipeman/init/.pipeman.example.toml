@@ -20,6 +20,13 @@ i18n_paths_file = ""
 pepper = ""
 past_peppers = [""]
 #password_min_length = 0
+allowed_hosts = [
+    "localhost:5000"
+]
+require_https = false
+check_get_referers = false
+check_refs_default = true
+check_https_default = true
 
 #[pipeman.security.password_complexity_classes]
 #lowercase = [a-z]
