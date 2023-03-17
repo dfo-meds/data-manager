@@ -27,6 +27,9 @@ class BaseTranslatableString:
         self.format_args = format_args or []
         self.format_kwargs = format_kwargs or {}
 
+    def __add__(self, o):
+        return str(self) + str(o)
+
     def __mod__(self, args):
         if hasattr(args, "keys"):
             return self.format(**args)
