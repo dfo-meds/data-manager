@@ -371,6 +371,15 @@ ul.messages li.success {
     display: table-cell;
     vertical-align: middle;
 }
+.cb {
+    clear: both;
+}
+#session_timeout_box.hidden {
+    display: none;
+}
+.hidden {
+    display: none;
+}
 .choices_innermost {
     width: 750px;
     margin: 0 auto;

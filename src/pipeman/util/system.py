@@ -17,6 +17,7 @@ import typing as t
 import datetime
 from pipeman.util.logging import PipemanLogger
 from pipeman.util.errors import PipemanConfigurationError
+from pipeman.util.flask import CSPRegistry, csp_nonce, csp_allow
 
 
 class CustomRule(Rule):
@@ -220,6 +221,12 @@ class System:
             session.permanent = True
             session.modified = True
 
+        # After the request, perform a few clean-up tasks
+        @app.after_request
+        @injector.inject
+        def add_response_headers(response, cspr: CSPRegistry = None):
+            return cspr.add_headers(response)
+
         # After the request, make sure the DB was removed
         @app.teardown_request
         def kill_db_session(exc: Exception):
@@ -230,7 +237,9 @@ class System:
         @app.context_processor
         def add_menu_item():
             items = {
-                'self_url': self_url
+                'self_url': self_url,
+                'csp_nonce': csp_nonce,
+                'csp_allow': csp_allow,
             }
             for key in self._nav_menu:
                 items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])

@@ -22,7 +22,68 @@ import subprocess
 import os
 import shutil
 import yaml
+import secrets
 import datetime
+
+
+@injector.injectable
+class CSPRegistry:
+
+    cfg: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self):
+        self._csp_policies = {
+            'default-src': [],
+            'script-src': [],
+            'style-src': [],
+            'img-src': []
+        }
+
+    def reset_csp_policy(self, policy_area: str):
+        if policy_area in self._csp_policies:
+            self._csp_policies[policy_area] = []
+
+    def add_csp_policy(self, policy_area: str, directive: str):
+        if policy_area not in self._csp_policies:
+            self._csp_policies[policy_area] = []
+        if directive not in self._csp_policies[policy_area]:
+            self._csp_policies[policy_area].append(directive)
+
+    def add_headers(self, response: flask.Response) -> flask.Response:
+        csp_headers = [
+            f"{header} 'self' {' '.join(str(x) for x in self._csp_policies[header])}"
+            for header in self._csp_policies
+        ]
+        if self.cfg.as_bool(("csp", "enable"), default=False):
+            response.headers.set("Content-Security-Policy", ";".join(csp_headers))
+        if self.cfg.as_bool(("csp", "report"), default=True):
+            response.headers.set("Content-Security-Policy-Report-Only", ";".join(csp_headers))
+        if self.cfg.as_bool(("csp", "upstream"), default=False):
+            for policy_area in self._csp_policies:
+                if policy_area == "default-src":
+                    continue
+                response.headers.set(
+                    f"X-Upstream-CSP-{policy_area}",
+                    " ".join(str(x) for x in self._csp_policies[policy_area])
+                )
+        return response
+
+    def build_nonce(self) -> str:
+        return secrets.token_urlsafe(24)
+
+
+@injector.inject
+def csp_nonce(policy_area: str, cspr: CSPRegistry = None):
+    nonce = cspr.build_nonce()
+    cspr.add_csp_policy(policy_area, f"'nonce-{nonce}'")
+    return nonce
+
+
+@injector.inject
+def csp_allow(policy_area: str, hostname: str, cspr: CSPRegistry = None):
+    cspr.add_csp_policy(policy_area, hostname)
+    return ""
 
 
 @injector.injectable_global
@@ -297,7 +358,7 @@ class FlatPickrWidget:
             markup += f"value='{str(field.data)}' "
         markup += '/>'
         markup += f' <button type="button" id="flatpickr-clear-button-{field.id}">{gettext("pipeman.general.clear")}</button>'
-        markup += '<script language="javascript" type="text/javascript">'
+        markup += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  let fp = $('#{field.id}').flatpickr(" + "{\n"
         if self.with_time:
@@ -333,7 +394,7 @@ class Select2Widget:
         markup += '>'
         for val, label, selected in field.iter_choices():
             markup += self.render_option(val, label, selected)
-        markup += '</select><script language="javascript" type="text/javascript">'
+        markup += f'</select><script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  $('#{field.id}').select2(" + "{\n"
         if self.ajax_callback:

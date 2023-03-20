@@ -43,10 +43,10 @@ function update_timestamp() {
             $(time_box_id).text(mins + ":" + seconds);
         }
         if (left < show_window) {
-            $(session_timeout_box_id).css("display", "block");
+            $(session_timeout_box_id).removeClass("hidden")
             setTimeout(update_timestamp, 500);
         } else {
-            $(session_timeout_box_id).css("display", "none");
+            $(session_timeout_box_id).addClass("hidden")
             setTimeout(update_timestamp, left * 500);
         }
     }

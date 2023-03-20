@@ -37,8 +37,7 @@
                 {% if control.description %}
                 <div class="form-description">{{control.description}}</div>
                 {% endif %}
-            </div>
-            <br style="clear: both" />
+            </div><br class="cb" />
         </div>
     {% elif control.__class__.__name__ == "SubmitField" %}
         <div class="form-field form-field-submit-field">
@@ -48,7 +47,7 @@
             <div class="form-control">
                 {{control}}
             </div>
-            <br style="clear: both" />
+            <br class="cb" />
         </div>
     {% else %}
         <div class="form-field form-field-{{control.__class__.__name__ | caps_to_snake('-')}}">
@@ -61,7 +60,7 @@
             <div class="form-description">{{control.description}}</div>
             {% endif %}
             </div>
-            <br style="clear: both" />
+            <br class="cb" />
         </div>
     {% endif %}
 {%- endmacro %}
@@ -77,15 +76,19 @@
     <head>
         <title>{{title}}</title>
         {% block scripts %}
+            {{ csp_allow('script-src', 'https://code.jquery.com') }}
             <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/fr.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-            <script src="https://npmcdn.com/flatpickr/dist/l10n/fr.js"></script>
-            <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+            {{ csp_allow('script-src', 'https://cdn.jsdelivr.net') }}
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" integrity="sha512-4MvcHwcbqXKUHB6Lx3Zb5CEAVoE9u84qN+ZSMM6s7z8IeJriExrV3ND5zRze9mxNlABJ6k864P/Vl8m0Sd3DtQ==" crossorigin="anonymous"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/fr.js" integrity="sha512-1deJ2bbARlLPE+U0qOpMsijjIhDJhiPZrDGwloLj+WdPkHknKnQ/Nu0EM200c91yR8YuRoGFeDAo4nbkIwcWVA==" crossorigin="anonymous"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/flatpickr" integrity="sha512-K/oyQtMXpxI4+K0W7H25UopjM8pzq0yrVdFdG21Fh5dBe91I40pDd9A4lzNlHPHBIP2cwZuoxaUSX0GJSObvGA==" crossorigin="anonymous"></script>
+            {{ csp_allow('script-src', 'https://npmcdn.com') }}
+            <script type="text/javascript" src="https://npmcdn.com/flatpickr/dist/l10n/fr.js" integrity="sha512-LqB8jMRhcKqMUy0giKYLI6cM3BL6NZ9+A10MESJLyGx1LIc5Wd0NZMeaG36Hed3/1x3B0GfqdEonsfOHGNvQ7A==" crossorigin="anonymous"></script>
+            {{ csp_allow('script-src', 'https://cdn.datatables.net') }}
+            <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js" integrity="sha512-2FAQqknslN8pS8aF3mK9Iiene7xFUawTM2h/aloIG4tkbXbzTlUimIfZvt6gLNTJbknJ4jwBKGWIQ4uq0DIPeA==" crossorigin="anonymous"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
-            <script type="text/javascript">
+            <script type="text/javascript" nonce="{{csp_nonce('script-src')}}">
 
                 let overflow_error = '{{'pipeman.html_error.overflow' | gettext}}';
                 let underflow_error = '{{'pipeman.html_error.underflow' | gettext}}';
@@ -173,9 +176,11 @@
         {% block customScripts %}
         {% endblock %}
         {% block style %}
-            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
-            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+            {{ csp_allow('style-src', 'https://cdn.datatables.net') }}
+            <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" rel="stylesheet" integrity="sha512-kKZ/XwW91zX5u2On9zBR4yAyVb3TXr39ndgkBajTyc4ReR+uYKp7JVimYxrUanPfsYAeJlqyA/OhaI+C60AhuA==" crossorigin="anonymous" />
+            {{ csp_allow('style-src', 'https://cdn.jsdelivr.net') }}
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" integrity="sha512-aD9ophpFQ61nFZP6hXYu4Q/b/USW7rpLCQLX6Bi0WJHXNO7Js/fUENpBQf/+P4NtpzNX0jSgR5zVvPOJp+W2Kg==" crossorigin="anonymous" />
+            <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" integrity="sha512-MQXduO8IQnJVq1qmySpN87QQkiR1bZHtorbJBD0tzy7/0U9+YIC93QWHeGTEoojMVHWWNkoCp8V6OzVSYrX0oQ==" crossorigin="anonymous" />
             <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dfo.css')}}" />
         {% endblock %}
         <meta charset="utf-8" />
@@ -202,13 +207,13 @@
                         {% endwith %}
                         {% endfor %}
                     </ul>
-                    <br style="clear: both" />
+                    <br class="cb" />
                 </div>
-                <br style="clear: both" />
+                <br class="cb" />
                 </div>
             <div class="topnav">
                 {{showmenu(nav_user)}}
-                <br style="clear: both" />
+                <br class="cb" />
             </div>
             {% block container %}
             <div class="main_body">
@@ -254,7 +259,7 @@
                 {% if current_user.is_authenticated %}
                 <div class="session_block">
                     <p class="session_timeout">{{'pipeman.session_logout' | gettext}}: {{current_user.session_timeout | format_datetime}}</p>
-                    <script language="javascript" type="text/javascript">
+                    <script language="javascript" type="text/javascript" nonce="{{csp_nonce('script-src')}}">
                         $(document).ready(function() {
                             start_session_timeout("#session_timeout_box", "#time_left", {{current_user.session_time_left()}}, "{{url_for('auth.logout', _external=True)}}", "{{url_for('auth.refresh_session', _external=True)}}", "{{'pipeman.session_refresh_ajax_error' | gettext}}", 300);
                         });
@@ -269,7 +274,7 @@
             {% endblock %}
         </div>
         {% endblock %}
-        <div id="session_timeout_box" style="display: none;">
+        <div id="session_timeout_box" class="hidden">
             <p>{{'pipeman.session_timeout_warning' | gettext}}</p>
             <p id="time_left">0:00</p>
             <p><a href="javascript:refresh_session();">{{'pipeman.refresh_session' | gettext}}</a></p>
