@@ -1,0 +1,25 @@
+[pipeman]
+holding_dir = "/metadb-data/holding"
+i18n_paths_file = "/metadb-config/paths.yaml"
+
+[flask]
+UPLOAD_FOLDER = "/metadb-data/flask"
+
+[pipeman.i18n_yaml]
+dictionary_path = "/metadb-config/locales"
+
+[logging]
+version = 1
+
+[logging.root]
+level = "INFO"
+handlers = ["console"]
+
+[logging.handlers.console]
+class = "logging.StreamHandler"
+formatter = "brief"
+level = "INFO"
+stream = "ext://sys.stdout"
+
+[logging.formatters.brief]
+format = "%(name)s [%(levelname)s]: %(message)s"

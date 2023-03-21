@@ -14,6 +14,6 @@ def create_cli(reg: System = None):
     return reg.init_cli()
 
 
-pipeman_init(extra_files=["./.pipeman.cli.toml", "~/.pipeman.cli.toml"])
+pipeman_init(extra_files=[".pipeman.cli.toml"])
 app = create_cli()
 app()

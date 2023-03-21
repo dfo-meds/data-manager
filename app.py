@@ -16,6 +16,6 @@ def create_app(reg: System = None):
     return _app
 
 
-pipeman_init(extra_files=["./.pipeman.flask.toml", "~/.pipeman.flask.toml"])
+pipeman_init(extra_files=[".pipeman.app.toml"])
 app = create_app()
 

@@ -9,6 +9,12 @@ RUN apt-get install libpq-dev build-essential -y
 
 WORKDIR /srv/metadb
 
+VOLUME /metadb-config
+VOLUME /metadb-data
+
+COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
+
+ENV PIPEMAN_CONFIG_DIR=/metadb-config
 ENV PYTHONPATH=/srv/metadb/app
 ENV MODULE_NAME=app
 ENV VARIABLE_NAME=app
