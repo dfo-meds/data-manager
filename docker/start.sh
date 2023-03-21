@@ -22,4 +22,4 @@ else
 fi
 
 # Start Gunicorn
-exec gunicorn --chdir /srv/metadb -k gevent -c "$GUNICORN_CONF" "$APP_MODULE" --statsd-host="$PIPEMAN_STATSD_HOST" --statsd-prefix="$PIPEMAN_STATSD_PREFIX"
+exec gunicorn --chdir /srv/metadb -k gevent -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
