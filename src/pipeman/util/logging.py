@@ -17,9 +17,6 @@ from zrlog.logger import ImprovedLogger
 class PipemanLogger(ImprovedLogger):
     """Logger that adds a few additional parameters for logging."""
 
-    rinfo: RequestInfo = None
-
-    @injector.construct
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -33,7 +30,8 @@ class PipemanLogger(ImprovedLogger):
             self._add_logging_extras(kwargs["extra"])
         super()._log(*args, **kwargs)
 
-    def _add_logging_extras(self, extras):
+    @injector.inject
+    def _add_logging_extras(self, extras, rinfo: RequestInfo = None):
         """Extend extras by adding the request info."""
         extras["remote_ip"] = self.rinfo.remote_ip() or ""
         extras["proxy_ip"] = self.rinfo.proxy_ip() or ""
