@@ -168,7 +168,7 @@ class DatabaseUserController:
 
     def _build_action_list(self, user, short_mode: bool = True):
         actions = ActionList()
-        kwargs = {'username': user.username}
+        kwargs = {'user_id': user.id}
         if short_mode:
             actions.add_action('pipeman.general.view', 'users.view_user', **kwargs)
         if flask_login.current_user.has_permission("auth_db.edit_users"):
@@ -305,16 +305,16 @@ class DatabaseUserController:
         session.add(user)
         return user
 
-    def view_user_page(self, username):
+    def view_user_page(self, user_id):
         with self.db as session:
-            user = session.query(orm.User).filter_by(username=username).first()
+            user = session.query(orm.User).filter_by(id=user_id).first()
             if not user:
                 return flask.abort(404)
             return flask.render_template("user.html", user=user, title=user.username, actions=self._build_action_list(user, False))
 
-    def edit_user_form(self, username):
+    def edit_user_form(self, user_id):
         with self.db as session:
-            user = session.query(orm.User).filter_by(username=username).first()
+            user = session.query(orm.User).filter_by(id=user_id).first()
             if not user:
                 return flask.abort(404)
             form = EditUserForm(user=user)
@@ -339,16 +339,16 @@ class DatabaseUserController:
                             self._remove_from_org(user.id, org_id, session)
                     session.commit()
                     flask.flash(gettext("auth_db.edit_user.success"), "success")
-                    return flask.redirect(flask.url_for("users.view_user", username=user.username))
+                    return flask.redirect(flask.url_for("users.view_user", user_id=user_id))
             return flask.render_template(
                 "form.html",
                 form=form,
                 title=gettext("auth_db.user_edit.title")
             )
 
-    def reset_password_form(self, username):
+    def reset_password_form(self, user_id):
         with self.db as session:
-            user = session.query(orm.User).filter_by(username=username).first()
+            user = session.query(orm.User).filter_by(id=user_id).first()
             if not user:
                 return flask.abort(404)
             form = ConfirmationForm()
@@ -356,7 +356,7 @@ class DatabaseUserController:
                 new_password = self._reset_password(user)
                 session.commit()
                 flask.flash(gettext("auth_db.reset_password.success") + f" {new_password}", "success")
-                return flask.redirect(flask.url_for("users.view_user", username=username))
+                return flask.redirect(flask.url_for("users.view_user", user_id=user_id))
             return flask.render_template("form.html", form=form, title=gettext("auth_db.user_reset_password.title"), instructions=gettext("auth_db.reset_password.instructions"))
 
     def set_password_cli(self, username, password):

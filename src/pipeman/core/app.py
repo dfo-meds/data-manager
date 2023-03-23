@@ -86,7 +86,7 @@ def _get_container(parent_id, parent_type, dcon, econ):
         return flask.abort(404)
 
 
-@core.i18n_route("/objects/<obj_type>/new/<parent_type>/<parent_id>", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/new/<parent_type>/<int:parent_id>", methods=["POST", "GET"])
 @require_permission("entities.create")
 @require_permission("datasets.edit")
 @injector.inject
@@ -99,7 +99,7 @@ def create_component(obj_type, parent_id, parent_type, dcon: DatasetController =
     return econ.create_component_form(obj_type, container)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/edit/<parent_type>/<parent_id>", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/edit/<parent_type>/<int:parent_id>", methods=["POST", "GET"])
 @require_permission("entities.edit")
 @require_permission("datasets.edit")
 @injector.inject
@@ -119,7 +119,7 @@ def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetContro
     return econ.edit_component_form(entity, container)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/remove/<parent_type>/<parent_id>", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/remove/<parent_type>/<int:parent_id>", methods=["POST", "GET"])
 @require_permission("entities.remove")
 @require_permission("datasets.edit")
 @injector.inject
@@ -139,7 +139,7 @@ def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCont
     return econ.remove_component_form(entity, container)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/restore/<parent_type>/<parent_id>", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/restore/<parent_type>/<int:parent_id>", methods=["POST", "GET"])
 @require_permission("entities.restore")
 @require_permission("datasets.edit")
 @injector.inject
@@ -159,7 +159,7 @@ def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCon
     return econ.restore_component_form(entity, container)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>")
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>")
 @require_permission("entities.view")
 @injector.inject
 def view_entity(obj_type, obj_id, con: EntityController = None):
@@ -176,7 +176,7 @@ def view_entity(obj_type, obj_id, con: EntityController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/edit", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/edit", methods=["POST", "GET"])
 @require_permission("entities.edit")
 @injector.inject
 def edit_entity(obj_type, obj_id, con: EntityController = None):
@@ -193,7 +193,7 @@ def edit_entity(obj_type, obj_id, con: EntityController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/remove", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/remove", methods=["POST", "GET"])
 @require_permission("entities.remove")
 @injector.inject
 def remove_entity(obj_type, obj_id, con: EntityController = None):
@@ -210,7 +210,7 @@ def remove_entity(obj_type, obj_id, con: EntityController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/objects/<obj_type>/<obj_id>/restore", methods=["POST", "GET"])
+@core.i18n_route("/objects/<obj_type>/<int:obj_id>/restore", methods=["POST", "GET"])
 @require_permission("entities.restore")
 @injector.inject
 def restore_entity(obj_type, obj_id, con: EntityController = None):
@@ -248,7 +248,7 @@ def create_dataset(con: DatasetController = None):
     return con.create_dataset_form()
 
 
-@core.i18n_route("/datasets/<dataset_id>")
+@core.i18n_route("/datasets/<int:dataset_id>")
 @require_permission("datasets.view")
 @injector.inject
 def view_dataset(dataset_id, con: DatasetController = None):
@@ -261,7 +261,7 @@ def view_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/edit", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/edit", methods=["POST", "GET"])
 @require_permission("datasets.edit")
 @injector.inject
 def edit_dataset(dataset_id, con: DatasetController = None):
@@ -274,7 +274,7 @@ def edit_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/metadata", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/metadata", methods=["POST", "GET"])
 @require_permission("datasets.edit")
 @injector.inject
 def edit_dataset_metadata_base(dataset_id, con: DatasetController = None):
@@ -287,7 +287,7 @@ def edit_dataset_metadata_base(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/metadata/<display_group>", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/metadata/<display_group>", methods=["POST", "GET"])
 @require_permission("datasets.edit")
 @injector.inject
 def edit_dataset_metadata(dataset_id, display_group, con: DatasetController = None):
@@ -300,7 +300,7 @@ def edit_dataset_metadata(dataset_id, display_group, con: DatasetController = No
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/activate", methods=["GET", "POST"])
+@core.i18n_route("/datasets/<int:dataset_id>/activate", methods=["GET", "POST"])
 @require_permission("datasets.activate")
 @injector.inject
 def activate_dataset(dataset_id, con: DatasetController = None):
@@ -313,7 +313,7 @@ def activate_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/validate", methods=["GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/validate", methods=["GET"])
 @require_permission("datasets.view")
 @injector.inject
 def validate_dataset(dataset_id, con: DatasetController = None):
@@ -326,7 +326,7 @@ def validate_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/publish", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/publish", methods=["POST", "GET"])
 @require_permission("datasets.publish")
 @injector.inject
 def publish_dataset(dataset_id, con: DatasetController = None):
@@ -339,7 +339,7 @@ def publish_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/remove", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/remove", methods=["POST", "GET"])
 @require_permission("datasets.remove")
 @injector.inject
 def remove_dataset(dataset_id, con: DatasetController = None):
@@ -352,7 +352,7 @@ def remove_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/restore", methods=["POST", "GET"])
+@core.i18n_route("/datasets/<int:dataset_id>/restore", methods=["POST", "GET"])
 @require_permission("datasets.restore")
 @injector.inject
 def restore_dataset(dataset_id, con: DatasetController = None):
@@ -365,7 +365,7 @@ def restore_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/<revision_no>")
+@core.i18n_route("/datasets/<int:dataset_id>/<int:revision_no>")
 @require_permission("datasets.view")
 @injector.inject
 def view_dataset_revision(dataset_id, revision_no, con: DatasetController = None):
@@ -378,7 +378,7 @@ def view_dataset_revision(dataset_id, revision_no, con: DatasetController = None
         return flask.abort(404)
 
 
-@core.i18n_route("/datasets/<dataset_id>/<revision_no>/<profile_name>/<format_name>")
+@core.i18n_route("/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>")
 @require_permission("datasets.view")
 @injector.inject
 def generate_metadata_format(dataset_id, revision_no, profile_name, format_name, con: DatasetController = None):
@@ -407,44 +407,50 @@ def list_workflow_history(wfc: WorkflowController = None):
     return wfc.list_workflow_items_page(False)
 
 
-@core.route("/api/action-list/<active_only>", methods=["POST", "GET"])
+@core.route("/api/action-list/<int:active_only>", methods=["POST", "GET"])
 @require_permission("action_items.view")
 @injector.inject
-def list_items_ajax(active_only: str, wfc: WorkflowController = None):
-    is_active_only = active_only == "1"
+def list_items_ajax(active_only: int, wfc: WorkflowController = None):
+    active_only = int(active_only)
+    if active_only not in (1, 0):
+        return flask.abort(404)
+    is_active_only = active_only == 1
     if is_active_only and not flask_login.current_user.has_permission("action_items.history"):
         raise flask.abort(403)
     return wfc.list_workflow_items_ajax(is_active_only)
 
 
-@core.i18n_route("/action-items/<item_id>")
+@core.i18n_route("/action-items/<int:item_id>")
 @require_permission("action_items.view")
 @injector.inject
 def view_item(item_id, wfc: WorkflowController = None):
     return wfc.view_item_page(item_id)
 
 
-@core.i18n_route("/action-items/<item_id>/approve", methods=["GET", "POST"])
+@core.i18n_route("/action-items/<int:item_id>/approve", methods=["GET", "POST"])
 @require_permission("action_items.decide")
 @injector.inject
 def approve_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, True)
 
 
-@core.i18n_route("/action-items/<item_id>/cancel", methods=["GET", "POST"])
+@core.i18n_route("/action-items/<int:item_id>/cancel", methods=["GET", "POST"])
 @require_permission("action_items.decide")
 @injector.inject
 def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
 
 
-@core.i18n_route("/api/entity-select-field/<entity_types>/<by_revision>", methods=["POST", "GET"])
+@core.i18n_route("/api/entity-select-field/<entity_types>/<int:by_revision>", methods=["POST", "GET"])
 @require_permission("_is_authenticated")
 @injector.inject
-def api_entity_select_field_list(entity_types, by_revision):
-    return EntitySelectField.results_list(entity_types.split("|"), flask.request.args.get("term"), by_revision == "1")
+def api_entity_select_field_list(entity_types, by_revision: int):
+    by_revision = int(by_revision)
+    if by_revision not in (0, 1):
+        return flask.abort(404)
+    return EntitySelectField.results_list(entity_types.split("|"), flask.request.args.get("term"), by_revision == 1)
 
-
+"""""
 @core.i18n_route("/api/pop-remote-item/<pipeline_name>")
 @require_permission("remote_items.access")
 @injector.inject
@@ -452,33 +458,33 @@ def pop_remote_item(pipeline_name, wfc: WorkflowController = None):
     return wfc.pop_remote_pipeline(pipeline_name)
 
 
-@core.i18n_route("/api/release-remote-item/<item_id>")
+@core.i18n_route("/api/release-remote-item/<int:item_id>")
 @require_permission("remote_items.access")
 @injector.inject
 def release_remote_item(item_id, wfc: WorkflowController = None):
     return wfc.release_remote_lock(item_id)
 
 
-@core.i18n_route("/api/renew-remote-item/<item_id>")
+@core.i18n_route("/api/renew-remote-item/<int:item_id>")
 @require_permission("remote_items.access")
 @injector.inject
 def renew_remote_item(item_id, wfc: WorkflowController = None):
     return wfc.renew_remote_lock(item_id)
 
 
-@core.i18n_route("/api/complete-remote-item/<item_id>")
+@core.i18n_route("/api/complete-remote-item/<int:item_id>")
 @require_permission("remote_items.access")
 @injector.inject
 def item_completed(item_id, wfc: WorkflowController = None):
     return wfc.remote_work_complete(item_id, True)
 
 
-@core.i18n_route("/api/cancel-remote-item/<item_id>")
+@core.i18n_route("/api/cancel-remote-item/<int:item_id>")
 @require_permission("remote_items.access")
 @injector.inject
 def item_cancelled(item_id, wfc: WorkflowController = None):
     return wfc.remote_work_complete(item_id, False)
-
+"""
 
 @core.i18n_route("/organizations")
 @require_permission("organizations.view")
@@ -494,20 +500,20 @@ def create_organization(oc: OrganizationController = None):
     return oc.create_organization_page()
 
 
-@core.i18n_route("/organizations/<org_id>")
+@core.i18n_route("/organizations/<int:org_id>")
 @require_permission("organizations.view")
 @injector.inject
 def view_organization(org_id, oc: OrganizationController = None):
     return oc.view_organization_page(org_id)
 
 
-@core.i18n_route("/organizations/<org_id>/edit", methods=['GET', 'POST'])
+@core.i18n_route("/organizations/<int:org_id>/edit", methods=['GET', 'POST'])
 @require_permission("organizations.edit")
 @injector.inject
 def edit_organization(org_id, oc: OrganizationController = None):
     return oc.edit_organization_form(org_id)
 
-
+"""""
 @core.i18n_route("/api/fire-event/<event_name>", methods=['POST'])
 @require_permission("events.fire")
 @injector.inject
@@ -536,6 +542,8 @@ def event_firing_form(event_name, wc: WorkflowController):
         return flask.abort(403)
     return wc.event_form(event_name)
 
+"""
+
 
 @core.i18n_route("/api/file-upload/<data_store_name>/<filename>", methods=['PUT'])
 @require_permission("files.upload")
@@ -548,7 +556,7 @@ def file_upload(data_store_name, filename, fc: FileController = None):
     return fc.send_file_from_handle(data_store_name, filename, flask.request.data)
 
 
-@core.i18n_route("/api/file-upload-status/<item_id>")
+@core.i18n_route("/api/file-upload-status/<int:item_id>")
 @require_permission("files.upload")
 @injector.inject
 def file_upload_status(item_id, fc: FileController = None):

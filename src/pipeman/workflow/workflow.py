@@ -475,7 +475,7 @@ class WorkflowController:
         dt = DataTable(
             table_id="action_list",
             base_query=dq,
-            ajax_route=flask.url_for("core.list_items_ajax", active_only = "1" if active_only else "0"),
+            ajax_route=flask.url_for("core.list_items_ajax", active_only=(1 if active_only else 0)),
             default_order=[("created_date", "asc")]
         )
         dt.add_column(DatabaseColumn(

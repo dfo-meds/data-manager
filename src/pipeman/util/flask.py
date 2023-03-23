@@ -438,7 +438,7 @@ class EntitySelectField(wtf.Field):
                 ajax_callback=flask.url_for(
                     "core.api_entity_select_field_list",
                     entity_types="|".join(self.entity_types),
-                    by_revision=("1" if self.by_revision else "0"),
+                    by_revision=(1 if self.by_revision else 0),
                     _external=True
                 ),
                 allow_multiple=self.allow_multiple,
