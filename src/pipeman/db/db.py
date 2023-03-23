@@ -70,6 +70,7 @@ class Database:
         self.log_safe.omit_extras()
         self.log_safe.info(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
         self._unclean_warned_once = False
+        self._closing_warned_once = False
 
     def _create_connection(self):
         if self.engine is None:
@@ -111,6 +112,7 @@ class Database:
         If there is an error, the transaction is rolled back, otherwise it is committed. The
         session is closed once the transaction stack is empty.
         """
+        r = False
         if self._transaction_stack:
             if exc_type:
                 self._transaction_stack[-1].rollback()
@@ -118,16 +120,24 @@ class Database:
                 self._transaction_stack[-1].commit()
             del self._transaction_stack[-1]
         else:
-            self.log_safe.exception("Transaction stack empty when it shouldn't be!")
+            if not self._closing_warned_once:
+                r = True
+                self.log_safe.exception("Transaction stack empty when it shouldn't be!")
         if not self._transaction_stack:
             if self._session:
                 self._session.close()
                 self._session = None
             else:
-                self.log_safe.exception("Session empty when it shouldn't be!")
+                if not self._closing_warned_once:
+                    r = True
+                    self.log_safe.exception("Session empty when it shouldn't be!")
             if self._is_closed:
-                self.log_safe.warning("Closing engine because this should be closed and might not be properly closed later")
+                if not self._closing_warned_once:
+                    r = True
+                    self.log_safe.warning("Closing engine because this should be closed and might not be properly closed later")
                 self.close()
+        if r:
+            self._closing_warned_once = True
 
     def __cleanup__(self):
         self.close()
