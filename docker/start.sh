@@ -26,4 +26,4 @@ fi
 
 # Start Gunicorn
 #exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
-python -m flask run
+python -m flask run --host="0.0.0.0" --port=80
