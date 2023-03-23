@@ -35,16 +35,13 @@ def init(db_only=False, extra_files=None):
                 config.register_file(cfg_file)
 
     from pipeman.util.system import System
-    from pipeman.auth import init as auth_init
-    from pipeman.core import init as core_init
-    from pipeman.i18n import init as i18n_init
 
     @injector.inject
     def _do_init(system: System = None):
         if not db_only:
-            i18n_init(system)
-            auth_init(system)
-            core_init(system)
+            system.pre_load("pipeman.i18n.init")
+            system.pre_load("pipeman.auth.init")
+            system.pre_load("pipeman.core.init")
             system.init()
         return system
 

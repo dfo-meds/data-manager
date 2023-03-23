@@ -163,7 +163,7 @@ class AnonymousUser(fl.AnonymousUserMixin):
         return None
 
 
-@injector.injectable
+@injector.injectable_global
 class AuthenticationManager:
     """This class is designed to provide authentication services to the application.
 

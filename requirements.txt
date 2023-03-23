@@ -1,10 +1,10 @@
 alembic
-autoinject
+autoinject>=1.1.0
 azure-core
 azure-storage-blob
 click
 flask
-flask-autoinject
+flask-autoinject>=1.1.0
 flask-login
 flask-wtf
 markupsafe
@@ -14,7 +14,7 @@ requests
 sqlalchemy
 toml
 universalio
-zirconium
+zirconium>=1.1.0
 zrlog
 psycopg2
 gunicorn

@@ -3,6 +3,8 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import zirconium as zr
 from autoinject import injector
+import logging
+import traceback
 
 from .orm import Base
 
@@ -62,9 +64,18 @@ class Database:
         self.engine = None
         self._session = None
         self._transaction_stack = []
+        self._is_closed = False
+        klass = logging.getLoggerClass()
+        logging.setLoggerClass(logging.Logger)
+        self.log = logging.getLogger("pipeman.db.db")
+        logging.setLoggerClass(klass)
+        self._unclean_warned_once = False
 
     def _create_connection(self):
         if self.engine is None:
+            if self._is_closed and not self._unclean_warned_once:
+                self.log.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
+                self._unclean_warned_once = True
             # Create the engine from the connection string
             self.engine = sa.engine_from_config(self.config["database"], prefix="")
 
@@ -107,6 +118,10 @@ class Database:
         if not self._transaction_stack:
             self._session.close()
             self._session = None
+
+    def __cleanup__(self):
+        self.close()
+        self._is_closed = True
 
     def close(self):
         while self._transaction_stack:

@@ -534,10 +534,8 @@ class ChangePasswordForm(FlaskForm):
 
 class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
 
-    db: Database = None
     sh: SecurityHelper = None
     cfg: zr.ApplicationConfig = None
-    rinfo: RequestInfo = None
 
     @injector.construct
     def __init__(self, form_template_name: str = "form.html"):
@@ -547,14 +545,15 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
         self._max_failed_login_window = self.cfg.as_int(("pipeman", "auth_db", "failed_login_window_hours"), 24)
         self._lockout_time = self.cfg.as_int(("pipeman", "auth_db", "failed_login_lockout_time"), 24)
 
-    def load_user(self, username):
-        with self.db as session:
+    @injector.inject
+    def load_user(self, username, db: Database = None):
+        with db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if user:
                 return self._build_user(user, session)
         return None
 
-    def _record_login_attempt(self, username, from_api, error_message=None, is_lockable_error: bool = None, create_record: bool = True):
+    def _record_login_attempt(self, username, from_api, error_message=None, is_lockable_error: bool = None, create_record: bool = True, session=None):
         if error_message:
             if is_lockable_error is None:
                 is_lockable_error = True
@@ -563,28 +562,39 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             is_lockable_error = False
             self.log.out(f"successful login attempt {username}, {'yes' if from_api else 'no'}")
         if create_record:
-            self._create_login_record(username, from_api, error_message, is_lockable_error)
+            self._create_login_record(username, from_api, error_message, is_lockable_error, session=session)
 
-    def _create_login_record(self, username, from_api, error_message, is_lockable_error):
-        with self.db as session:
-            user = session.query(orm.User).filter_by(username=username).first()
-            if not error_message:
-                self._clear_login_records(username, session)
-                self._update_user_login_properties(user, session)
-            ulr = orm.UserLoginRecord(
-                username=username or None,
-                attempt_time=datetime.datetime.now(),
-                was_since_last_clear=True,
-                lockable=is_lockable_error,
-                was_success=not error_message,
-                error_message=error_message or None,
-                from_api=from_api,
-                remote_ip=self.rinfo.remote_ip()
-            )
-            session.add(ulr)
-            session.commit()
-            if error_message and user:
-                self._check_for_suspicious_activity(user, session)
+    def _create_login_record(self, *args, session=None, **kwargs):
+        if session is None:
+            self._create_login_record_no_session(*args, **kwargs)
+        else:
+            self._create_login_record_with_session(*args, **kwargs, session=session)
+
+    @injector.inject
+    def _create_login_record_no_session(self, *args, db: Database = None, **kwargs):
+        with db as session:
+            self._create_login_record_with_session(*args, **kwargs, session=session)
+
+    @injector.inject
+    def _create_login_record_with_session(self, username, from_api, error_message, is_lockable_error, session, rinfo: RequestInfo = None):
+        user = session.query(orm.User).filter_by(username=username).first()
+        if not error_message:
+            self._clear_login_records(username, session)
+            self._update_user_login_properties(user, session)
+        ulr = orm.UserLoginRecord(
+            username=username or None,
+            attempt_time=datetime.datetime.now(),
+            was_since_last_clear=True,
+            lockable=is_lockable_error,
+            was_success=not error_message,
+            error_message=error_message or None,
+            from_api=from_api,
+            remote_ip=rinfo.remote_ip()
+        )
+        session.add(ulr)
+        session.commit()
+        if error_message and user:
+            self._check_for_suspicious_activity(user, session)
 
     def _check_for_suspicious_activity(self, user, session):
         if self._max_failed_logins > 0 and self._max_failed_login_window > 0 and self._lockout_time > 0:
@@ -620,8 +630,9 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             return None
         return user
 
-    def attempt_login(self, username, password, from_api: bool = False):
-        with self.db as session:
+    @injector.inject
+    def attempt_login(self, username, password, from_api: bool = False, db: Database = None):
+        with db as session:
             user = self._get_valid_user(username, from_api, session)
             if user is None:
                 return None
@@ -666,28 +677,29 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             self._record_login_attempt("", True, "invalid utf-8 encoding for basic auth", False, False)
         return None
 
-    def _bearer_auth(self, auth_header):
+    @injector.inject
+    def _bearer_auth(self, auth_header, db: Database = None):
         prefix, key, username = self.sh.parse_auth_header(auth_header)
         if prefix is None:
             self._record_login_attempt("", True, "invalid bearer auth format", False, False)
             return None
-        with self.db as session:
+        with db as session:
             user = self._get_valid_user(username, True, session)
             if user is None:
                 return None
             key = session.query(orm.APIKey).filter_by(user_id=user.id, prefix=prefix).first()
             if not key:
-                self._record_login_attempt(username, True, "no such API key")
+                self._record_login_attempt(username, True, "no such API key", session=session)
                 return None
             if not key.is_active:
-                self._record_login_attempt(username, True, "inactive API key")
+                self._record_login_attempt(username, True, "inactive API key", session=session)
                 return None
             gate_date = datetime.datetime.now()
             error = "expired api key"
             if key.expiry > gate_date:
                 error = "invalid api token"
                 if self.sh.check_secret(auth_header, key.key_salt, key.key_hash):
-                    self._record_login_attempt(username, True)
+                    self._record_login_attempt(username, True, session=session)
                     if self.sh.is_hash_outdated(auth_header, key.key_salt, key.key_hash):
                         key.key_hash = self.sh.hash_secret(auth_header, key.key_salt)
                         session.commit()
@@ -695,12 +707,12 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             if key.old_expiry > gate_date:
                 error = "invalid api token"
                 if self.sh.check_secret(auth_header, key.old_key_salt, key.old_key_hash):
-                    self._record_login_attempt(username, True)
+                    self._record_login_attempt(username, True, session=session)
                     if self.sh.is_hash_outdated(auth_header, key.old_key_salt, key.old_key_hash):
                         key.old_key_hash = self.sh.hash_secret(auth_header, key.old_key_salt)
                         session.commit()
                     return self._build_user(user, session)
-            self._record_login_attempt(username, True, error)
+            self._record_login_attempt(username, True, error, session=session)
         return None
 
     def _update_user_login_properties(self, user, session):

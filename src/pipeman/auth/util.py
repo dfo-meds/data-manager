@@ -1,11 +1,11 @@
 """Utility functions for managing groups"""
-from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.util import UserInputError
 import logging
 import json
 from pipeman.i18n import MultiLanguageString
+from autoinject import injector
 
 
 @injector.inject

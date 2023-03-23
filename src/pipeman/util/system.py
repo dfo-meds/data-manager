@@ -11,6 +11,7 @@ from pipeman.i18n import gettext
 import pathlib
 from flask import session, render_template
 from flask_wtf.csrf import CSRFProtect
+import flask_autoinject
 from pipeman.util.flask import self_url
 from werkzeug.routing import Rule
 import typing as t
@@ -18,6 +19,7 @@ import datetime
 from pipeman.util.logging import PipemanLogger
 from pipeman.util.errors import PipemanConfigurationError
 from pipeman.util.flask import CSPRegistry, csp_nonce, csp_allow
+from autoinject.informants import NamedContextInformant
 
 
 class CustomRule(Rule):
@@ -86,7 +88,7 @@ def load_object(obj_name: str) -> t.Any:
     return getattr(mod, specific_cls_name)
 
 
-@injector.injectable
+@injector.injectable_global
 class System:
     """Core management of plugins and configuration."""
 
@@ -100,6 +102,7 @@ class System:
         self._load_init = []
         self._flask_init_cb = []
         self._setup_cb = []
+        self._pre_init = []
         self._cli_init_cb = []
         self._flask_blueprints = []
         self._click_groups = []
@@ -109,14 +112,23 @@ class System:
         self.user_timeout = 0
         self.i18n_locale_dirs = []
         self._log = None
+        self._nci = None
 
     def init(self):
         """Initialize the application for the first time."""
+        # Setup a named context to manage the setup vs request workflows
+        self._nci = NamedContextInformant("pipeman_stage")
+        self._nci.switch_context("init")
+        injector.register_informant(self._nci)
         # Setup logging
         zrlog.init_logging()
         logging.setLoggerClass(PipemanLogger)
         self._log = logging.getLogger("pipeman.system")
         self._log.out("Initializing system")
+        # Pre-init functions
+        for obj_name in self._pre_init:
+            obj = load_object(obj_name)
+            obj(self)
         # Include plugins
         self._init_plugins()
         # Manage overrides
@@ -127,6 +139,7 @@ class System:
             str(root),
             str(pathlib.Path(".").absolute() / "templates"),
         ])
+        # Call the init callbacks
         for fn in self._load_init:
             fn()
         self._log.out("Init complete")
@@ -142,6 +155,10 @@ class System:
     def register_init_cli(self, init_cli_cb: callable):
         """Register a function to call when init_cli() is called."""
         self._cli_init_cb.append(init_cli_cb)
+
+    def pre_load(self, load_cb: str):
+        """Register a function to call at the start of init()."""
+        self._pre_init.append(load_cb)
 
     def on_load(self, load_cb: callable):
         """Register a function to call when init() is done."""
@@ -185,7 +202,7 @@ class System:
 
     def init_app(self, app: flask.Flask):
         """Initialize a Flask application."""
-
+        flask_autoinject.init_app(app)
         # Set the URL Rule class to our custom one
         app.url_rule_class = CustomRule
 
@@ -227,12 +244,6 @@ class System:
         def add_response_headers(response, cspr: CSPRegistry = None):
             return cspr.add_headers(response)
 
-        # After the request, make sure the DB was removed
-        @app.teardown_request
-        def kill_db_session(exc: Exception):
-            db = injector.get("pipeman.db.db.Database")
-            db.close()
-
         # Add the menu items and self_url() function to every template
         @app.context_processor
         def add_menu_item():
@@ -254,6 +265,10 @@ class System:
         @app.route("/")
         def splash():
             return render_template("splash.html")
+
+        # We want to kill the init context here so that we can save on resources
+        self._nci.switch_context("flask_app")
+        self._nci.destroy("init")
 
         return app
 
