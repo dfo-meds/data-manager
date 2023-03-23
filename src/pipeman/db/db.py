@@ -120,8 +120,14 @@ class Database:
         else:
             self.log_safe.exception("Transaction stack empty when it shouldn't be!")
         if not self._transaction_stack:
-            self._session.close()
-            self._session = None
+            if self._session:
+                self._session.close()
+                self._session = None
+            else:
+                self.log_safe.exception("Session empty when it shouldn't be!")
+            if self._is_closed:
+                self.log_safe.warning("Closing engine because this should be closed and might not be properly closed later")
+                self.close()
 
     def __cleanup__(self):
         self.close()
