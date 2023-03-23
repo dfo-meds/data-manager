@@ -65,15 +65,17 @@ class Database:
         self._session = None
         self._transaction_stack = []
         self._is_closed = False
-        self.log = logging.getLogger("pipeman.safe_out")
-        self.log.info(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
+        self.log = logging.getLogger("pipeman.db")
+        self.log_safe = logging.getLogger("pipeman.db.safe")
+        self.log_safe.omit_extras()
+        self.log_safe.info(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
         self._unclean_warned_once = False
 
     def _create_connection(self):
         if self.engine is None:
             if self._is_closed and not self._unclean_warned_once:
-                self.log.info(f"Recreating connection DB out of context {injector.context_manager._get_context_hash()}")
-                self.log.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
+                self.log_safe.info(f"Recreating connection DB out of context {injector.context_manager._get_context_hash()}")
+                self.log_safe.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
                 self._unclean_warned_once = True
             # Create the engine from the connection string
             self.engine = sa.engine_from_config(self.config["database"], prefix="")
@@ -109,11 +111,14 @@ class Database:
         If there is an error, the transaction is rolled back, otherwise it is committed. The
         session is closed once the transaction stack is empty.
         """
-        if exc_type:
-            self._transaction_stack[-1].rollback()
+        if self._transaction_stack:
+            if exc_type:
+                self._transaction_stack[-1].rollback()
+            else:
+                self._transaction_stack[-1].commit()
+            del self._transaction_stack[-1]
         else:
-            self._transaction_stack[-1].commit()
-        del self._transaction_stack[-1]
+            self.log_safe.exception("Transaction stack empty when it shouldn't be!")
         if not self._transaction_stack:
             self._session.close()
             self._session = None

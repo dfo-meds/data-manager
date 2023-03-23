@@ -19,6 +19,10 @@ class PipemanLogger(ImprovedLogger):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._no_extras = False
+
+    def omit_extras(self):
+        self._no_extras = True
 
     def _log(self, *args, **kwargs):
         """Override _log()."""
@@ -30,8 +34,25 @@ class PipemanLogger(ImprovedLogger):
             self._add_logging_extras(kwargs["extra"])
         super()._log(*args, **kwargs)
 
+    def _add_logging_extras(self, extras):
+        if self._no_extras:
+            extras["remote_ip"] = ""
+            extras["proxy_ip"] = ""
+            extras["correlation_id"] = ""
+            extras["client_id"] = ""
+            extras["request_url"] = ""
+            extras["user_agent"] = ""
+            extras["username"] = ""
+            extras["referrer"] = ""
+            extras["sys_username"] = ""
+            extras["sys_emulated"] = ""
+            extras["sys_logon"] = ""
+            extras["sys_remote"] = ""
+        else:
+            self._add_logging_extras_from_rinfo(extras)
+
     @injector.inject
-    def _add_logging_extras(self, extras, rinfo: RequestInfo = None):
+    def _add_logging_extras_from_rinfo(self, extras, rinfo: RequestInfo = None):
         """Extend extras by adding the request info."""
         extras["remote_ip"] = rinfo.remote_ip() or ""
         extras["proxy_ip"] = rinfo.proxy_ip() or ""
