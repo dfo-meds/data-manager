@@ -62,47 +62,57 @@
     {{ iso.render_date(date['type']['short_name'], date['date']) }}
   </mdb:dateInfo>
   {% endfor %}
+  {% if dataset['metadata_standards'] %}
   {% for standard in dataset['metadata_standards'] %}
   <mdb:metadataStandard>
     {{ iso.render_citation(standard) }}
   </mdb:metadataStandard>
   {% endfor %}
+  {% endif %}
+  {% if dataset['metadata_profiles'] %}
   {% for profile in dataset['metadata_profiles'] %}
   <mdb:metadataProfile>
     {{ iso.render_citation(profile) }}
   </mdb:metadataProfile>
   {% endfor %}
+  {% endif %}
+  {% if dataset['alt_metadata'] %}
   {% for alt_md in dataset['alt_metadata'] %}
   <mdb:alternativeMetadataReference>
     {{ iso.render_citation(alt_md) }}
   </mdb:alternativeMetadataReference>
   {% endfor %}
+  {% endif %}
+  {% if dataset['other_locales'] %}
   {% for locale in dataset['other_locales'] %}
   <mdb:otherLocale>
         {{iso.render_locale(locale, True)}}
   </mdb:otherLocale>
   {% endfor %}
+  {% endif %}
+  {% if dataset['canon_urls'] %}
   {% for meta_url in dataset['canon_urls'] %}
   <mdb:metadataLinkage>
     {{ iso.render_resource(meta_url) }}
   </mdb:metadataLinkage>
   {% endfor %}
+  {% endif %}
   {# <!-- spatialRepresentationInfo --> #}
-    {% if dataset['horizontal_ref_system'] %}
+  {% if dataset['horizontal_ref_system'] %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
   </mdb:referenceSystemInfo>
-    {% endif %}
-    {% if dataset['vertical_ref_system'] %}
+  {% endif %}
+  {% if dataset['vertical_ref_system'] %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['vertical_ref_system'])}}
   </mdb:referenceSystemInfo>
-    {% endif %}
-    {% if dataset['temporal_ref_system'] %}
+  {% endif %}
+  {% if dataset['temporal_ref_system'] %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['temporal_ref_system'])}}
   </mdb:referenceSystemInfo>
-    {% endif %}
+  {% endif %}
   {# <!-- metadataExtensionInfo --> #}
   <mdb:identificationInfo>
     <mri:MD_DataIdentification>
@@ -137,16 +147,20 @@
       </mri:spatialRepresentationType>
       {% endfor %}
       {% endif %}
+      {% if dataset['spatial_resolution'] %}
       {% for sr in dataset['spatial_resolution'] %}
       <mri:spatialResolution>
         {{ iso.render_spatial_res(sr) }}
       </mri:spatialResolution>
       {% endfor %}
+      {% endif %}
+      {% if dataset['temporal_resolution'] %}
       {% for tr in dataset['temporal_resolution'] %}
       <mri:temporalResolution>
         {{ iso.render_temporal_res(tr) }}
       </mri:temporalResolution>
       {% endfor %}
+      {% endif %}
       {% if dataset['topic_category'] %}
       {% for tc in dataset['topic_category'] %}
       <mri:topicCategory>
@@ -205,24 +219,32 @@
           {% endif %}
         </gex:EX_Extent>
       </mri:extent>
+      {% if dataset['additional_docs'] %}
       {% for doc in dataset['additional_docs'] %}
       <mri:additionalDocumentation>
         {{ iso.render_citation(doc) }}
       </mri:additionalDocumentation>
       {% endfor %}
+      {% endif %}
       {% if dataset['processing_code'] %}
       <mri:processingLevel>
         {{ iso.render_id(dataset['processing_code'], dataset['processing_desc'], dataset['processing_system']) }}
       </mri:processingLevel>
       {% endif %}
       <mri:resourceMaintenance>
+        {% if dataset['resource_maintenance_frequency'] %}
         {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency']['short_name'], dataset_maintenance) }}
+        {% else %}
+        {{ iso.render_maintenance_info("", dataset_maintenance) }}
+        {% endif %}
       </mri:resourceMaintenance>
+      {% if dataset['graphics'] %}
       {% for graphic in dataset['graphics'] %}
       <mri:graphicOverview>
         {{ iso.render_graphic(graphic) }}
       </mri:graphicOverview>
       {% endfor %}
+      {% endif %}
       {# <!-- resourceFormat --> #}
       {% if grouped_keywords %}
         {% for key in grouped_keywords %}
@@ -246,11 +268,11 @@
       </mri:defaultLocale>
       {% endif %}
       {% if dataset['dataset_other_locales'] %}
+      {% for locale in dataset['dataset_other_locales'] %}
       <mri:otherLocale>
-        {% for locale in dataset['dataset_other_locales'] %}
         {{iso.render_locale(locale)}}
-        {% endfor %}
       </mri:otherLocale>
+      {% endfor %}
       {% endif %}
       {% if dataset['environment_desc'] %}
       <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
@@ -261,11 +283,13 @@
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
   {# <!-- contentInfo --> #}
+  {% if dataset['distributors'] %}
+  {% for dc in dataset['distributors'] %}
   <mdb:distributionInfo>
-    {% for dc in dataset['distributors'] %}
       {{ iso.render_distribution(dc) }}
-    {% endfor %}
   </mdb:distributionInfo>
+  {% endfor %}
+  {% endif %}
   {# <!-- dataQualityInfo --> #}
   {# <!-- resourceLineage --> #}
   {# <!-- portrayalCatalogueInfo --> #}
@@ -278,7 +302,11 @@
   {% endif %}
   {# <!-- applicationSchemaInfo --> #}
   <mdb:metadataMaintenance>
-    {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency']['short_name'], metadata_maintenance) }}
+      {% if dataset['metadata_maintenance_frequency'] %}
+      {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency']['short_name'], metadata_maintenance) }}
+      {% else %}
+      {{ iso.render_maintenance_info("", metadata_maintenance) }}
+      {% endif %}
   </mdb:metadataMaintenance>
   {# <!-- acquisitionInfo --> #}
 </mdb:MD_Metadata>

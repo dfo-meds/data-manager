@@ -11,6 +11,7 @@ from pipeman.org import OrganizationController
 from pipeman.files import FileController
 from pipeman.i18n import gettext
 from pipeman.util.flask import EntitySelectField, MultiLanguageBlueprint
+import logging
 
 core = MultiLanguageBlueprint("core", __name__)
 
@@ -388,7 +389,31 @@ def generate_metadata_format(dataset_id, revision_no, profile_name, format_name,
         dataset = con.load_dataset(dataset_id, revision_no)
         if not con.has_access(dataset, "view"):
             return flask.abort(403)
-        return con.generate_metadata_file(dataset, profile_name, format_name)
+        try:
+            return con.generate_metadata_file(dataset, profile_name, format_name)
+        except Exception as ex:
+            logging.getLogger("pipeman").exception(ex)
+            flask.flash(str(gettext("pipeman.metadata.generation_error")), 'error')
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset_id))
+    except DatasetNotFoundError:
+        return flask.abort(404)
+
+
+@core.i18n_route("/api/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>")
+@require_permission("datasets.view")
+@injector.inject
+def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_name, con: DatasetController = None):
+    try:
+        if not con.metadata_format_exists(profile_name, format_name):
+            return flask.abort(404)
+        dataset = con.load_dataset(dataset_id, revision_no)
+        if not con.has_access(dataset, "view"):
+            return flask.abort(403)
+        try:
+            return con.generate_metadata_file(dataset, profile_name, format_name)
+        except Exception as ex:
+            logging.getLogger("pipeman").exception(ex)
+            return {'error': ''}, 500
     except DatasetNotFoundError:
         return flask.abort(404)
 

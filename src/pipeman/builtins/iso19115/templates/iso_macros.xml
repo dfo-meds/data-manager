@@ -227,9 +227,11 @@
     <lan:CountryCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml" codeListValue="{{locale['country']}}" />
   </lan:country>
   {% endif %}
+  {% if locale['encoding'] %}
   <lan:characterEncoding>
     <lan:MD_CharacterSetCode codeList="http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml" codeListValue="{{locale['encoding']['short_name']}}" />
   </lan:characterEncoding>
+  {% endif %}
 {% endmacro %}
 {% macro render_distribution(dc) %}
   <mrd:MD_Distribution>
