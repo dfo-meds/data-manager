@@ -122,7 +122,7 @@ class Database:
         else:
             if not self._closing_warned_once:
                 r = True
-                self.log_safe.exception("Transaction stack empty when it shouldn't be!")
+                self.log_safe.error("Transaction stack empty when it shouldn't be!")
         if not self._transaction_stack:
             if self._session:
                 self._session.close()
@@ -130,7 +130,7 @@ class Database:
             else:
                 if not self._closing_warned_once:
                     r = True
-                    self.log_safe.exception("Session empty when it shouldn't be!")
+                    self.log_safe.error("Session empty when it shouldn't be!")
             if self._is_closed:
                 if not self._closing_warned_once:
                     r = True

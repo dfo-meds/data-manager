@@ -4,6 +4,7 @@ import json
 import multiprocessing
 import os
 
+"""""
 workers_per_core_str = os.getenv("WORKERS_PER_CORE", "2")
 web_concurrency_str = os.getenv("WEB_CONCURRENCY", None)
 worker_class = os.getenv("WORKER_CLASS", "gevent")
@@ -33,28 +34,32 @@ else:
 # Errors in the threaded workers we wil lhave to fix later
 web_concurrency = 1
 worker_class = "sync"
-
+"""
 # Gunicorn config variables
-loglevel = use_loglevel
-bind = use_bind
-keepalive = 120
+loglevel = "info"
+bind = "0.0.0.0:80"
+#keepalive = 120
 errorlog = "-"
 #accesslog = "-"
-keepalive = 15
+#keepalive = 15
+web_concurrency = 1
+workers = 1
+worker_class = "sync"
+
 
 # For debugging and testing
 log_data = {
     "loglevel": loglevel,
     "workers": web_concurrency,
     "worker_class": worker_class,
-    "worker_connections": worker_connections,
-    "max_requests": max_requests,
-    "max_requests_jitter": max_requests_jitter,
-    "keepalive": keepalive,
+#    "worker_connections": worker_connections,
+#    "max_requests": max_requests,
+#    "max_requests_jitter": max_requests_jitter,
+#    "keepalive": keepalive,
     "bind": bind,
     # Additional, non-gunicorn variables
-    "workers_per_core": workers_per_core,
-    "host": host,
-    "port": port,
+#    "workers_per_core": workers_per_core,
+#    "host": host,
+#    "port": port,
 }
 print(json.dumps(log_data))
