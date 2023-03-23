@@ -30,6 +30,9 @@ if web_concurrency_str:
 else:
     web_concurrency = int(default_web_concurrency)
 
+# Errors in the threaded workers we wil lhave to fix later
+worker_class = "sync"
+
 # Gunicorn config variables
 loglevel = use_loglevel
 bind = use_bind
