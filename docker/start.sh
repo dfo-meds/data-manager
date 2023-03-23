@@ -25,4 +25,4 @@ else
 fi
 
 # Start Gunicorn
-exec gunicorn --chdir /srv/metadb -k gevent -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
+exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
