@@ -31,7 +31,7 @@ else:
     web_concurrency = int(default_web_concurrency)
 
 # Errors in the threaded workers we wil lhave to fix later
-workers = 1
+web_concurrency = 1
 worker_class = "sync"
 
 # Gunicorn config variables
