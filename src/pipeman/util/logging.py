@@ -19,7 +19,7 @@ class PipemanLogger(ImprovedLogger):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._no_extras = False
+        self._no_extras = True
 
     def omit_extras(self):
         self._no_extras = True
