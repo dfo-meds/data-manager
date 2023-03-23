@@ -16,6 +16,3 @@ toml
 universalio
 zirconium>=1.1.0
 zrlog
-psycopg2
-gunicorn
-gunicorn[gevent]

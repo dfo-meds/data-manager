@@ -1,2 +1,3 @@
 gunicorn
 gunicorn[gevent]
+psycopg2
