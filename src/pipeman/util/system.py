@@ -172,6 +172,8 @@ class System:
 
     def register_blueprint(self, module: str, blueprint_name: str, prefix: str = ""):
         """Register a blueprint to add to the main Flask application."""
+        if prefix and not prefix.startswith("/"):
+            prefix = f"/{prefix}"
         self._flask_blueprints.append((module, blueprint_name, prefix))
 
     def register_cli(self, module: str, group_name: str, register_as: str = None):
@@ -226,11 +228,16 @@ class System:
         for cb in self._flask_init_cb:
             cb(app)
 
+        universal_prefix = self.config.get(("pipeman", "base_path"), default="")
+        if universal_prefix:
+            if not universal_prefix.startswith("/"):
+                universal_prefix = f"/{universal_prefix}"
+
         # Load all of the blueprints registered by plugins
         for bp_mod, bp_obj, prefix in self._flask_blueprints:
             mod = importlib.import_module(bp_mod)
             bp = getattr(mod, bp_obj)
-            app.register_blueprint(bp, url_prefix=prefix)
+            app.register_blueprint(bp, url_prefix=f"{universal_prefix}{prefix}")
 
         # Before request, make sure the session is permanent
         @app.before_request
@@ -257,15 +264,19 @@ class System:
                 items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])
             return items
 
+        basebp = flask.Blueprint("base", __name__)
+
         # Main home page for logged in users (the welcome page)
-        @app.route("/h")
+        @basebp.route("/h")
         def home():
             return render_template("welcome.html", title=gettext("pipeman.welcome.title"))
 
         # The splash page welcomes new users
-        @app.route("/")
+        @basebp.route("/")
         def splash():
             return render_template("splash.html")
+
+        app.register_blueprint(basebp, url_prefix=universal_prefix)
 
         # We want to kill the init context here so that we can save on resources
         self._nci.switch_context("flask_app")

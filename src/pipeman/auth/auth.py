@@ -174,9 +174,9 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
-        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="home")
-        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="home")
-        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="home")
+        self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="base.home")
+        self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="base.home")
+        self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="base.home")
         self.not_logged_in_route = self.config.as_str(("pipeman", "authentication", "login_required"), default="auth.login")
 
     def login_handler(self):
