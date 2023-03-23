@@ -21,6 +21,8 @@ ENV VARIABLE_NAME=app
 ENV APP_MODULE=app:app
 ENV GUNICORN_CONF=/srv/metadb/gunicorn_conf.py
 
+RUN pip install --upgrade pip
+
 COPY requirements-docker.txt requirements-docker.txt
 
 RUN pip install -r requirements-docker.txt
