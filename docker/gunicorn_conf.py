@@ -19,6 +19,8 @@ if bind_env:
 else:
     use_bind = "{host}:{port}".format(host=host, port=port)
 
+enable_stdio_inheritance=True
+
 cores = multiprocessing.cpu_count()
 workers_per_core = float(workers_per_core_str)
 default_web_concurrency = (workers_per_core * cores) + 1
@@ -33,7 +35,7 @@ loglevel = use_loglevel
 bind = use_bind
 keepalive = 120
 errorlog = "-"
-accesslog = "-"
+#accesslog = "-"
 keepalive = 15
 
 # For debugging and testing

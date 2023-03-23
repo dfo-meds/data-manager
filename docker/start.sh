@@ -1,6 +1,9 @@
 #! /usr/bin/env sh
 set -e
 
+PYTHONBUFFERED=TRUE
+export PYTHONUNBUFFERED
+
 cd /srv/metadb/app || exit
 
 python -m alembic upgrade head
