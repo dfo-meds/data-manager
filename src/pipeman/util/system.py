@@ -237,6 +237,7 @@ class System:
         def make_session_permanent():
             session.permanent = True
             session.modified = True
+            logging.getLogger("pipeman").info(f"Request context: {injector.context_manager._get_context_hash()}")
 
         # After the request, perform a few clean-up tasks
         @app.after_request
