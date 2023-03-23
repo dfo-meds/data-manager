@@ -184,7 +184,8 @@ class RequestInfo:
 
     def username(self):
         if self._username is None and flask.has_request_context():
-            self._username = flask_login.current_user.get_id()
+            self._username = "unknown"
+            #self._username = flask_login.current_user.get_id()
         return self._username
 
     def referrer(self):
