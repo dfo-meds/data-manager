@@ -23,7 +23,6 @@ class HtmlList:
         self.items = items
 
     def __str__(self):
-        print(self.items)
         h = '<ul>'
         h += ''.join(f'<li>{item}</li>' for item in self.items if item)
         h += '</ul>'

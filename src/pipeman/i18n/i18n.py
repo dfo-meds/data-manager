@@ -139,6 +139,4 @@ class MultiLanguageLink(MultiLanguageString):
     def render(self, **kwargs):
         text = super().render(**kwargs)
         target = "" if not self.new_tab else " target='_blank'"
-        print(text)
-        print(markupsafe.escape(text))
         return markupsafe.Markup(f'<a href="{self.link}"{target}>{markupsafe.escape(text)}</a>')
