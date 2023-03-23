@@ -13,7 +13,7 @@ import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget, SecureBaseForm
-from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
@@ -231,14 +231,15 @@ class DatasetController:
 
     def edit_metadata_form(self, dataset, display_group):
         supported_groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
-        if not supported_groups:
-            return flask.abort(404)
-        if display_group is None:
-            display_group = supported_groups[0]
-        if not self.reg.display_group_exists(display_group):
-            return flask.abort(404)
-        if display_group not in supported_groups:
-            return flask.abort(404)
+        if supported_groups:
+            if display_group is None:
+                display_group = supported_groups[0]
+            if not self.reg.display_group_exists(display_group):
+                return flask.abort(404)
+            if display_group not in supported_groups:
+                return flask.abort(404)
+        else:
+            display_group = None
         form = DatasetMetadataForm(dataset, display_group)
         if form.handle_form():
             self.save_metadata(dataset)
@@ -649,6 +650,11 @@ class DatasetMetadataForm(SecureBaseForm):
         self.entity = entity
         self.display_group = display_group
         cntrls = self.entity.controls(display_group)
+        if not cntrls:
+            cntrls["_no_fields"] = HtmlField(
+                DelayedTranslationString("pipeman.dataset.no_fields"),
+                label=""
+            )
         cntrls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
         super().__init__(cntrls, *args, **kwargs)
         self.process()
