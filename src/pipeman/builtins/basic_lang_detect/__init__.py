@@ -18,6 +18,9 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
     @app.url_defaults
     def _add_lang_arg(endpoint, values):
         """Add the language parameter."""
+        if endpoint == 'static':
+            # Don't add to static requests, these are raw files
+            return
         lang_param = ld.detect_language(supported_languages)
         if lang_param and "lang" not in values:
             values["lang"] = markupsafe.escape(lang_param)
