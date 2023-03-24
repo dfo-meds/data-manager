@@ -4,7 +4,7 @@ from pipeman.util.system import System as _System
 from pipeman.util.flask import self_url
 from autoinject import injector as _injector
 from pipeman.i18n import LanguageDetector, TranslationManager, gettext
-import flask
+import markupsafe
 
 __all__ = ["BasicRequestLanguageDetector"]
 
@@ -19,7 +19,7 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
         """Add the language parameter."""
         lang_param = ld.detect_language(supported_languages)
         if lang_param and "lang" not in values:
-            values["lang"] = lang_param
+            values["lang"] = markupsafe.escape(lang_param)
 
     @app.context_processor
     def _add_language_links():
