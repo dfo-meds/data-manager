@@ -5,6 +5,7 @@ from pipeman.util.flask import self_url
 from autoinject import injector as _injector
 from pipeman.i18n import LanguageDetector, TranslationManager, gettext
 import markupsafe
+import flask
 
 __all__ = ["BasicRequestLanguageDetector"]
 
