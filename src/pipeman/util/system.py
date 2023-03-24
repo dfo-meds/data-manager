@@ -244,7 +244,7 @@ class System:
         def make_session_permanent():
             session.permanent = True
             session.modified = True
-            logging.getLogger("pipeman").info(f"Request context: {injector.context_manager._get_context_hash()}")
+            logging.getLogger("pipeman").trace(f"Request context: {injector.context_manager._get_context_hash()}")
 
         # After the request, perform a few clean-up tasks
         @app.after_request
@@ -260,6 +260,7 @@ class System:
                 'self_url': self_url,
                 'csp_nonce': csp_nonce,
                 'csp_allow': csp_allow,
+                'csrf_token': lambda: ''
             }
             for key in self._nav_menu:
                 items[f'nav_{key}'] = self._build_nav(self._nav_menu[key])

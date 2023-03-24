@@ -1,20 +1,17 @@
 import typing as t
 import decimal
-import uuid
-
 import wtforms as wtf
 import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString, MultiLanguageLink
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget
+from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget, NoControlCharacters
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 import flask
 import datetime
-
 
 
 class HtmlList:
@@ -185,6 +182,10 @@ class Field:
             return MultiLanguageString(txt)
         return txt
 
+    def filters(self) -> list:
+        filters = []
+        return filters
+
     def validators(self) -> list:
         validators = []
         if self.config("is_required", default=False):
@@ -201,7 +202,8 @@ class Field:
             "label": self.label(),
             "description": self.description(),
             "validators": self.validators(),
-            "default": self.default_value
+            "default": self.default_value,
+            "filters": self.filters()
         }
         args.update(self._extra_wtf_arguments())
         return args
@@ -281,6 +283,14 @@ class Field:
         if val is None:
             return ""
         return str(val)
+
+
+class NoControlMixin:
+
+    def validators(self):
+        validators = super().validators()
+        validators.append(NoControlCharacters())
+        return validators
 
 
 class LengthValidationMixin:
@@ -429,7 +439,7 @@ class DecimalField(NumberValidationMixin, Field):
         return str(val)
 
 
-class EmailField(LengthValidationMixin, Field):
+class EmailField(NoControlMixin, LengthValidationMixin, Field):
 
     DATA_TYPE = "email"
 
@@ -554,6 +564,11 @@ class ChoiceField(Field):
             return val[0]
         return val
 
+    def filters(self) -> list:
+        filts = super().filters()
+        filts.append(text_sanitize)
+        return filts
+
     def _extra_wtf_arguments(self) -> dict:
         args = {
             "choices": self.choices,
@@ -589,7 +604,7 @@ class ChoiceField(Field):
         return val
 
 
-class TextField(LengthValidationMixin, Field):
+class TextField(NoControlMixin, LengthValidationMixin, Field):
 
     DATA_TYPE = "text"
 
@@ -625,9 +640,14 @@ class MultiLineTextField(TextField):
         return wtf.TextAreaField
 
 
-class TelephoneField(Field):
+class TelephoneField(NoControlMixin, Field):
 
     DATA_TYPE = "telephone"
+
+    def filters(self) -> list:
+        filts = super().filters()
+        filts.append(text_sanitize)
+        return filts
 
     def _control_class(self) -> t.Callable:
         return wtf.TelField
@@ -649,7 +669,7 @@ class TimeField(DateField):
         return wtf.TimeField
 
 
-class URLField(LengthValidationMixin, Field):
+class URLField(NoControlMixin, LengthValidationMixin, Field):
 
     DATA_TYPE = "url"
 

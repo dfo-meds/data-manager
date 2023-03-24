@@ -1,12 +1,13 @@
 """Supporting controller and tools for form-based authentication."""
 from pipeman.auth.auth import AuthenticationManager
 import flask_login as fl
-from flask_wtf import FlaskForm
+from pipeman.util.flask import PipemanFlaskForm as FlaskForm
 import wtforms as wtf
 import wtforms.validators as wtfv
 from pipeman.i18n import DelayedTranslationString
 from pipeman.i18n import gettext
 import flask
+from pipeman.util.flask import NoControlCharacters
 
 
 class LoginForm(FlaskForm):
@@ -15,7 +16,8 @@ class LoginForm(FlaskForm):
     username = wtf.StringField(
         DelayedTranslationString("pipeman.auth_form.username"),
         validators=[
-            wtfv.InputRequired(message=DelayedTranslationString("pipeman.auth_form.missing_username"))
+            wtfv.InputRequired(message=DelayedTranslationString("pipeman.auth_form.missing_username")),
+            NoControlCharacters()
         ]
     )
     password = wtf.PasswordField(
@@ -43,6 +45,7 @@ class FormAuthenticationManager(AuthenticationManager):
         form = LoginForm()
         if form.validate_on_submit():
             user = self.attempt_login(form.username.data, form.password.data)
+            print(form.username.data)
             if user:
                 fl.login_user(user)
                 flask.flash(str(gettext("pipeman.auth_form.login_success")), "success")

@@ -1,7 +1,6 @@
 from .entity import EntityRegistry
 from autoinject import injector
 import wtforms as wtf
-from wtforms.form import BaseForm
 import flask
 from .entity import entity_access, specific_entity_access
 from pipeman.i18n import gettext, MultiLanguageString, DelayedTranslationString

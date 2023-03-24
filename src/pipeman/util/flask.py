@@ -15,6 +15,8 @@ import typing as t
 from markupsafe import Markup, escape
 from pipeman.i18n import gettext, LanguageDetector
 from pipeman.util.errors import FormValueError
+import wtforms.validators as wtfv
+
 import sqlalchemy as sa
 import flask_login
 import zirconium as zr
@@ -24,6 +26,59 @@ import shutil
 import yaml
 import secrets
 import datetime
+
+WORD_FANCY_MAP = {
+    "‘": "'",
+    "’": "'",
+    "“": '"',
+    "”": '"',
+    "«": "<<",
+    "»": ">>",
+    " ": " ",
+}
+
+CONTROL_LIST = [
+    *[chr(x) for x in range(0, 9)],
+    chr(11),
+    chr(12),
+    *[chr(x) for x in range(14, 32)],
+    chr(127)
+]
+
+
+def remove_control_chars(txt):
+    for x in CONTROL_LIST:
+        txt = txt.replace(x, "")
+    return txt
+
+
+class PipemanFlaskForm(FlaskForm):
+
+    def validate_on_submit(self, extra_validators=None):
+        if super().validate_on_submit(extra_validators):
+            return True
+        elif self.errors:
+            for key in self.errors:
+                for m in self.errors[key]:
+                    flask.flash(gettext("pipeman.entity.form_error").format(
+                        field=self._fields[key].label.text,
+                        error=m
+                    ), "error")
+        return False
+
+
+class NoControlCharacters:
+    """Ensure there are no control characters"""
+
+    def __init__(self, exceptions=None, message=None):
+        self.message = message or DelayedTranslationString("pipeman.errors.control_char_in_str")
+        self.exceptions = exceptions or []
+
+    def __call__(self, form, field, message=None):
+        txt = field.data or ''
+        for cchar in CONTROL_LIST:
+            if cchar in txt and not cchar in self.exceptions:
+                raise wtfv.ValidationError(message or self.message)
 
 
 @injector.injectable
