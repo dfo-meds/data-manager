@@ -17,7 +17,7 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
     @app.url_defaults
     def _add_lang_arg(endpoint, values):
         """Add the language parameter."""
-        lang_param = flask.request.args.get("lang", "")
+        lang_param = ld.detect_language(supported_languages)
         if lang_param and "lang" not in values:
             values["lang"] = lang_param
 
