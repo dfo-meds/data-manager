@@ -8,6 +8,8 @@ from functools import wraps
 from pipeman.i18n import gettext
 import datetime
 from urllib.parse import urlparse
+import itsdangerous
+import logging
 
 
 @injector.injectable_global
@@ -16,11 +18,16 @@ class RequestSecurity:
 
     cfg: zr.ApplicationConfig = None
 
+    FORBIDDEN = "forbid"
+    TO_SPLASH = "splash"
+    ALLOWED = "allowed"
+
     @injector.construct
     def __init__(self):
         self._allowed_hosts = self.cfg.get(("pipeman", "security", "allowed_hosts"), default=[])
         self._require_https = self.cfg.as_bool(("pipeman", "security", "require_https"), default=False)
         self._check_get_refs = self.cfg.as_bool(("pipeman", "security", "check_get_referrers"), default=False)
+        print(self._check_get_refs)
         self._check_refs_default = self.cfg.as_bool(("pipeman", "security", "check_refs_default"), default=True)
         self._check_https_default = self.cfg.as_bool(("pipeman", "security", "check_https_default"), default=True)
 
@@ -40,10 +47,13 @@ class RequestSecurity:
     def check_referrer(self):
         """Check that the referer is good."""
         if not flask.has_request_context():
+            print("no request context")
             return False
         if flask.request.method == "HEAD":
+            print("is head")
             return True
         if (not self._check_get_refs) and flask.request.method == "GET":
+            print("is get")
             return True
         ref = flask.request.headers.get("Referer")
         org = flask.request.headers.get("Origin")
@@ -66,32 +76,16 @@ class RequestSecurity:
     def check_access(self, perm_names: t.Iterable, check_referrer: bool = None, check_https: bool = None):
         """Check all configured requirements to access the page."""
         if not self.require_permissions(perm_names):
-            return False
+            return RequestSecurity.FORBIDDEN
         if check_referrer is None:
             check_referrer = self._check_refs_default
         if check_referrer and not self.check_referrer():
-            return False
+            return RequestSecurity.TO_SPLASH
         if check_https is None:
             check_https = self._check_https_default
         if check_https and not self.check_for_https():
-            return False
-        return True
-
-
-def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable], **perm_args):
-    """Ensure the current user is logged in and has one of the given permissions before allowing the request."""
-    if isinstance(perm_names, str):
-        perm_names = [perm_names]
-
-    def _decorator(func: t.Callable) -> t.Callable:
-        @wraps(func)
-        @injector.inject
-        def _decorated(*args, rs: RequestSecurity = None, **kwargs):
-            if not rs.check_access(perm_names, **perm_args):
-                return flask.current_app.login_manager.unauthorized()
-            return flask.current_app.ensure_sync(func)(*args, **kwargs)
-        return _decorated
-    return _decorator
+            return RequestSecurity.TO_SPLASH
+        return RequestSecurity.ALLOWED
 
 
 class AuthenticatedUser(fl.UserMixin):
@@ -125,6 +119,8 @@ class AuthenticatedUser(fl.UserMixin):
 
     def has_permission(self, permission_name: str):
         """Check if the user has the given permission."""
+        if permission_name == "_is_anyone":
+            return True
         if permission_name == "_is_anonymous":
             return False
         if permission_name == "_is_not_anonymous":
@@ -154,7 +150,7 @@ class AnonymousUser(fl.AnonymousUserMixin):
         return False
 
     def has_permission(self, permission_name):
-        return permission_name == "_is_anonymous"
+        return permission_name == "_is_anonymous" or permission_name == "_is_anyone"
 
     def works_on(self, dataset_id):
         return False
@@ -174,10 +170,22 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
+        self.log = logging.getLogger("pipeman.auth")
         self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="base.home")
         self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="base.home")
         self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="base.home")
         self.not_logged_in_route = self.config.as_str(("pipeman", "authentication", "login_required"), default="auth.login")
+        self.splash_route = self.config.as_str(("pipeman", "authentication", "splash_page"), default="base.splash")
+        self.show_login_req = self.config.as_bool(("pipeman", "authentication", "show_login_required_message"), default=True)
+        self.show_unauth = self.config.as_bool(("pipeman", "authentication", "show_unauthorized_required_message"), default=True)
+        _secret_key = self.config.get(("pipeman", "authentication", "next_signing_key"), default=None)
+        if _secret_key is None:
+            _secret_key = self.config.get(("flask", "SECRET_KEY"), default=None)
+        self._serializer = None
+        if _secret_key:
+            if len(_secret_key) < 20:
+                self.log.warning(f"Insufficient length for secret key (recommend 20): {len(_secret_key)}")
+            self._serializer = itsdangerous.URLSafeTimedSerializer(_secret_key, "pipeman_auth")
 
     def login_handler(self):
         """Display the login form or redirect to a third-party authorization page."""
@@ -201,22 +209,60 @@ class AuthenticationManager:
 
     def login_success(self):
         """Redirect the user after successful login."""
+        if self._serializer:
+            try:
+                next_signed = flask.request.args.get("next_url", default=None)
+                if next_signed:
+                    next_page = self._serializer.loads(flask.request.args.get("next_url"), max_age=1800)
+                    return flask.redirect(next_page)
+            except itsdangerous.BadData as ex:
+                self.log.warning(f"Exception while unserializing next_url: {str(ex)}")
+                # Don't redirect without proper signatures
+                pass
         return flask.redirect(flask.url_for(self.login_success_route))
 
     def logout_success(self):
         """Redirect the user after successful logout."""
         return flask.redirect(flask.url_for(self.logout_success_route))
 
-    def unauthorized_handler(self):
+    def unauthorized_handler(self, result=RequestSecurity.FORBIDDEN):
         """Handle unauthorized requests."""
         # API calls start with /api and should return 403 instead of an error page.
         if flask.request.path.startswith("/api"):
             return flask.abort(403)
         # Error for if the user is not authenticated
         elif not fl.current_user.is_authenticated:
-            flask.flash(gettext("pipeman.auth.login_required"), "error")
-            return flask.redirect(flask.url_for(self.not_logged_in_route))
+            if self.show_login_req:
+                flask.flash(gettext("pipeman.auth.login_required"), "error")
+            next_page = ""
+            if self._serializer:
+                next_page = self._serializer.dumps(flask.request.url)
+            return flask.redirect(flask.url_for(self.not_logged_in_route, next_url=next_page))
+        # This is for referrer or CSRF failure mostly
+        elif result == RequestSecurity.TO_SPLASH:
+            return flask.redirect(flask.url_for(self.splash_route))
         # Error for if the user is authenticated but doesn't have sufficient access
         else:
-            flask.flash(gettext("pipeman.auth.not_authorized"), "error")
+            if self.show_unauth:
+                flask.flash(str(gettext("pipeman.auth.not_authorized")), "error")
             return flask.redirect(flask.url_for(self.unauthorized_route))
+
+
+def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable], **perm_args):
+    """Ensure the current user is logged in and has one of the given permissions before allowing the request."""
+    if isinstance(perm_names, str):
+        perm_names = [perm_names]
+
+    def _decorator(func: t.Callable) -> t.Callable:
+        @wraps(func)
+        @injector.inject
+        def _decorated(*args, rs: RequestSecurity = None, auth_man: AuthenticationManager = None, **kwargs):
+            result = rs.check_access(perm_names, **perm_args)
+            if result == RequestSecurity.ALLOWED:
+                return flask.current_app.ensure_sync(func)(*args, **kwargs)
+            else:
+                return auth_man.unauthorized_handler(result)
+        return _decorated
+
+    return _decorator
+

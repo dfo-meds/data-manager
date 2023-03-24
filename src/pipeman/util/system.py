@@ -250,6 +250,7 @@ class System:
         @app.after_request
         @injector.inject
         def add_response_headers(response, cspr: CSPRegistry = None):
+            cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
             return cspr.add_headers(response)
 
         # Add the menu items and self_url() function to every template

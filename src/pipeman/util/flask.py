@@ -886,7 +886,7 @@ class DataTable:
                     "orderable": col.allow_order,
                 }
             )
-        block = "<script>"
+        block = f"<script nonce='{csp_nonce('script-src')}'>"
         block += "$(document).ready(function() {\n"
         block += "  $('#{}').DataTable({});".format(self._table_id, json.dumps(safe_json(config)))
         block += "});</script>"

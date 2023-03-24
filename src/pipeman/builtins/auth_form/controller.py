@@ -58,6 +58,9 @@ class FormAuthenticationManager(AuthenticationManager):
     def logout_handler(self):
         """Handle the logout for Flask login."""
         fl.logout_user()
+        flask.session.modified = True
+        for k, v in flask.session.items():
+            print(f"{k}: {v}")
         flask.flash(str(gettext("pipeman.auth_form.logout_success")), "success")
         return self.logout_success()
 

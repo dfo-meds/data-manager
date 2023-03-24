@@ -5,7 +5,7 @@ import os
 
 
 def _cfg_files_from_template(filename):
-    custom_config_path = os.environ.get("PIPEMAN_CONFIG_DIR")
+    custom_config_path = os.environ.get("PIPEMAN_CONFIG_DIR", "./config")
     if custom_config_path:
         p = pathlib.Path(custom_config_path)
         if p.exists():
