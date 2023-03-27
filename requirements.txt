@@ -1,10 +1,10 @@
 alembic
-autoinject>=1.1.0
+autoinject>=1.2.0
 azure-core
 azure-storage-blob
 click
 flask
-flask-autoinject>=1.1.0
+flask-autoinject>=2.0.2
 flask-login
 flask-wtf
 markupsafe

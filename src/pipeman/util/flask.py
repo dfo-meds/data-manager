@@ -885,9 +885,10 @@ class DataTable:
 
     def to_javascript(self) -> str:
         """Generate the JavaScript content for the datatable."""
+        from flask_wtf.csrf import generate_csrf
         config = {
             "ajax": {
-                "type": "POST"
+                "type": "POST",
             },
             "columns": [],
             "searching": False,

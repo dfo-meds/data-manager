@@ -13,6 +13,21 @@ from pipeman.i18n import gettext
 from pipeman.util.flask import EntitySelectField, MultiLanguageBlueprint
 import logging
 
+
+base = flask.Blueprint("base", __name__)
+
+# Main home page for logged in users (the welcome page)
+@base.route("/h")
+def home():
+    return flask.render_template("welcome.html", title=gettext("pipeman.welcome.title"))
+
+
+# The splash page welcomes new users
+@base.route("/")
+def splash():
+    return flask.render_template("splash.html")
+
+
 core = MultiLanguageBlueprint("core", __name__)
 
 

@@ -15,6 +15,7 @@ def init(system, reg: MetadataRegistry = None, wreg: WorkflowRegistry = None, vr
     system.register_cli("pipeman.core.cli", "org")
     system.register_cli("pipeman.core.cli", "workflow")
     system.register_cli("pipeman.core.cli", "core")
+    system.register_blueprint("pipeman.core.app", "base")
     system.register_blueprint("pipeman.core.app", "core")
     system.register_init_app(create_jinja_filters)
     system.register_setup_fn("pipeman.core.util.setup_core_groups")
