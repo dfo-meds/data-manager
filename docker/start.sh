@@ -24,6 +24,11 @@ else
     echo "There is no script $PRE_START_PATH"
 fi
 
-# Start Gunicorn
-#exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
-python -m flask run --host="0.0.0.0" --port=80
+# Start Gunicorn or Flask
+if [ -z "$USE_FLASK" ]; then
+  python -m flask run --host="0.0.0.0" --port=80
+else
+  exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
+fi
+
+
