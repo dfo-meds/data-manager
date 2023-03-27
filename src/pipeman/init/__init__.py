@@ -7,13 +7,13 @@ import logging
 
 def _config_paths():
     yield pathlib.Path(".").absolute()
-    yield pathlib.Path("~").absolute().expanduser()
+    yield pathlib.Path("~").expanduser().absolute()
     custom_config_path = os.environ.get("PIPEMAN_CONFIG_SEARCH_PATHS", "./config")
     if custom_config_path:
         paths = custom_config_path.split(";")
         for path in paths:
             if path:
-                p = pathlib.Path(path)
+                p = pathlib.Path(path).absolute()
                 if p.exists():
                     yield p
 
