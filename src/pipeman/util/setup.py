@@ -1,15 +1,10 @@
 import logging
 from autoinject import injector
-import zirconium as zr
-import importlib
 import zrlog
-import pkgutil
 from pipeman.i18n import gettext
-import pathlib
 import typing as t
 import datetime
-from autoinject.informants import NamedContextInformant
-from flask import session, render_template
+from flask import session
 from flask_wtf.csrf import CSRFProtect
 import flask
 import flask_login
@@ -18,8 +13,8 @@ from werkzeug.routing import Rule
 import flask_autoinject
 from pipeman.util.logging import PipemanLogger
 from pipeman.util.errors import PipemanConfigurationError
-
-from pipeman.util.flask import self_url
+from pipeman.util.flask import self_url, RequestInfo
+from pipeman.util.logging import set_request_info
 
 
 def build_nav(items: dict) -> list:
@@ -62,16 +57,29 @@ def core_init_app(system, app, config):
 
     # Before request, make sure the session is permanent
     @app.before_request
-    def make_session_permanent():
+    @injector.inject
+    def make_session_permanent(rinfo: RequestInfo = None):
         session.permanent = True
         session.modified = True
-        logging.getLogger("pipeman").out(f"Request context: {injector.context_manager._get_context_hash()}")
+        set_request_info(
+            rinfo.username(),
+            rinfo.remote_ip()
+        )
+        logging.getLogger("pipeman").debug(f"Request context: {injector.context_manager._get_context_hash()}")
 
     # After the request, perform a few clean-up tasks
     @app.after_request
     @injector.inject
-    def add_response_headers(response, cspr: CSPRegistry = None):
+    def add_response_headers(response: flask.Response, cspr: CSPRegistry = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
+        if flask.request.endpoint == "static":
+            logging.getLogger("pipeman.access_log").info(
+                f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
+            )
+        else:
+            logging.getLogger("pipeman.access_log").out(
+                f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
+            )
         return cspr.add_headers(response)
 
     # Add the menu items and self_url() function to every template

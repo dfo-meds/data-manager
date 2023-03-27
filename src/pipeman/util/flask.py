@@ -204,7 +204,7 @@ class RequestInfo:
         self._system_remote_addr = None
 
     def remote_ip(self):
-        if self._remote_ip is None and flask.has_request_context():
+        if self._remote_ip is None and flask.has_app_context():
             if "X-Forwarded-For" in flask.request.headers:
                 self._remote_ip = flask.request.headers.getlist("X-Forwarded-For")[0].rpartition(' ')[-1]
             else:
@@ -238,9 +238,8 @@ class RequestInfo:
         return self._user_agent
 
     def username(self):
-        if self._username is None and flask.has_request_context():
-            self._username = "unknown"
-            #self._username = flask_login.current_user.get_id()
+        if self._username is None and flask.has_app_context():
+            self._username = flask_login.current_user.get_id() or "__anonymous__"
         return self._username
 
     def referrer(self):

@@ -9,9 +9,19 @@ This class adds the additional parameters to Flask logging:
 - username
 - referrer
 """
-from autoinject import injector
-from pipeman.util.flask import RequestInfo
 from zrlog.logger import ImprovedLogger
+from contextvars import ContextVar
+
+_cv_username = ContextVar("pipeman_username", default="")
+_cv_remote_ip = ContextVar("pipeman_remote_ip", default="")
+
+
+def set_request_info(
+        username,
+        remote_ip
+):
+    _cv_username.set(username)
+    _cv_remote_ip.set(remote_ip)
 
 
 class PipemanLogger(ImprovedLogger):
@@ -35,25 +45,22 @@ class PipemanLogger(ImprovedLogger):
         super()._log(*args, **kwargs)
 
     def _add_logging_extras(self, extras):
-        if self._no_extras:
-            extras["remote_ip"] = ""
-            extras["proxy_ip"] = ""
-            extras["correlation_id"] = ""
-            extras["client_id"] = ""
-            extras["request_url"] = ""
-            extras["user_agent"] = ""
-            extras["username"] = ""
-            extras["referrer"] = ""
-            extras["sys_username"] = ""
-            extras["sys_emulated"] = ""
-            extras["sys_logon"] = ""
-            extras["sys_remote"] = ""
-        else:
-            self._add_logging_extras_from_rinfo(extras)
-
+        extras["remote_ip"] = _cv_remote_ip.get()
+        extras["proxy_ip"] = ""
+        extras["correlation_id"] = ""
+        extras["client_id"] = ""
+        extras["request_url"] = ""
+        extras["user_agent"] = ""
+        extras["username"] = _cv_username.get()
+        extras["referrer"] = ""
+        extras["sys_username"] = ""
+        extras["sys_emulated"] = ""
+        extras["sys_logon"] = ""
+        extras["sys_remote"] = ""
+"""""
     @injector.inject
     def _add_logging_extras_from_rinfo(self, extras, rinfo: RequestInfo = None):
-        """Extend extras by adding the request info."""
+        ""Extend extras by adding the request info.""
         extras["remote_ip"] = rinfo.remote_ip() or ""
         extras["proxy_ip"] = rinfo.proxy_ip() or ""
         extras["correlation_id"] = rinfo.correlation_id() or ""
@@ -66,3 +73,4 @@ class PipemanLogger(ImprovedLogger):
         extras["sys_emulated"] = rinfo.sys_emulated_username() or ""
         extras["sys_logon"] = rinfo.sys_logon_time() or ""
         extras["sys_remote"] = rinfo.sys_remote_addr() or ""
+"""
