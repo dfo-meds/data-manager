@@ -1,6 +1,8 @@
 #! /usr/bin/env sh
 set -e
 
+PIPEMAN_CONFIG_DIR=/metadb-config
+
 cd /srv/metadb/app || exit
 
 python -m alembic upgrade head
