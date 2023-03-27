@@ -37,6 +37,9 @@ RUN chmod +x build.sh
 
 COPY docker/gunicorn_conf.py gunicorn_conf.py
 
+COPY docker/pipeman /usr/local/bin/pipeman
+RUN chmod +x /usr/local/bin/pipeman
+
 COPY . app
 
 RUN ./build.sh

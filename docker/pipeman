@@ -1,0 +1,5 @@
+#! /bin/bash
+
+pushd /srv/metadb/app
+python cli.py "$@"
+popd
