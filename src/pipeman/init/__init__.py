@@ -23,9 +23,8 @@ def init(db_only=False, extra_files=None):
     @zr.configure
     def configure_extra_files(config: zr.ApplicationConfig):
         config_paths = [x for x in _config_paths()]
+        print(config_paths)
         for path in config_paths:
-            print(f"default file: {path / '.pipeman.default.toml'}")
-            print(f"regular file: {path / '.pipeman.toml'}")
             config.register_default_file(path / ".pipeman.defaults.toml")
             config.register_file(path / ".pipeman.toml")
             for filename in extra_files or []:

@@ -17,7 +17,7 @@ host = os.getenv("HOST", "0.0.0.0")
 port = os.getenv("PORT", "80")
 bind_env = os.getenv("BIND", None)
 errorlog = os.getenv("ERROR_LOG", "-")
-accesslog = os.getenv("ACCESS_LOG", "")
+accesslog = os.getenv("ACCESS_LOG", None)
 loglevel = os.getenv("LOG_LEVEL", "info")
 enable_stdio_inheritance = os.getenv("ENABLE_STDIO_INHERITANCE", "1") == "1"
 
@@ -60,5 +60,6 @@ if os.getenv("DUMP_GUNICORN_CONFIG", "1") == "1":
         "_workers_per_core": workers_per_core_str,
     }
     print("gunicorn config::")
+    pad = max(len(x) for x in log_data) + 5
     for x in log_data:
-        print(f"{x: ^20}{log_data[x]}")
+        print(f"{x.ljust(pad)} {log_data[x]}")
