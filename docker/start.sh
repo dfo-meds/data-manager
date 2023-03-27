@@ -9,6 +9,8 @@ export PIPEMAN_CONFIG_DIR
 
 cd /srv/metadb/app || exit
 
+rsync -a -v --ignore-existing /srv/metadb/app/docker/default_config /metadb-config
+
 python -m alembic upgrade head
 
 python cli.py core setup
