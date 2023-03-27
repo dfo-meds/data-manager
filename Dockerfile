@@ -12,8 +12,6 @@ WORKDIR /srv/metadb
 VOLUME /metadb-config
 VOLUME /metadb-data
 
-COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
-
 ENV PIPEMAN_CONFIG_DIR=/metadb-config
 ENV PYTHONPATH=/srv/metadb/app
 ENV MODULE_NAME=app
@@ -37,6 +35,8 @@ RUN chmod +x start.sh
 COPY docker/gunicorn_conf.py gunicorn_conf.py
 
 COPY . app
+
+COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
 
 EXPOSE 80
 
