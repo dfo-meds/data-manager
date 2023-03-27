@@ -41,7 +41,7 @@ COPY . app
 
 COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
 
-RUN build.sh
+RUN ./build.sh
 
 EXPOSE 80
 
