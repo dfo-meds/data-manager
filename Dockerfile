@@ -32,11 +32,16 @@ RUN pip install -r requirements.txt
 COPY docker/start.sh start.sh
 RUN chmod +x start.sh
 
+COPY docker/build.sh build.sh
+RUN chmod +x build.sh
+
 COPY docker/gunicorn_conf.py gunicorn_conf.py
 
 COPY . app
 
 COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
+
+RUN build.sh
 
 EXPOSE 80
 
