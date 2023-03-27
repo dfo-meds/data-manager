@@ -342,3 +342,10 @@ class WorkflowDecision(_BaseModel, Base):
     decision_date = sa.Column(sa.DateTime)
 
     workflow_item = orm.relationship("WorkflowItem", back_populates="decisions")
+
+
+class ServerSession(_BaseModel, Base):
+
+    guid = sa.Column(sa.String(1024), nullable=False, unique=True)
+    valid_until = sa.Column(sa.DateTime, nullable=False)
+    is_valid = sa.Column(sa.Boolean, nullable=False)

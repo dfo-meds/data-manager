@@ -4,7 +4,7 @@ import zrlog
 from pipeman.i18n import gettext
 import typing as t
 import datetime
-from flask import session
+import sqlalchemy as sa
 from flask_wtf.csrf import CSRFProtect
 import flask
 import flask_login
@@ -15,6 +15,67 @@ from pipeman.util.logging import PipemanLogger
 from pipeman.util.errors import PipemanConfigurationError
 from pipeman.util.flask import self_url, RequestInfo
 from pipeman.util.logging import set_request_info
+from pipeman.db import Database
+import pipeman.db.orm as orm
+import uuid
+
+
+@injector.inject
+def check_request_session(db: Database = None):
+    if flask.request.endpoint == "static":
+        return
+    sess = flask.session.get("_pipeman_uuid", default=None)
+    with db as session:
+        if sess is None:
+            _new_session(session)
+        else:
+            user_session = session.query(orm.ServerSession).filter_by(guid=sess).first()
+            if not _validate_session(user_session):
+                _new_session(session)
+            else:
+                _refresh_session(user_session, session)
+
+
+@injector.inject
+def invalidate_session(db: Database = None):
+    sess = flask.session.get("_pipeman_uuid", default=None)
+    with db as session:
+        if sess:
+            session.query(orm.ServerSession).filter_by(guid=sess).delete()
+            session.commit()
+        _new_session(session)
+
+
+def _refresh_session(user_session, session):
+    user_session.valid_until = datetime.datetime.now() + flask.current_app.permanent_session_lifetime
+    session.commit()
+    flask.session.permanent = True
+    flask.session.modified = True
+
+
+def _validate_session(user_session):
+    if user_session is None:
+        return False
+    if not user_session.is_valid:
+        return False
+    if user_session.valid_until < datetime.datetime.now():
+        return False
+    return True
+
+
+def _new_session(session):
+    # new session
+    flask.session.clear()
+    flask.session["_pipeman_uuid"] = str(uuid.uuid4())
+    q = sa.insert(orm.ServerSession).values({
+        "guid": flask.session["_pipeman_uuid"],
+        "valid_until": datetime.datetime.now() + flask.current_app.permanent_session_lifetime,
+        "is_valid": True
+    })
+    session.execute(q)
+    session.commit()
+    flask.session.permanent = True
+    flask.session.modified = True
 
 
 def build_nav(items: dict) -> list:
@@ -48,7 +109,6 @@ def core_init_app(system, app, config):
     flask_autoinject.init_app(app)
     # Set the URL Rule class to our custom one
     app.url_rule_class = CustomRule
-    app.extensions['csrf'] = CSRFProtect(app)
     if isinstance(app.config["SECRET_KEY"], str):
         app.config["SECRET_KEY"] = app.config["SECRET_KEY"].encode("ascii")
     # Adjust the user timeout as necessary
@@ -59,8 +119,7 @@ def core_init_app(system, app, config):
     @app.before_request
     @injector.inject
     def make_session_permanent(rinfo: RequestInfo = None):
-        session.permanent = True
-        session.modified = True
+        check_request_session()
         set_request_info(
             rinfo.username(),
             rinfo.remote_ip()
@@ -94,6 +153,7 @@ def core_init_app(system, app, config):
             items[f'nav_{key}'] = build_nav(system._nav_menu[key])
         return items
 
+    app.extensions['csrf'] = CSRFProtect(app)
 
 class CustomRule(Rule):
     """Custom implementation of werkzeug.routing.Rule.

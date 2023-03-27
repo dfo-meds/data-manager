@@ -77,7 +77,7 @@ class Database:
             if self._is_closed and not self._unclean_warned_once:
                 self.log_safe.info(f"Recreating connection DB out of context {injector.context_manager._get_context_hash()}")
                 self.log_safe.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
-                self._unclean_warned_once = True
+                #self._unclean_warned_once = True
             # Create the engine from the connection string
             self.engine = sa.engine_from_config(self.config["database"], prefix="")
 
@@ -137,7 +137,8 @@ class Database:
                     self.log_safe.warning("Closing engine because this should be closed and might not be properly closed later")
                 self.close()
         if r:
-            self._closing_warned_once = True
+            #self._closing_warned_once = True
+            pass
 
     def __cleanup__(self):
         self.close()

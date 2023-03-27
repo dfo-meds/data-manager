@@ -8,6 +8,7 @@ from pipeman.i18n import DelayedTranslationString
 from pipeman.i18n import gettext
 import flask
 from pipeman.util.flask import NoControlCharacters
+from pipeman.util.setup import invalidate_session
 
 
 class LoginForm(FlaskForm):
@@ -45,8 +46,8 @@ class FormAuthenticationManager(AuthenticationManager):
         form = LoginForm()
         if form.validate_on_submit():
             user = self.attempt_login(form.username.data, form.password.data)
-            print(form.username.data)
             if user:
+                invalidate_session()
                 fl.login_user(user)
                 flask.flash(str(gettext("pipeman.auth_form.login_success")), "success")
                 return self.login_success()
@@ -60,10 +61,8 @@ class FormAuthenticationManager(AuthenticationManager):
 
     def logout_handler(self):
         """Handle the logout for Flask login."""
+        invalidate_session()
         fl.logout_user()
-        flask.session.modified = True
-        for k, v in flask.session.items():
-            print(f"{k}: {v}")
         flask.flash(str(gettext("pipeman.auth_form.logout_success")), "success")
         return self.logout_success()
 
