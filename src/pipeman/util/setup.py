@@ -94,11 +94,19 @@ def build_nav(items: dict) -> list:
     nav.sort(key=lambda x: x[3])
     return nav
 
-def init_system_logging(system):
+
+@injector.inject
+def init_system_logging(system, rinfo: RequestInfo = None):
     # Setup logging
     zrlog.init_logging()
     logging.setLoggerClass(PipemanLogger)
     system._log = logging.getLogger("pipeman.system")
+    set_request_info({
+        "sys_username": rinfo.sys_username(),
+        "sys_emulated": rinfo.sys_emulated_username(),
+        "sys_logon": rinfo.sys_logon_time(),
+        "sys_remote": rinfo.sys_remote_addr()
+    })
 
 
 def core_init_app(system, app, config):
@@ -118,12 +126,19 @@ def core_init_app(system, app, config):
     # Before request, make sure the session is permanent
     @app.before_request
     @injector.inject
-    def make_session_permanent(rinfo: RequestInfo = None):
+    def session_init(rinfo: RequestInfo = None):
         check_request_session()
-        set_request_info(
-            rinfo.username(),
-            rinfo.remote_ip()
-        )
+        set_request_info({
+            "username": rinfo.username(),
+            "remote_ip": rinfo.remote_ip(),
+            "proxy_ip": rinfo.proxy_ip(),
+            "correlation_id": rinfo.correlation_id(),
+            "client_id": rinfo.client_id(),
+            "request_url": rinfo.request_url(),
+            "user_agent": rinfo.user_agent(),
+            "referrer": rinfo.referrer(),
+            "request_method": rinfo.request_method(),
+        })
         logging.getLogger("pipeman").debug(f"Request context: {injector.context_manager._get_context_hash()}")
 
     # After the request, perform a few clean-up tasks

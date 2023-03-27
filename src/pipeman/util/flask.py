@@ -202,6 +202,7 @@ class RequestInfo:
         self._correl_id = None
         self._client_id = None
         self._request_url = None
+        self._request_method = None
         self._user_agent = None
         self._username = None
         self._referrer = None
@@ -211,8 +212,13 @@ class RequestInfo:
         self._logon_time = None
         self._system_remote_addr = None
 
+    def request_method(self):
+        if self._request_method is None and flask.has_request_context():
+            self._request_method = flask.request.method
+        return self._request_method
+
     def remote_ip(self):
-        if self._remote_ip is None and flask.has_app_context():
+        if self._remote_ip is None and flask.has_request_context():
             if "X-Forwarded-For" in flask.request.headers:
                 self._remote_ip = flask.request.headers.getlist("X-Forwarded-For")[0].rpartition(' ')[-1]
             else:
@@ -246,7 +252,7 @@ class RequestInfo:
         return self._user_agent
 
     def username(self):
-        if self._username is None and flask.has_app_context():
+        if self._username is None and flask.has_request_context():
             self._username = flask_login.current_user.get_id() or "__anonymous__"
         return self._username
 
@@ -256,7 +262,7 @@ class RequestInfo:
         return self._referrer
 
     def _load_process_info(self):
-        if self._proc_info_loaded is False and not flask.has_app_context():
+        if self._proc_info_loaded is False:
             res = subprocess.run([shutil.which("whoami")], capture_output=True)  # noqa: S603
             txt = res.stdout.decode("utf-8").replace("\t", " ").strip("\r\n\t ")
             while "  " in txt:

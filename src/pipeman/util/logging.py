@@ -12,16 +12,13 @@ This class adds the additional parameters to Flask logging:
 from zrlog.logger import ImprovedLogger
 from contextvars import ContextVar
 
-_cv_username = ContextVar("pipeman_username", default="")
-_cv_remote_ip = ContextVar("pipeman_remote_ip", default="")
+_cv_logging_info = ContextVar("pipeman_logger_vars", default=None)
 
 
-def set_request_info(
-        username,
-        remote_ip
-):
-    _cv_username.set(username)
-    _cv_remote_ip.set(remote_ip)
+def set_request_info(request_vars: dict):
+    val = _cv_logging_info.get({})
+    val.update(request_vars)
+    _cv_logging_info.set(val)
 
 
 class PipemanLogger(ImprovedLogger):
@@ -45,32 +42,20 @@ class PipemanLogger(ImprovedLogger):
         super()._log(*args, **kwargs)
 
     def _add_logging_extras(self, extras):
-        extras["remote_ip"] = _cv_remote_ip.get()
+        extras["remote_ip"] = ""
         extras["proxy_ip"] = ""
         extras["correlation_id"] = ""
         extras["client_id"] = ""
         extras["request_url"] = ""
+        extras["request_method"] = ""
         extras["user_agent"] = ""
-        extras["username"] = _cv_username.get()
+        extras["username"] = ""
         extras["referrer"] = ""
         extras["sys_username"] = ""
         extras["sys_emulated"] = ""
         extras["sys_logon"] = ""
         extras["sys_remote"] = ""
-"""""
-    @injector.inject
-    def _add_logging_extras_from_rinfo(self, extras, rinfo: RequestInfo = None):
-        ""Extend extras by adding the request info.""
-        extras["remote_ip"] = rinfo.remote_ip() or ""
-        extras["proxy_ip"] = rinfo.proxy_ip() or ""
-        extras["correlation_id"] = rinfo.correlation_id() or ""
-        extras["client_id"] = rinfo.client_id() or ""
-        extras["request_url"] = rinfo.request_url() or ""
-        extras["user_agent"] = rinfo.user_agent() or ""
-        extras["username"] = rinfo.username() or ""
-        extras["referrer"] = rinfo.referrer() or ""
-        extras["sys_username"] = rinfo.sys_username() or ""
-        extras["sys_emulated"] = rinfo.sys_emulated_username() or ""
-        extras["sys_logon"] = rinfo.sys_logon_time() or ""
-        extras["sys_remote"] = rinfo.sys_remote_addr() or ""
-"""
+        info = _cv_logging_info.get({})
+        for key in info:
+            if info[key]:
+                extras[key] = info[key]

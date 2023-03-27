@@ -22,7 +22,6 @@ def login(am: AuthenticationManager = None):
 @injector.inject
 def logout(am: AuthenticationManager = None):
     """Logout handler"""
-    print("logout")
     if not fl.current_user.is_authenticated:
         return am.logout_success()
     return am.logout_handler()
