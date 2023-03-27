@@ -2,10 +2,12 @@ import zirconium as zr
 import pathlib
 from autoinject import injector
 import os
+import logging
 
 
 def _cfg_files_from_template(filename):
     custom_config_path = os.environ.get("PIPEMAN_CONFIG_DIR", "./config")
+    logging.getLogger().warning(f"Loading extra config from {custom_config_path}")
     if custom_config_path:
         p = pathlib.Path(custom_config_path)
         if p.exists():
