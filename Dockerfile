@@ -39,8 +39,6 @@ COPY docker/gunicorn_conf.py gunicorn_conf.py
 
 COPY . app
 
-COPY docker/.pipeman.docker.toml /metadb-config/.pipeman.defaults.toml
-
 RUN ./build.sh
 
 EXPOSE 80
