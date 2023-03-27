@@ -6,6 +6,9 @@ from zirconium import ApplicationConfig
 
 @injector.inject
 def init_plugin(system: System = None, cfg: ApplicationConfig = None):
-    dictionary_path = cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_path'))
-    if dictionary_path:
-        system.i18n_locale_dirs.append(dictionary_path)
+    dictionary_paths = cfg.get(('pipeman', 'i18n_yaml', 'dictionary_paths'))
+    if dictionary_paths:
+        if isinstance(dictionary_paths, list):
+            system.i18n_locale_dirs.extend(dictionary_paths)
+        else:
+            system.i18n_locale_dirs.append(dictionary_paths)

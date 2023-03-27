@@ -4,6 +4,7 @@ from autoinject import injector
 from pipeman.i18n import LanguageDetector
 import zirconium as zr
 import logging
+import typing as t
 
 
 class YamlTranslationManager:
@@ -12,21 +13,32 @@ class YamlTranslationManager:
     cfg: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self, dictionary_path: str = None):
-        if dictionary_path is None:
-            dictionary_path = self.cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_path'))
+    def __init__(self, extra_paths: t.Union[str, t.Iterable, None] = None):
+        self._allow_undefined = self.cfg.get(("pipeman", "i18n_yaml", "allow_undefined"), default=False)
         self.log = logging.getLogger("pipeman.i18n_yaml")
+        dpaths = []
+        if isinstance(extra_paths, str):
+            dpaths.append(extra_paths)
+        elif extra_paths is not None:
+            dpaths.extend(extra_paths)
+        cfg_paths = self.cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_paths'), default=None)
+        if isinstance(cfg_paths, str):
+            dpaths.append(cfg_paths)
+        elif cfg_paths is not None:
+            dpaths.extend(cfg_paths)
         self._warn_on_missing_key = self.cfg.as_bool(('pipeman', 'i18n_yaml', 'warn_missing_key'), default=False)
         self._dictionaries = {}
         self._dictionary_lookup = {}
-        for file in os.scandir(dictionary_path):
-            if file.name.endswith(".yaml") or file.name.endswith(".yml"):
-                self._dictionary_lookup[file.name[:file.name.rfind(".")]] = file.path
-        self._supported = None
+        for dict_path in dpaths:
+            for file in os.scandir(dict_path):
+                if file.name.endswith(".yaml") or file.name.endswith(".yml"):
+                    self._dictionary_lookup[file.name[:file.name.rfind(".")]] = file.path
+        self._supported = []
+        if self._allow_undefined:
+            self._supported = ["und"]
+        self._supported.extend(list(self._dictionary_lookup.keys()))
 
     def supported_languages(self):
-        if not self._supported:
-            self._supported = list(self._dictionary_lookup.keys())
         return self._supported
 
     def _ensure_dictionary(self, lang):
@@ -38,6 +50,8 @@ class YamlTranslationManager:
 
     def get_text(self, text_key: str, default: str = None) -> str:
         lang = self.ld.detect_language(self.supported_languages())
+        if lang == "und":
+            return default or text_key
         if not lang:
             self.log.error(f"Could not find a supported language, options {'|'.join(self.supported_languages())}")
             raise ValueError("Could not agree on a language")

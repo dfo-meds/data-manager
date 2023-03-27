@@ -6,6 +6,7 @@ import pipeman.db.orm as orm
 from autoinject import injector
 from flask_wtf import FlaskForm
 from wtforms.form import BaseForm
+import pathlib
 from wtforms.meta import DefaultMeta
 from flask_wtf.csrf import _FlaskFormCSRF
 import flask
@@ -149,10 +150,17 @@ class PathMapper:
     @injector.construct
     def __init__(self):
         self._path_map = {}
-        path_map_file = self.cfg.as_path(("pipeman", "i18n_paths_file"))
-        if path_map_file and path_map_file.exists():
-            with open(path_map_file, "r", encoding="utf-8") as h:
-                self._path_map = yaml.safe_load(h) or {}
+        path_map_files = self.cfg.get(("pipeman", "i18n_paths_files"), default=[])
+        for file_path in path_map_files:
+            path_map_file = pathlib.Path(file_path)
+            if path_map_file and path_map_file.exists():
+                with open(path_map_file, "r", encoding="utf-8") as h:
+                    path_map = yaml.safe_load(h) or {}
+                    for p in path_map:
+                        if p in self._path_map:
+                            self._path_map.update(path_map[p])
+                        else:
+                            self._path_map = path_map[p] or {}
 
     def get_path_translations(self, path):
         if path in self._path_map and self._path_map[path]:

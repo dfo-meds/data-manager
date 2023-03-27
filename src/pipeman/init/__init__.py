@@ -12,9 +12,10 @@ def _config_paths():
     if custom_config_path:
         paths = custom_config_path.split(";")
         for path in paths:
-            p = pathlib.Path(path)
-            if p.exists():
-                yield p
+            if path:
+                p = pathlib.Path(path)
+                if p.exists():
+                    yield p
 
 
 def init(db_only=False, extra_files=None):

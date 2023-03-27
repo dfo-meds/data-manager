@@ -1,12 +1,15 @@
 [pipeman]
 holding_dir = "/metadb-data/holding"
-i18n_paths_file = "/metadb-config/paths.yaml"
+i18n_paths_files = [
+    "/srv/metadb/app/config/paths.yaml",
+    "/metadb-config/paths.yaml"
+]
 
 [flask]
 UPLOAD_FOLDER = "/metadb-data/flask"
 
 [pipeman.i18n_yaml]
-dictionary_path = "/metadb-config/locales"
+dictionary_paths = ["/srv/metadb/app/config/locales", "/metadb-config/locales"]
 
 [universalio]
 sync_db = "/metadb-data/sync.db"

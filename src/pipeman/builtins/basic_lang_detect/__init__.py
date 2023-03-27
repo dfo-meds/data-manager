@@ -13,7 +13,7 @@ __all__ = ["BasicRequestLanguageDetector"]
 @_injector.inject
 def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = None):
     """Initialize the Flask application to detect languages."""
-    supported_languages = tm.supported_languages()
+    supported_languages = [x for x in tm.supported_languages() if not x == "und"]
 
     @app.url_defaults
     def _add_lang_arg(endpoint, values):

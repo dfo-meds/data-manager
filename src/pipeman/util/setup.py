@@ -155,6 +155,7 @@ def core_init_app(system, app, config):
 
     app.extensions['csrf'] = CSRFProtect(app)
 
+
 class CustomRule(Rule):
     """Custom implementation of werkzeug.routing.Rule.
 
