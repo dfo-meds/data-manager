@@ -8,6 +8,9 @@ UPLOAD_FOLDER = "/metadb-data/flask"
 [pipeman.i18n_yaml]
 dictionary_path = "/metadb-config/locales"
 
+[universalio]
+sync_db = "/metadb-data/sync.db"
+
 [logging]
 version = 1
 

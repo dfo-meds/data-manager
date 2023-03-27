@@ -26,9 +26,9 @@ fi
 
 # Start Gunicorn or Flask
 if [ -z "$USE_FLASK" ]; then
-  python -m flask run --host="0.0.0.0" --port=80
-else
   exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
+else
+  python -m flask run --host="0.0.0.0" --port=80
 fi
 
 
