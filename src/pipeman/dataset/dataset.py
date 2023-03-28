@@ -159,6 +159,26 @@ class MetadataRegistry:
     def metadata_format_template(self, profile_name, format_name):
         return self._profiles[profile_name]["formatters"][format_name]["template"]
 
+    def metadata_format_content_type(self, profile_name, format_name):
+        # Defaults
+        encoding = "utf-8"
+        mime_type = "text/plain"
+        template_name = self._profiles[profile_name]["formatters"][format_name]["template"].lower()
+        # What were we told?
+        if "content_type" in self._profiles[profile_name]["formatters"][format_name] and self._profiles[profile_name]["formatters"][format_name]["content_type"]:
+            mime_type = self._profiles[profile_name]["formatters"][format_name]["content_type"]
+        elif template_name.endswith(".xml"):
+            mime_type = "text/xml"
+        elif template_name.endswith(".html") or template_name.endswith(".htm"):
+            mime_type = "text/html"
+        elif template_name.endswith(".rdf"):
+            mime_type = "application/rdf+xml"
+        elif template_name.endswith(".jsonld"):
+            mime_type = "application/ld+json"
+        if "encoding" in self._profiles[profile_name]["formatters"][format_name]:
+            encoding = self._profiles[profile_name]["formatters"][format_name] or "utf-8"
+        return mime_type, encoding
+
     def metadata_format_link(self, profile_name, format_name, dataset_id, revision_no):
         link = flask.url_for(
             "core.generate_metadata_format",

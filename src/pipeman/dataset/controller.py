@@ -371,7 +371,15 @@ class DatasetController:
             self.reg.metadata_format_template(profile_name, format_name),
             **args
         )
-        return re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip()
+        mime_type, encoding = self.reg.metadata_format_content_type(profile_name, format_name)
+        response = flask.Response(
+            re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip(),
+            200,
+            mimetype=mime_type
+        )
+        response.headers['Content-Type'] = f"{mime_type}; charset={encoding}"
+        return response
+
 
     def remove_dataset(self, dataset):
         with self.db as session:
