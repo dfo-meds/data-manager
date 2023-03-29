@@ -1,5 +1,5 @@
 erddap:
-  label:
+  display:
     en: Core ERDDAP
   validation:
     required:
@@ -48,4 +48,5 @@ erddap:
       label:
         en: ERDDAP XML
       template: erddap.xml
+      content_type: text/xml
       preprocess: pipeman.builtins.erddap.util.preprocess_dataset

@@ -317,6 +317,16 @@ class MetadataEdition(_BaseModel, Base):
     dataset = orm.relationship("Dataset", back_populates="data")
 
 
+class ConfigRegistry(_BaseModel, Base):
+
+    __table_args__ = (
+        sa.UniqueConstraint("obj_type", "obj_name", name="unique_registry_name_type"),
+    )
+    obj_type = sa.Column(sa.String(255), index=True)
+    obj_name = sa.Column(sa.String(255), index=True)
+    config = sa.Column(sa.Text)
+
+
 class WorkflowItem(_BaseModel, Base):
 
     context = sa.Column(sa.Text)

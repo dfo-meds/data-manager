@@ -646,7 +646,7 @@ class TelephoneField(NoControlMixin, Field):
 
     def filters(self) -> list:
         filts = super().filters()
-        filts.append(text_sanitize)
+        #filts.append(text_sanitize)
         return filts
 
     def _control_class(self) -> t.Callable:

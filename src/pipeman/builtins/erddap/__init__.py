@@ -4,18 +4,18 @@ from pipeman.vocab import VocabularyRegistry
 from pipeman.entity import EntityRegistry
 from pipeman.util import System
 import pathlib
-import yaml
 
 
 @injector.inject
-def init_plugin(system: System = None, reg: MetadataRegistry = None, vreg: VocabularyRegistry = None, ereg: EntityRegistry = None):
+def init_plugin(system: System = None):
     system.register_blueprint("pipeman.builtins.erddap.app", "erddap")
+    system.register_setup_fn(setup_plugin)
+
+
+@injector.inject
+def setup_plugin(ereg: EntityRegistry = None, vreg: VocabularyRegistry = None, reg: MetadataRegistry = None):
     root = pathlib.Path(__file__).parent
-    with open(root / "vocabs.yaml", "r", encoding="utf-8") as h:
-        vreg.register_from_dict(yaml.safe_load(h))
-    with open(root / "entities.yaml", "r", encoding="utf-8") as h:
-        ereg.register_from_dict(yaml.safe_load(h))
-    with open(root / "fields.yaml", "r", encoding="utf-8") as h:
-        reg.register_fields_from_dict(yaml.safe_load(h))
-    with open(root / "profiles.yaml", "r", encoding="utf-8") as h:
-        reg.register_profiles_from_dict(yaml.safe_load(h))
+    ereg.register_from_yaml(root / "entities.yaml")
+    vreg.register_from_yaml(root / "vocabs.yaml")
+    reg.register_metadata_from_yaml(root / "metadata.yaml")
+    reg.register_profiles_from_yaml(root / "profiles.yaml")

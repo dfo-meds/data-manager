@@ -7,6 +7,8 @@ import pkgutil
 import pathlib
 import typing as t
 from pipeman.util.errors import PipemanConfigurationError
+import subprocess
+import sys
 
 
 def load_dynamic_class(cls_name: str) -> object:
@@ -57,7 +59,7 @@ class System:
         injector.register_informant(self._nci)
 
         # System logging
-        from pipeman.util.setup import init_system_logging
+        from pipeman.util.setup import init_system_logging, init_registries
         init_system_logging(self)
         self._log.out("Initializing system")
         # Pre-init functions
@@ -78,6 +80,9 @@ class System:
             str(root),
             str(pathlib.Path(".").absolute() / "templates"),
         ])
+        # Reloading registeries
+        self._log.out("Loading registries")
+        init_registries()
         self._log.out("Initializing callbacks")
         # Call the init callbacks
         for fn in self._load_init:
@@ -106,9 +111,15 @@ class System:
 
     def setup(self):
         """Run all the setup scripts."""
+        # Alembic migration should come first
+        res = subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"])
+        res.check_returncode()
         for cb in self._setup_cb:
-            obj = load_object(cb)
-            obj()
+            if isinstance(cb, str):
+                obj = load_object(cb)
+                obj()
+            else:
+                cb()
 
     def register_blueprint(self, module: str, blueprint_name: str, prefix: str = ""):
         """Register a blueprint to add to the main Flask application."""

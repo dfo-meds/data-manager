@@ -18,6 +18,10 @@ from pipeman.util.logging import set_request_info
 from pipeman.db import Database
 import pipeman.db.orm as orm
 import uuid
+from pipeman.vocab import VocabularyRegistry
+from pipeman.workflow import WorkflowRegistry
+from pipeman.entity import EntityRegistry
+from pipeman.dataset import MetadataRegistry
 
 
 @injector.inject
@@ -107,6 +111,14 @@ def init_system_logging(system, rinfo: RequestInfo = None):
         "sys_logon": rinfo.sys_logon_time(),
         "sys_remote": rinfo.sys_remote_addr()
     })
+
+
+@injector.inject
+def init_registries(r1: MetadataRegistry = None, r2: VocabularyRegistry = None, r3: WorkflowRegistry = None, r4: EntityRegistry = None):
+    r1.reload_types()
+    r2.reload_types()
+    r3.reload_types()
+    r4.reload_types()
 
 
 def core_init_app(system, app, config):

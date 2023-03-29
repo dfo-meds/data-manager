@@ -578,8 +578,8 @@ class DatasetForm(FlaskForm):
         super().__init__(*args, **kwargs)
         self.organization.choices = self.ocontroller.list_organizations()
         self.profiles.choices = self.reg.profiles_for_select()
-        self.act_workflow.choices = self.wreg.list_workflows("dataset_activation")
-        self.pub_workflow.choices = self.wreg.list_workflows("dataset_publication")
+        self.act_workflow.choices = [x for x in self.wreg.list_workflows("dataset_activation")]
+        self.pub_workflow.choices = [x for x in self.wreg.list_workflows("dataset_publication")]
         self.security_level.choices = self.reg.security_labels_for_select()
         self.assigned_users.choices = user_list()
 

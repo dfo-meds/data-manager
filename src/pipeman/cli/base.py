@@ -13,4 +13,6 @@ class CommandLineInterface(click.MultiCommand):
         return self.commands.keys()
 
     def get_command(self, ctx, name):
-        return self.commands[name]
+        if name in self.commands:
+            return self.commands[name]
+        return None

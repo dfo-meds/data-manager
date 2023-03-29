@@ -1,5 +1,5 @@
 iso19115:
-  label:
+  display:
     en: Core ISO-19115
   validation:
     required:
@@ -73,4 +73,5 @@ iso19115:
       label:
         en: ISO-19115 XML
       template: iso19115.xml
+      content_type: text/xml
       preprocess: pipeman.builtins.iso19115.util.preprocess_metadata

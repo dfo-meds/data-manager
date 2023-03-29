@@ -88,7 +88,7 @@ metadata_info:
       order: 30
       repeatable: yes
 citation:
-  label:
+  display:
     en: Citation
     fr: Citation
   order: 15
@@ -336,7 +336,7 @@ extent:
         en: Temporal Reference System
         fr: Système de référence temporelle
 references:
-  label:
+  display:
     en: References
     fr: Références
   order: 50

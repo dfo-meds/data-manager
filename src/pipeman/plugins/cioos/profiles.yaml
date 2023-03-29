@@ -1,5 +1,5 @@
 cioosv2:
-  label:
+  display:
     en: CIOOS v2
   extends: iso19115
   validation:

@@ -38,6 +38,7 @@ def init(db_only=False, extra_files=None):
             system.pre_load("pipeman.i18n.init")
             system.pre_load("pipeman.auth.init")
             system.pre_load("pipeman.core.init")
+            system.pre_load("pipeman.setup.init")
             system.init()
         return system
 

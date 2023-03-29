@@ -1,5 +1,5 @@
 gociso19115:
-  label:
+  display:
     en: Government of Canada ISO-19115
   extends: iso19115
   validation:

@@ -3,45 +3,38 @@ from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.i18n import MultiLanguageString, gettext
+from pipeman.db import BaseObjectRegistry
 import json
+import csv
 
 
 @injector.injectable_global
-class VocabularyRegistry:
+class VocabularyRegistry(BaseObjectRegistry):
 
     def __init__(self):
-        self._vocabularies = {}
+        super().__init__("vocabulary")
 
     def list_vocabularies(self):
-        names = list(self._vocabularies.keys())
-        names.sort()
-        for vocab_name in names:
-            yield vocab_name, self._vocabularies[vocab_name][0], self._vocabularies[vocab_name][1]
+        for vocab_name in self.sorted_keys():
+            yield vocab_name, self[vocab_name]["display"], self[vocab_name]["uri"]
 
     def display_name(self, vocab_name):
-        return MultiLanguageString(self._vocabularies[vocab_name][0])
-
-    def register_vocabulary(self, name, display, uri=None):
-        if name in self._vocabularies:
-            self._vocabularies[name][0].update(display)
-            if uri is not None:
-                self._vocabularies[name][1] = uri
-        else:
-            self._vocabularies[name] = (display, uri)
-
-    def vocabulary_exists(self, name):
-        return name in self._vocabularies
-
-    def register_from_dict(self, d: dict):
-        if d:
-            for key in d:
-                self.register_vocabulary(key, d[key]["display"], d[key]["uri"])
-                if "terms" in d[key]:
-                    self.register_terms_from_dict(key, d[key]["terms"])
+        return MultiLanguageString(self[vocab_name]["display"])
 
     @injector.inject
     def register_terms_from_dict(self, vocab_name, terms: dict, vtc: "pipeman.vocab.vocab.VocabularyTermController"):
         vtc.save_terms_from_dict(vocab_name, terms)
+
+    @injector.inject
+    def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController"):
+        with open(term_file, "r", encoding="utf-8") as h:
+            r = csv.reader(h)
+            header = None
+            for line in r:
+                if header is None:
+                    header = line
+                    continue
+                vtc.upsert_term_by_map(vocab_name, line, header)
 
 
 @injector.injectable
@@ -92,24 +85,54 @@ class VocabularyTermController:
     def save_terms_from_dict(self, vocab_name, terms: dict):
         with self.db as session:
             for tsname in terms:
-                term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
-                if not term:
-                    t = orm.VocabularyTerm(
-                        vocabulary_name=vocab_name,
-                        short_name=tsname,
-                        display_names=json.dumps(terms[tsname]["display"] if "display" in terms[tsname] else {}),
-                        descriptions=json.dumps(terms[tsname]["description"] if "description" in terms[tsname] else {})
-                    )
-                    session.add(t)
-                else:
-                    dn = json.loads(term.display_names)
-                    desc = json.loads(term.descriptions)
-                    if "display" in terms[tsname]:
-                        dn.update(terms[tsname]["display"])
-                        if "description" in terms[tsname]:
-                            desc.update(terms[tsname]["description"])
-                    else:
-                        dn.update(terms[tsname])
-                    term.display_names = json.dumps(dn)
-                    term.descriptions = json.dumps(desc)
-            session.commit()
+                self.upsert_term(
+                    vocab_name,
+                    tsname,
+                    terms[tsname]["display"] if "display" in terms[tsname] else {},
+                    terms[tsname]["description"] if "description" in terms[tsname] else {},
+                    session
+                )
+
+    def upsert_term_by_map(self, vocab_name, line, header):
+        displays = {}
+        descriptions = {}
+        tsname = ""
+        for idx, key in enumerate(header):
+            if key == "short_name":
+                tsname = line[idx]
+            elif key.startswith("display__"):
+                displays[key[9:]] = line[idx]
+            elif key.startswith("description__"):
+                displays[key[13:]] = line[idx]
+            else:
+                raise ValueError(f"Unrecognized column header {key}")
+        if not tsname:
+            if not displays:
+                raise ValueError(f"Missing a term name")
+            key_name = "und" if "und" in displays else "en"
+            if key_name not in displays:
+                raise ValueError(f"Missing a fallback term name")
+            tsname = displays[key_name].replace(" ", "_").lower()
+        with self.db as session:
+            self.upsert_term(vocab_name, tsname, displays, descriptions, session)
+
+    def upsert_term(self, vocab_name, tsname, display, description, session):
+        term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
+        if not term:
+            t = orm.VocabularyTerm(
+                vocabulary_name=vocab_name,
+                short_name=tsname,
+                display_names=json.dumps(display),
+                descriptions=json.dumps(description)
+            )
+            session.add(t)
+        else:
+            dn = json.loads(term.display_names)
+            desc = json.loads(term.descriptions)
+            if display:
+                dn.update(display)
+            if description:
+                desc.update(description)
+            term.display_names = json.dumps(dn)
+            term.descriptions = json.dumps(desc)
+        session.commit()

@@ -24,6 +24,8 @@ from wtforms.form import BaseForm
 from pipeman.entity import FieldContainer
 import asyncio
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, CustomDisplayColumn, ActionListColumn
+from pipeman.db import BaseObjectRegistry
+import yaml
 
 
 class ItemResult(Enum):
@@ -41,109 +43,45 @@ class ItemResult(Enum):
 class WorkflowRegistry:
 
     def __init__(self):
-        self._steps = {}
-        self._workflows = {}
-        self._pipelines = {}
+        self._steps = BaseObjectRegistry("step")
+        self._workflows = BaseObjectRegistry("workflow")
         self._factories = []
-        self._events = {}
         self._factories.append(DefaultStepFactory())
+
+    def reload_types(self):
+        self._steps.reload_types()
+        self._workflows.reload_types()
 
     def register_step_factory(self, factory):
         self._factories.append(factory)
 
-    def step_display(self, step_name):
-        return MultiLanguageString(self._steps[step_name]['label'])
+    def register_workflow(self, workflow_name, category, **config):
+        self._workflows.register(f"{category}__{workflow_name}", **config)
 
-    def register_event_type(self, event_name, label, fields, enabled=True):
-        record = {
-            event_name: {
-                "label": label or {},
-                "fields": fields or {},
-                "enabled": enabled
-            }
-        }
-        deep_update(self._events, record)
-
-    def get_event_fields(self, event_name):
-        return self._events[event_name]["fields"]
-
-    def register_pipeline(self,
-                          pipeline_name,
-                          label,
-                          steps,
-                          trigger_events,
-                          enabled=True
-                          ):
-        record = {
-            "label": label or {},
-            "steps": steps,
-            "trigger_events": trigger_events,
-            "enabled": enabled,
-        }
-        if pipeline_name in self._pipelines:
-            deep_update(self._pipelines[pipeline_name], record)
-        else:
-            self._pipelines[pipeline_name] = record
-
-    def triggered_pipelines(self, event_name):
-        for pipeline_name in self._pipelines:
-            if 'enabled' in self._pipelines[pipeline_name] and not self._pipelines['enabled']:
-                continue
-            if event_name == self._pipelines[pipeline_name]["trigger_events"]:
-                yield pipeline_name
-            elif (not isinstance(self._pipelines[pipeline_name]["trigger_events"], str)) and event_name in self._pipelines["trigger_events"]:
-                yield pipeline_name
-
-    def register_event_types_from_dict(self, d: dict):
-        if d:
-            deep_update(self._events, d)
-
-    def register_pipelines_from_dict(self, d: dict):
-        if d:
-            deep_update(self._pipelines, d)
-
-    def register_workflow(self, workflow_name, category, label, steps, enabled=True):
-        record = {
-            category: {
-                workflow_name: {
-                    "label": label or {},
-                    "steps": steps,
-                    "enabled": enabled
-                }
-            }
-        }
-        deep_update(self._workflows, record)
-
-    def workflow_display(self, category_name, workflow_name):
-        return MultiLanguageString(self._workflows[category_name][workflow_name]['label']) if category_name in self._workflows and workflow_name in self._workflows[category_name] else "?"
-
-    def event_exists(self, event_name):
-        if event_name not in self._events:
-            return False
-        return 'enabled' not in self._events[event_name] or self._events[event_name]['enabled']
-
-    def list_events(self):
-        for en in self._events:
-            if self.event_exists(en):
-                yield en
-
-    def register_step(self, step_name, label, step_type, item_config):
-        record = {
-            step_name: {
-                "label": label or {},
-                "step_type": step_type,
-                **item_config
-            }
-        }
-        deep_update(self._steps, record)
+    def register_step(self, step_name, **config):
+        self._steps.register(step_name, **config)
 
     def register_steps_from_dict(self, d: dict):
-        if d:
-            deep_update(self._steps, d)
+        self._steps.register_from_dict(d)
+
+    def register_steps_from_yaml(self, yaml_file):
+        self._steps.register_from_yaml(yaml_file)
 
     def register_workflows_from_dict(self, d: dict):
-        if d:
-            deep_update(self._workflows, d)
+        for cat_name in d or {}:
+            for obj_name in d[cat_name] or {}:
+                self.register_workflow(obj_name, cat_name, **d[cat_name][obj_name])
+
+    def register_workflows_from_yaml(self, f):
+        with open(f, "r", encoding="utf-8") as h:
+            self.register_workflows_from_dict(yaml.safe_load(h))
+
+    def step_display(self, step_name):
+        return MultiLanguageString(self._steps[step_name]['label'] if step_name in self._steps else {"und": step_name})
+
+    def workflow_display(self, category_name, workflow_name):
+        key = f"{category_name}__{workflow_name}"
+        return MultiLanguageString(self._workflows[key] if key in self._workflows else {"und": key})
 
     def construct_step(self, step_name):
         if step_name not in self._steps:
@@ -154,23 +92,19 @@ class WorkflowRegistry:
                 return factory.build_step(step_name, step_config["step_type"], step_config)
         raise StepConfigurationError(f"Invalid step type for {step_name}: {step_config['step_type']}")
 
-    def step_list(self, workflow_type, workflow_name):
-        if workflow_type == "pipeline":
-            if workflow_name not in self._pipelines:
-                raise WorkflowNotFoundError(f"pipeline-{workflow_name}")
-            return self._pipelines[workflow_name]["steps"]
-        if workflow_type not in self._workflows:
-            raise WorkflowNotFoundError(f"{workflow_type}-{workflow_name}")
-        if workflow_name not in self._workflows[workflow_type]:
-            raise WorkflowNotFoundError(f"{workflow_type}-{workflow_name}")
-        return self._workflows[workflow_type][workflow_name]["steps"]
+    def step_list(self, category_name, workflow_name):
+        key = f"{category_name}__{workflow_name}"
+        if key not in self._workflows:
+            raise WorkflowNotFoundError(key)
+        return self._workflows[key]["steps"]
 
     def list_workflows(self, workflow_type):
-        return [
-            (x, MultiLanguageString(self._workflows[workflow_type][x]["label"]))
-            for x in self._workflows[workflow_type]
-            if "enabled" not in self._workflows[workflow_type][x] or self._workflows[workflow_type][x]["enabled"]
-        ]
+        for key in self._workflows:
+            if not key.startswith(f"{workflow_type}__"):
+                continue
+            if "enabled" in self._workflows[key] and not self._workflows[key]["enabled"]:
+                continue
+            yield key, MultiLanguageString(self._workflows[key]["label"] or {"und": key})
 
 
 class ItemDisplayWrapper:
@@ -282,36 +216,6 @@ class WorkflowController:
             self._start_next_step(item, session)
             return item.status, item.id
 
-    def has_access_to_event(self, event_name):
-        # TODO: implement this
-        return True
-
-    def event_exists(self, event_name):
-        return self.reg.event_exists(event_name)
-
-    def fire_event(self, event_name, data):
-        results = []
-        for triggered_pipeline in self.reg.triggered_pipelines(event_name):
-            results.append(self.trigger_pipeline(triggered_pipeline, data))
-        return results
-
-    def trigger_pipeline(self, pipeline_name, context):
-        return self.start_workflow("pipeline", pipeline_name, context, None)
-
-    def list_events_page(self):
-        return flask.render_template(
-            "list_events.html",
-            events=self._event_iterator(),
-            title=gettext("pipeman.events.title")
-        )
-
-    def _event_iterator(self):
-        for en in self.reg.list_events():
-            if self.has_access_to_event(en):
-                yield en, [
-                    (flask.url_for("core.event_firing_form", event_name=en), "pipeman.event.fire"),
-                ]
-
     def workflow_item_status_by_id(self, item_id):
         with self.db as session:
             item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
@@ -325,13 +229,6 @@ class WorkflowController:
                 self.interpret_status(item.status)
                 for item in session.query(orm.WorkflowItem).filter_by(object_id=object_id, workflow_type=workflow_type)
             ]
-
-    def event_form(self, event_name):
-        form = EventFiringForm(event_name)
-        if form.handle_form():
-            self.fire_event(form.event_name, form.container.values())
-            return flask.redirect(flask.url_for("core.list_events"))
-        return flask.render_template("form.html", form=form, title=gettext("pipeman.fire_event.title"))
 
     def workflow_form(self, item_id, decision: bool = True):
         with self.db as session:

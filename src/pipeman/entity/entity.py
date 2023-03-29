@@ -7,8 +7,9 @@ from pipeman.i18n import MultiLanguageString
 import copy
 from pipeman.util import deep_update, load_object
 from functools import cache
-import markupsafe
+from pipeman.db import BaseObjectRegistry
 from pipeman.i18n import gettext
+from threading import RLock
 
 
 def entity_access(entity_type: str, op: str) -> bool:
@@ -32,63 +33,28 @@ def specific_entity_access(entity, op: str) -> bool:
 
 
 @injector.injectable_global
-class EntityRegistry:
+class EntityRegistry(BaseObjectRegistry):
 
     def __init__(self):
-        self._entity_types = {}
-
-    def __iter__(self):
-        return iter(self._entity_types)
-
-    def type_exists(self, key):
-        return key in self._entity_types
-
-    def register_type(self, key, display_names, field_config, derived_config, validation, is_component: bool = None):
-        if key in self._entity_types:
-            deep_update(self._entity_types[key]["display"], display_names)
-            deep_update(self._entity_types[key]["fields"], field_config)
-            deep_update(self._entity_types[key]["validation"], validation)
-            deep_update(self._entity_types[key]["derived_fields"], derived_config)
-            if is_component is not None:
-                self._entity_types[key]['is_component'] = is_component
-        else:
-            self._entity_types[key] = {
-                "display": display_names,
-                "fields": field_config,
-                "is_component": bool(is_component),
-                "validation": validation,
-                "derived_fields": derived_config
-            }
-
-    def register_from_dict(self, cfg_dict):
-        if cfg_dict:
-            for key in cfg_dict:
-                self.register_type(
-                    key,
-                    cfg_dict[key]["display"] if "display" in cfg_dict[key] else {},
-                    cfg_dict[key]["fields"] if "fields" in cfg_dict[key] else {},
-                    cfg_dict[key]["derived_fields"] if "derived_fields" in cfg_dict[key] else {},
-                    cfg_dict[key]["validation"] if "validation" in cfg_dict[key] else {},
-                    cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
-                )
+        super().__init__("entity")
 
     def display(self, key):
-        keys = self._entity_types[key]["display"].copy()
+        keys = self[key]["display"].copy()
         keys['und'] = key
         return MultiLanguageString(keys)
 
     def new_entity(self, key, **kwargs):
         ent = Entity(
             key,
-            field_list=self._entity_types[key]["fields"],
-            is_component=self._entity_types[key]["is_component"],
+            field_list=self[key]["fields"],
+            is_component=self[key]["is_component"] if "is_component" in self[key] else False,
             **kwargs
         )
-        if "derived_fields" in self._entity_types[key] and self._entity_types[key]["derived_fields"]:
-            dfns = self._entity_types[key]["derived_fields"]
+        if "derived_fields" in self[key] and self[key]["derived_fields"]:
+            dfns = self[key]["derived_fields"]
             for dfn in dfns:
                 ent.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
-        validation = self._entity_types[key]['validation'] or {}
+        validation = self[key]['validation'] or {}
         if 'required' in validation and validation['required']:
             for fn in validation['required']:
                 ent.add_field_validator(fn, RequiredFieldValidator())

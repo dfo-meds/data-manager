@@ -117,7 +117,7 @@ def upgrade() -> None:
     sa.Column('created_date', sa.DateTime(), nullable=True),
     sa.Column('modified_date', sa.DateTime(), nullable=True),
     sa.Column('is_deprecated', sa.Boolean(), nullable=True),
-    sa.Column('organization_id', sa.Integer(), nullable=False),
+    sa.Column('organization_id', sa.Integer(), nullable=True),
     sa.Column('display_names', sa.Text(), nullable=True),
     sa.Column('profiles', sa.Text(), nullable=True),
     sa.Column('pub_workflow', sa.String(length=255), nullable=False),

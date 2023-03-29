@@ -52,7 +52,7 @@ def list_entities(reg: EntityRegistry):
 @require_permission("entities.view_entities")
 @injector.inject
 def list_entities_by_type(obj_type, con: EntityController):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "view"):
         return flask.abort(403)
@@ -63,7 +63,7 @@ def list_entities_by_type(obj_type, con: EntityController):
 @require_permission("entities.view_entities")
 @injector.inject
 def list_entities_by_type_ajax(obj_type, con: EntityController):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "view"):
         return flask.abort(403)
@@ -74,7 +74,7 @@ def list_entities_by_type_ajax(obj_type, con: EntityController):
 @require_permission("entities.create")
 @injector.inject
 def create_entity(obj_type, con: EntityController = None):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "create"):
         return flask.abort(403)
@@ -107,7 +107,7 @@ def _get_container(parent_id, parent_type, dcon, econ):
 @require_permission("datasets.edit")
 @injector.inject
 def create_component(obj_type, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
-    if not econ.reg.type_exists(obj_type):
+    if obj_type not in econ.reg:
         return flask.abort(404)
     if not econ.has_access(obj_type, "create"):
         return flask.abort(403)
@@ -120,7 +120,7 @@ def create_component(obj_type, parent_id, parent_type, dcon: DatasetController =
 @require_permission("datasets.edit")
 @injector.inject
 def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
-    if not econ.reg.type_exists(obj_type):
+    if obj_type not in econ.reg:
         return flask.abort(404)
     if not econ.has_access(obj_type, "edit"):
         return flask.abort(403)
@@ -140,7 +140,7 @@ def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetContro
 @require_permission("datasets.edit")
 @injector.inject
 def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
-    if not econ.reg.type_exists(obj_type):
+    if obj_type not in econ.reg:
         return flask.abort(404)
     if not econ.has_access(obj_type, "remove"):
         return flask.abort(403)
@@ -160,7 +160,7 @@ def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCont
 @require_permission("datasets.edit")
 @injector.inject
 def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
-    if not econ.reg.type_exists(obj_type):
+    if obj_type not in econ.reg:
         return flask.abort(404)
     if not econ.has_access(obj_type, "restore"):
         return flask.abort(403)
@@ -179,7 +179,7 @@ def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCon
 @require_permission("entities.view")
 @injector.inject
 def view_entity(obj_type, obj_id, con: EntityController = None):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "view"):
         return flask.abort(403)
@@ -196,7 +196,7 @@ def view_entity(obj_type, obj_id, con: EntityController = None):
 @require_permission("entities.edit")
 @injector.inject
 def edit_entity(obj_type, obj_id, con: EntityController = None):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "edit"):
         return flask.abort(403)
@@ -213,7 +213,7 @@ def edit_entity(obj_type, obj_id, con: EntityController = None):
 @require_permission("entities.remove")
 @injector.inject
 def remove_entity(obj_type, obj_id, con: EntityController = None):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "remove"):
         return flask.abort(403)
@@ -230,7 +230,7 @@ def remove_entity(obj_type, obj_id, con: EntityController = None):
 @require_permission("entities.restore")
 @injector.inject
 def restore_entity(obj_type, obj_id, con: EntityController = None):
-    if not con.reg.type_exists(obj_type):
+    if obj_type not in con.reg:
         return flask.abort(404)
     if not con.has_access(obj_type, "restore"):
         return flask.abort(403)
@@ -614,6 +614,6 @@ def list_vocabularies(vtc: VocabularyTermController = None):
 @require_permission("vocabularies.view")
 @injector.inject
 def vocabulary_term_list(vocab_name, vtc: VocabularyTermController = None):
-    if not vtc.reg.vocabulary_exists(vocab_name):
+    if vocab_name not in vtc.reg:
         return flask.abort(404)
     return vtc.list_terms_page(vocab_name)
