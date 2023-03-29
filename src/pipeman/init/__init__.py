@@ -2,6 +2,7 @@ import zirconium as zr
 import pathlib
 from autoinject import injector
 import os
+import logging
 
 
 def _config_paths():
@@ -22,8 +23,7 @@ def init(db_only=False, extra_files=None):
     @zr.configure
     def configure_extra_files(config: zr.ApplicationConfig):
         config_paths = [x for x in _config_paths()]
-        print("Configuration file search paths:")
-        print([str(x) for x in config_paths])
+        logging.getLogger("pipeman.init").warning(f"Config Search Paths: {';'.join(str(x) for x in config_paths)}")
         for path in config_paths:
             config.register_default_file(path / ".pipeman.defaults.toml")
             config.register_file(path / ".pipeman.toml")
