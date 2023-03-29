@@ -566,7 +566,7 @@ class ChoiceField(Field):
 
     def filters(self) -> list:
         filts = super().filters()
-        filts.append(text_sanitize)
+        #filts.append(text_sanitize)
         return filts
 
     def _extra_wtf_arguments(self) -> dict:
