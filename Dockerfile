@@ -12,7 +12,7 @@ WORKDIR /srv/metadb
 VOLUME /metadb-config
 VOLUME /metadb-data
 
-ENV PIPEMAN_CONFIG_SEARCH_PATHS=/metadb-config
+ENV PIPEMAN_CONFIG_SEARCH_PATHS=/srv/metadb/app/docker/config;/metadb-config
 ENV PYTHONPATH=/srv/metadb/app
 ENV MODULE_NAME=app
 ENV VARIABLE_NAME=app
