@@ -12,12 +12,13 @@ WORKDIR /srv/metadb
 VOLUME /metadb-config
 VOLUME /metadb-data
 
-ENV PIPEMAN_CONFIG_DIR=/metadb-config
+ENV PIPEMAN_CONFIG_SEARCH_PATH=/metadb-config
 ENV PYTHONPATH=/srv/metadb/app
 ENV MODULE_NAME=app
 ENV VARIABLE_NAME=app
 ENV APP_MODULE=app:app
 ENV GUNICORN_CONF=/srv/metadb/gunicorn_conf.py
+
 
 RUN pip install --upgrade pip
 

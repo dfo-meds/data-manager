@@ -4,9 +4,6 @@ set -e
 PYTHONBUFFERED=TRUE
 export PYTHONUNBUFFERED
 
-PIPEMAN_CONFIG_DIR=/metadb-config
-export PIPEMAN_CONFIG_DIR
-
 cd /srv/metadb/app || exit
 
 if [ -z "$PIPEMAN_SKIP_SETUP" ]; then
