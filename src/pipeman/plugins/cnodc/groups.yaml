@@ -1,1 +1,231 @@
 sysadmin:
+  display:
+    en: System Administrator
+    fr: Administrateur système
+  permissions:
+    - approvals.sysadmin
+    - auth_db.view.all
+    - auth_db.create
+    - auth_db.edit
+    - auth_db.reset
+    - entities.view
+    - entities.view.all
+    - entities.create
+    - entities.create.all
+    - entities.edit
+    - entities.edit.all
+    - entities.remove
+    - entities.remove.all
+    - entities.restore
+    - entities.restore.all
+    - datasets.view
+    - datasets.view.deprecated
+    - datasets.view.all
+    - datasets.create
+    - datasets.decide.all
+    - datasets.edit
+    - datasets.edit.all
+    - datasets.remove
+    - datasets.remove.all
+    - datasets.restore
+    - datasets.restore.all
+    - datasets.activate
+    - datasets.activate.all
+    - datasets.publish
+    - datasets.publish.all
+    - action_items.view
+    - action_items.view.completed_steps
+    - action_items.history
+    - action_items.decide
+    - organizations.view
+    - organizations.edit
+    - organizations.create
+    - organizations.manage.any
+    - organizations.manage.global
+    - files.upload
+    - vocabularies.view
+pub_coord:
+  display:
+    en: Publishing Coordinator
+    fr: Coordonnateur de la publication
+  permissions:
+    - approvals.publishing_coordinator
+    - entities.view
+    - entities.view.all
+    - entities.create
+    - entities.create.all
+    - datasets.decide.all
+    - entities.edit
+    - entities.edit.all
+    - entities.remove
+    - entities.remove.all
+    - entities.restore
+    - entities.restore.all
+    - datasets.view
+    - datasets.view.deprecated
+    - datasets.view.all
+    - datasets.create
+    - datasets.edit
+    - datasets.edit.all
+    - datasets.remove
+    - datasets.remove.all
+    - datasets.restore
+    - datasets.restore.all
+    - datasets.activate
+    - datasets.activate.all
+    - datasets.publish
+    - datasets.publish.all
+    - action_items.view
+    - action_items.view.completed_steps
+    - action_items.history
+    - action_items.decide
+    - organizations.view
+    - organizations.manage.any
+    - organizations.manage.global
+    - files.upload
+    - vocabularies.view
+org_coordinator:
+  display:
+    en: Data Unit Coordinator
+    fr: Coordinateur de l'unité de données
+  permissions:
+    - approvals.coordinator
+    - entities.view
+    - entities.view.all
+    - entities.create
+    - entities.create.ref_system
+    - entities.create.keyword
+    - entities.create.series
+    - entities.create.variable
+    - entities.create.responsibility
+    - entities.create.maintenance
+    - entities.create.citation
+    - entities.create.graphic
+    - entities.create.resource
+    - entities.create.contact
+    - entities.create.spatial_res
+    - entities.create.time_res
+    - entities.create.dist_channel
+    - entities.edit
+    - entities.edit.ref_system
+    - entities.edit.keyword
+    - entities.edit.series
+    - entities.edit.variable
+    - entities.edit.responsibility
+    - entities.edit.maintenance
+    - entities.edit.citation
+    - entities.edit.graphic
+    - entities.edit.resource
+    - entities.edit.contact
+    - entities.edit.spatial_res
+    - entities.edit.time_res
+    - entities.edit.dist_channel
+    - datasets.view
+    - datasets.view.organization
+    - datasets.view.deprecated
+    - datasets.create
+    - datasets.decide.organization
+    - datasets.edit
+    - datasets.edit.organization
+    - datasets.remove
+    - datasets.remove.organization
+    - datasets.restore
+    - datasets.restore.organization
+    - datasets.activate
+    - datasets.activate.organization
+    - datasets.publish
+    - datasets.publish.organization
+    - action_items.view
+    - action_items.view.completed_steps
+    - action_items.history
+    - action_items.decide
+    - files.upload
+    - vocabularies.view
+tech_lead:
+  display:
+    en: Program Lead
+    fr: Chef de programme
+  permissions:
+    - approvals.program_lead
+    - entities.view
+    - entities.view.all
+    - entities.create
+    - entities.edit.ref_system
+    - entities.create.keyword
+    - entities.create.series
+    - entities.create.variable
+    - entities.create.responsibility
+    - entities.create.maintenance
+    - entities.create.citation
+    - entities.create.graphic
+    - entities.create.resource
+    - entities.create.contact
+    - entities.create.spatial_res
+    - entities.create.time_res
+    - entities.create.dist_channel
+    - entities.edit
+    - entities.edit.ref_system
+    - entities.edit.keyword
+    - entities.edit.series
+    - entities.edit.variable
+    - entities.edit.responsibility
+    - entities.edit.maintenance
+    - entities.edit.citation
+    - entities.edit.graphic
+    - entities.edit.resource
+    - entities.edit.contact
+    - entities.edit.spatial_res
+    - entities.edit.time_res
+    - entities.edit.dist_channel
+    - datasets.view
+    - datasets.view.organization
+    - datasets.decide.assigned
+    - datasets.create
+    - datasets.edit
+    - datasets.edit.assigned
+    - datasets.activate
+    - datasets.activate.assigned
+    - datasets.publish
+    - datasets.publish.assigned
+    - action_items.view
+    - action_items.view.completed_steps
+    - action_items.decide
+    - files.upload
+    - vocabularies.view
+steward:
+  display:
+    en: Data Steward
+    fr: Intendant des données
+  permissions:
+    - approvals.data_steward
+    - entities.create
+    - entities.edit.ref_system
+    - entities.create.keyword
+    - entities.create.variable
+    - entities.create.responsibility
+    - entities.create.maintenance
+    - entities.create.citation
+    - entities.create.graphic
+    - entities.create.resource
+    - entities.create.contact
+    - entities.edit
+    - entities.edit.keyword
+    - entities.edit.variable
+    - entities.edit.responsibility
+    - entities.edit.maintenance
+    - entities.edit.citation
+    - entities.edit.graphic
+    - entities.edit.resource
+    - entities.edit.contact
+    - datasets.view
+    - datasets.view.organization
+    - datasets.decide.assigned
+    - datasets.edit
+    - datasets.edit.assigned
+    - datasets.publish
+    - datasets.publish.assigned
+    - action_items.view
+    - action_items.view.completed_steps
+    - action_items.decide
+    - files.upload
+    - vocabularies.view

@@ -1,0 +1,30 @@
+dataset_publication:
+  direct_publish:
+    enabled: no
+  super_user_publish:
+    enabled: no
+  cnodc_publish:
+    label:
+      en: CNODC Standard
+      fr: Standard de CNDOC
+    steps:
+      - lead_approval
+      - pub_coord_approval
+      ## TODO: Implement push metadata to X environment
+      # - push_metadata_to_staging
+      # - sysadmin_approval
+      # - push_metadata_to_production
+      - publish_dataset
+dataset_activation:
+  direct_activation:
+    enabled: no
+  super_user_activation:
+    enabled: no
+  cnodc_activation:
+    label:
+      en: CNODC Standard
+      fr: Standard de CNDOC
+    steps:
+      - flag_dataset_for_review
+      - pub_coord_approval
+      - activate_dataset

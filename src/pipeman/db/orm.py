@@ -52,6 +52,13 @@ class _BaseModel(object):
     id = sa.Column(sa.Integer, primary_key=True, nullable=False)
 
 
+class _AuditableModel:
+
+    created_by = sa.Column(sa.ForeignKey("user.id"), nullable=True)
+    created_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now())
+    modified_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now(), onupdate=sa.func.now())
+
+
 class _DisplayNameModel(_BaseModel):
 
     short_name = sa.Column(sa.String(255), unique=True, nullable=False)
@@ -87,14 +94,14 @@ class Metric(_BaseModel, Base):
     username = sa.Column(sa.String(1024))
 
 
-class Organization(_DisplayNameModel, Base):
+class Organization(_DisplayNameModel, _AuditableModel, Base):
 
     users = orm.relationship("User", secondary=user_organization, back_populates="organizations")
     entities = orm.relationship("Entity", back_populates="organization")
     datasets = orm.relationship("Dataset", back_populates="organization")
 
 
-class User(_BaseModel, Base):
+class User(_AuditableModel, _BaseModel, Base):
 
     username = sa.Column(sa.String(255), unique=True, nullable=False)
     display = sa.Column(sa.String(255), nullable=False)
@@ -122,7 +129,7 @@ class UserLoginRecord(_BaseModel, Base):
     lockable = sa.Column(sa.Boolean, nullable=False)
 
 
-class APIKey(_BaseModel, Base):
+class APIKey(_BaseModel, _AuditableModel, Base):
 
     user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False)
     display = sa.Column(sa.String(1024), nullable=True)
@@ -136,9 +143,10 @@ class APIKey(_BaseModel, Base):
     is_active = sa.Column(sa.Boolean, default=True)
 
 
-class Group(_DisplayNameModel, Base):
+class Group(_DisplayNameModel, _AuditableModel, Base):
 
     permissions = sa.Column(sa.Text)
+    restricted_access = sa.Column(sa.Boolean)
 
     users = orm.relationship("User", back_populates="groups", secondary=user_group)
 
@@ -157,12 +165,10 @@ class Group(_DisplayNameModel, Base):
         self.permissions = ""
 
 
-class Entity(_BaseModel, Base):
+class Entity(_BaseModel, _AuditableModel, Base):
 
     entity_type = sa.Column(sa.String(255), nullable=False, index=True)
 
-    created_date = sa.Column(sa.DateTime)
-    modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
@@ -203,7 +209,7 @@ class Entity(_BaseModel, Base):
         return f"{self.entity_type}_{self.id}"
 
 
-class EntityData(_BaseModel, Base):
+class EntityData(_BaseModel, _AuditableModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("entity_id", "revision_no", name="unique_entity_revision_data"),
@@ -212,12 +218,11 @@ class EntityData(_BaseModel, Base):
     entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False)
     revision_no = sa.Column(sa.Integer, nullable=False)
     data = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
 
     entity = orm.relationship("Entity", back_populates="data")
 
 
-class VocabularyTerm(_BaseModel, Base):
+class VocabularyTerm(_BaseModel, _AuditableModel, Base):
 
     vocabulary_name = sa.Column(sa.String(255), nullable=False, index=True)
     short_name = sa.Column(sa.String(255), nullable=False)
@@ -243,10 +248,8 @@ class VocabularyTerm(_BaseModel, Base):
         return self.short_name
 
 
-class Dataset(_BaseModel, Base):
+class Dataset(_BaseModel, _AuditableModel, Base):
 
-    created_date = sa.Column(sa.DateTime)
-    modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
@@ -301,7 +304,7 @@ class Dataset(_BaseModel, Base):
         return f"{self.entity_type}_{self.id}"
 
 
-class MetadataEdition(_BaseModel, Base):
+class MetadataEdition(_BaseModel, _AuditableModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("dataset_id", "revision_no", name="unique_dataset_revision_data"),
@@ -310,14 +313,13 @@ class MetadataEdition(_BaseModel, Base):
     dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False)
     revision_no = sa.Column(sa.Integer, nullable=False)
     data = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
     is_published = sa.Column(sa.Boolean, default=False, nullable=False)
     published_date = sa.Column(sa.DateTime, nullable=True, default=None)
 
     dataset = orm.relationship("Dataset", back_populates="data")
 
 
-class ConfigRegistry(_BaseModel, Base):
+class ConfigRegistry(_BaseModel, _AuditableModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("obj_type", "obj_name", name="unique_registry_name_type"),
@@ -327,14 +329,13 @@ class ConfigRegistry(_BaseModel, Base):
     config = sa.Column(sa.Text)
 
 
-class WorkflowItem(_BaseModel, Base):
+class WorkflowItem(_BaseModel, _AuditableModel, Base):
 
     context = sa.Column(sa.Text)
     workflow_type = sa.Column(sa.String(255), index=True)
     workflow_name = sa.Column(sa.String(255), index=True)
     object_id = sa.Column(sa.Integer)
     step_list = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
     completed_index = sa.Column(sa.Integer, default=None, nullable=True)
     status = sa.Column(sa.String(255))
     locked_by = sa.Column(sa.String(36))
@@ -343,7 +344,7 @@ class WorkflowItem(_BaseModel, Base):
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 
 
-class WorkflowDecision(_BaseModel, Base):
+class WorkflowDecision(_BaseModel, _AuditableModel, Base):
 
     workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False)
     step_name = sa.Column(sa.String(255))

@@ -288,7 +288,6 @@ class EntityController:
         with self.db as session:
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
-                e.modified_date = datetime.datetime.now()
                 e.display_names = json.dumps(entity.display_names())
                 e.organization_id = int(entity.organization_id) or None
                 e.parent_id = entity.parent_id if entity.parent_id else None
@@ -296,8 +295,6 @@ class EntityController:
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
-                    modified_date=datetime.datetime.now(),
-                    created_date=datetime.datetime.now(),
                     display_names=json.dumps(entity.display_names()),
                     organization_id=int(entity.organization_id) or None,
                     parent_id=entity.parent_id,
@@ -315,8 +312,7 @@ class EntityController:
                     ed = orm.EntityData(
                         entity_id=e.id,
                         revision_no=next_rev,
-                        data=json.dumps(entity.values()),
-                        created_date=datetime.datetime.now()
+                        data=json.dumps(entity.values())
                     )
                     session.add(ed)
                     session.commit()

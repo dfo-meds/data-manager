@@ -1,0 +1,24 @@
+lead_approval:
+  label:
+    en: Program Lead Approval
+  step_type: gate
+  require_permission: approvals.program_lead
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+coordinator_approval:
+  label:
+    en: Regional Coordinator Approval
+  step_type: gate
+  require_permssion: approvals.coordinator
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+pub_coord_approval:
+  label:
+    en: Publishing Coordinator Approval
+  step_type: gate
+  require_permission: approvals.publishing_coordinator
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+sysadmin_approval:
+  label:
+    en: System Administrator Approval
+  step_type: gate
+  require_permission: approvals.sysadmin
+  access_check: "pipeman.dataset.dataset_gate_step_access"

@@ -32,7 +32,7 @@ core = MultiLanguageBlueprint("core", __name__)
 
 
 @core.i18n_route("/objects")
-@require_permission("entities.view_entities")
+@require_permission("entities.view")
 @injector.inject
 def list_entities(reg: EntityRegistry):
     entity_list = []
@@ -49,7 +49,7 @@ def list_entities(reg: EntityRegistry):
 
 
 @core.i18n_route("/objects/<obj_type>")
-@require_permission("entities.view_entities")
+@require_permission("entities.view")
 @injector.inject
 def list_entities_by_type(obj_type, con: EntityController):
     if obj_type not in con.reg:
@@ -60,7 +60,7 @@ def list_entities_by_type(obj_type, con: EntityController):
 
 
 @core.route("/api/objects/<obj_type>", methods=["POST", "GET"])
-@require_permission("entities.view_entities")
+@require_permission("entities.view")
 @injector.inject
 def list_entities_by_type_ajax(obj_type, con: EntityController):
     if obj_type not in con.reg:
@@ -534,7 +534,7 @@ def list_organizations(oc: OrganizationController = None):
 
 
 @core.i18n_route('/organizations/create', methods=['GET', 'POST'])
-@require_permission("organizations.edit")
+@require_permission("organizations.create")
 @injector.inject
 def create_organization(oc: OrganizationController = None):
     return oc.create_organization_page()

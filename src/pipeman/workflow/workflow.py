@@ -81,7 +81,7 @@ class WorkflowRegistry:
 
     def workflow_display(self, category_name, workflow_name):
         key = f"{category_name}__{workflow_name}"
-        return MultiLanguageString(self._workflows[key] if key in self._workflows else {"und": key})
+        return MultiLanguageString(self._workflows[key]['label'] if key in self._workflows else {"und": key})
 
     def construct_step(self, step_name):
         if step_name not in self._steps:
@@ -104,7 +104,7 @@ class WorkflowRegistry:
                 continue
             if "enabled" in self._workflows[key] and not self._workflows[key]["enabled"]:
                 continue
-            yield key, MultiLanguageString(self._workflows[key]["label"] or {"und": key})
+            yield key[len(workflow_type)+2:], MultiLanguageString(self._workflows[key]["label"] or {"und": key})
 
 
 class ItemDisplayWrapper:
@@ -421,7 +421,7 @@ class WorkflowController:
     def _has_access(self, item, mode):
         step, steps = self._build_next_step(item)
         if step is None:
-            return flask_login.current_user.has_permission("action_items.view_completed") if mode == 'view' else False
+            return flask_login.current_user.has_permission("action_items.view.completed_steps") if mode == 'view' else False
         ctx = json.loads(item.context)
         if mode == 'view' and step.allow_view(ctx):
             return True
@@ -558,9 +558,25 @@ class WorkflowStep:
         return ItemResult.SUCCESS
 
     def allow_view(self, context: dict) -> bool:
-        return False
+        if "access_check" in self.item_config:
+            if self.item_config["access_check"] is True:
+                return True
+            elif self.item_config["access_check"] is False:
+                return False
+            else:
+                return self._call_function(self.item_config["access_check"], context, 'view')
+        return True
 
     def allow_decision(self, context: dict) -> bool:
+        if "require_permission" in self.item_config:
+            if not flask_login.current_user.has_permission(self.item_config["require_permission"]):
+                return False
+        if "access_check" in self.item_config:
+            if self.item_config["access_check"] is True:
+                return True
+            elif self.item_config["access_check"] is False:
+                return False
+            return self._call_function(self.item_config["access_check"], context, 'decide')
         return False
 
     async def async_execute(self, context: dict) -> ItemResult:
@@ -665,15 +681,6 @@ class WorkflowRemoteStep(WorkflowDelayedStep):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, execute_response=ItemResult.REMOTE_EXECUTE_REQUIRED)
 
-    def allow_decision(self, context: dict) -> bool:
-        if "require_permission" in self.item_config:
-            if not flask_login.current_user.has_permission(self.item_config["require_permission"]):
-                return False
-        if "access_check" in self.item_config:
-            if not self._call_function(self.item_config["access_check"], context):
-                return False
-        return True
-
     def complete(self, decision: bool, context: dict) -> ItemResult:
         res = ItemResult.SUCCESS if decision else ItemResult.CANCELLED
         return self._execute_wrapper(self._post_hook, context, res)
@@ -696,21 +703,6 @@ class WorkflowGateStep(WorkflowDelayedStep):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, execute_response=ItemResult.DECISION_REQUIRED)
-
-    def allow_view(self, context: dict) -> bool:
-        if "access_check" in self.item_config:
-            if not self._call_function(self.item_config["access_check"], context, 'view'):
-                return False
-        return True
-
-    def allow_decision(self, context: dict) -> bool:
-        if "require_permission" in self.item_config:
-            if not flask_login.current_user.has_permission(self.item_config["require_permission"]):
-                return False
-        if "access_check" in self.item_config:
-            if not self._call_function(self.item_config["access_check"], context, 'decide'):
-                return False
-        return True
 
     def complete(self, decision: bool, context: dict) -> ItemResult:
         res = ItemResult.SUCCESS if decision else ItemResult.CANCELLED

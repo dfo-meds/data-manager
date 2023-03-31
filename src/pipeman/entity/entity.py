@@ -14,9 +14,12 @@ from threading import RLock
 
 def entity_access(entity_type: str, op: str) -> bool:
     broad_perm = f"entities.{op}"
+    general_access = f"entities.{op}.all"
     specific_perm = f"entities.{op}.{entity_type}"
     if not flask_login.current_user.has_permission(broad_perm):
         return False
+    if flask_login.current_user.has_permission(general_access):
+        return True
     if not flask_login.current_user.has_permission(specific_perm):
         return False
     return True
@@ -27,7 +30,7 @@ def specific_entity_access(entity, op: str) -> bool:
         return False
     if op == "restore" and not entity.is_deprecated:
         return False
-    if flask_login.current_user.has_permission("organization.manage_any"):
+    if flask_login.current_user.has_permission("organizations.manage.any"):
         return True
     return entity.organization_id in flask_login.current_user.organizations
 

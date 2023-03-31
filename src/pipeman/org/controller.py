@@ -103,8 +103,8 @@ class OrganizationController:
 
     def list_organizations(self):
         with self.db as session:
-            all_access = flask_login.current_user.has_permission("organization.manage_any")
-            global_access = flask_login.current_user.has_permission("organization.manage_global")
+            all_access = flask_login.current_user.has_permission("organizations.manage.any")
+            global_access = flask_login.current_user.has_permission("organizations.manage.global")
             orgs = []
             if global_access:
                 orgs.append((0, DelayedTranslationString("pipeman.organization.global")))

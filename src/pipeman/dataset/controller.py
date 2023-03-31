@@ -50,7 +50,7 @@ class DatasetController:
         if dataset.is_deprecated:
             if operation not in ("restore", "view"):
                 return False
-            if not flask_login.current_user.has_permission(f"datasets.deprecated_access"):
+            if not flask_login.current_user.has_permission(f"datasets.view.deprecated"):
                 return False
         elif operation == "restore":
             return False
@@ -63,7 +63,7 @@ class DatasetController:
         return False
 
     def _has_organization_access(self, dataset, operation):
-        if flask_login.current_user.has_permission("organization.manage_any"):
+        if flask_login.current_user.has_permission("organizations.manage.any"):
             return True
         if not dataset.organization_id:
             return True
@@ -434,7 +434,6 @@ class DatasetController:
                 ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
                 if not ds:
                     raise DatasetNotFoundError(dataset.dataset_id)
-                ds.modified_date = datetime.datetime.now()
                 ds.is_deprecated = dataset.is_deprecated
                 ds.organization_id = int(dataset.organization_id) or None
                 ds.display_names = json.dumps(dataset.display_names())
@@ -444,8 +443,6 @@ class DatasetController:
             else:
                 ds = orm.Dataset(
                     organization_id=int(dataset.organization_id) or None,
-                    created_date=datetime.datetime.now(),
-                    modified_date=datetime.datetime.now(),
                     is_deprecated=dataset.is_deprecated,
                     display_names=json.dumps(dataset.display_names()),
                     profiles="\n".join(dataset.profiles),

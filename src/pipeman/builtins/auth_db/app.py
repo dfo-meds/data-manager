@@ -30,42 +30,42 @@ def change_my_password(duc: DatabaseUserController = None):
 
 
 @users.i18n_route("/users")
-@require_permission("auth_db.view_users")
+@require_permission("auth_db.view_all")
 @injector.inject
 def list_users(duc: DatabaseUserController = None):
     return duc.list_users_page()
 
 
 @users.route("/api/users-ajax", methods=["POST", "GET"])
-@require_permission("auth_db.view_users")
+@require_permission("auth_db.view.all")
 @injector.inject
 def list_users_ajax(duc: DatabaseUserController = None):
     return duc.list_users_ajax()
 
 
 @users.i18n_route("/users/create", methods=['GET', 'POST'])
-@require_permission("auth_db.create_users")
+@require_permission("auth_db.create")
 @injector.inject
 def create_user(duc: DatabaseUserController = None):
     return duc.create_user_form()
 
 
 @users.i18n_route("/users/<int:user_id>")
-@require_permission("auth_db.view_users")
+@require_permission("auth_db.view.all")
 @injector.inject
 def view_user(user_id, duc: DatabaseUserController = None):
     return duc.view_user_page(user_id)
 
 
 @users.i18n_route("/users/<int:user_id>/edit", methods=['GET', 'POST'])
-@require_permission("auth_db.edit_users")
+@require_permission("auth_db.edit")
 @injector.inject
 def edit_user(user_id, duc: DatabaseUserController = None):
     return duc.edit_user_form(user_id)
 
 
 @users.i18n_route("/users/<int:user_id>/reset", methods=['GET', 'POST'])
-@require_permission("auth_db.reset_passwords")
+@require_permission("auth_db.reset")
 @injector.inject
 def reset_password(user_id, duc: DatabaseUserController = None):
     return duc.reset_password_form(user_id)
