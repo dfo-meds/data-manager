@@ -43,8 +43,6 @@ RUN chmod +x /usr/local/bin/pipeman
 
 COPY . app
 
-RUN ./build.sh
-
 EXPOSE 80
 
 WORKDIR /srv/metadb/app
