@@ -199,6 +199,7 @@ class DatabaseUserController:
                         form.email.data,
                         pw, session, True
                     )
+                    session.commit()
                     for group_id in form.groups.data:
                         self._assign_to_group(user.id, group_id, session)
                     for org_id in form.organizations.data:
