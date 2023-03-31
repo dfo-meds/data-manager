@@ -6,21 +6,18 @@ import logging
 import json
 from pipeman.i18n import MultiLanguageString
 from autoinject import injector
-import zirconium as zr
-import pathlib
 import yaml
 
 
 def load_groups_from_yaml(yaml_file):
-    group_files = [pathlib.Path(__file__).absolute().parent / "groups.yaml"]
     with open(yaml_file, "r", encoding="utf-8") as h:
         groups = yaml.safe_load(h) or {}
         for gname in groups:
             try:
-                create_group(gname)
+                create_group(gname, groups[gname]["display"] or {})
             except UserInputError:
                 continue
-            for pname in groups[gname]:
+            for pname in groups[gname]["permissions"] or []:
                 try:
                     grant_permission(gname, pname)
                 except UserInputError:
