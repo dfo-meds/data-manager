@@ -16,7 +16,7 @@ def init(system):
 @injector.inject
 def core_init_app(app, system: System = None):
     system.register_nav_item("datasets", "pipeman.datasets", "core.list_datasets", "datasets.view")
-    system.register_nav_item("entities", "pipeman.entities", "core.list_entities", "entities.view_entities")
+    system.register_nav_item("entities", "pipeman.entities", "core.list_entities", "entities.view")
     system.register_nav_item("action-items", "pipeman.action-items", "core.list_workflow_items", "action_items.view")
     system.register_nav_item("action-history", "pipeman.action-history", "core.list_workflow_history", "action_items.history")
     system.register_nav_item("organizations", "pipeman.organizations", "core.list_organizations", "organizations.view")
