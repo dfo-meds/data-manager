@@ -6,6 +6,8 @@ export PYTHONUNBUFFERED
 
 cd /srv/metadb/app || exit
 
+python -m alembic upgrade head
+
 python cli.py core setup
 
 # If there's a prestart.sh script in the /app directory, run it before starting
