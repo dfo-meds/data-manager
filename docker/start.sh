@@ -6,9 +6,7 @@ export PYTHONUNBUFFERED
 
 cd /srv/metadb/app || exit
 
-if [ -z "$PIPEMAN_SKIP_SETUP" ]; then
-  python cli.py core setup
-fi
+python cli.py core setup
 
 # If there's a prestart.sh script in the /app directory, run it before starting
 PRE_START_PATH=/srv/metadb/prestart.sh
