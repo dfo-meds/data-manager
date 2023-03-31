@@ -6,6 +6,20 @@ body {
     margin: 0;
     padding: 0;
 }
+.user_info {
+    float: right;
+    width: 200px;
+    color: #FFFFFF;
+    text-align: right;
+    margin: 0;
+    padding: 0;
+    vertical-align: text-top;
+    flex-grow: 0;
+}
+.topnav_container {
+    width: 80%;
+    flex-grow: 5;
+}
 ul.vocabulary-list li a {
     font-weight: bold;
 }
@@ -81,6 +95,8 @@ a:hover {
     padding-top: 0;
 }
 .topnav {
+    display: flex;
+    flex-direction: row;
     background-color: #333333;
 }
 .topnav a {

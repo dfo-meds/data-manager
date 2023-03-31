@@ -212,7 +212,14 @@
                 <br class="cb" />
                 </div>
             <div class="topnav">
-                {{showmenu(nav_user)}}
+                <div class="topnav_container">
+                    {{showmenu(nav_user)}}
+                </div>
+                <div class="user_info">
+                    {% if current_user.is_authenticated %}
+                    {{ 'pipeman.welcome' | gettext}} {{current_user.display}}
+                    {% endif %}
+                </div>
                 <br class="cb" />
             </div>
             {% block container %}
