@@ -44,3 +44,11 @@ def core():
 @injector.inject
 def setup(system: System = None):
     system.setup()
+
+
+@core.command
+@injector.inject
+def cleanup():
+    #from .util import cleanup
+    #cleanup()
+    pass

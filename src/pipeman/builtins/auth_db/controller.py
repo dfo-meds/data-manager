@@ -205,7 +205,7 @@ class DatabaseUserController:
                         self._assign_to_org(user.id, org_id, session)
                     session.commit()
                     flask.flash(gettext("auth_db.create_user.success") + f" {pw}", "success")
-                    return flask.redirect(flask.url_for("users.view_user", username=user.username))
+                    return flask.redirect(flask.url_for("users.view_user", user_id=user.id))
         return flask.render_template("form.html", form=form, title=gettext("auth_db.user_create.title"))
 
     def create_user_cli(self, username, email, display, password):
