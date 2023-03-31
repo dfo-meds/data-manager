@@ -9,9 +9,9 @@ export PIPEMAN_CONFIG_DIR
 
 cd /srv/metadb/app || exit
 
-python -m alembic upgrade head
-
-python cli.py core setup
+if [ -z "$PIPEMAN_SKIP_SETUP" ]; then
+  python cli.py core setup
+fi
 
 # If there's a prestart.sh script in the /app directory, run it before starting
 PRE_START_PATH=/srv/metadb/prestart.sh
