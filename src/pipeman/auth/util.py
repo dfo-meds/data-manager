@@ -19,7 +19,7 @@ def groups_select(db: Database = None):
 
 
 @injector.inject
-def create_group(group_name: str, db: Database = None):
+def create_group(group_name: str, display_names: dict = None, db: Database = None):
     """Create a new group."""
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
@@ -29,6 +29,8 @@ def create_group(group_name: str, db: Database = None):
             short_name=group_name,
             permissions=""
         )
+        for key in display_names or {}:
+            g.set_display_name(key, display_names[key])
         session.add(g)
         session.commit()
         logging.getLogger("pipeman.auth").out(f"Created group {group_name}")
