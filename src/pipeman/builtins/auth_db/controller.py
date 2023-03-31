@@ -199,13 +199,14 @@ class DatabaseUserController:
                         form.email.data,
                         pw, session, True
                     )
+                    session.commit()
                     for group_id in form.groups.data:
                         self._assign_to_group(user.id, group_id, session)
                     for org_id in form.organizations.data:
                         self._assign_to_org(user.id, org_id, session)
                     session.commit()
                     flask.flash(gettext("auth_db.create_user.success") + f" {pw}", "success")
-                    return flask.redirect(flask.url_for("users.view_user", username=user.username))
+                    return flask.redirect(flask.url_for("users.view_user", user_id=user.id))
         return flask.render_template("form.html", form=form, title=gettext("auth_db.user_create.title"))
 
     def create_user_cli(self, username, email, display, password):
