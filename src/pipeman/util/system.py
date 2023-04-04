@@ -63,17 +63,17 @@ class System:
         init_system_logging(self)
         self._log.out("Initializing system")
         # Pre-init functions
-        self._log.out("Executing pre-init functions...")
+        self._log.debug("Executing pre-init functions...")
         for obj_name in self._pre_init:
             obj = load_object(obj_name)
             obj(self)
-        self._log.out("Loading plugins...")
+        self._log.debug("Loading plugins...")
         # Include plugins
         self._init_plugins()
-        self._log.out("Setting up autoinject overrides")
+        self._log.debug("Setting up autoinject overrides")
         # Manage overrides
         self._init_overrides()
-        self._log.out("Initializing locale directories")
+        self._log.debug("Initializing locale directories")
         # Set up the translation directories
         root = pathlib.Path(__file__).absolute().parent.parent
         self.i18n_dirs.update([
@@ -81,9 +81,9 @@ class System:
             str(pathlib.Path(".").absolute() / "templates"),
         ])
         # Reloading registeries
-        self._log.out("Loading registries")
+        self._log.debug("Loading registries")
         init_registries()
-        self._log.out("Initializing callbacks")
+        self._log.debug("Initializing callbacks")
         # Call the init callbacks
         for fn in self._load_init:
             fn()
@@ -229,7 +229,7 @@ class System:
     def _load_plugin(self, name: str):
         """Load a plugin from its fully qualified name."""
         if name not in self.plugins:
-            self._log.out(f"Loading plugin {name}")
+            self._log.debug(f"Loading plugin {name}")
             # Import it
             mod = importlib.import_module(name)
             # Call init_plugin() if it exists

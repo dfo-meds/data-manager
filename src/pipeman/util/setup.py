@@ -22,6 +22,8 @@ from pipeman.vocab import VocabularyRegistry
 from pipeman.workflow import WorkflowRegistry
 from pipeman.entity import EntityRegistry
 from pipeman.dataset import MetadataRegistry
+import ipaddress
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 @injector.inject
@@ -121,6 +123,45 @@ def init_registries(r1: MetadataRegistry = None, r2: VocabularyRegistry = None, 
     r4.reload_types()
 
 
+class TrustedProxyFix:
+
+    def __init__(self, app, trust_from_ips="*", **kwargs):
+        self._app = app
+        self._proxy = ProxyFix(app, **kwargs)
+        self._trusted = trust_from_ips
+        self._log = logging.getLogger("pipeman.trusted_proxy")
+
+    def _is_upstream_trustworthy(self, environ, start_response):
+        if self._trusted == "*" or self._trusted is True:
+            return True
+        if self._trusted == "" or self._trusted is False or self._trusted is None:
+            return False
+        _ip = environ.get("REMOTE_ADDR")
+        try:
+            upstream_ip = ipaddress.ip_address(_ip)
+        except ipaddress.AddressValueError:
+            self._log.warning(f"Upstream address could not be parsed: {_ip}")
+            return False
+        if isinstance(self._trusted, str):
+            return self._match_ip_address(upstream_ip, self._trusted)
+        return any(self._match_ip_address(upstream_ip, x) for x in self._trusted)
+
+    def _match_ip_address(self, actual: ipaddress, network_def):
+        try:
+            subnet = ipaddress.ip_network(network_def)
+            return actual in subnet
+        except (ipaddress.AddressValueError, ipaddress.NetmaskValueError) as ex:
+            self._log.warning(f"Trusted IP or subnet could not be parsed: {network_def}")
+            return False
+
+    def __call__(self, environ, start_response):
+        """Applies proxy configuration only if the upstream IP is allowed."""
+        if self._is_upstream_trustworthy(environ, start_response):
+            return self._proxy(environ, start_response)
+        else:
+            return self._app(environ, start_response)
+
+
 def core_init_app(system, app, config):
     if "flask" in config:
         app.config.update(config["flask"] or {})
@@ -134,6 +175,18 @@ def core_init_app(system, app, config):
     # Adjust the user timeout as necessary
     system.user_timeout = config.as_int(("pipeman", "session_expiry"), default=44640)
     app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=system.user_timeout + 1)
+
+    if config.as_bool(("pipeman", "proxy_fix", "enabled"), default=False):
+        system._log.info("Proxy headers enabled")
+        app = TrustedProxyFix(
+            app,
+            trust_from_ips=config.get(("pipeman", "proxy_fix", "trusted_upstreams"), default="*"),
+            x_for=config.get(("pipeman", "proxy_fix", "x_for"), default=1),
+            x_proto=config.get(("pipeman", "proxy_fix", "x_proto"), default=1),
+            x_host=config.get(("pipeman", "proxy_fix", "x_host"), default=1),
+            x_port=config.get(("pipeman", "proxy_fix", "x_port"), default=1),
+            x_prefix=config.get(("pipeman", "proxy_fix", "x_prefix"), default=1)
+        )
 
     # Before request, make sure the session is permanent
     @app.before_request
@@ -158,7 +211,6 @@ def core_init_app(system, app, config):
     @injector.inject
     def add_response_headers(response: flask.Response, cspr: CSPRegistry = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
-        response.headers.set("Referrer-Policy", "strict-origin")
         if flask.request.endpoint == "static":
             logging.getLogger("pipeman.access_log").info(
                 f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
