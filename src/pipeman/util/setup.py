@@ -157,10 +157,10 @@ class TrustedProxyFix:
     def __call__(self, environ, start_response):
         """Applies proxy configuration only if the upstream IP is allowed."""
         if self._is_upstream_trustworthy(environ, start_response):
-            self._log.out("trusting upstream...")
+            self._log.debug("trusting upstream...")
             return self._proxy(environ, start_response)
         else:
-            self._log.out("not trusting upstream...")
+            self._log.debug("not trusting upstream...")
             return self._app(environ, start_response)
 
 
