@@ -57,7 +57,7 @@
         <att name="summary">
 {{dataset['abstract']['en']}}
 -----
-{{dataset['abstract']['fr']
+{{dataset['abstract']['fr']}}
         </att>
         {% endif %}
         {% if dataset['title'] %}
