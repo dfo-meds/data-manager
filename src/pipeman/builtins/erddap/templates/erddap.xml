@@ -1,4 +1,28 @@
 <dataset type="{{dataset['erddap_dataset_type']['short_name']}}" datasetID="{{dataset['erddap_dataset_id']}}" active="true">
+{% macro render_text(text) %}
+{% if text is string %}
+{{text}}
+{% elif "und" in text %}
+{{text['und']}}
+{% elif "en" in text and "fr" in text %}
+{{text["en"]}}  |  {{text['fr']}}
+{% elif "en" in text %}
+{{text['en']}}
+{% elif "fr" in text %}
+{{text['fr']}}
+{% endif %}
+{% endmacro %}
+{% macro render_text_once(text) %}
+{% if text is string %}
+{{text}}
+{% elif "und" in text %}
+{{text['und']}}
+{% elif "en" in text %}
+{{text['en']}}
+{% elif "fr" in text %}
+{{text['fr']}}
+{% endif %}
+{% endmacro %}
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
     <fileDir>{{dataset['erddap_data_file_path']}}</fileDir>
     <fileNameRegex>{{dataset['erddap_data_file_pattern']}}</fileNameRegex>
@@ -12,17 +36,17 @@
         {% if dataset['point_of_contact'] %}
         {% with author = dataset['metadata_owner'] %}
         {% if author['email'] %}
-        <att name="creator_email">{{author['email'][0]}}</att>
+        <att name="creator_email">{{author['email']}}</att>
         {% endif %}
         {% if author['individual_name'] %}
         <att name="creator_name">{{author['individual_name']}}</att>
         <att name="creator_type">person</att>
         {% elif author['organization_name'] %}
-        <att name="creator_name">{{author['organization_name']}}</att>
+        <att name="creator_name">{{render_text(author['organization_name'])}}</att>
         <att name="creator_type">organization</att>
         {% endif %}
         {% if author['web_resource'] and author['web_resource'][0] and author['web_resource'][0]['url'] %}
-        <att name="creator_url">{{author['web_resource'][0]['url']}}</att>
+        <att name="creator_url">{{render_text_once(author['web_resource'][0]['url'])}}</att>
         {% endif %}
         {% endwith %}
         {% endif %}
@@ -38,15 +62,15 @@
         {% if dataset['short_institution'] %}
 		<att name="institution">{{dataset['short_institution']}}</att>
         {% endif %}
-        {% if dataset['info_link'] %}
-        <att name="infoUrl">{{dataset['info_link']['url']}}</att>
+        {% if dataset['info_link'] and dataset['info_link']['url'] %}
+        <att name="infoUrl">{{render_text_once(dataset['info_link']['url'])}}</att>
         {% endif %}
         {% if dataset['licenses'] %}
         <att name="license">
-{% for license in dataset['licenses'] %}
+{% for license in dataset['licenses'] %}{% if license['erddap_display'] %}
 {{ license['erddap_display'] }}
 
-{% endfor %}
+{% endif %}{% endfor %}
         </att>
         {% endif %}
         <att name="sourceUrl">(local files)</att>
@@ -54,17 +78,13 @@
         <att name="standard_name_vocabulary">{{dataset['standard_name_vocab']}}</att>
         {% endif %}
         {% if dataset['abstract'] %}
-        <att name="summary">
-{{dataset['abstract']['en']}}
------
-{{dataset['abstract']['fr']}}
-        </att>
+        <att name="summary">{{render_text(dataset['abstract'])}}</att>
         {% endif %}
         {% if dataset['title'] %}
-		<att name="title">{{dataset['title']['en']}} | {{dataset['title']['fr']}}</att>
+		<att name="title">{{render_text(dataset['title'])}}</att>
         {% endif %}
         {% if dataset['credit'] %}
-        <att name="acknowledgement">{{dataset['credit']['en']}} | {{dataset['credit']['fr']}}</att>
+        <att name="acknowledgement">{{render_text(dataset['credit'])}}</att>
         {% endif %}
         {% if dataset['processing_code'] %}
         <att name="processing_level">{{dataset['processing_code']}}</att>
@@ -75,17 +95,17 @@
         {% with pub = dataset['point_of_contact'] %}
         {% if pub %}
         {% if pub['email'] %}
-        <att name="publisher_email">{{pub['email'][0]}}</att>
+        <att name="publisher_email">{{pub['email']}}</att>
         {% endif %}
         {% if pub['individual_name'] %}
         <att name="publisher_name">{{pub['individual_name']}}</att>
         <att name="publisher_type">person</att>
         {% elif pub['organization_name'] %}
-        <att name="publisher_name">{{pub['organization_name']}}</att>
+        <att name="publisher_name">{{render_text(pub['organization_name'])}}</att>
         <att name="publisher_type">organization</att>
         {% endif %}
         {% if pub['web_resource'] and pub['web_resource'][0] and pub['web_resource'][0]['url'] %}
-        <att name="publisher_url">{{pub['web_resource'][0]['url']}}</att>
+        <att name="publisher_url">{{render_text_once(pub['web_resource'][0]['url'])}}</att>
         {% endif %}
         {% endif %}
         {% endwith %}
