@@ -30,7 +30,7 @@ def change_my_password(duc: DatabaseUserController = None):
 
 
 @users.i18n_route("/users")
-@require_permission("auth_db.view_all")
+@require_permission("auth_db.view.all")
 @injector.inject
 def list_users(duc: DatabaseUserController = None):
     return duc.list_users_page()
