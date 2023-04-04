@@ -611,6 +611,7 @@ resource:
   fields:
     url:
       data_type: url
+      multilingual: yes
       label:
         en: URL
     protocol:

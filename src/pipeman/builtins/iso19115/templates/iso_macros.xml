@@ -45,7 +45,7 @@
 {% endmacro %}
 {% macro render_resource(resource) %}
 <cit:CI_OnlineResource>
-  <cit:linkage>{{ render_text(resource['url']) }}</cit:linkage>
+  <cit:linkage xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(resource['url']) }}</cit:linkage>
   {% if resource['protocol'] %}
   <cit:protocol>{{ render_text(resource['protocol']['short_name']) }}</cit:protocol>
   {% endif %}
