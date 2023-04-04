@@ -21,12 +21,17 @@ class VocabularyRegistry(BaseObjectRegistry):
     def display_name(self, vocab_name):
         return MultiLanguageString(self[vocab_name]["display"])
 
+    def register(self, obj_name, *args, terms=None, **kwargs):
+        super().register(obj_name, *args, **kwargs)
+        if terms:
+            self.register_terms_from_dict(obj_name, terms)
+
     @injector.inject
-    def register_terms_from_dict(self, vocab_name, terms: dict, vtc: "pipeman.vocab.vocab.VocabularyTermController"):
+    def register_terms_from_dict(self, vocab_name, terms: dict, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
         vtc.save_terms_from_dict(vocab_name, terms)
 
     @injector.inject
-    def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController"):
+    def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
         with open(term_file, "r", encoding="utf-8") as h:
             r = csv.reader(h)
             header = None
