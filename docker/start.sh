@@ -6,8 +6,6 @@ export PYTHONUNBUFFERED
 
 cd /srv/metadb/app || exit
 
-python cli.py core setup
-
 # If there's a prestart.sh script in the /app directory, run it before starting
 PRE_START_PATH=/srv/metadb/prestart.sh
 echo "Checking for script in $PRE_START_PATH"
