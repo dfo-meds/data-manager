@@ -158,6 +158,7 @@ def core_init_app(system, app, config):
     @injector.inject
     def add_response_headers(response: flask.Response, cspr: CSPRegistry = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
+        response.headers.set("Referrer-Policy", "strict-origin")
         if flask.request.endpoint == "static":
             logging.getLogger("pipeman.access_log").info(
                 f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"

@@ -178,6 +178,8 @@ class System:
         self._nci.switch_context("flask_app")
         self._nci.destroy("init")
 
+        self._log.out(f"Flask preferred URL scheme: {app.config.get('PREFERRED_URL_SCHEME', '?')}")
+
         return app
 
     def init_cli(self):
