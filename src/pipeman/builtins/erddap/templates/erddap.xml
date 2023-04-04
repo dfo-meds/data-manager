@@ -1,34 +1,36 @@
 <dataset type="{{dataset['erddap_dataset_type']['short_name']}}" datasetID="{{dataset['erddap_dataset_id']}}" active="true">
-{% macro render_text(text) %}
-{% if text is string %}
-{{text}}
-{% elif "und" in text %}
-{{text['und']}}
-{% elif "en" in text and "fr" in text %}
-{{text["en"]}}  |  {{text['fr']}}
-{% elif "en" in text %}
-{{text['en']}}
-{% elif "fr" in text %}
-{{text['fr']}}
-{% endif %}
-{% endmacro %}
-{% macro render_text_once(text) %}
-{% if text is string %}
-{{text}}
-{% elif "und" in text %}
-{{text['und']}}
-{% elif "en" in text %}
-{{text['en']}}
-{% elif "fr" in text %}
-{{text['fr']}}
-{% endif %}
-{% endmacro %}
+{%- macro render_text(text) -%}
+    {%- if text is string -%}
+        {{text}}
+    {%- elif "und" in text and text['und'] -%}
+        {{text['und']}}
+    {%- elif "en" in text and "fr" in text and text['en'] and text['fr'] -%}
+        {{text["en"]}}  |  {{text['fr']}}
+    {%- elif "en" in text and text['en'] -%}
+        {{text['en']}}
+    {%- elif "fr" in text and text['fr'] -%}
+        {{text['fr']}}
+    {%- endif -%}
+{%- endmacro -%}
+
+{%- macro render_text_once(text) -%}
+    {%- if text is string -%}
+        {{text}}
+    {%- elif "und" in text and text['und'] -%}
+        {{text['und']}}
+    {%- elif "en" in text and text['en'] -%}
+        {{text['en']}}
+    {%- elif "fr" in text and text['fr'] -%}
+        {{text['fr']}}
+    {%- endif -%}
+{%- endmacro -%}
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
     <fileDir>{{dataset['erddap_data_file_path']}}</fileDir>
     <fileNameRegex>{{dataset['erddap_data_file_pattern']}}</fileNameRegex>
     <recursive>true</recursive>
     <metadataFrom>last</metadataFrom>
     <addAttributes>
+        {{dataset['point_of_contact']['organization_name']['fr']}}
         {% if dataset['cdm_data_type'] %}
         <att name="cdm_data_type">{{dataset['cdm_data_type']['short_name']}}</att>
         {% endif %}

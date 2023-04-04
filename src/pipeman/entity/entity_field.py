@@ -57,12 +57,14 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         return markupsafe.Markup(self._build_html_content())
 
     def data(self, **kwargs):
+        _data = []
         for c, _, _ in self._component_list():
             if c.is_deprecated:
                 continue
             ent = self.ec.load_entity(c.entity_type, c.id)
             if ent:
-                yield ent
+                _data.append(ent)
+        return _data
 
     def _build_html_content(self):
         create_link = None
