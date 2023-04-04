@@ -178,8 +178,8 @@ def core_init_app(system, app, config):
 
     if config.as_bool(("pipeman", "proxy_fix", "enabled"), default=False):
         system._log.out("Proxy fix: enabled")
-        app = TrustedProxyFix(
-            app,
+        app.wsgi_app = TrustedProxyFix(
+            app.wsgi_app,
             trust_from_ips=config.get(("pipeman", "proxy_fix", "trusted_upstreams"), default="*"),
             x_for=config.get(("pipeman", "proxy_fix", "x_for"), default=1),
             x_proto=config.get(("pipeman", "proxy_fix", "x_proto"), default=1),
