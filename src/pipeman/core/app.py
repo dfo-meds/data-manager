@@ -16,6 +16,7 @@ import logging
 
 base = flask.Blueprint("base", __name__)
 
+
 # Main home page for logged in users (the welcome page)
 @base.route("/h")
 def home():
@@ -26,6 +27,13 @@ def home():
 @base.route("/")
 def splash():
     return flask.render_template("splash.html")
+
+
+@base.route("/-/health")
+def health_check():
+    if flask.request.remote_addr != "127.0.0.1":
+        return flask.abort(404)
+    return "healthy", 200
 
 
 core = MultiLanguageBlueprint("core", __name__)
