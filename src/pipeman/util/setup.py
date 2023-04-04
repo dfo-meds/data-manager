@@ -177,7 +177,7 @@ def core_init_app(system, app, config):
     app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=system.user_timeout + 1)
 
     if config.as_bool(("pipeman", "proxy_fix", "enabled"), default=False):
-        system._log.info("Proxy headers enabled")
+        system._log.out("Proxy fix: enabled")
         app = TrustedProxyFix(
             app,
             trust_from_ips=config.get(("pipeman", "proxy_fix", "trusted_upstreams"), default="*"),
@@ -187,6 +187,8 @@ def core_init_app(system, app, config):
             x_port=config.get(("pipeman", "proxy_fix", "x_port"), default=1),
             x_prefix=config.get(("pipeman", "proxy_fix", "x_prefix"), default=1)
         )
+    else:
+        system._log.out("Proxy fix: disabled")
 
     # Before request, make sure the session is permanent
     @app.before_request
