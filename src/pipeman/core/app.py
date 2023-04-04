@@ -491,7 +491,7 @@ def cancel_item(item_id, wfc: WorkflowController = None):
 
 
 @core.i18n_route("/api/entity-select-field/<entity_types>/<int:by_revision>", methods=["POST", "GET"])
-@require_permission("_is_authenticated")
+@require_permission("entities.view")
 @injector.inject
 def api_entity_select_field_list(entity_types, by_revision: int):
     by_revision = int(by_revision)
