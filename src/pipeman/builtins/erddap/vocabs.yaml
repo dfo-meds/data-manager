@@ -7,6 +7,8 @@ erddap_dataset_types:
       en: Table from NetCDF
     EDDTableFromAsciiFiles:
       en: Table from ASCII
+    EDDGridFromNcFiles:
+      en: Grid from NetCDF
 erddap_data_types:
   display:
     en: ERDDAP - Variable Data Types
