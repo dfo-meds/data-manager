@@ -520,6 +520,7 @@ class EntitySelectField(wtf.Field):
     @staticmethod
     @injector.inject
     def results_list(entity_types, text, by_revision, db: Database = None):
+        # TODO security filtering on entity_Types
         results = {
             "results": [],
         }
