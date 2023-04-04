@@ -33,6 +33,7 @@ variable:
       data_type: text
       label:
         en: Long Name
+      multilingual: yes
     source_data_type:
       data_type: vocabulary
       vocabulary_name: erddap_data_types
