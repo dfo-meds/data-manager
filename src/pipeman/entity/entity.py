@@ -57,16 +57,17 @@ class EntityRegistry(BaseObjectRegistry):
             dfns = self[key]["derived_fields"]
             for dfn in dfns:
                 ent.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
-        validation = self[key]['validation'] or {}
-        if 'required' in validation and validation['required']:
-            for fn in validation['required']:
-                ent.add_field_validator(fn, RequiredFieldValidator())
-        if 'recommended' in validation and validation['recommended']:
-            for fn in validation['recommended']:
-                ent.add_field_validator(fn, RecommendedFieldValidator())
-        if 'custom' in validation and validation['custom']:
-            for call in validation['custom']:
-                ent.add_self_validator(CustomValidator(call))
+        if 'validation' in self[key] and self[key]['validation']:
+            validation = self[key]['validation']
+            if 'required' in validation and validation['required']:
+                for fn in validation['required']:
+                    ent.add_field_validator(fn, RequiredFieldValidator())
+            if 'recommended' in validation and validation['recommended']:
+                for fn in validation['recommended']:
+                    ent.add_field_validator(fn, RecommendedFieldValidator())
+            if 'custom' in validation and validation['custom']:
+                for call in validation['custom']:
+                    ent.add_self_validator(CustomValidator(call))
         return ent
 
 
