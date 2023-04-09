@@ -28,3 +28,5 @@ dataset_activation:
       - flag_dataset_for_review
       - pub_coord_approval
       - activate_dataset
+    cleanup:
+      - return_to_draft

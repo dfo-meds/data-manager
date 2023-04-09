@@ -10,6 +10,7 @@ import datetime
 from urllib.parse import urlparse
 import itsdangerous
 import logging
+from pipeman.util.flask import flasht
 
 
 @injector.injectable_global
@@ -234,7 +235,7 @@ class AuthenticationManager:
         # Error for if the user is not authenticated
         elif not fl.current_user.is_authenticated:
             if self.show_login_req:
-                flask.flash(gettext("pipeman.auth.login_required"), "error")
+                flasht("pipeman.auth.error.login_required", 'error')
             next_page = ""
             if self._serializer:
                 next_page = self._serializer.dumps(flask.request.url)
@@ -245,7 +246,7 @@ class AuthenticationManager:
         # Error for if the user is authenticated but doesn't have sufficient access
         else:
             if self.show_unauth:
-                flask.flash(str(gettext("pipeman.auth.not_authorized")), "error")
+                flasht("pipeman.auth.error.not_authorized", "error")
             return flask.redirect(flask.url_for(self.unauthorized_route))
 
 

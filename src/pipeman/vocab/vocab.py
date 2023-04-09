@@ -56,7 +56,7 @@ class VocabularyTermController:
         return flask.render_template(
             "list_vocabularies.html",
             vocabularies=self._vocabulary_iterator(),
-            title=gettext("pipeman.vocabularies_list.title")
+            title=gettext("pipeman.vocab.page.list_vocabularies.title")
         )
 
     def _vocabulary_iterator(self):

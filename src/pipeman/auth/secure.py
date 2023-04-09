@@ -105,10 +105,10 @@ class SecurityHelper:
         if _pepper is None:
             _pepper = self.pepper
         if len(pw) > self.max_password_length:
-            raise UserInputError("pipeman.auth.password_too_long")
+            raise UserInputError("pipeman.auth.error.password_too_long")
         if self.default_algo not in hashlib.algorithms_available:
             self.log.error(f"Hash algorithm {self.default_algo} not available")
-            raise UserInputError("pipeman.auth.hash_not_available")
+            raise UserInputError("pipeman.auth.error.hash_not_available")
         pw += _pepper
         return hashlib.pbkdf2_hmac(
             self.default_algo,
@@ -148,13 +148,13 @@ class SecurityHelper:
     def check_password_strength(self, password: str) -> bool:
         """Check that the password meets the strength requirements."""
         if not password:
-            raise UserInputError("pipeman.auth.blank_password")
+            raise UserInputError("pipeman.auth.error.blank_password")
         if len(password) < self.cfg.as_int(("pipeman", "security", "password_min_length"), default=0):
-            raise UserInputError("pipeman.auth.too_short_password")
+            raise UserInputError("pipeman.auth.error.too_short_password")
         complexities = self.cfg.get(("pipeman", "security", "password_complexity_classes"), default=None)
         if complexities:
             for complexity_key in complexities:
                 complexity_re = complexities[complexity_key]
                 if not re.match(complexity_re, password):
-                    raise UserInputError(f"pipeman.auth.complexity.{complexity_key}")
+                    raise UserInputError(f"pipeman.auth.error.missing_complexity.{complexity_key}")
         return True

@@ -39,3 +39,5 @@ dataset_activation:
         - flag_dataset_for_review
         - superuser_approval
         - activate_dataset
+      cleanup:
+        - return_to_draft

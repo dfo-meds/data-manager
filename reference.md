@@ -50,6 +50,10 @@
 |datasets.publish.all
 |datasets.publish.organization
 |datasets.publish.assigned
+|datasets.post_draft_full_edit
+|datasets.post_draft_full_edit.all
+|datasets.post_draft_full_edit.organization
+|datasets.post_draft_full_edit.assigned
 |action_items.view
 |action_items.view.completed_steps
 |action_items.history

@@ -103,7 +103,7 @@ class MultiLanguageString(BaseTranslatableString):
             return self.language_map["und"]
         if use_blank:
             return ""
-        return tm.get_text("pipeman.general.unknown")
+        return tm.get_text("pipeman.common.unknown")
 
     def keys(self):
         return self.language_map.keys()

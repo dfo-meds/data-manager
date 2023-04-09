@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 {% if for_revision %}
-<p class="revision_warning">{{'pipeman.dataset_revision.warning' | gettext}}</p>
+<p class="revision_warning">{{'pipeman.dataset.message.revision_warning' | gettext}}</p>
 {% endif %}
-<h2>{{'pipeman.dataset.properties' | gettext}}</h2>
+<h2>{{'pipeman.label.dataset.properties' | gettext}}</h2>
 <table class="property-list" cellpadding="0" cellspacing="0">
     <tbody>
     {% for name, value in dataset.properties() %}
@@ -13,7 +13,7 @@
     </tr>
     {% endfor %}</tbody>
 </table>
-<h2>{{'pipeman.dataset.metadata' | gettext}}</h2>
+<h2>{{'pipeman.label.dataset.metadata' | gettext}}</h2>
 {% for group in groups %}
 <h3>{{group_labels[group]}}</h3>
 <table class="property-list" cellpadding="0" cellspacing="0">
@@ -27,14 +27,14 @@
 </table>
 {% endfor %}
 {% if dataset.revision_no %}
-<h2>{{'pipeman.dataset.metadata_files' | gettext}}</h2>
+<h2>{{'pipeman.label.dataset.metadata_files' | gettext}}</h2>
 <ul>
 {% for link, text in dataset.metadata_format_links() %}
 <li><a href="{{link}}">{{text}}</a></li>
 {% endfor %}
 </ul>
 {% if pubs %}
-<h2>{{'pipeman.dataset.published_versions' | gettext}}</h2>
+<h2>{{'pipeman.label.dataset.published_versions' | gettext}}</h2>
 <ul>
     {% for link, date in pubs %}
     <li><a href="{{link}}">{{date | format_datetime}}</a></li>

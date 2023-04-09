@@ -1,17 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
-<p>{{ 'dfo.welcome' | gettext }}</p>
-<h2>{{'dfo.usage_warning.header' | gettext}}</h2>
-<p>{{'dfo.usage_warning' | gettext}}</p>
+<p>{{ 'cnodc.welcome_message' | gettext }}</p>
+<h2>{{'cnodc.usage_warning.header' | gettext}}</h2>
+<p>{{'cnodc.usage_warning' | gettext}}</p>
 {% if current_user.is_authenticated %}
-<h2>{{'dfo.recent_activity.header' | gettext}}</h2>
+<h2>{{'pipeman.auth_db.page.view_myself.info_header' | gettext}}</h2>
 <table class="property-list" cellpadding="0" cellspacing="0">
     <tbody>
-    <tr><th>{{'auth_db.last_success' | gettext}}</th><td>{% if current_user.property('last_success') %}{{current_user.property('last_success') | format_datetime}}{% else %}{{'auth_db.no_recent_logins' | gettext}}{% endif %}</td></tr>
-    <tr><th>{{'auth_db.last_success_ip' | gettext}}</th><td>{% if current_user.property('last_success_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.general.na' | gettext}}{% endif %}</td></tr>
-    <tr><th>{{'auth_db.last_error' | gettext}}</th><td>{% if current_user.property('last_error') %}{{current_user.property('last_error') | format_datetime}}{% else %}{{'auth_db.no_recent_failed_logins' | gettext}}{% endif %}</td></tr>
-    <tr><th>{{'auth_db.last_error_ip' | gettext}}</th><td>{% if current_user.property('last_error_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.general.na' | gettext}}{% endif %}</td></tr>
-    <tr><th>{{'auth_db.total_errors' | gettext}}</th><td>{{current_user.property('total_errors')}}</td></tr>
+    <tr><th>{{'pipeman.label.user.display_name' | gettext}}</th><td>{{current_user.display}}</td></tr>
+    <tr><th>{{'pipeman.label.user.username' | gettext}}</th><td>{{current_user.username}}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_success' | gettext}}</th><td>{% if current_user.property('last_success') %}{{current_user.property('last_success') | format_datetime}}{% else %}{{'pipeman.auth.message.no_recent_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_success_ip' | gettext}}</th><td>{% if current_user.property('last_success_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.common.na' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_error' | gettext}}</th><td>{% if current_user.property('last_error') %}{{current_user.property('last_error') | format_datetime}}{% else %}{{'pipeman.auth.message.no_recent_failed_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_error_ip' | gettext}}</th><td>{% if current_user.property('last_error_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.common.na' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.total_errors' | gettext}}</th><td>{{current_user.property('total_errors')}}</td></tr>
     </tbody>
 </table>
 {% endif %}

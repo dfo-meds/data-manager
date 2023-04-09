@@ -13,7 +13,7 @@ import datetime
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm, SecureBaseForm, ActionList, Select2Widget
+from pipeman.util.flask import ConfirmationForm, SecureBaseForm, ActionList, Select2Widget, flasht
 from pipeman.util.flask import ActionListColumn, DatabaseColumn, DataQuery, DataTable, DisplayNameColumn
 import flask_login
 import wtforms.validators as wtfv
@@ -45,25 +45,25 @@ class EntityController:
         }
         for_comp = ent.parent_id is not None
         if short_list:
-            actions.add_action("pipeman.general.view", "core.view_entity", **kwargs)
+            actions.add_action("pipeman.entity.page.view_entity.link", "core.view_entity", **kwargs)
         elif for_comp:
             if ent.parent_type == 'dataset':
-                actions.add_action("pipeman.entity.view_dataset", "core.view_dataset", dataset_id=ent.parent_id)
+                actions.add_action("pipeman.label.entity.dataset.link", "core.view_dataset", dataset_id=ent.parent_id)
         if self.has_specific_access(ent, "edit"):
             if for_comp:
-                actions.add_action("pipeman.general.edit", "core.edit_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.edit_component.link", "core.edit_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.edit", "core.edit_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.edit_entity.link", "core.edit_entity", **kwargs)
         if self.has_specific_access(ent, "remove"):
             if for_comp:
-                actions.add_action("pipeman.general.remove", "core.remove_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.remove_component.link", "core.remove_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.remove", "core.remove_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.remove_entity.link", "core.remove_entity", **kwargs)
         if self.has_specific_access(ent, "restore"):
             if for_comp:
-                actions.add_action("pipeman.general.restore", "core.restore_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.restore_component.link", "core.restore_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.restore", "core.restore_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.restore_entity.link", "core.restore_entity", **kwargs)
         return actions
 
     def _build_format_list(self):
@@ -73,7 +73,7 @@ class EntityController:
         return flask.render_template(
             self.view_template,
             entity=ent,
-            title=gettext("pipeman.entity_view.title"),
+            title=gettext("pipeman.entity.page.view_entity.title"),
             actions=self.build_action_list(ent, False)
         )
 
@@ -82,88 +82,88 @@ class EntityController:
         form = EntityForm(new_ent, container=container)
         if form.handle_form():
             self.save_entity(new_ent)
-            flask.flash(gettext("pipeman.entity_create.success"), 'success')
+            flasht("pipeman.entity.page.create_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.entity_create.title')
+            title=gettext('pipeman.entity.page.create_component.title')
         )
 
     def edit_component_form(self, ent, container):
         form = EntityForm(ent, container=container)
         if form.handle_form():
             self.save_entity(ent)
-            flask.flash(gettext("pipeman.entity_edit.success"), 'success')
+            flasht("pipeman.entity.page.edit_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.component_edit.title")
+            title=gettext("pipeman.entity.page.edit_component.title")
         )
 
     def remove_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
-            flask.flash(gettext("pipeman.entity_remove.success"), 'success')
+            flasht("pipeman.entity.page.remove_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_remove.confirmation"),
-            title=gettext("pipeman.entity_remove.title")
+            instructions=gettext("pipeman.entity.page.remove_component.instructions"),
+            title=gettext("pipeman.entity.page.remove_component.title")
         )
 
     def restore_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
-            flask.flash(gettext("pipeman.entity_restore.success"), 'success')
+            flasht("pipeman.entity.page.restore_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_restore.confirmation"),
-            title=gettext("pipeman.entity_restore.title")
+            instructions=gettext("pipeman.entity.page.restore_component.instructions"),
+            title=gettext("pipeman.entity.page.restore_component.title")
         )
 
     def edit_entity_form(self, ent):
         form = EntityForm(ent)
         if form.handle_form():
             self.save_entity(ent)
-            flask.flash(gettext("pipeman.entity_edit.success"), 'success')
+            flasht("pipeman.entity.page.edit_entity.success", 'success')
             return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.db_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.entity_edit.title")
+            title=gettext("pipeman.entity.page.edit_entity.title")
         )
 
     def remove_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
-            flask.flash(gettext("pipeman.entity_remove.success"), 'success')
+            flasht("pipeman.entity.page.remove_entity.success", 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_remove.confirmation"),
-            title=gettext("pipeman.entity_remove.title")
+            instructions=gettext("pipeman.entity.page.remove_entity.instructions"),
+            title=gettext("pipeman.entity.page.remove_entity.title")
         )
 
     def restore_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
-            flask.flash(gettext("pipeman.entity_restore.success"), 'success')
+            flasht("pipeman.entity.page.restore_entity.success", 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_restore.confirmation"),
-            title=gettext("pipeman.entity_restore.title")
+            instructions=gettext("pipeman.entity.page.restore_entity.confirmation"),
+            title=gettext("pipeman.entity.page.restore_entity.title")
         )
 
     def create_entity_form(self, entity_type):
@@ -171,12 +171,12 @@ class EntityController:
         form = EntityForm(new_ent)
         if form.handle_form():
             self.save_entity(new_ent)
-            flask.flash(gettext("pipeman.entity_create.success"), 'success')
+            flasht("pipeman.entity.page.create_entity.success", 'success')
             return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.db_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.entity_create.title')
+            title=gettext('pipeman.entity.page.create_entity.title')
         )
 
     def has_access(self, entity_type, op):
@@ -222,13 +222,13 @@ class EntityController:
         if self.has_access(entity_type, "create"):
             links.append((
                 flask.url_for("core.create_entity", obj_type=entity_type),
-                gettext("pipeman.create_entity.link")
+                gettext("pipeman.entity.page.create_entity.link")
             ))
         return flask.render_template(
             "data_table.html",
             table=self._list_entities_table(entity_type),
             side_links=links,
-            title=gettext("pipeman.entity_list.title")
+            title=gettext("pipeman.entity.page.list_entities.title")
         )
 
     def list_entities_ajax(self, entity_type):
@@ -244,7 +244,7 @@ class EntityController:
             ajax_route=flask.url_for("core.list_entities_by_type_ajax", obj_type=entity_type),
             default_order=[("id", "asc")]
         )
-        dt.add_column(DatabaseColumn("id", gettext("pipeman.entity.id"), allow_order=True))
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.label.entity.id"), allow_order=True))
         dt.add_column(DisplayNameColumn())
         dt.add_column(ActionListColumn(action_callback=functools.partial(self.build_action_list, short_list=True)))
         return dt
@@ -333,57 +333,48 @@ class EntityForm(SecureBaseForm):
         controls = {
             "_name": TranslatableField(
                 wtf.StringField,
-                label=DelayedTranslationString("pipeman.entity_form.display_name"),
+                label=DelayedTranslationString("pipeman.common.display_name"),
                 default=self.entity.display_names()
             ),
             "_org": wtf.SelectField(
-                label=DelayedTranslationString("pipeman.entity.organization"),
+                label=DelayedTranslationString("pipeman.label.entity.organization_name"),
                 choices=self.ocontroller.list_organizations(),
                 coerce=int,
                 default=self.entity.organization_id if self.entity.organization_id else "",
-                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
-                validators=[wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required"))]
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
+                validators=[wtfv.InputRequired(message=DelayedTranslationString("pipeman.error.required_field"))]
             ),
         }
         self.container = container
         if entity.is_component and container is None:
             controls["_dataset"] = wtf.SelectField(
-                label=DelayedTranslationString("pipeman.entity.dataset"),
+                label=DelayedTranslationString("pipeman.label.entity.dataset"),
                 choices=self.dcontroller.list_datasets_for_component(),
                 default=self.entity.parent_id if self.entity.parent_id else "",
-                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
                 validators=[wtfv.InputRequired(
-                    message=DelayedTranslationString("pipeman.fields.required")
+                    message=DelayedTranslationString("pipeman.error.required_field")
                 )]
             )
         controls.update(self.entity.controls())
-        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
         super().__init__(controls, *args, **kwargs)
         self.process()
 
     def handle_form(self):
-        if flask.request.method == "POST":
-            self.process(flask.request.form)
-            if self.validate():
-                d = self.data
-                self.entity.process_form_data(d)
-                for key in d["_name"]:
-                    self.entity.set_display_name(key, d["_name"][key])
-                if self.container:
-                    self.entity.parent_id = self.container.container_id
-                    self.entity.parent_type = self.container.container_type
-                elif self.entity.is_component and "_dataset" in d and d["_dataset"]:
-                    self.entity.parent_id = d["_dataset"]
-                    self.entity.parent_type = "dataset"
-                self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
-                return True
-            else:
-                for key in self.errors:
-                    for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error").format(
-                            field=self._fields[key].label.text,
-                            error=m
-                        ), "error")
+        if self.validate_on_submit():
+            d = self.data
+            self.entity.process_form_data(d)
+            for key in d["_name"]:
+                self.entity.set_display_name(key, d["_name"][key])
+            if self.container:
+                self.entity.parent_id = self.container.container_id
+                self.entity.parent_type = self.container.container_type
+            elif self.entity.is_component and "_dataset" in d and d["_dataset"]:
+                self.entity.parent_id = d["_dataset"]
+                self.entity.parent_type = "dataset"
+            self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
+            return True
         return False
 
     def validate(self, extra_validators=None):

@@ -69,7 +69,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
     def _build_html_content(self):
         create_link = None
         if not self.parent_id:
-            return gettext("pipeman.component.add_later")
+            return gettext("pipeman.entity.message.add_components_after_creation")
         if self.parent_id and self.ec.has_access(self.field_config["entity_type"], "create"):
             # TODO: dataset access to edit??
             create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], parent_id=self.parent_id, parent_type=self.parent_type)

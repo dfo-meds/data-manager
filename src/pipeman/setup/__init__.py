@@ -28,3 +28,8 @@ def setup_module(
     mreg.register_security_labels_from_yaml(root_path / "security.yaml")
     load_groups_from_yaml(root_path / "groups.yaml")
 
+
+# gettext('pipeman.label.witem.type.receive_send_item')
+# gettext('pipeman.label.witem.type.send_file')
+# gettext('pipeman.label.witem.type.dataset_publication')
+# gettext('pipeman.label.witem.type.dataset_activation')

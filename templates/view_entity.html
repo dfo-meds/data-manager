@@ -3,15 +3,15 @@
 <table cellpadding="0" cellspacing="0" border="0" class="property-list">
     <tbody>
         <tr>
-            <th>{{'pipeman.entity.id' | gettext}}</th>
+            <th>{{'pipeman.label.entity.id' | gettext}}</th>
             <td>{{entity.db_id}}</td>
         </tr>
         <tr>
-            <th>{{'pipeman.entity.status' | gettext }}</th>
-            <td>{% if entity.is_deprecated %}{{'pipeman.general.deprecated' | gettext}}{% else %}{{'pipeman.general.active' | gettext}}{% endif %}</td>
+            <th>{{'pipeman.label.entity.status' | gettext }}</th>
+            <td>{% if entity.is_deprecated %}{{'pipeman.common.deprecated' | gettext}}{% else %}{{'pipeman.common.active' | gettext}}{% endif %}</td>
         </tr>
         <tr>
-            <th>{{'pipeman.entity.display' | gettext}}</th>
+            <th>{{'pipeman.common.display_name' | gettext}}</th>
             <td>{{entity.label()}}</td>
         </tr>
         {% for label, value in entity.display_values() %}

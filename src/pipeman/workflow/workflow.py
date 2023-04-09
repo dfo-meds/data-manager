@@ -3,7 +3,7 @@ from enum import Enum
 import importlib
 import flask_login
 import flask
-from pipeman.util.flask import ConfirmationForm, ActionList, paginate_query
+from pipeman.util.flask import ConfirmationForm, ActionList, flasht
 from pipeman.util import deep_update
 from pipeman.util.errors import StepNotFoundError, StepConfigurationError, WorkflowNotFoundError, WorkflowItemNotFoundError
 from autoinject import injector
@@ -97,6 +97,12 @@ class WorkflowRegistry:
         if key not in self._workflows:
             raise WorkflowNotFoundError(key)
         return self._workflows[key]["steps"]
+        
+    def cleanup_step_list(self, category_name, workflow_name):
+        key = f"{category_name}__{workflow_name}"
+        if key not in self._workflows:
+            raise WorkflowNotFoundError(key)
+        return self._workflows[key]["cleanup"] if "cleanup" in self._workflows[key] and self._workflows[key] else []
 
     def list_workflows(self, workflow_type):
         for key in self._workflows:
@@ -134,11 +140,11 @@ class ItemDisplayWrapper:
 
     def properties(self):
         return [
-            (gettext('pipeman.workflow_item.object_link'), markupsafe.Markup(f"<a href='{self.object_link()}'>{self.object_link_text()}</a>")),
-            (gettext('pipeman.workflow_item.type'), gettext(f'pipeman.workflow_types.{self.item.workflow_type}')),
-            (gettext('pipeman.workflow_item.name'), self.reg.workflow_display(self.item.workflow_type, self.item.workflow_name)),
-            (gettext('pipeman.workflow_item.created'), format_datetime(self.item.created_date)),
-            (gettext('pipeman.workflow_item.status'), gettext(f'pipeman.workflow_statuses.{self.item.status.lower()}')),
+            (gettext('pipeman.label.witem.object_link'), markupsafe.Markup(f"<a href='{self.object_link()}'>{self.object_link_text()}</a>")),
+            (gettext('pipeman.label.witem.type'), gettext(f'pipeman.label.witem.type.{self.item.workflow_type}')),
+            (gettext('pipeman.label.witem.name'), self.reg.workflow_display(self.item.workflow_type, self.item.workflow_name)),
+            (gettext('pipeman.label.witem.created'), format_datetime(self.item.created_date)),
+            (gettext('pipeman.label.witem.status'), gettext(f'pipeman.label.witem.status.{self.item.status.lower()}')),
         ]
 
     def steps(self):
@@ -149,7 +155,7 @@ class ItemDisplayWrapper:
         for idx, step in enumerate(step_list):
             data = [self.reg.step_display(step)]
             if step in decision_list:
-                template = gettext("pipeman.workflow_item.gate_completed") if decision_list[step].decision else gettext("pipeman.workflow_item.gate_cancelled")
+                template = gettext("pipeman.label.witem.step.gate_completed") if decision_list[step].decision else gettext("pipeman.label.witem.step.gate_cancelled")
                 template = template.format(
                     decider=decision_list[step].decider_id,
                     date=format_datetime(decision_list[step].decision_date)
@@ -166,6 +172,14 @@ class ItemDisplayWrapper:
             else:
                 data.append("pending")
             yield data
+# gettext('pipeman.label.witem.step.in-progress')
+# gettext('pipeman.label.witem.step.pending')
+# gettext('pipeman.label.witem.step.complete')
+# gettext('pipeman.label.witem.status.complete')
+# gettext('pipeman.label.witem.status.failure')
+# gettext('pipeman.label.witem.status.cancelled')
+# gettext('pipeman.label.witem.status.in-progress')
+# gettext('pipeman.label.witem.status.unknown')
 
 
 @injector.injectable
@@ -187,7 +201,7 @@ class WorkflowController:
         elif result == ItemResult.CANCELLED:
             return "cancelled"
         else:
-            return "in_progress"
+            return "in-progress"
 
     def interpret_status(self, status):
         if status == "SUCCESS":
@@ -197,7 +211,7 @@ class WorkflowController:
         elif status == "CANCELLED":
             return "cancelled"
         else:
-            return "in_progress"
+            return "in-progress"
 
     def start_workflow(self, workflow_type, workflow_name, workflow_context, object_id=None):
         with self.db as session:
@@ -238,10 +252,11 @@ class WorkflowController:
             if not self._has_access(item, "decide"):
                 return flask.abort(403)
             item_url = flask.url_for("core.view_item", item_id=item_id)
-            base_key = "pipeman.workflow.continue" if decision else 'pipeman.workflow.cancel'
+            base_key = "pipeman.workflow.page.continue" if decision else 'pipeman.workflow.page.cancel'
             form = ConfirmationForm()
             if form.validate_on_submit():
                 self._make_decision(item, session, decision)
+                flasht(f"{base_key}.success", "success")
                 return flask.redirect(item_url)
             return flask.render_template(
                 "form.html",
@@ -250,91 +265,12 @@ class WorkflowController:
                 title=gettext(f"{base_key}.title"),
                 back=item_url
             )
-
-    def pop_remote_pipeline(self, pipeline_name):
-        with self.db as session:
-            q = session.query(orm.WorkflowItem).filter_by(
-                workflow_type='pipeline',
-                workflow_name=pipeline_name,
-                status='REMOTE_EXEC_QUEUED',
-                locked_by=None
-            )
-            my_id = str(uuid.uuid4())
-            lock_time = datetime.datetime.now()
-            for item in q:
-                step, steps = self._build_next_step(item)
-                ctx = self._build_context(item)
-                if not step.allow_decision(ctx):
-                    continue
-                session.execute(
-                    sa.update(orm.WorkflowItem)
-                    .where(orm.WorkflowItem.id == item.id)
-                    .where(orm.WorkflowItem.locked_by == None)
-                    .values(
-                        locked_by=my_id,
-                        locked_since=lock_time,
-                        status='REMOTE_EXEC_IN_PROGRESS'
-                    )
-                )
-                session.commit()
-                session.refresh(item)
-                if item.locked_by == my_id:
-                    return json.dumps({
-                        "id": item.id,
-                        "context": ctx,
-                        "until": lock_time,
-                        "owner_id": my_id,
-                        "renew_url": flask.url_for("core.renew_remote_item", item_id=item.id, _external=True),
-                        "complete_url": flask.url_for("core.item_completed", item_id=item.id, _external=True),
-                        "cancel_url": flask.url_for("core.item_cancelled", item_id=item.id, _external=True),
-                        "release_url": flask.url_for("core.release_remote_item", item_id=item.id, _external=True),
-                    }), 200, {"ContentType": "application/json"}
-            return json.dumps({}), 200, {"ContentType": "application/json"}
-
-    def release_remote_lock(self, item_id):
-        with self.db as session:
-            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
-            if not item:
-                return flask.abort(404)
-            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
-                return flask.abort(403)
-            step, steps = self._build_next_step(item)
-            ctx = self._build_context(item)
-            if not step.allow_decision(ctx):
-                return flask.abort(403)
-            item.locked_since = None
-            item.locked_by = None
-            item.status = "REMOTE_EXEC_QUEUED"
-            session.commit()
-
-    def renew_remote_lock(self, item_id):
-        with self.db as session:
-            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
-            if not item:
-                return flask.abort(404)
-            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
-                return flask.abort(403)
-            step, steps = self._build_next_step(item)
-            ctx = self._build_context(item)
-            if not step.allow_decision(ctx):
-                return flask.abort(403)
-            item.locked_since = datetime.datetime.now()
-            session.commit()
-
-    def remote_work_complete(self, item_id, decision: bool = True):
-        with self.db as session:
-            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
-            if not item:
-                return flask.abort(404)
-            if not item.status == "REMOTE_EXEC_IN_PROGRESS":
-                return flask.abort(403)
-            step, steps = self._build_next_step(item)
-            ctx = self._build_context(item)
-            if not step.allow_decision(ctx):
-                return flask.abort(403)
-            self._make_decision(item, session, decision)
-            session.commit()
-            return "", 200, {}
+        # gettext('pipeman.workflow.page.continue.title')
+        # gettext('pipeman.workflow.page.continue.instructions')
+        # gettext('pipeman.workflow.page.continue.success')
+        # gettext('pipeman.workflow.page.cancel.title')
+        # gettext('pipeman.workflow.page.cancel.instructions')
+        # gettext('pipeman.workflow.page.cancel.success')
 
     def view_item_page(self, item_id):
         with self.db as session:
@@ -347,7 +283,7 @@ class WorkflowController:
             return flask.render_template(
                 "view_workflow_item.html",
                 item=ItemDisplayWrapper(item),
-                title=gettext("pipeman.workflow_view.title"),
+                title=gettext("pipeman.workflow.page.view_item.title"),
                 actions=actions
             )
 
@@ -355,7 +291,7 @@ class WorkflowController:
         return flask.render_template(
             "data_table.html",
             table=self._item_table(active_only),
-            title=gettext("pipeman.workflow_list.title")
+            title=gettext("pipeman.workflow.page.list_items.title")
         )
 
     def list_workflow_items_ajax(self, active_only: bool = True):
@@ -377,18 +313,18 @@ class WorkflowController:
         )
         dt.add_column(DatabaseColumn(
             "id",
-            gettext("pipeman.item.id"),
+            gettext("pipeman.label.witem.id"),
             allow_order=True
         ))
         dt.add_column(DatabaseColumn(
             "created_date",
-            gettext("pipeman.item.created"),
+            gettext("pipeman.label.witem.created"),
             allow_order=True,
             formatter=format_datetime
         ))
         dt.add_column(CustomDisplayColumn(
             "object_link",
-            gettext("pipeman.item.object_link"),
+            gettext("pipeman.label.witem.object_link"),
             self._format_object_link
         ))
         dt.add_column(ActionListColumn(
@@ -400,10 +336,10 @@ class WorkflowController:
         actions = ActionList()
         kwargs = {'item_id': item.id}
         if short_mode:
-            actions.add_action('pipeman.general.view', 'core.view_item', **kwargs)
+            actions.add_action('pipeman.workflow.page.view_item.link', 'core.view_item', **kwargs)
         if self._has_access(item, 'decide'):
-            actions.add_action('pipeman.workflow_item.approve', 'core.approve_item', **kwargs)
-            actions.add_action('pipeman.workflow_item.cancel', 'core.cancel_item', **kwargs)
+            actions.add_action('pipeman.workflow.page.continue.link', 'core.approve_item', **kwargs)
+            actions.add_action('pipeman.workflow.page.cancel.link', 'core.cancel_item', **kwargs)
         return actions
 
     def _item_query(self, session, only_active: bool = True):
@@ -468,42 +404,66 @@ class WorkflowController:
     def _handle_step_result(self, result, item, session, steps, ctx):
         if result == ItemResult.FAILURE:
             item.status = "FAILURE"
-            "gettext('pipeman.workflow_statuses.failure')"
+            # "gettext('pipeman.label.witem.status.failure')"
         elif result == ItemResult.DECISION_REQUIRED:
             item.status = "DECISION_REQUIRED"
-            "gettext('pipeman.workflow_statuses.decision_required')"
+            # "gettext('pipeman.label.witem.status.decision_required')"
         elif result == ItemResult.BATCH_EXECUTE:
             item.status = "BATCH_EXECUTE"
-            "gettext('pipeman.workflow_statuses.batch_execute')"
+            # "gettext('pipeman.label.witem.status.batch_execute')"
         elif result == ItemResult.ASYNC_EXECUTE:
             item.status = "ASYNC_EXECUTE"
-            "gettext('pipeman.workflow_statuses.async_execute')"
+            # "gettext('pipeman.label.witem.status.async_execute')"
         elif result == ItemResult.CANCELLED:
             item.status = "CANCELLED"
-            "gettext('pipeman.workflow_statuses.cancelled')"
+            # "gettext('pipeman.label.witem.status.cancelled')"
         elif result == ItemResult.REMOTE_EXECUTE_REQUIRED:
             item.status = "REMOTE_EXEC_QUEUED"
-            "gettext('pipeman.workflow_statuses.remote_exec_queued')"
+            # "gettext('pipeman.label.witem.status.remote_exec_queued')"
         else:
             item.completed_index += 1
             item.status = "IN_PROGRESS"
-            "gettext('pipeman.workflow_statuses.in_progress')"
+            # "gettext('pipeman.label.witem.status.in_progress')"
         item.context = json.dumps(ctx)
         session.commit()
         if item.status == "IN_PROGRESS":
             self._start_next_step(item, session, steps, ctx)
+        elif item.status in ('FAILURE', 'CANCELLED'):
+            self._handle_cleanup(item, session, steps, ctx, item.status)
+            
+    def _handle_cleanup(self, item, session, steps, ctx, end_state):
+        cleanup_steps = []
+        try:
+            cleanup_steps = self.reg.cleanup_steps(item.workflow_type, item.workflow_name)
+        except WorkflowNotFoundError as ex:
+            return
+        if not cleanup_steps:
+            return
+        next_index = len(steps)
+        steps.extend(cleanup_steps)
+        # Remember the original state so we can set it when we finish
+        ctx['_cleanup_set_state'] = end_state
+        item.step_list = json.dumps(steps)
+        item.completed_index = len(steps)
+        item.context = json.dumps(ctx)
+        session.commit()
+        self._start_next_step(item, session, steps, ctx)
 
-    def _build_next_step(self, item, steps=None):
+    def _build_next_step(self, item, steps=None, ctx=None):
         steps = steps or json.loads(item.step_list)
         next_index = item.completed_index
         if next_index >= len(steps):
-            item.status = "COMPLETE"
-            "gettext('pipeman.workflow_statuses.cancelled')"
+            ctx = self._build_context(item, ctx)
+            if '_cleanup_set_state' in ctx and ctx['_cleanup_set_state']:
+                item.status = ctx['_cleanup_set_state']
+            else:
+                item.status = "COMPLETE"
+            # "gettext('pipeman.label.witem.status.complete')"
             return None, None
         return self.reg.construct_step(steps[next_index]), steps
 
     def _start_next_step(self, item, session, steps=None, ctx=None):
-        step, steps = self._build_next_step(item, steps)
+        step, steps = self._build_next_step(item, steps, ctx)
         if step is None:
             session.commit()
             return
@@ -734,29 +694,3 @@ class DefaultStepFactory(GenericStepFactory):
             WorkflowAsynchronousStep,
         ])
 
-
-class EventFiringForm(BaseForm):
-
-    reg: WorkflowRegistry = None
-
-    @injector.construct
-    def __init__(self, *args, event_name=None, **kwargs):
-        self.event_name = event_name
-        fields = self.reg.get_event_fields(self.event_name)
-        self.container = FieldContainer(fields)
-        controls = self.container.controls()
-        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
-        super().__init__(controls, *args, **kwargs)
-
-    def handle_form(self):
-        if flask.request.method == "POST":
-            self.process(flask.request.form)
-            if self.validate():
-                d = self.data
-                self.container.process_form_data(d)
-                return True
-            else:
-                for key in self.errors:
-                    for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error") % (self._fields[key].label.text, m), "error")
-        return False

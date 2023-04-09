@@ -28,6 +28,13 @@ import yaml
 import secrets
 import datetime
 
+
+def flasht(dts_str, message_type='info', default=None, *args, **kwargs):
+    if isinstance(dts_str, str):
+        dts_str = DelayedTranslationString(dts_str, default, *args, **kwargs)
+    flask.flash(str(dts_str), message_type)
+
+
 WORD_FANCY_MAP = {
     "‘": "'",
     "’": "'",
@@ -61,10 +68,7 @@ class PipemanFlaskForm(FlaskForm):
         elif self.errors:
             for key in self.errors:
                 for m in self.errors[key]:
-                    flask.flash(gettext("pipeman.entity.form_error").format(
-                        field=self._fields[key].label.text,
-                        error=m
-                    ), "error")
+                    flasht("pipeman.error.form", "error", field=self._fields[key].label.text, error=m)
         return False
 
 
@@ -72,7 +76,7 @@ class NoControlCharacters:
     """Ensure there are no control characters"""
 
     def __init__(self, exceptions=None, message=None):
-        self.message = message or DelayedTranslationString("pipeman.errors.control_char_in_str")
+        self.message = message or DelayedTranslationString("pipeman.error.control_char_in_str")
         self.exceptions = exceptions or []
 
     def __call__(self, form, field, message=None):
@@ -404,11 +408,23 @@ class SecureBaseForm(BaseForm):
     def __init__(self, controls, *args, **kwargs):
         meta = SecureBaseForm.Meta()
         super().__init__(controls, *args, meta=meta, **kwargs)
+        
+    def validate_on_submit(self):
+        if flask.request.method == "POST":
+            self.process(flask.request.form)
+            if self.validate():
+                return True
+            else:
+                for key in self.errors:
+                    for m in self.errors[key]:
+                        flasht("pipeman.error.form", "error", field=self._fields[key].label.text, error=m)
+        return False
+
 
 
 class ConfirmationForm(FlaskForm):
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
 
 class FlatPickrWidget:
@@ -426,7 +442,7 @@ class FlatPickrWidget:
         if field.data:
             markup += f"value='{str(field.data)}' "
         markup += '/>'
-        markup += f' <button type="button" id="flatpickr-clear-button-{field.id}">{gettext("pipeman.general.clear")}</button>'
+        markup += f' <button type="button" id="flatpickr-clear-button-{field.id}">{gettext("pipeman.common.clear")}</button>'
         markup += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  let fp = $('#{field.id}').flatpickr(" + "{\n"
@@ -512,7 +528,7 @@ class EntitySelectField(wtf.Field):
                 ),
                 allow_multiple=self.allow_multiple,
                 query_delay=250,
-                placeholder=DelayedTranslationString("pipeman.general.empty_select"),
+                placeholder=DelayedTranslationString("pipeman.common.placeholder"),
                 min_input=min_chars_to_search
             )
         super().__init__(*args, widget=widget, **kwargs)
@@ -565,7 +581,7 @@ class EntitySelectField(wtf.Field):
 
     def iter_choices(self):
         if self.include_empty:
-            yield "", DelayedTranslationString("pipeman.general.empty_select"), not self.data
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data
         if self.data:
             with self.db as session:
                 if self.allow_multiple:
@@ -599,18 +615,18 @@ class EntitySelectField(wtf.Field):
         revision_no = None
         if by_revision:
             if "|" not in value:
-                raise FormValueError("pipeman.entity_field.missing_revision_piece")
+                raise FormValueError("pipeman.entity_field.error.missing_revision_piece")
             pieces = value.split("|", maxsplit=1)
             if not len(pieces) == 2:
-                raise FormValueError("pipeman.entity_field.malformed_revision_str")
+                raise FormValueError("pipeman.entity_field.error.malformed_revision_str")
             entity_id = pieces[0] or None
             revision_no = pieces[1] or None
         if entity_id is None:
-            raise FormValueError("pipeman.entity_field_missing_entity_id")
+            raise FormValueError("pipeman.entity_field.error.missing_entity_id")
         if not entity_id.isdigit():
-            raise FormValueError("pipeman.entity_field.bad_entity_id")
+            raise FormValueError("pipeman.entity_field.error.bad_entity_id")
         if revision_no is not None and not revision_no.isdigit():
-            raise FormValueError("pipeman.entity_field.bad_revision_no")
+            raise FormValueError("pipeman.entity_field.error.bad_revision_no")
         return int(entity_id), int(revision_no) if revision_no else None
 
     @staticmethod
@@ -619,14 +635,14 @@ class EntitySelectField(wtf.Field):
         ent = session.query(orm.Entity).filter_by(id=int(entity_id)).first()
         rev = None
         if not ent:
-            raise FormValueError("pipeman.entity_field.no_such_entity")
+            raise FormValueError("pipeman.entity_field.error.no_such_entity")
         if not flask_login.current_user.has_permission("organization.manage_any"):
             if ent.organization_id is not None and ent.organization_id not in flask_login.current_user.organizations:
-                raise FormValueError("pipeman.entity_field.no_entity_access")
+                raise FormValueError("pipeman.entity_field.error.no_entity_access")
         if revision_no:
             rev = session.query(orm.EntityData).filter_by(entity_id=int(entity_id), revision_no=int(revision_no)).first()
             if not rev:
-                raise FormValueError("pipeman.entity_field.no_such_revision")
+                raise FormValueError("pipeman.entity_field.error.no_such_revision")
         return ent, rev
 
     def process_data(self, value):
@@ -679,6 +695,8 @@ class TranslatableField(DynamicFormField):
             lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
             for lang in self.tm.supported_languages()
         })
+        # gettext('languages.short.en')
+        # gettext('languages.short.fr')
         return fields
 
 
@@ -720,7 +738,7 @@ class ActionListColumn(DataColumn):
     def __init__(self, action_callback=None):
         super().__init__(
             name="_actions",
-            header_text=gettext("pipeman.general.actions")
+            header_text=gettext("pipeman.common.actions")
         )
         self._callback = action_callback
 
@@ -752,7 +770,7 @@ class DatabaseColumn(DataColumn):
 class DisplayNameColumn(DatabaseColumn):
 
     def __init__(self):
-        super().__init__("display_names", gettext("pipeman.general.display_name"), allow_search=True)
+        super().__init__("display_names", gettext("pipeman.common.display_name"), allow_search=True)
 
     def value(self, data_row):
         return MultiLanguageString(json.loads(data_row.display_names))

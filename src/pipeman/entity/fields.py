@@ -189,7 +189,7 @@ class Field:
     def validators(self) -> list:
         validators = []
         if self.config("is_required", default=False):
-            validators.append(wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required", "Field is required")))
+            validators.append(wtfv.InputRequired(message=DelayedTranslationString("pipeman.error.required_field")))
         else:
             validators.append(wtfv.Optional())
         return validators
@@ -303,17 +303,17 @@ class LengthValidationMixin:
             validators.append(wtfv.Length(
                 min=min_val,
                 max=max_val,
-                message=DelayedTranslationString("pipeman.fields.length_between", "Length must be between %(min) and %(max)")
+                message=DelayedTranslationString("pipeman.error.length_between", "Length must be between %(min) and %(max)")
             ))
         elif min_val is not None:
             validators.append(wtfv.Length(
                 min=min_val,
-                message=DelayedTranslationString("pipeman.fields.length_less_than_min", "Length must be greater than %(min)")
+                message=DelayedTranslationString("pipeman.error.length_less_than_min", "Length must be greater than %(min)")
             ))
         elif max_val is not None:
             validators.append(wtfv.Length(
                 max=max_val,
-                message=DelayedTranslationString("pipeman.fields.length_greater_than_max", "Length must be less than %(max)")
+                message=DelayedTranslationString("pipeman.error.length_greater_than_max", "Length must be less than %(max)")
             ))
         return validators
 
@@ -328,19 +328,19 @@ class NumberValidationMixin:
             validators.append(wtfv.NumberRange(
                 min=min_val,
                 max=max_val,
-                message=DelayedTranslationString("pipeman.fields.range_between",
+                message=DelayedTranslationString("pipeman.error.range_between",
                                                  "Number must be between %(min) and %(max)")
             ))
         elif min_val is not None:
             validators.append(wtfv.NumberRange(
                 min=min_val,
-                message=DelayedTranslationString("pipeman.fields.range_less_than_min",
+                message=DelayedTranslationString("pipeman.error.range_less_than_min",
                                                  "Number must be greater than %(min)")
             ))
         elif max_val is not None:
             validators.append(wtfv.NumberRange(
                 max=max_val,
-                message=DelayedTranslationString("pipeman.fields.range_greater_than_max",
+                message=DelayedTranslationString("pipeman.error.range_greater_than_max",
                                                  "Number must be less than %(max)")
             ))
         return validators
@@ -355,11 +355,11 @@ class BooleanField(Field):
 
     def _format_for_ui(self, val):
         if val is None:
-            return gettext("pipeman.general.na")
+            return gettext("pipeman.common.na")
         elif not val:
-            return gettext("pipeman.general.no")
+            return gettext("pipeman.common.no")
         else:
-            return gettext("pipeman.general.yes")
+            return gettext("pipeman.common.yes")
 
 
 class DateField(Field):
@@ -391,7 +391,7 @@ class DateField(Field):
             "widget": FlatPickrWidget(
                 with_time=self.with_time,
                 with_calendar=self.with_cal,
-                placeholder=DelayedTranslationString("pipeman.general.empty_date")
+                placeholder=DelayedTranslationString("pipeman.common.placeholder")
             )
         }
 
@@ -550,7 +550,7 @@ class ChoiceField(Field):
 
     def choices(self):
         if self._values is None:
-            self._values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+            self._values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
             for x in self.field_config["values"]:
                 disp = self.field_config["values"][x]
                 if isinstance(disp, dict):
@@ -575,7 +575,7 @@ class ChoiceField(Field):
             "coerce": str,
             "widget": Select2Widget(
                 allow_multiple=self.is_repeatable(),
-                placeholder=DelayedTranslationString("pipeman.general.empty_select")
+                placeholder=DelayedTranslationString("pipeman.common.placeholder")
             )
         }
         if "coerce" in self.field_config and self.field_config["coerce"] == "int":
@@ -592,7 +592,7 @@ class ChoiceField(Field):
         for key, disp in lst:
             if key == val:
                 return disp
-        return gettext("pipeman.general.unknown")
+        return gettext("pipeman.common.unknown")
 
     def _process_value(self, val, **kwargs):
         if val is None:
@@ -694,7 +694,7 @@ class DatasetReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+        values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         with self.db as session:
             for entity in session.query(orm.Dataset).filter_by(is_deprecated=False):
                 values.append((entity.id, MultiLanguageString(json.loads(entity.display_names) if entity.display_names else {})))
@@ -775,7 +775,7 @@ class VocabularyReferenceField(ChoiceField):
         return self._value_cache
 
     def _load_values(self):
-        values = [("", DelayedTranslationString("pipeman.general.empty_select"))]
+        values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
                 dns = json.loads(term.display_names)

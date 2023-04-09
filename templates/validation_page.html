@@ -3,7 +3,7 @@
 <ul class="validation-results">
     {% for error in errors %}
     <li class="validation-result result-level-{{error.level}}">
-        <p class="error_message"><span class="error_code">{{error.code}}</span>{{error.display_text()}}<span class="error_level"> ({{('pipeman.validation_level.' + error.level) | gettext}})</span></p>
+        <p class="error_message"><span class="error_code">{{error.code}}</span>{{error.display_text()}}<span class="error_level"> ({{('pipeman.validation.level.' + error.level) | gettext}})</span></p>
         <p class="error_object">{{error.display_path()}}</p>
         {% if error.profile %}
         <p class="profile">{{error.profile}}</p>
@@ -12,7 +12,7 @@
     {% endfor %}
     {% if not errors %}
       <li class="validation-result result-level-success">
-          <p class="error_message">{{'pipeman.validation.success' | gettext}}</p>
+          <p class="error_message">{{'pipeman.validation.level.success' | gettext}}</p>
       </li>
     {% endif %}
 </ul>

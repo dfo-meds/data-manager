@@ -20,7 +20,7 @@ base = flask.Blueprint("base", __name__)
 # Main home page for logged in users (the welcome page)
 @base.route("/h")
 def home():
-    return flask.render_template("welcome.html", title=gettext("pipeman.welcome.title"))
+    return flask.render_template("welcome.html", title=gettext("pipeman.core.page.welcome.title"))
 
 
 # The splash page welcomes new users
@@ -54,7 +54,7 @@ def list_entities(reg: EntityRegistry):
                 flask.url_for("core.create_entity", obj_type=k)
             ))
     entity_list.sort(key=lambda x: str(x[1]))
-    return flask.render_template("list_entity_types.html", entity_types=entity_list, title=gettext('pipeman.entity_type.list'))
+    return flask.render_template("list_entity_types.html", entity_types=entity_list, title=gettext('pipeman.entity.page.list_entity_types.title'))
 
 
 @core.i18n_route("/objects/<obj_type>")
@@ -417,7 +417,7 @@ def generate_metadata_format(dataset_id, revision_no, profile_name, format_name,
             return con.generate_metadata_file(dataset, profile_name, format_name)
         except Exception as ex:
             logging.getLogger("pipeman").exception(ex)
-            flask.flash(str(gettext("pipeman.metadata.generation_error")), 'error')
+            flask.flash(str(gettext("pipeman.core.error.metadata_generation_error")), 'error')
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset_id))
     except DatasetNotFoundError:
         return flask.abort(404)

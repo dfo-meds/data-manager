@@ -241,8 +241,11 @@ class Dataset(FieldContainer):
     def status_display(self):
         stat = self.status()
         if stat is None or stat == "":
-            return gettext("pipeman.status.unknown")
-        return gettext(f"pipeman.dataset.status.{stat.lower()}")
+            return gettext("pipeman.label.dataset.status.unknown")
+        return gettext(f"pipeman.label.dataset.status.{stat.lower()}")
+        # gettext('pipeman.label.dataset.status.under_review')
+        # gettext('pipeman.label.dataset.status.active')
+        # gettext('pipeman.label.dataset.status.draft')
 
     @injector.inject
     def pub_workflow_display(self, wreg: WorkflowRegistry = None):
@@ -258,9 +261,9 @@ class Dataset(FieldContainer):
 
     def properties(self):
         return [
-            ('pipeman.dataset.status', self.status_display()),
-            ('pipeman.dataset.act_workflow', self.act_workflow_display()),
-            ('pipeman.dataset.pub_workflow', self.pub_workflow_display()),
-            ('pipeman.dataset.security_level', self.security_level_display()),
-            ('pipeman.dataset.guid', self.guid()),
+            ('pipeman.label.dataset.status', self.status_display()), # gettext('pipeman.label.dataset.status')
+            ('pipeman.label.dataset.activation_workflow', self.act_workflow_display()), # gettext('pipeman.label.dataset.activation_workflow')
+            ('pipeman.label.dataset.publication_workflow', self.pub_workflow_display()),  # gettext('pipeman.label.dataset.publication_workflow')
+            ('pipeman.label.dataset.security_level', self.security_level_display()),  #gettext('pipeman.label.dataset.security_level')
+            ('pipeman.label.dataset.guid', self.guid()),  # gettext('pipeman.label.dataset.guid')
         ]

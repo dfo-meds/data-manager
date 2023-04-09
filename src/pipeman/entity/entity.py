@@ -219,6 +219,10 @@ class FieldContainer:
         return self._display
 
 
+# gettext('pipeman.validation.level.warning')
+# gettext('pipeman.validation.level.error')
+
+
 class ValidationResult:
 
     def __init__(self, str_key, object_path, level, code, profile=None):
@@ -242,7 +246,7 @@ class RequiredFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.required", object_path, "error", "CRE-01", self.profile)]
+            return [ValidationResult("pipeman.validation.error.required_field", object_path, "error", "CRE-01", self.profile)]
         return []
 
 
@@ -253,7 +257,7 @@ class RecommendedFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.recommended", object_path, "warning", "CRE-02", self.profile)]
+            return [ValidationResult("pipeman.validation.error.recommended_field", object_path, "warning", "CRE-02", self.profile)]
         return []
 
 
@@ -303,17 +307,17 @@ class Entity(FieldContainer):
         }
         actions = []
         if not for_view:
-            actions.append((flask.url_for("core.view_entity", **action_args), "pipeman.general.view"))
+            actions.append((flask.url_for("core.view_entity", **action_args), "pipeman.entity.page.view_entity.link"))
         if entity_access(self.entity_type, 'edit'):
             actions.append((
-                flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
+                flask.url_for("core.edit_entity", **action_args), "pipeman.entity.page.edit_entity.link"
             ))
         if (not self.is_deprecated) and entity_access(self.entity_type, 'remove'):
             actions.append((
-                flask.url_for("core.remove_entity", **action_args), "pipeman.general.remove"
+                flask.url_for("core.remove_entity", **action_args), "pipeman.entity.page.remove_entity.link"
             ))
         if self.is_deprecated and entity_access(self.entity_type, 'restore'):
             actions.append((
-                flask.url_for("core.restore_entity", **action_args), "pipeman.general.restore"
+                flask.url_for("core.restore_entity", **action_args), "pipeman.entity.page.restore_entity.link"
             ))
         return actions

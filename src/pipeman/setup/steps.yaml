@@ -13,6 +13,11 @@ flag_dataset_for_review:
     en: Block Dataset Edits
   step_type: action
   action: pipeman.dataset.workflow.flag_dataset_for_review
+return_to_draft:
+  label:
+    en: Return to Draft
+  step_type: action
+  action: pipeman.dataset.workflow.return_to_draft
 superuser_approval:
   label:
     en: General Approval

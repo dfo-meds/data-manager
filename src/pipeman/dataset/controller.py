@@ -13,7 +13,7 @@ import wtforms as wtf
 from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget, SecureBaseForm
-from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField, flasht, PipemanFlaskForm
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
@@ -77,13 +77,13 @@ class DatasetController:
             if flask_login.current_user.has_permission("datasets.create"):
                 links.append((
                     flask.url_for("core.create_dataset"),
-                    gettext("pipeman.create_dataset.link")
+                    gettext("pipeman.dataset.page.create_dataset.link")
                 ))
             return flask.render_template(
                 "data_table.html",
                 table=self._list_datasets_table(),
                 side_links=links,
-                title=gettext('pipeman.dataset_list.title')
+                title=gettext('pipeman.dataset.page.list_datasets.title')
             )
 
     def list_datasets_ajax(self):
@@ -98,7 +98,7 @@ class DatasetController:
             ajax_route=flask.url_for("core.list_datasets_ajax"),
             default_order=[("id", "asc")]
         )
-        dt.add_column(DatabaseColumn("id", gettext("pipeman.dataset.id"), allow_order=True))
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.label.dataset.id"), allow_order=True))
         dt.add_column(DisplayNameColumn())
         dt.add_column(ActionListColumn(action_callback=functools.partial(self._build_action_list, short_list=True)))
         return dt
@@ -109,23 +109,23 @@ class DatasetController:
             "dataset_id": ds.dataset_id if hasattr(ds, "dataset_id") else ds.id
         }
         if short_list:
-            actions.add_action("pipeman.general.view", "core.view_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.view_dataset.link", "core.view_dataset", **kwargs)
         if for_revision:
-            actions.add_action("pipeman.dataset_view_current.link", "core.view_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.view_current.link", "core.view_dataset", **kwargs)
         else:
-            actions.add_action("pipeman.dataset_validate.link", "core.validate_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.validate_dataset.link", "core.validate_dataset", **kwargs)
             if self.has_access(ds, 'edit'):
-                actions.add_action("pipeman.general.edit", "core.edit_dataset", **kwargs)
-                actions.add_action("pipeman.dataset_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
+                actions.add_action("pipeman.dataset.page.edit_dataset.link", "core.edit_dataset", **kwargs)
+                actions.add_action("pipeman.dataset.page.edit_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
             if not short_list:
                 if self.has_access(ds, 'activate'):
-                    actions.add_action("pipeman.dataset_activate.link", "core.activate_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.activate_dataset.link", "core.activate_dataset", **kwargs)
                 if self.has_access(ds, "publish"):
-                    actions.add_action("pipeman.dataset_publish.link", "core.publish_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.publish_dataset.link", "core.publish_dataset", **kwargs)
                 if self.has_access(ds, "remove"):
-                    actions.add_action("pipeman.general.remove", "core.remove_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.remove_dataset.link", "core.remove_dataset", **kwargs)
                 if self.has_access(ds, "restore"):
-                    actions.add_action("pipeman.general.restore", "core.restore_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.restore_dataset.link", "core.restore_dataset", **kwargs)
         return actions
 
     def _dataset_iterator(self, query):
@@ -149,7 +149,7 @@ class DatasetController:
         return q.order_by(orm.Dataset.id)
 
     def _base_filters(self, op="view"):
-        if not flask_login.current_user.has_permission("datasets.deprecated_access"):
+        if not flask_login.current_user.has_permission("datasets.view.deprecated"):
             yield orm.Dataset.is_deprecated == False
         if flask_login.current_user.has_permission(f"datasets.{op}.all"):
             pass
@@ -173,11 +173,12 @@ class DatasetController:
         if form.validate_on_submit():
             ds = form.build_dataset()
             self.save_dataset(ds)
+            flasht("pipeman.dataset.page.create_dataset.success", "success")
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.dataset_create.title')
+            title=gettext('pipeman.dataset.page.create_dataset.title')
         )
 
     def view_dataset_page(self, dataset):
@@ -208,7 +209,7 @@ class DatasetController:
             "validation_page.html",
             dataset=dataset,
             actions=self._build_action_list(dataset, True),
-            title=gettext("pipeman.dataset_validation.title"),
+            title=gettext("pipeman.dataset.page.validate_dataset.title"),
             errors=dataset.validate()
         )
 
@@ -221,11 +222,12 @@ class DatasetController:
         if form.validate_on_submit():
             ds = form.build_dataset()
             self.save_dataset(ds)
+            flasht("pipeman.dataset.page.edit_dataset.success", "success")
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.dataset_edit.title"),
+            title=gettext("pipeman.dataset.page.edit_dataset.title"),
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
 
@@ -243,7 +245,7 @@ class DatasetController:
         form = DatasetMetadataForm(dataset, display_group)
         if form.handle_form():
             self.save_metadata(dataset)
-            flask.flash(gettext("pipeman.dataset_metadata.success"), "success")
+            flasht("pipeman.dataset.page.edit_metadata.success", "success")
         group_list = [
             (
                 flask.url_for(
@@ -258,7 +260,7 @@ class DatasetController:
         return flask.render_template(
             self.meta_template,
             form=form,
-            title=gettext("pipeman.dataset_metadata.title"),
+            title=gettext("pipeman.dataset.page.edit_metadata.title"),
             groups=group_list,
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
@@ -267,12 +269,13 @@ class DatasetController:
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_dataset(dataset)
+            flasht("pipeman.dataset.page.remove_dataset.success", "success")
             return flask.redirect(flask.url_for("core.list_datasets"))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.dataset_remove.confirmation"),
-            title=gettext("pipeman.dataset_remove.title"),
+            instructions=gettext("pipeman.dataset.page.remove_dataset.instructions"),
+            title=gettext("pipeman.dataset.page.remove_dataset.title"),
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
 
@@ -280,12 +283,13 @@ class DatasetController:
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_dataset(dataset)
+            flasht("pipeman.dataset.page.restore_dataset.success", "success")
             return flask.redirect(flask.url_for("core.list_datasets"))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.dataset_restore.confirmation"),
-            title=gettext("pipeman.dataset_restore.title"),
+            instructions=gettext("pipeman.dataset.page.restore_dataset.instructions"),
+            title=gettext("pipeman.dataset.page.restore_dataset.title"),
             back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
         )
 
@@ -297,7 +301,7 @@ class DatasetController:
             dataset=dataset,
             for_revision=True,
             actions=self._build_action_list(dataset, False, True),
-            title=dataset.label(),
+            title=f"{dataset.label()} v{dataset.revision_no}",
             groups=groups,
             group_labels=labels,
         )
@@ -311,8 +315,8 @@ class DatasetController:
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.dataset_publish.confirmation"),
-            title=gettext("pipeman.dataset_publish.title"),
+            instructions=gettext("pipeman.dataset.page.publish_dataset.instructions"),
+            title=gettext("pipeman.dataset.page.publish_dataset.title"),
             back=dataset_url
         )
 
@@ -322,9 +326,9 @@ class DatasetController:
             self.activate_dataset(dataset)
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
         return flask.render_template("form.html", form=form,
-                                     instructions=gettext("pipeman.dataset_activate.confirmation"),
-                                     title=gettext("pipeman.dataset_activate.title"),
-            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+                                     instructions=gettext("pipeman.dataset.page.activate_dataset.instructions"),
+                                     title=gettext("pipeman.dataset.page.activate_dataset.title"),
+                                     back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):
         status, _ = self.workflow.start_workflow(
@@ -336,11 +340,11 @@ class DatasetController:
             dataset.dataset_id
         )
         if status == "COMPLETE":
-            flask.flash(gettext("pipeman.dataset.activated"), "success")
+            flask.flash(gettext("pipeman.dataset.message.activated"), "success")
         elif status == "FAILURE":
-            flask.flash(gettext("pipeman.dataset.activation_error"), "error")
+            flask.flash(gettext("pipeman.dataset.error.during_activation"), "error")
         else:
-            flask.flash(gettext("pipeman.dataset.activation_in_progress"), "success")
+            flask.flash(gettext("pipeman.dataset.message.activation_in_progress"), "success")
 
     def publish_dataset(self, dataset):
         status, _ = self.workflow.start_workflow(
@@ -353,11 +357,11 @@ class DatasetController:
             dataset.dataset_id
         )
         if status == "COMPLETE":
-            flask.flash(gettext("pipeman.dataset.published"), "success")
+            flasht("pipeman.dataset.message.published", "success")
         elif status == "FAILURE":
-            flask.flash(gettext("pipeman.dataset.publication_error"), "error")
+            flasht("pipeman.dataset.error.during_publication", "error")
         else:
-            flask.flash(gettext("pipeman.dataset.publication_in_progress"), "success")
+            flasht("pipeman.dataset.message.publication_in_progress", "success")
 
     def generate_metadata_file(self, dataset, profile_name, format_name):
         args = {
@@ -484,7 +488,7 @@ class DatasetController:
                     continue
 
 
-class DatasetForm(FlaskForm):
+class DatasetForm(PipemanFlaskForm):
 
     reg: MetadataRegistry = None
     wreg: WorkflowRegistry = None
@@ -492,72 +496,72 @@ class DatasetForm(FlaskForm):
 
     names = TranslatableField(
         wtf.StringField,
-        label=DelayedTranslationString("pipeman.general.display_name")
+        label=DelayedTranslationString("pipeman.common.display_name")
     )
 
     organization = wtf.SelectField(
-        DelayedTranslationString("pipeman.dataset.organization"),
+        DelayedTranslationString("pipeman.label.dataset.organization"),
         choices=[],
         coerce=int,
-        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     profiles = wtf.SelectMultipleField(
-        DelayedTranslationString("pipeman.dataset.profiles"),
+        DelayedTranslationString("pipeman.label.dataset.profiles"),
         choices=[],
         coerce=str,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
 
     pub_workflow = wtf.SelectField(
-        DelayedTranslationString("pipeman.dataset.publication_workflow"),
+        DelayedTranslationString("pipeman.label.dataset.publication_workflow"),
         choices=[],
         coerce=str,
-        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     act_workflow = wtf.SelectField(
-        DelayedTranslationString("pipeman.dataset.activation_workflow"),
+        DelayedTranslationString("pipeman.label.dataset.activation_workflow"),
         choices=[],
         coerce=str,
-        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     assigned_users = wtf.SelectMultipleField(
-        DelayedTranslationString("pipeman.dataset.assigned_users"),
+        DelayedTranslationString("pipeman.label.dataset.assigned_users"),
         choices=[],
         coerce=int,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
 
     security_level = wtf.SelectField(
-        DelayedTranslationString("pipeman.dataset.security_level"),
+        DelayedTranslationString("pipeman.label.dataset.security_level"),
         choices=[],
         coerce=str,
-        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+        widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     @injector.construct
     def __init__(self, *args, dataset=None, **kwargs):
@@ -579,18 +583,6 @@ class DatasetForm(FlaskForm):
         self.pub_workflow.choices = [x for x in self.wreg.list_workflows("dataset_publication")]
         self.security_level.choices = self.reg.security_labels_for_select()
         self.assigned_users.choices = user_list()
-
-    def validate_on_submit(self):
-        if super().validate_on_submit():
-            return True
-        elif self.errors:
-            for key in self.errors:
-                for m in self.errors[key]:
-                    flask.flash(gettext("pipeman.entity.form_error").format(
-                        field=self._fields[key].label.text,
-                        error=m
-                    ), "error")
-        return False
 
     def build_dataset(self):
         if self.dataset:
@@ -619,20 +611,20 @@ class DatasetForm(FlaskForm):
             )
 
 
-class ApprovedDatasetForm(FlaskForm):
+class ApprovedDatasetForm(PipemanFlaskForm):
 
     names = TranslatableField(
         wtf.StringField,
-        label=DelayedTranslationString("pipeman.general.display_name")
+        label=DelayedTranslationString("pipeman.common.display_name")
     )
 
     assigned_users = wtf.SelectMultipleField(
-        DelayedTranslationString("pipeman.dataset.assigned_users"),
+        DelayedTranslationString("pipeman.label.dataset.assigned_users"),
         choices=[],
         coerce=int
     )
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     def __init__(self, *args, dataset=None, **kwargs):
         self.dataset = None
@@ -657,25 +649,16 @@ class DatasetMetadataForm(SecureBaseForm):
         cntrls = self.entity.controls(display_group)
         if not cntrls:
             cntrls["_no_fields"] = HtmlField(
-                DelayedTranslationString("pipeman.dataset.no_fields"),
+                DelayedTranslationString("pipeman.dataset.message.no_fields"),
                 label=""
             )
-        cntrls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+        cntrls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
         super().__init__(cntrls, *args, **kwargs)
         self.process()
 
     def handle_form(self):
-        if flask.request.method == "POST":
-            self.process(flask.request.form)
-            if self.validate():
-                d = self.data
-                self.entity.process_form_data(d, self.display_group)
-                return True
-            else:
-                for key in self.errors:
-                    for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error").format(
-                            field=self._fields[key].label.text,
-                            error=m
-                        ), "error")
+        if self.validate_on_submit():
+            d = self.data
+            self.entity.process_form_data(d, self.display_group)
+            return True
         return False

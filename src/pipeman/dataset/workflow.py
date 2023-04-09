@@ -40,3 +40,15 @@ def flag_dataset_for_review(action_config, context, db: Database = None):
         ds.status = "UNDER_REVIEW"
         session.commit()
         return ItemResult.SUCCESS
+
+
+@injector.inject
+def return_to_draft(action_config, context, db: Database = None):
+    with db as session:
+        ds = session.query(orm.Dataset).filter_by(id=context["dataset_id"]).first()
+        if not ds:
+            return ItemResult.FAILURE
+        ds.status = "DRAFT"
+        session.commit()
+        return ItemResult.SUCCESS
+

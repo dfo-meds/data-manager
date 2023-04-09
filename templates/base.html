@@ -1,6 +1,6 @@
 {% macro pager(current_page, page_count, page_size) %}
 <div class="pager_control">
-    <p>{{'pipeman.general.pages' | gettext}} {{current_page}} / {{page_count}}</p>
+    <p>{{'pipeman.common.pages' | gettext}} {{current_page}} / {{page_count}}</p>
     <ul class="table_actions">
         {% for i in range(0, page_count) %}
         <li><a href="{{self_url(page=i+1, size=page_size)}}">{{i+1}}</a></li>
@@ -9,6 +9,7 @@
     <br style="clear: both" />
 </div>
 {%- endmacro %}
+
 {% macro action_list(actions) %}
 {{actions.render('table_actions')}}
 {%- endmacro %}
@@ -24,6 +25,7 @@
         {% endfor %}
     </ul>
 {%- endmacro %}
+
 {% macro showformcontrol(control) %}
     {% if control.__class__.__name__ == "CSRFTokenField" or control.__class__.__name__ == "HiddenField" %}
         {{control}}
@@ -90,17 +92,17 @@
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
             <script type="text/javascript" nonce="{{csp_nonce('script-src')}}">
 
-                let overflow_error = '{{'pipeman.html_error.overflow' | gettext}}';
-                let underflow_error = '{{'pipeman.html_error.underflow' | gettext}}';
-                let no_value_error = '{{'pipeman.html_error.missing_value' | gettext}}';
-                let too_long_error = '{{'pipeman.html_error.too_long' | gettext}}';
-                let too_short_error = '{{'pipeman.html_error.too_short' | gettext}}';
-                let step_error = '{{'pipeman.html_error.step_error' | gettext}}';
-                let pattern_error = '{{'pipeman.html_error.pattern_error' | gettext}}';
-                let input_error = '{{'pipeman.html_error.input_error' | gettext}}';
-                let email_format = '{{'pipeman.html_error.email_format_error' | gettext}}';
-                let url_format = '{{'pipeman.html_error.url_format_error' | gettext}}';
-                let tel_format = '{{'pipeman.html_error.tel_format_error' | gettext}}';
+                let overflow_error = '{{'pipeman.error.html_js_overflow' | gettext}}';
+                let underflow_error = '{{'pipeman.error.html_js_underflow' | gettext}}';
+                let no_value_error = '{{'pipeman.error.html_js_missing_value' | gettext}}';
+                let too_long_error = '{{'pipeman.error.html_js_too_long' | gettext}}';
+                let too_short_error = '{{'pipeman.error.html_js_too_short' | gettext}}';
+                let step_error = '{{'pipeman.error.html_js_step_error' | gettext}}';
+                let pattern_error = '{{'pipeman.error.html_js_pattern_error' | gettext}}';
+                let input_error = '{{'pipeman.error.html_js_input_error' | gettext}}';
+                let email_format = '{{'pipeman.error.html_js_email_format_error' | gettext}}';
+                let url_format = '{{'pipeman.error.html_js_url_format_error' | gettext}}';
+                let tel_format = '{{'pipeman.error.html_js_tel_format_error' | gettext}}';
                 let csrf_token = "{{ csrf_token() }}";
 
                 $.ajaxSetup({
@@ -197,7 +199,7 @@
                     <img src="{{url_for('static', filename='sig-blk-en.svg')}}" height="35" />
                 </div>
                 <div class="right_block">
-                    <p class="site_title">{{'dfo.cnodc' | gettext}}</p>
+                    <p class="site_title">{{'cnodc.site_title' | gettext}}</p>
                     <ul class="langswitch">
                         {% for lang in language_switchers %}
                         {% with txt, url, show = language_switchers[lang] %}
@@ -217,7 +219,7 @@
                 </div>
                 <div class="user_info">
                     {% if current_user.is_authenticated %}
-                    {{ 'pipeman.welcome' | gettext}} {{current_user.display}}
+                    {{ 'cnodc.user_welcome' | gettext}} {{current_user.display}}
                     {% endif %}
                 </div>
                 <br class="cb" />
@@ -258,17 +260,17 @@
             </div>
             <div class="separator_block">
                 <ul class="bottom_links">
-                    <li><a href="{{url_for('cnodc.help')}}">{{'cnodc.help.link' | gettext}}</a></li>
+                    <li><a href="{{url_for('cnodc.help')}}">{{'cnodc.page.help.link' | gettext}}</a></li>
                 </ul>
             </div>
             <div class="footer">
                 {% block footer %}
                 {% if current_user.is_authenticated %}
                 <div class="session_block">
-                    <p class="session_timeout">{{'pipeman.session_logout' | gettext}}: {{current_user.session_timeout | format_datetime}}</p>
+                    <p class="session_timeout">{{'pipeman.session.logout' | gettext}}: {{current_user.session_timeout | format_datetime}}</p>
                     <script language="javascript" type="text/javascript" nonce="{{csp_nonce('script-src')}}">
                         $(document).ready(function() {
-                            start_session_timeout("#session_timeout_box", "#time_left", {{current_user.session_time_left()}}, "{{url_for('auth.logout', _external=True)}}", "{{url_for('auth.refresh_session', _external=True)}}", "{{'pipeman.session_refresh_ajax_error' | gettext}}", 300);
+                            start_session_timeout("#session_timeout_box", "#time_left", {{current_user.session_time_left()}}, "{{url_for('auth.logout', _external=True)}}", "{{url_for('auth.refresh_session', _external=True)}}", "{{'pipeman.session.refresh_ajax_error' | gettext}}", 300);
                         });
                     </script>
                 </div>
@@ -282,9 +284,9 @@
         </div>
         {% endblock %}
         <div id="session_timeout_box" class="hidden">
-            <p>{{'pipeman.session_timeout_warning' | gettext}}</p>
+            <p>{{'pipeman.session.timeout_warning' | gettext}}</p>
             <p id="time_left">0:00</p>
-            <p><a href="javascript:refresh_session();">{{'pipeman.refresh_session' | gettext}}</a></p>
+            <p><a href="javascript:refresh_session();">{{'pipeman.session.refresh_link' | gettext}}</a></p>
         </div>
     </body>
 </html>

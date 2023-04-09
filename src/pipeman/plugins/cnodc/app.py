@@ -7,7 +7,7 @@ cnodc = MultiLanguageBlueprint("cnodc", __name__, template_folder="templates")
 
 @cnodc.i18n_route("/help")
 def help():
-    return _render_dfo_template("dfo_help", gettext("cnodc.help.title"))
+    return _render_dfo_template("dfo_help", gettext("cnodc.page.help.title"))
 
 
 def _render_dfo_template(template_base_name, title):

@@ -20,7 +20,7 @@ import binascii
 import sqlalchemy as sa
 import zirconium as zr
 import json
-from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn
+from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, flasht, PipemanFlaskForm
 
 
 @injector.injectable
@@ -37,7 +37,7 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise ValueError("No such user")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             user.allowed_api_access = is_enabled
             session.commit()
 
@@ -45,7 +45,7 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise ValueError("No such user")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             prefix = self.sh.generate_secret(32)
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
@@ -76,10 +76,10 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise ValueError("No such user")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             key = session.query(orm.APIKey).filter_by(user_id=user.id, prefix=prefix).first()
             if not key:
-                raise ValueError("No such API key")
+                raise UserInputError("pipeman.auth_db.error.api_key_does_not_exist")
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
             auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
@@ -109,7 +109,11 @@ class DatabaseUserController:
     def view_myself_page(self):
         with self.db as session:
             user = session.query(orm.User).filter_by(username=flask_login.current_user.get_id()).first()
-            return flask.render_template("me.html", user=user)
+            return flask.render_template(
+                "me.html", 
+                user=user,
+                title=gettext("pipeman.auth_db.page.view_myself.title", username=user.username)
+            )
 
     def edit_myself_form(self):
         with self.db as session:
@@ -118,8 +122,9 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 user.display = form.display.data
                 session.commit()
+                flasht("pipeman.auth_db.page.edit_myself.success")
                 return flask.redirect(flask.url_for("users.view_myself"))
-            return flask.render_template("form.html", form=form, title=gettext("auth_db.edit_myself.title"))
+            return flask.render_template("form.html", form=form, title=gettext("pipeman.auth_db.page.edit_myself.title"))
 
     def change_password_form(self):
         with self.db as session:
@@ -128,23 +133,29 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 try:
                     self._set_password(user, form.password.data)
+                    flasht("pipeman.auth_db.page.change_password.success")
                     return flask.redirect(flask.url_for("users.view_myself"))
                 except UserInputError as ex:
                     flask.flash(str(ex), "error")
-            return flask.render_template("form.html", form=form, title=gettext("auth_db.change_password.title"))
+            return flask.render_template(
+                "form.html", 
+                form=form, 
+                title=gettext("pipeman.auth_db.page.change_password.title"),
+                instructions=gettext("pipeman.auth_db.page.change_password.instructions")
+            )
 
     def list_users_page(self):
         links = []
-        if flask_login.current_user.has_permission("auth_db.create_users"):
+        if flask_login.current_user.has_permission("auth_db.create"):
             links.append((
                 flask.url_for("users.create_user"),
-                gettext("auth_db.create_user.link")
+                gettext("pipeman.auth_db.page.create_user.link")
             ))
         return flask.render_template(
             "data_table.html",
             table=self._users_table(),
             side_links=links,
-            title=gettext("auth_db.user_list.title"),
+            title=gettext("pipeman.auth_db.page.list_users.title"),
         )
 
     def list_users_ajax(self):
@@ -158,9 +169,9 @@ class DatabaseUserController:
             ajax_route=flask.url_for("users.list_users_ajax"),
             default_order=[("username", "asc")]
         )
-        dt.add_column(DatabaseColumn("id", gettext("pipeman.user.id"), allow_order=True))
-        dt.add_column(DatabaseColumn("username", gettext("pipeman.user.username"), allow_order=True, allow_search=True))
-        dt.add_column(DatabaseColumn("display", gettext("pipeman.user.display_name"), allow_order=True, allow_search=True))
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.label.user.id"), allow_order=True))
+        dt.add_column(DatabaseColumn("username", gettext("pipeman.label.user.username"), allow_order=True, allow_search=True))
+        dt.add_column(DatabaseColumn("display", gettext("pipeman.label.user.display_name"), allow_order=True, allow_search=True))
         dt.add_column(ActionListColumn(
             action_callback=self._build_action_list
         ))
@@ -170,11 +181,11 @@ class DatabaseUserController:
         actions = ActionList()
         kwargs = {'user_id': user.id}
         if short_mode:
-            actions.add_action('pipeman.general.view', 'users.view_user', **kwargs)
-        if flask_login.current_user.has_permission("auth_db.edit_users"):
-            actions.add_action('pipeman.general.edit', 'users.edit_user', **kwargs)
-        if flask_login.current_user.has_permission("auth_db.reset_passwords"):
-            actions.add_action('auth_db.reset_password', 'users.reset_password', **kwargs)
+            actions.add_action('pipeman.auth_db.page.view_user.link', 'users.view_user', **kwargs)
+        if flask_login.current_user.has_permission("auth_db.edit"):
+            actions.add_action('pipeman.auth_db.page.edit_user.link', 'users.edit_user', **kwargs)
+        if flask_login.current_user.has_permission("auth_db.reset"):
+            actions.add_action('pipeman.auth_db.page.reset_password.link', 'users.reset_password', **kwargs)
         return actions
 
     def _user_iterator(self, query):
@@ -188,9 +199,9 @@ class DatabaseUserController:
                 u = session.query(orm.User.id).filter_by(username=form.username.data).first()
                 ue = session.query(orm.User.id).filter_by(email=form.email.data).first()
                 if u:
-                    flask.flash(gettext("auth_db.create_user.error_already_exists"), "error")
+                    flasht("pipeman.auth_db.error.username_already_exists", "error")
                 elif ue:
-                    flask.flash(gettext("auth_db.create_user.error_email_exists"), "error")
+                    flasht("pipeman.auth_db.error.email_already_exists", "error")
                 else:
                     pw = self.sh.random_password()
                     user = self._create_user(
@@ -205,9 +216,9 @@ class DatabaseUserController:
                     for org_id in form.organizations.data:
                         self._assign_to_org(user.id, org_id, session)
                     session.commit()
-                    flask.flash(gettext("auth_db.create_user.success") + f" {pw}", "success")
+                    flasht("pipeman.auth_db.page.create_user.success", "success", password=pw)
                     return flask.redirect(flask.url_for("users.view_user", user_id=user.id))
-        return flask.render_template("form.html", form=form, title=gettext("auth_db.user_create.title"))
+        return flask.render_template("form.html", form=form, title=gettext("pipeman.auth_db.page.create_user.title"))
 
     def create_user_cli(self, username, email, display, password):
         skip_check = False
@@ -218,7 +229,10 @@ class DatabaseUserController:
         with self.db as session:
             u = session.query(orm.User.id).filter_by(username=username).first()
             if u:
-                raise UserInputError("auth_db.cli.user_already_exists")
+                raise UserInputError("pipeman.auth_db.error.username_already_exists")
+            ue = session.query(orm.User.id).filter_by(email=email).first()
+            if ue:
+                raise UserInputError("pipeman.auth_db.error.email_already_exists")
             self._create_user(username, display, email, password, session, skip_check)
             session.commit()
 
@@ -226,10 +240,10 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise UserInputError("pipeman.plugins.auth_db.username_does_not_exist")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             org = session.query(orm.Organization).filter_by(short_name=org_name).first()
             if not org:
-                raise UserInputError("pipeman.auth.org_does_not_exist")
+                raise UserInputError("pipeman.org.error.org_does_not_exist")
             self._assign_to_org(user.id, org.id, session)
             session.commit()
 
@@ -237,10 +251,10 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise UserInputError("pipeman.plugins.auth_db.username_does_not_exist")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             org = session.query(orm.Organization).filter_by(short_name=org_name).first()
             if not org:
-                raise UserInputError("pipeman.auth.org_does_not_exist")
+                raise UserInputError("pipeman.org.error.org_does_not_exist")
             self._remove_from_org(user.id, org.id, session)
             session.commit()
 
@@ -264,10 +278,10 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise UserInputError("pipeman.plugins.auth_db.username_does_not_exist")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             group = session.query(orm.Group).filter_by(short_name=group_name).first()
             if not group:
-                raise UserInputError("pipeman.auth.group_does_not_exist")
+                raise UserInputError("pipeman.auth.error.group_does_not_exist")
             self._assign_to_group(user.id, group.id, session)
             session.commit()
 
@@ -275,10 +289,10 @@ class DatabaseUserController:
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise UserInputError("pipeman.plugins.auth_db.username_does_not_exist")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             group = session.query(orm.Group).filter_by(short_name=group_name).first()
             if not group:
-                raise UserInputError("pipeman.auth.group_does_not_exist")
+                raise UserInputError("pipeman.auth.error.group_does_not_exist")
             self._remove_from_group(user.id, group.id, session)
             session.commit()
 
@@ -322,7 +336,7 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 ue = session.query(orm.User.id).filter_by(email=form.email.data).first()
                 if ue and not user.id == ue.id:
-                    flask.flash(gettext("auth_db.create_user.error_email_exists"), "error")
+                    flasht("pipeman.auth_db.error.email_already_exists", "error")
                 else:
                     user.email = form.email.data
                     user.display = form.display.data
@@ -339,12 +353,12 @@ class DatabaseUserController:
                         else:
                             self._remove_from_org(user.id, org_id, session)
                     session.commit()
-                    flask.flash(gettext("auth_db.edit_user.success"), "success")
+                    flasht("pipeman.auth_db.page.edit_user.success", "success")
                     return flask.redirect(flask.url_for("users.view_user", user_id=user_id))
             return flask.render_template(
                 "form.html",
                 form=form,
-                title=gettext("auth_db.user_edit.title")
+                title=gettext("pipeman.auth_db.page.edit_user.title")
             )
 
     def reset_password_form(self, user_id):
@@ -356,15 +370,15 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 new_password = self._reset_password(user)
                 session.commit()
-                flask.flash(gettext("auth_db.reset_password.success") + f" {new_password}", "success")
+                flasht("pipeman.auth_db.page.reset_password.success", "success", password=new_password)
                 return flask.redirect(flask.url_for("users.view_user", user_id=user_id))
-            return flask.render_template("form.html", form=form, title=gettext("auth_db.user_reset_password.title"), instructions=gettext("auth_db.reset_password.instructions"))
+            return flask.render_template("form.html", form=form, title=gettext("pipeman.auth_db.page.reset_password.title"), instructions=gettext("pipeman.auth_db.page.reset_password.instructions"))
 
     def set_password_cli(self, username, password):
         with self.db as session:
             user = session.query(orm.User).filter_by(username=username).first()
             if not user:
-                raise UserInputError("auth_db.username_does_not_exist")
+                raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             self._set_password(user, password)
             session.commit()
 
@@ -389,49 +403,49 @@ class DatabaseUserController:
             session.commit()
 
 
-class CreateUserForm(FlaskForm):
+class CreateUserForm(PipemanFlaskForm):
 
     oc: OrganizationController = None
 
     username = wtf.StringField(
-        DelayedTranslationString("auth_db.username"),
+        DelayedTranslationString("pipeman.label.user.username"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     display = wtf.StringField(
-        DelayedTranslationString("auth_db.display_name"),
+        DelayedTranslationString("pipeman.label.user.display_name"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     email = wtf.EmailField(
-        DelayedTranslationString("auth_db.email"),
+        DelayedTranslationString("pipeman.label.user.email"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     groups = wtf.SelectMultipleField(
-        DelayedTranslationString("auth_db.groups"),
+        DelayedTranslationString("pipeman.label.user.groups"),
         coerce=int,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
     organizations = wtf.SelectMultipleField(
-        DelayedTranslationString("auth_db.organizations"),
+        DelayedTranslationString("pipeman.label.user.organizations"),
         coerce=int,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
 
-    submit = wtf.SubmitField("pipeman.general.submit")
+    submit = wtf.SubmitField("pipeman.common.submit")
 
     @injector.construct
     def __init__(self, *args, **kwargs):
@@ -441,40 +455,41 @@ class CreateUserForm(FlaskForm):
         self.organizations.choices = self.oc.list_organizations()
 
 
-class EditUserForm(FlaskForm):
+class EditUserForm(PipemanFlaskForm):
 
     oc: OrganizationController = None
 
     display = wtf.StringField(
-        DelayedTranslationString("auth_db.display_name"),
+        DelayedTranslationString("pipeman.label.user.display_name"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     email = wtf.EmailField(
-        DelayedTranslationString("auth_db.email"),
+        DelayedTranslationString("pipeman.label.user.email"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     groups = wtf.SelectMultipleField(
-        DelayedTranslationString("auth_db.groups"),
+        DelayedTranslationString("pipeman.label.user.groups"),
         coerce=int,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
+    
     organizations = wtf.SelectMultipleField(
-        DelayedTranslationString("auth_db.organizations"),
+        DelayedTranslationString("pipeman.label.user.organizations"),
         coerce=int,
-        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.general.empty_select"))
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     @injector.construct
     def __init__(self, *args, user=None, **kwargs):
@@ -490,18 +505,18 @@ class EditUserForm(FlaskForm):
         self.organizations.choices = self.org_list
 
 
-class EditMyselfForm(FlaskForm):
+class EditMyselfForm(PipemanFlaskForm):
 
     display = wtf.StringField(
-        DelayedTranslationString("auth_db.display_name"),
+        DelayedTranslationString("pipeman.label.user.display_name"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     def __init__(self, *args, user=None, **kwargs):
         if user:
@@ -509,28 +524,28 @@ class EditMyselfForm(FlaskForm):
         super().__init__(*args, **kwargs)
 
 
-class ChangePasswordForm(FlaskForm):
+class ChangePasswordForm(PipemanFlaskForm):
 
     password = wtf.PasswordField(
-        DelayedTranslationString("auth_db.password"),
+        DelayedTranslationString("pipeman.label.user.password"),
         validators=[
             wtfv.InputRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
     repeat_password = wtf.PasswordField(
-        DelayedTranslationString("auth_db.repeat_password"),
+        DelayedTranslationString("pipeman.label.user.repeat_password"),
         validators=[
             wtfv.EqualTo(
                 "password",
-                message=DelayedTranslationString("pipeman.fields.passwords_match")
+                message=DelayedTranslationString("pipeman.error.fields_must_match")
             )
         ]
     )
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
 
 class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
@@ -604,7 +619,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             if failures >= self._max_failed_logins:
                 user.locked_until = datetime.datetime.now() + datetime.timedelta(hours=self._lockout_time)
                 session.commit()
-                flask.flash(gettext("auth_db.too_many_recent_logins"), "error")
+                flasht("pipeman.auth_db.error.too_many_recent_logins", "error")
 
     def _clear_login_records(self, username, session):
         st = (
@@ -623,7 +638,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             return None
         right_now = datetime.datetime.now()
         if user.locked_until and user.locked_until >= right_now:
-            flask.flash(gettext("auth_db.account_locked"), "warning")
+            flasht("pipeman.auth_db.error.account_locked", "warning")
             self._record_login_attempt(username, from_api, "locked", False, False)
             return None
         if from_api and not user.allowed_api_access:

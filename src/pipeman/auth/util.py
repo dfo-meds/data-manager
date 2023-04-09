@@ -40,7 +40,7 @@ def create_group(group_name: str, display_names: dict = None, db: Database = Non
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if g:
-            raise UserInputError("pipeman.auth.group_already_exists", group_name)
+            raise UserInputError("pipeman.auth.error.group_already_exists", group_name)
         g = orm.Group(
             short_name=group_name,
             permissions=""
@@ -58,7 +58,7 @@ def grant_permission(group_name: str, perm_name: str, db: Database = None):
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if not g:
-            raise UserInputError("pipeman.auth.group_does_not_exist", group_name)
+            raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.add_permission(perm_name)
         session.commit()
         logging.getLogger("pipeman.auth").out(f"Granted permission {perm_name} to {group_name}")
@@ -70,7 +70,7 @@ def revoke_permission(group_name: str, perm_name: str, db: Database = None):
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if not g:
-            raise UserInputError("pipeman.auth.group_does_not_exist", group_name)
+            raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.remove_permission(perm_name)
         session.commit()
         logging.getLogger("pipeman.auth").out(f"Revoked permission {perm_name} from {group_name}")
@@ -82,7 +82,7 @@ def clear_permissions(group_name: str, db: Database = None):
     with db as session:
         g = session.query(orm.Group).filter_by(short_name=group_name).first()
         if not g:
-            raise UserInputError("pipeman.auth.group_does_not_exist", group_name)
+            raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.clear_permissions()
         session.commit()
         logging.getLogger("pipeman.auth").out(f"Cleared all permissions from {group_name}")
