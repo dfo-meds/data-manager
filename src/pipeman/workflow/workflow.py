@@ -152,27 +152,39 @@ class ItemDisplayWrapper:
         for decision in self.item.decisions:
             decision_list[decision.step_name] = decision
         step_list = json.loads(self.item.step_list)
+        outputs = json.loads(self.item.step_output) if self.item.step_output else {}
+        current_step_state = 'in-progress'
+        if self.item.status == 'CANCELLED':
+            current_step_state = 'cancelled'
+        elif self.item.status == 'COMPLETED':
+            current_step_state = 'complete'
+        elif self.item.status == 'FAILURE':
+            current_step_state = 'failure'
         for idx, step in enumerate(step_list):
             data = [self.reg.step_display(step)]
+            info = []
+            if str(idx) in outputs:
+                info.extend(outputs[str(idx)])
             if step in decision_list:
                 template = gettext("pipeman.label.witem.step.gate_completed") if decision_list[step].decision else gettext("pipeman.label.witem.step.gate_cancelled")
                 template = template.format(
                     decider=decision_list[step].decider_id,
                     date=format_datetime(decision_list[step].decision_date)
                 )
-                data.append(template)
-            else:
-                data.append("")
+                info.append(template)
+            data.append(markupsafe.Markup(markupsafe.escape("\n".join([str(x) for x in info])).replace("\n", "<br />")))
             if self.item.completed_index is None and idx == 0:
-                data.append("in-progress")
+                data.append(current_step_state)
             elif self.item.completed_index > idx:
                 data.append("complete")
             elif self.item.completed_index == idx:
-                data.append("in-progress")
+                data.append(current_step_state)
             else:
                 data.append("pending")
             yield data
 # gettext('pipeman.label.witem.step.in-progress')
+# gettext('pipeman.label.witem.step.failure')
+# gettext('pipeman.label.witem.step.cancelled')
 # gettext('pipeman.label.witem.step.pending')
 # gettext('pipeman.label.witem.step.complete')
 # gettext('pipeman.label.witem.status.complete')
@@ -297,8 +309,42 @@ class WorkflowController:
     def list_workflow_items_ajax(self, active_only: bool = True):
         return self._item_table(active_only).ajax_response()
 
+    def _format_workflow_type(self, data_row):
+        return gettext(f'pipeman.label.witem.type.{data_row.workflow_type}')
+
+    def _format_workflow_name(self, data_row):
+        return self.reg.workflow_display(data_row.workflow_type, data_row.workflow_name)
+
     def _format_object_link(self, data_row):
-        return data_row.object_id
+        obj_link = None
+        obj_name = str(data_row.object_id)
+        if data_row.workflow_type.startswith("dataset"):
+            with self.db as session:
+                obj = session.query(orm.Dataset).filter_by(id=data_row.object_id).first()
+                if obj:
+                    obj_name = MultiLanguageString(
+                        json.loads(obj.display_names)
+                        if obj.display_names else
+                        {"und": data_row.object_id}
+                    )
+                    obj_link = flask.url_for('core.view_dataset', dataset_id=data_row.object_id)
+        if obj_link:
+            return markupsafe.Markup(f"<a href='{obj_link}'>{obj_name}</a>")
+        return obj_name
+
+    def object_link(self):
+        if self.item.workflow_type.startswith('dataset_'):
+            return flask.url_for('core.view_dataset', dataset_id=self.item.object_id)
+        return ""
+
+    @injector.inject
+    def object_link_text(self, db: Database = None):
+        with db as session:
+            if self.item.workflow_type.startswith('dataset_'):
+                obj = session.query(orm.Dataset).filter_by(id=self.item.object_id).first()
+                if obj:
+                    return MultiLanguageString(json.loads(obj.display_names) if obj.display_names else {})
+        return ""
 
     def _item_table(self, active_only: bool = True):
         filters = []
@@ -315,6 +361,16 @@ class WorkflowController:
             "id",
             gettext("pipeman.label.witem.id"),
             allow_order=True
+        ))
+        dt.add_column(CustomDisplayColumn(
+            "workflow_type",
+            gettext("pipeman.label.witem.workflow_type"),
+            self._format_workflow_type
+        ))
+        dt.add_column(CustomDisplayColumn(
+            "workflow_name",
+            gettext("pipeman.label.witem.workflow_name"),
+            self._format_workflow_name
         ))
         dt.add_column(DatabaseColumn(
             "created_date",
@@ -399,9 +455,16 @@ class WorkflowController:
             return
         ctx = self._build_context(item)
         result = await step.async_execute(ctx)
-        self._handle_step_result(result, item, session, steps, ctx)
+        self._handle_step_result(step, result, item, session, steps, ctx)
 
-    def _handle_step_result(self, result, item, session, steps, ctx):
+    def _handle_step_result(self, step, result, item, session, steps, ctx):
+        if step.output:
+            outputs = json.loads(item.step_output) if item.step_output else {}
+            if str(item.completed_index) in outputs:
+                outputs[str(item.completed_index)].extend([str(x) for x in step.output])
+            else:
+                outputs[str(item.completed_index)] = [str(x) for x in step.output]
+            item.step_output = json.dumps(outputs)
         if result == ItemResult.FAILURE:
             item.status = "FAILURE"
             # "gettext('pipeman.label.witem.status.failure')"
@@ -434,7 +497,7 @@ class WorkflowController:
     def _handle_cleanup(self, item, session, steps, ctx, end_state):
         cleanup_steps = []
         try:
-            cleanup_steps = self.reg.cleanup_steps(item.workflow_type, item.workflow_name)
+            cleanup_steps = self.reg.cleanup_step_list(item.workflow_type, item.workflow_name)
         except WorkflowNotFoundError as ex:
             return
         if not cleanup_steps:
@@ -469,7 +532,7 @@ class WorkflowController:
             return
         ctx = self._build_context(item, ctx)
         result = step.execute(ctx)
-        self._handle_step_result(result, item, session, steps, ctx)
+        self._handle_step_result(step, result, item, session, steps, ctx)
 
     def _batch_execute(self, item, session):
         step, steps = self._build_next_step(item)
@@ -478,7 +541,7 @@ class WorkflowController:
             return
         ctx = self._build_context(item)
         result = step.batch(ctx)
-        self._handle_step_result(result, item, session, steps, ctx)
+        self._handle_step_result(step, result, item, session, steps, ctx)
 
     def _make_decision(self, item, session, decision: bool):
         step, steps = self._build_next_step(item)
@@ -487,7 +550,7 @@ class WorkflowController:
             return
         ctx = self._build_context(item)
         result = step.complete(decision, ctx)
-        self._handle_step_result(result, item, session, steps, ctx)
+        self._handle_step_result(step, result, item, session, steps, ctx)
         dec = orm.WorkflowDecision(
             workflow_item_id=item.id,
             step_name=step.step_name,
@@ -510,6 +573,7 @@ class WorkflowStep:
     def __init__(self, step_name: str, item_config: dict):
         self.item_config = item_config
         self.step_name = step_name
+        self.output = []
 
     def execute(self, context: dict) -> ItemResult:
         return self._execute_wrapper(self._execute, context)
@@ -551,7 +615,9 @@ class WorkflowStep:
                 return ItemResult.FAILURE
             return res
         except Exception as ex:
+            logging.getLogger("pipeman.workflow").error(ex)
             logging.getLogger("pipeman.workflow").exception(ex)
+            self.output.append(f"Error calling {str(call_me)}: {str(ex)}")
             return ItemResult.FAILURE
 
     def _execute(self, context: dict) -> ItemResult:
@@ -563,7 +629,7 @@ class WorkflowStep:
         func_name = func_path[mod_pos+1:]
         module = importlib.import_module(module_name)
         func = getattr(module, func_name)
-        return func(self.item_config, *args, **kwargs)
+        return func(self, *args, **kwargs)
 
 
 class WorkflowActionStep(WorkflowStep):
@@ -582,12 +648,12 @@ class WorkflowDelayedStep(WorkflowStep):
 
     def _execute(self, context: dict) -> ItemResult:
         if "pre_action" in self.item_config:
-            res = self._call_function(self.item_config["pre_action"], context)
+            res = self._call_function(self.item_config["pre_action"],  context)
             if res == ItemResult.FAILURE or res is False:
                 return ItemResult.FAILURE
         return self.execute_response
 
-    def _post_hook(self, outcome: ItemResult, context: dict) -> ItemResult:
+    def _post_hook(self, context: dict, outcome: ItemResult) -> ItemResult:
         res = outcome
         if "post_action" in self.item_config:
             res = self._call_function(self.item_config["post_action"], context, outcome)
@@ -612,6 +678,7 @@ class WorkflowAsynchronousStep(WorkflowDelayedStep):
                 res = ItemResult.FAILURE
             return self._execute_wrapper(self._post_hook, context, res)
         except Exception as ex:
+            logging.getLogger("pipeman.workflow").error(ex)
             logging.getLogger("pipeman.workflow").exception(ex)
             return ItemResult.FAILURE
 

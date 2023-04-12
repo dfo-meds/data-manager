@@ -340,6 +340,7 @@ class WorkflowItem(_BaseModel, _AuditableModel, Base):
     status = sa.Column(sa.String(255))
     locked_by = sa.Column(sa.String(36))
     locked_since = sa.Column(sa.DateTime)
+    step_output = sa.Column(sa.Text)
 
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 

@@ -10,11 +10,12 @@ dataset_publication:
     steps:
       - lead_approval
       - pub_coord_approval
-      ## TODO: Implement push metadata to X environment
-      # - push_metadata_to_staging
-      # - sysadmin_approval
-      # - push_metadata_to_production
+      - iso19115_metadata_upload_staging
+      - erddap_metadata_upload_staging
+      - sysadmin_approval
       - publish_dataset
+      - iso19115_metadata_upload
+      - erddap_metadata_upload
 dataset_activation:
   direct_activation:
     enabled: no

@@ -352,7 +352,8 @@ class DatasetController:
             dataset.extras['pub_workflow'],
             {
                 "dataset_id": dataset.dataset_id,
-                "metadata_id": dataset.metadata_id
+                "metadata_id": dataset.metadata_id,
+                "revision_no": dataset.revision_no
             },
             dataset.dataset_id
         )
@@ -363,7 +364,7 @@ class DatasetController:
         else:
             flasht("pipeman.dataset.message.publication_in_progress", "success")
 
-    def generate_metadata_file(self, dataset, profile_name, format_name):
+    def generate_metadata_content(self, dataset, profile_name, format_name):
         args = {
             "dataset": dataset
         }
@@ -371,19 +372,23 @@ class DatasetController:
             updates = processor(**args)
             if updates:
                 args.update(updates)
+        mime_type, encoding, extension = self.reg.metadata_format_content_type(profile_name, format_name)
         content = flask.render_template(
             self.reg.metadata_format_template(profile_name, format_name),
             **args
         )
-        mime_type, encoding = self.reg.metadata_format_content_type(profile_name, format_name)
+        content = re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip()
+        return content, mime_type, encoding, extension
+
+    def generate_metadata_file(self, dataset, profile_name, format_name):
+        content, mime_type, encoding, _ = self.generate_metadata_content(dataset, profile_name, format_name)
         response = flask.Response(
-            re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip(),
+            content,
             200,
             mimetype=mime_type
         )
         response.headers['Content-Type'] = f"{mime_type}; charset={encoding}"
         return response
-
 
     def remove_dataset(self, dataset):
         with self.db as session:
@@ -427,7 +432,8 @@ class DatasetController:
                     "security_level": ds.security_level,
                     "created_date": ds.created_date,
                     "modified_date": ds.modified_date,
-                    "guid": ds.guid
+                    "guid": ds.guid,
+                    "pub_date": ds_data.published_date if ds_data else None
                 }
             )
 

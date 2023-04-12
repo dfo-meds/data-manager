@@ -2,11 +2,13 @@ from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.workflow import ItemResult
+from pipeman.dataset import DatasetController
+import zirconium as zr
 import datetime
 
 
 @injector.inject
-def publish_dataset(action_config, context, db: Database = None):
+def publish_dataset(step, context, db: Database = None):
     with db as session:
         ds = session.query(orm.Dataset).filter_by(id=context["dataset_id"]).first()
         if not ds:
@@ -21,7 +23,7 @@ def publish_dataset(action_config, context, db: Database = None):
 
 
 @injector.inject
-def activate_dataset(action_config, context, db: Database = None):
+def activate_dataset(step, context, db: Database = None):
     with db as session:
         ds = session.query(orm.Dataset).filter_by(id=context["dataset_id"]).first()
         if not ds:
@@ -32,7 +34,7 @@ def activate_dataset(action_config, context, db: Database = None):
 
 
 @injector.inject
-def flag_dataset_for_review(action_config, context, db: Database = None):
+def flag_dataset_for_review(step, context, db: Database = None):
     with db as session:
         ds = session.query(orm.Dataset).filter_by(id=context["dataset_id"]).first()
         if not ds:
@@ -43,7 +45,7 @@ def flag_dataset_for_review(action_config, context, db: Database = None):
 
 
 @injector.inject
-def return_to_draft(action_config, context, db: Database = None):
+def return_to_draft(step, context, db: Database = None):
     with db as session:
         ds = session.query(orm.Dataset).filter_by(id=context["dataset_id"]).first()
         if not ds:
@@ -51,4 +53,3 @@ def return_to_draft(action_config, context, db: Database = None):
         ds.status = "DRAFT"
         session.commit()
         return ItemResult.SUCCESS
-

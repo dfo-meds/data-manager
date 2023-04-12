@@ -16,3 +16,4 @@ toml
 universalio
 zirconium>=1.1.0
 zrlog
+azure-identity

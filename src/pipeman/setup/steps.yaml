@@ -18,6 +18,11 @@ return_to_draft:
     en: Return to Draft
   step_type: action
   action: pipeman.dataset.workflow.return_to_draft
+upload_metadata:
+  label:
+    en: Upload Metadata
+  step_type: action
+  action: pipeman.dataset.workflow.upload_metadata
 superuser_approval:
   label:
     en: General Approval

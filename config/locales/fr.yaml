@@ -169,6 +169,8 @@ pipeman.dataset.page.edit_metadata.link: "Modifier les métadonnées"
 pipeman.dataset.page.edit_metadata.title: "Modifier les métadonnées"
 pipeman.auth_db.page.view_myself.title: "Mon profil"
 pipeman.label.user.password: "Mot de passe"
+pipeman.label.witem.step.cancelled: 'Annuler'
+pipeman.label.witem.step.failure: 'Échec'
 pipeman.auth_db.page.reset_password.success: "Mot de passe utilisateur réinitialisé à |{password}|"
 pipeman.label.dataset.security_level: "Niveau de sécurité"
 pipeman.label.witem.name: "Nom"

@@ -22,3 +22,36 @@ sysadmin_approval:
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
+iso19115_metadata_upload:
+  label:
+    en: Upload ISO-19115 Metadata File
+  step_type: action
+  action: "pipeman.plugins.cnodc.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  environment: "production"
+erddap_metadata_upload:
+  label:
+    en: Upload ERDDAP Config File
+  step_type: action
+  action: "pipeman.plugins.cnodc.workflow.upload_metadata"
+  profile_name: erddap
+  format_name: erddapxml
+  environment: "production"
+iso19115_metadata_upload_staging:
+  label:
+    en: Upload ISO-19115 Metadata File
+  step_type: action
+  action: "pipeman.plugins.cnodc.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  environment: "staging"
+erddap_metadata_upload_staging:
+  label:
+    en: Upload ERDDAP Config File
+  step_type: action
+  action: "pipeman.plugins.cnodc.workflow.upload_metadata"
+  profile_name: erddap
+  format_name: erddapxml
+  environment: "staging"
+
