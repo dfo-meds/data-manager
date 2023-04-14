@@ -124,7 +124,7 @@ class CSPRegistry:
         # Otherwise we can probably cache this resource
         return True
 
-    def allow_shared_caching(self, response):
+    def allow_shared_caching(self, response = None):
         # We can cache static resources even if it is an authenticated request since
         # there is no extra information
         if self._is_static_resource:
