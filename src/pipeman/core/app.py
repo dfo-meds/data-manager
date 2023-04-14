@@ -10,7 +10,7 @@ from pipeman.workflow import WorkflowController
 from pipeman.org import OrganizationController
 from pipeman.files import FileController
 from pipeman.i18n import gettext
-from pipeman.util.flask import EntitySelectField, MultiLanguageBlueprint
+from pipeman.util.flask import EntitySelectField, MultiLanguageBlueprint, CSPRegistry
 import logging
 
 
@@ -25,12 +25,16 @@ def home():
 
 # The splash page welcomes new users
 @base.route("/")
-def splash():
+@injector.inject
+def splash(cspr: CSPRegistry = None):
+    cspr.set_static()
     return flask.render_template("splash.html")
 
 
 @base.route("/-/health")
-def health_check():
+@injector.inject
+def health_check(cspr: CSPRegistry = None):
+    cspr.set_static()
     if flask.request.remote_addr != "127.0.0.1":
         return flask.abort(404)
     return "healthy", 200

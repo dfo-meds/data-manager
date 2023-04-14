@@ -90,92 +90,92 @@
             <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js" integrity="sha512-2FAQqknslN8pS8aF3mK9Iiene7xFUawTM2h/aloIG4tkbXbzTlUimIfZvt6gLNTJbknJ4jwBKGWIQ4uq0DIPeA==" crossorigin="anonymous"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
-            <script type="text/javascript" nonce="{{csp_nonce('script-src')}}">
-
-                let overflow_error = '{{'pipeman.error.html_js_overflow' | gettext}}';
-                let underflow_error = '{{'pipeman.error.html_js_underflow' | gettext}}';
-                let no_value_error = '{{'pipeman.error.html_js_missing_value' | gettext}}';
-                let too_long_error = '{{'pipeman.error.html_js_too_long' | gettext}}';
-                let too_short_error = '{{'pipeman.error.html_js_too_short' | gettext}}';
-                let step_error = '{{'pipeman.error.html_js_step_error' | gettext}}';
-                let pattern_error = '{{'pipeman.error.html_js_pattern_error' | gettext}}';
-                let input_error = '{{'pipeman.error.html_js_input_error' | gettext}}';
-                let email_format = '{{'pipeman.error.html_js_email_format_error' | gettext}}';
-                let url_format = '{{'pipeman.error.html_js_url_format_error' | gettext}}';
-                let tel_format = '{{'pipeman.error.html_js_tel_format_error' | gettext}}';
-                let csrf_token = "{{ csrf_token() }}";
-
-                $.ajaxSetup({
-                    beforeSend: function(xhr, settings) {
-                        if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                            xhr.setRequestHeader("X-CSRFToken", csrf_token);
-                        }
-                    }
-                });
-
-                $(document).ready(function() {
-                    $("input").each(function() {
-                        $(this).on("input", function(e) {
-                            let obj = $(this).get(0);
-                            obj.setCustomValidity("");
-                            obj.title = "";
-                            $(this).removeClass("form-error");
-                            $(this).parent().find(".form-error-message").remove();
-                        });
-                        $(this).on("invalid blur", function(e) {
-                            let obj = $(this).get(0);
-                            original_message = obj.validationMessage;
-                            obj.setCustomValidity("");
-                            if (obj.validity.valueMissing) {
-                                obj.setCustomValidity(no_value_error);
-                            } else if (obj.validity.tooShort) {
-                                obj.setCustomValidity(too_short_error.replace("{min}", $(this).attr("minlength")));
-                            } else if (obj.validity.tooLong) {
-                                obj.setCustomValidity(too_long_error.replace("{max}", $(this).attr("maxlength")));
-                            } else if (obj.validity.rangeOverflow) {
-                                obj.setCustomValidity(overflow_error.replace("{max}", $(this).attr("max")));
-                            } else if (obj.validity.rangeUnderflow) {
-                                obj.setCustomValidity(underflow_error.replace("{min}", $(this).attr("min")));
-                            } else if (obj.validity.stepMismatch) {
-                                obj.setCustomValidity(step_error.replace("{step}", $(this).attr("step")));
-                            } else if (obj.validity.patternMismatch) {
-                                obj.setCustomValidity(pattern_error.replace("{pattern}", $(this).attr("pattern")));
-                            } else if (obj.validity.badInput) {
-                                obj.setCustomValidity(input_error);
-                            } else if (!obj.validity.valid) {
-                                if ($(this).attr("type") == "email") {
-                                    obj.setCustomValidity(email_format);
-                                }
-                                else if ($(this).attr("type") == "url") {
-                                    obj.setCustomValidity(url_format);
-                                }
-                                else if ($(this).attr("type") == "tel") {
-                                    obj.setCustomValidity(tel_format);
-                                }
-                                else {
-                                    obj.setCustomValidity(original_message);
-                                    window.alert(original_message);
-                                }
-                            }
-                            obj.title = obj.validationMessage;
-                            if (obj.validationMessage) {
-                                $(this).addClass("form-error");
-                                let box_count = $(this).parent().find(".form-error-message").length;
-                                if (box_count > 0) {
-                                    $(this).parent().find(".form-error-message").text(obj.validationMessage);
-                                } else {
-                                    $(this).parent().append("<div class='form-error-message'>" + obj.validationMessage + "</div>");
-                                }
-                            } else {
-                                $(this).removeClass("form-error");
-                                $(this).parent().find(".form-error-message").remove();
-                            }
-                        });
-                    });
-                });
-            </script>
         {% endblock %}
         {% block customScripts %}
+        <script type="text/javascript" nonce="{{csp_nonce('script-src')}}">
+
+            let overflow_error = '{{'pipeman.error.html_js_overflow' | gettext}}';
+            let underflow_error = '{{'pipeman.error.html_js_underflow' | gettext}}';
+            let no_value_error = '{{'pipeman.error.html_js_missing_value' | gettext}}';
+            let too_long_error = '{{'pipeman.error.html_js_too_long' | gettext}}';
+            let too_short_error = '{{'pipeman.error.html_js_too_short' | gettext}}';
+            let step_error = '{{'pipeman.error.html_js_step_error' | gettext}}';
+            let pattern_error = '{{'pipeman.error.html_js_pattern_error' | gettext}}';
+            let input_error = '{{'pipeman.error.html_js_input_error' | gettext}}';
+            let email_format = '{{'pipeman.error.html_js_email_format_error' | gettext}}';
+            let url_format = '{{'pipeman.error.html_js_url_format_error' | gettext}}';
+            let tel_format = '{{'pipeman.error.html_js_tel_format_error' | gettext}}';
+            let csrf_token = "{{ csrf_token() }}";
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                    }
+                }
+            });
+
+            $(document).ready(function() {
+                $("input").each(function() {
+                    $(this).on("input", function(e) {
+                        let obj = $(this).get(0);
+                        obj.setCustomValidity("");
+                        obj.title = "";
+                        $(this).removeClass("form-error");
+                        $(this).parent().find(".form-error-message").remove();
+                    });
+                    $(this).on("invalid blur", function(e) {
+                        let obj = $(this).get(0);
+                        original_message = obj.validationMessage;
+                        obj.setCustomValidity("");
+                        if (obj.validity.valueMissing) {
+                            obj.setCustomValidity(no_value_error);
+                        } else if (obj.validity.tooShort) {
+                            obj.setCustomValidity(too_short_error.replace("{min}", $(this).attr("minlength")));
+                        } else if (obj.validity.tooLong) {
+                            obj.setCustomValidity(too_long_error.replace("{max}", $(this).attr("maxlength")));
+                        } else if (obj.validity.rangeOverflow) {
+                            obj.setCustomValidity(overflow_error.replace("{max}", $(this).attr("max")));
+                        } else if (obj.validity.rangeUnderflow) {
+                            obj.setCustomValidity(underflow_error.replace("{min}", $(this).attr("min")));
+                        } else if (obj.validity.stepMismatch) {
+                            obj.setCustomValidity(step_error.replace("{step}", $(this).attr("step")));
+                        } else if (obj.validity.patternMismatch) {
+                            obj.setCustomValidity(pattern_error.replace("{pattern}", $(this).attr("pattern")));
+                        } else if (obj.validity.badInput) {
+                            obj.setCustomValidity(input_error);
+                        } else if (!obj.validity.valid) {
+                            if ($(this).attr("type") == "email") {
+                                obj.setCustomValidity(email_format);
+                            }
+                            else if ($(this).attr("type") == "url") {
+                                obj.setCustomValidity(url_format);
+                            }
+                            else if ($(this).attr("type") == "tel") {
+                                obj.setCustomValidity(tel_format);
+                            }
+                            else {
+                                obj.setCustomValidity(original_message);
+                                window.alert(original_message);
+                            }
+                        }
+                        obj.title = obj.validationMessage;
+                        if (obj.validationMessage) {
+                            $(this).addClass("form-error");
+                            let box_count = $(this).parent().find(".form-error-message").length;
+                            if (box_count > 0) {
+                                $(this).parent().find(".form-error-message").text(obj.validationMessage);
+                            } else {
+                                $(this).parent().append("<div class='form-error-message'>" + obj.validationMessage + "</div>");
+                            }
+                        } else {
+                            $(this).removeClass("form-error");
+                            $(this).parent().find(".form-error-message").remove();
+                        }
+                    });
+                });
+            });
+        </script>
         {% endblock %}
         {% block style %}
             {{ csp_allow('style-src', 'https://cdn.datatables.net') }}
@@ -274,6 +274,11 @@
                         });
                     </script>
                 </div>
+                <div id="session_timeout_box" class="hidden">
+                    <p>{{'pipeman.session.timeout_warning' | gettext}}</p>
+                    <p id="time_left">0:00</p>
+                    <p><a href="javascript:refresh_session();">{{'pipeman.session.refresh_link' | gettext}}</a></p>
+                </div>
                 {% endif %}
                 <div class="bottom_image">
                     <img src="{{url_for('static', filename='wmms-blk.svg')}}" width="150" />
@@ -283,10 +288,6 @@
             {% endblock %}
         </div>
         {% endblock %}
-        <div id="session_timeout_box" class="hidden">
-            <p>{{'pipeman.session.timeout_warning' | gettext}}</p>
-            <p id="time_left">0:00</p>
-            <p><a href="javascript:refresh_session();">{{'pipeman.session.refresh_link' | gettext}}</a></p>
-        </div>
+
     </body>
 </html>

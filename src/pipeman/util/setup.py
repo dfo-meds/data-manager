@@ -1,6 +1,8 @@
 import logging
 from autoinject import injector
 import zrlog
+from flask.sessions import SecureCookieSessionInterface, SessionMixin
+
 from pipeman.i18n import gettext
 import typing as t
 import datetime
@@ -164,7 +166,15 @@ class TrustedProxyFix:
             return self._app(environ, start_response)
 
 
+class SessionCookieInterface(SecureCookieSessionInterface):
+
+    @injector.inject
+    def should_set_cookie(self, app: "Flask", session: SessionMixin, cspr: CSPRegistry = None) -> bool:
+        return not cspr.allow_shared_caching()
+
+
 def core_init_app(system, app, config):
+    app.session_interface = SessionCookieInterface()
     if "flask" in config:
         app.config.update(config["flask"] or {})
     if not app.config.get("SECRET_KEY"):
@@ -195,7 +205,9 @@ def core_init_app(system, app, config):
     # Before request, make sure the session is permanent
     @app.before_request
     @injector.inject
-    def session_init(rinfo: RequestInfo = None):
+    def session_init(rinfo: RequestInfo = None, cspr: CSPRegistry = None):
+        if flask.request.endpoint == "static":
+            cspr.set_static()
         check_request_session()
         set_request_info({
             "username": rinfo.username(),
@@ -216,7 +228,8 @@ def core_init_app(system, app, config):
     def add_response_headers(response: flask.Response, cspr: CSPRegistry = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
         if flask.request.endpoint == "static":
-            logging.getLogger("pipeman.access_log").info(
+            # Avoid spamming crap into the log for every static resource
+            logging.getLogger("pipeman.access_log").debug(
                 f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
             )
         else:
