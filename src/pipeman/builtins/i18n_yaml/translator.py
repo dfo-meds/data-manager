@@ -21,7 +21,7 @@ class YamlTranslationManager:
             dpaths.append(extra_paths)
         elif extra_paths is not None:
             dpaths.extend(extra_paths)
-        cfg_paths = self.cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_paths'), default=None)
+        cfg_paths = self.cfg.get(('pipeman', 'i18n_yaml', 'dictionary_paths'), default=None)
         if isinstance(cfg_paths, str):
             dpaths.append(cfg_paths)
         elif cfg_paths is not None:
