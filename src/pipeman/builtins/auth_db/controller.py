@@ -122,7 +122,7 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 user.display = form.display.data
                 session.commit()
-                flasht("pipeman.auth_db.page.edit_myself.success")
+                flasht("pipeman.auth_db.page.edit_myself.success", 'success')
                 return flask.redirect(flask.url_for("users.view_myself"))
             return flask.render_template("form.html", form=form, title=gettext("pipeman.auth_db.page.edit_myself.title"))
 
@@ -133,7 +133,7 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 try:
                     self._set_password(user, form.password.data)
-                    flasht("pipeman.auth_db.page.change_password.success")
+                    flasht("pipeman.auth_db.page.change_password.success", 'success')
                     return flask.redirect(flask.url_for("users.view_myself"))
                 except UserInputError as ex:
                     flask.flash(str(ex), "error")
