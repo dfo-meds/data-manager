@@ -153,6 +153,8 @@ class ItemDisplayWrapper:
             decision_list[decision.step_name] = decision
         step_list = json.loads(self.item.step_list)
         outputs = json.loads(self.item.step_output) if self.item.step_output else {}
+        ctx = json.loads(self.item.context) if self.item.context else {}
+        skip_info = (None, None) if '_final_completed_step' not in ctx else (ctx['_final_completed_step'], ctx['_first_cleanup_step'])
         current_step_state = 'in-progress'
         if self.item.status == 'CANCELLED':
             current_step_state = 'cancelled'
@@ -173,7 +175,9 @@ class ItemDisplayWrapper:
                 )
                 info.append(template)
             data.append(markupsafe.Markup(markupsafe.escape("\n".join([str(x) for x in info])).replace("\n", "<br />")))
-            if self.item.completed_index is None and idx == 0:
+            if skip_info and skip_info[0] < idx < (skip_info[1] - 1):
+                data.append('skipped')
+            elif self.item.completed_index is None and idx == 0:
                 data.append(current_step_state)
             elif self.item.completed_index > idx:
                 data.append("complete")
@@ -187,6 +191,7 @@ class ItemDisplayWrapper:
 # gettext('pipeman.label.witem.step.cancelled')
 # gettext('pipeman.label.witem.step.pending')
 # gettext('pipeman.label.witem.step.complete')
+# gettext('pipeman.label.witem.step.skipped')
 # gettext('pipeman.label.witem.status.complete')
 # gettext('pipeman.label.witem.status.failure')
 # gettext('pipeman.label.witem.status.cancelled')
@@ -505,9 +510,11 @@ class WorkflowController:
         next_index = len(steps)
         steps.extend(cleanup_steps)
         # Remember the original state so we can set it when we finish
+        ctx['_final_completed_step'] = item.completed_index
+        ctx['_first_cleanup_step'] = next_index + 1
         ctx['_cleanup_set_state'] = end_state
         item.step_list = json.dumps(steps)
-        item.completed_index = len(steps)
+        item.completed_index = next_index
         item.context = json.dumps(ctx)
         session.commit()
         self._start_next_step(item, session, steps, ctx)

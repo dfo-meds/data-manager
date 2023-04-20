@@ -5,6 +5,7 @@ cioos.validation.metadata_owner_no_id_code_or_name: 'Identifier code or name is 
 cioos.validation.metadata_owner_no_id_code_space: 'Identifier system is missing a code space'
 cioos.validation.metadata_owner_no_id_system: 'Identifier system is empty'
 cioos.validation.metadata_owner_org_no_ror: 'ROR is required'
+pipeman.label.witem.step.skipped: "Skipped"
 cnodc.page.help.link: 'User Manual'
 cnodc.page.help.title: 'User Manual'
 cnodc.site_title: 'Canadian National Oceanographic Data Centre'
