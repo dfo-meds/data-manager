@@ -3,6 +3,9 @@ from enum import Enum
 import importlib
 import flask_login
 import flask
+
+import pipeman.util.flask
+from pipeman.attachment import AttachmentController
 from pipeman.util.flask import ConfirmationForm, ActionList, flasht
 from pipeman.util import deep_update
 from pipeman.util.errors import StepNotFoundError, StepConfigurationError, WorkflowNotFoundError, WorkflowItemNotFoundError
@@ -15,6 +18,7 @@ import datetime
 import sqlalchemy as sa
 import requests
 import wtforms as wtf
+import wtforms.validators as wtfv
 import time
 import zirconium as zr
 from pipeman.i18n import gettext, format_datetime, DelayedTranslationString
@@ -26,6 +30,8 @@ import asyncio
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, CustomDisplayColumn, ActionListColumn
 from pipeman.db import BaseObjectRegistry
 import yaml
+from flask_wtf.file import FileField
+
 
 
 class ItemResult(Enum):
@@ -174,7 +180,16 @@ class ItemDisplayWrapper:
                     date=format_datetime(decision_list[step].decision_date)
                 )
                 info.append(template)
-            data.append(markupsafe.Markup(markupsafe.escape("\n".join([str(x) for x in info])).replace("\n", "<br />")))
+                if decision_list[step].comments:
+                    info.append(str(gettext('pipeman.label.witem.step.comments')) + ": " + str(decision_list[step].comments))
+                if decision_list[step].attachment_id:
+                    att = decision_list[step].attachment
+                    link = flask.url_for('core.view_attachment', attachment_id=att.id)
+                    print(link)
+                    print(att.file_name)
+                    info.append(markupsafe.Markup(f'{gettext("pipeman.label.witem.step.attachment")}: <a href="{link}">{markupsafe.escape(att.file_name)}</a>'))
+            clean_info = [markupsafe.escape(x) for x in info]
+            data.append(markupsafe.Markup('<br />'.join(clean_info)))
             if skip_info[0] and skip_info[1] and skip_info[0] < idx < (skip_info[1] - 1):
                 data.append('skipped')
             elif self.item.completed_index is None and idx == 0:
@@ -205,6 +220,7 @@ class WorkflowController:
     db: Database = None
     reg: WorkflowRegistry = None
     cfg: zr.ApplicationConfig = None
+    attachments: AttachmentController = None
 
     @injector.construct
     def __init__(self):
@@ -270,10 +286,10 @@ class WorkflowController:
                 return flask.abort(403)
             item_url = flask.url_for("core.view_item", item_id=item_id)
             base_key = "pipeman.workflow.page.continue" if decision else 'pipeman.workflow.page.cancel'
-            form = ConfirmationForm()
+            form = WorkflowItemForm()
             if form.validate_on_submit():
-                self._make_decision(item, session, decision)
-                flasht(f"{base_key}.success", "success")
+                if self._make_decision(item, session, decision, form):
+                    flasht(f"{base_key}.success", "success")
                 return flask.redirect(item_url)
             return flask.render_template(
                 "form.html",
@@ -550,23 +566,36 @@ class WorkflowController:
         result = step.batch(ctx)
         self._handle_step_result(step, result, item, session, steps, ctx)
 
-    def _make_decision(self, item, session, decision: bool):
+    def _make_decision(self, item, session, decision: bool, form=None):
         step, steps = self._build_next_step(item)
         if step is None:
             session.commit()
             return
-        ctx = self._build_context(item)
-        result = step.complete(decision, ctx)
-        self._handle_step_result(step, result, item, session, steps, ctx)
+        att_id = None
+        if form.file_submission.data:
+            att_id = self.attachments.create_attachment(
+                form.file_submission.data,
+                f"witem{item.id}",
+                item.object_id if item.workflow_type.startswith("dataset") else None
+            )
+            if att_id is None:
+                flasht("pipeman.workflow.error.file_upload_error", "error")
+                return False
         dec = orm.WorkflowDecision(
             workflow_item_id=item.id,
             step_name=step.step_name,
             decider_id=flask_login.current_user.get_id(),
             decision=decision,
-            decision_date=datetime.datetime.now()
+            decision_date=datetime.datetime.now(),
+            comments=form.comments.data if form else "",
+            attachment_id=att_id
         )
         session.add(dec)
+        ctx = self._build_context(item)
+        result = step.complete(decision, ctx)
+        self._handle_step_result(step, result, item, session, steps, ctx)
         session.commit()
+        return True
 
     def _build_context(self, item, ctx=None):
         if ctx is None:
@@ -768,3 +797,21 @@ class DefaultStepFactory(GenericStepFactory):
             WorkflowAsynchronousStep,
         ])
 
+
+class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
+
+    comments = wtf.TextAreaField(
+        DelayedTranslationString("pipeman.label.witem.step.comments")
+    )
+
+    file_submission = wtf.FileField(
+        DelayedTranslationString("pipeman.label.witem.step.approval_file")
+    )
+
+    submit = wtf.SubmitField(
+        DelayedTranslationString("pipeman.common.submit")
+    )
+
+    def __init__(self):
+        super().__init__()
+        self.with_file_upload = True

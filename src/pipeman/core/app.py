@@ -1,6 +1,8 @@
 import flask
 import flask_login
 from autoinject import injector
+
+from pipeman.attachment import AttachmentController
 from pipeman.entity import EntityController, EntityRegistry
 from pipeman.dataset import DatasetController
 from pipeman.auth import require_permission
@@ -275,6 +277,13 @@ def list_datasets_ajax(con: DatasetController = None):
 @injector.inject
 def create_dataset(con: DatasetController = None):
     return con.create_dataset_form()
+
+
+@core.i18n_route("/attachment/<int:attachment_id>", methods=["GET"])
+@require_permission("attachments.view")
+@injector.inject
+def view_attachment(attachment_id, atc: AttachmentController = None):
+    return atc.download_attachment(attachment_id)
 
 
 @core.i18n_route("/datasets/<int:dataset_id>")

@@ -8,6 +8,7 @@ sysadmin:
     - auth_db.create
     - auth_db.edit
     - auth_db.reset
+    - attachments.view
     - entities.view
     - entities.view.all
     - entities.create
@@ -50,6 +51,7 @@ pub_coord:
     fr: Coordonnateur de la publication
   permissions:
     - approvals.publishing_coordinator
+    - attachments.view
     - entities.view
     - entities.view.all
     - entities.create
@@ -90,6 +92,7 @@ org_coordinator:
     fr: Coordinateur de l'unité de données
   permissions:
     - approvals.coordinator
+    - attachments.view
     - entities.view
     - entities.view.all
     - entities.create
@@ -147,6 +150,7 @@ tech_lead:
     fr: Chef de programme
   permissions:
     - approvals.program_lead
+    - attachments.view
     - entities.view
     - entities.view.all
     - entities.create
@@ -198,6 +202,7 @@ steward:
     fr: Intendant des données
   permissions:
     - approvals.data_steward
+    - attachments.view
     - entities.create
     - entities.edit.ref_system
     - entities.create.keyword

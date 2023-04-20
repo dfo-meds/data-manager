@@ -2,6 +2,7 @@ from autoinject import injector
 import zirconium as zr
 from pipeman.dataset import DatasetController
 import azure.storage.blob as asb
+import azure.storage.fileshare as afs
 from azure.identity import DefaultAzureCredential
 import datetime
 
@@ -22,10 +23,9 @@ def upload_metadata(step, context, config: zr.ApplicationConfig = None, dc: Data
         pname,
         fname
     )
-    cc = _get_container_client(config, env)
-    blob_pattern = config.as_str(("cnodc", "metadata", "blob_pattern"), default=default_pattern)
+    blob_pattern = config.as_str(("cnodc", "metadata", "name_pattern"), default=default_pattern)
     if env:
-        blob_pattern = config.as_str(("cnodc", "metadata", env, "blob_pattern"), default=blob_pattern)
+        blob_pattern = config.as_str(("cnodc", "metadata", env, "name_pattern"), default=blob_pattern)
     allow_overwrite = config.as_bool(("cnoc", "metadata", "allow_overwrite"), default=True)
     if env:
         allow_overwrite = config.as_bool(("cnodc", "metadata", env, "allow_overwrite"), default=allow_overwrite)
@@ -50,25 +50,73 @@ def upload_metadata(step, context, config: zr.ApplicationConfig = None, dc: Data
         "ReleaseDate": "",
         "AutomatedRelease": "",
         "StoragePlan": "TIER 3",
-        "PublicationPlan": "ERDDAP",
+        "PublicationPlan": "_METADATA",
         "Program": "_METADATA",
         "Dataset": "_METADATA",
         "CostUnit": "CNODC"
     }
-    cs = asb.ContentSettings(
-        content_type=mime_type,
-        content_encoding=encoding
+    metadata.update(config.get(("cnodc", "metadata", "properties"), default={}))
+    path = _upload_file(
+        content,
+        blob_pattern,
+        metadata,
+        allow_overwrite,
+        mime_type,
+        encoding,
+        config,
+        env
     )
-    blob = cc.upload_blob(
-        name=blob_pattern,
-        data=content,
-        metadata=metadata,
-        overwrite=allow_overwrite,
-        length=len(content),
-        content_settings=cs,
-        standard_blob_tier=asb.StandardBlobTier.HOT
-    )
-    step.output.append(f"Metadata uploaded to {blob.url}")
+    step.output.append(f"Metadata uploaded to {path}")
+
+
+def _upload_file(content, path, metadata, allow_overwrite, mime_type, encoding, config, env):
+    connect_type = config.as_str(("cnodc", "metadata", "connect_type"), default="blob")
+    if env:
+        connect_type = config.as_str(("cnodc", "metadata", env, "connect_type"), default=connect_type)
+    if connect_type == "file":
+        fsc = _get_file_share_client(config, env)
+        cs = afs.ContentSettings(
+            content_type=mime_type,
+            content_encoding=encoding
+        )
+        fc = fsc.get_file_client(path)
+        # NB: allow_overwrite not respected at the moment
+        fc.upload_file(
+            data=content,
+            length=len(content)
+            
+        )
+        fc.set_http_headers(content_settings=cs)
+        fc.set_file_metadata(metadata)
+    else:
+        cc = _get_container_client(config, env)
+        cs = asb.ContentSettings(
+            content_type=mime_type,
+            content_encoding=encoding
+        )
+        blob = cc.upload_blob(
+            name=path,
+            data=content,
+            metadata=metadata,
+            overwrite=allow_overwrite,
+            length=len(content),
+            content_settings=cs,
+            standard_blob_tier=asb.StandardBlobTier.HOT
+        )
+        return blob.url
+
+
+def _get_file_share_client(config: zr.ApplicationConfig, env) -> afs.ShareClient:
+    connect_str = config.as_str(("cnodc", "metadata", "connect_str"))
+    share_name = config.as_str(("cnodc", "metadata", "share"))
+    if env:
+        connect_str = config.as_str(("cnodc", "metadata", env, "connect_str"), default=connect_str)
+        share_name = config.as_str(("cnodc", "metadata", env, "share"), default=share_name)
+    if connect_str.startswith("http"):
+        credentials = DefaultAzureCredential()
+        return afs.ShareClient(connect_str, share_name, credentials=credentials)
+    else:
+        return afs.ShareClient.from_connection_string(connect_str, share_name)
 
 
 def _get_container_client(config: zr.ApplicationConfig, env) -> asb.ContainerClient:
@@ -92,5 +140,4 @@ def _get_blob_service_client(config: zr.ApplicationConfig, env) -> asb.BlobServi
     if connect_str.startswith("http"):
         cred = DefaultAzureCredential()
         return asb.BlobServiceClient(connect_str, credential=cred)
-
     return asb.BlobServiceClient.from_connection_string(connect_str)

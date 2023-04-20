@@ -67,7 +67,7 @@
     {% endif %}
 {%- endmacro %}
 {% macro showform(form) -%}
-    <form action="" lang={{language}} method="POST"{% if with_file_upload %} enctype="multipart/form-data"{% endif %}>
+    <form action="" lang={{language}} method="POST"{% if form.with_file_upload %} enctype="multipart/form-data"{% endif %}>
         {% for control in form %}
             {{ showformcontrol(control) }}
         {% endfor %}

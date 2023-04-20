@@ -260,6 +260,7 @@ class Dataset(_BaseModel, _AuditableModel, Base):
     security_level = sa.Column(sa.String(255), nullable=False)
     guid = sa.Column(sa.String(255), nullable=False, unique=True)
 
+    attachments = orm.relationship("Attachment", back_populates="dataset")
     organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("MetadataEdition", back_populates="dataset")
     users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
@@ -345,6 +346,16 @@ class WorkflowItem(_BaseModel, _AuditableModel, Base):
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 
 
+class Attachment(_BaseModel, _AuditableModel, Base):
+
+    file_name = sa.Column(sa.String(1024), nullable=False)
+    storage_path = sa.Column(sa.String(1024), nullable=False)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True)
+    storage_name = sa.Column(sa.String(1024), nullable=True)
+
+    dataset = orm.relationship("Dataset", back_populates="attachments")
+
+
 class WorkflowDecision(_BaseModel, _AuditableModel, Base):
 
     workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False)
@@ -352,8 +363,11 @@ class WorkflowDecision(_BaseModel, _AuditableModel, Base):
     decider_id = sa.Column(sa.String(1024), nullable=False)
     decision = sa.Column(sa.Boolean)
     decision_date = sa.Column(sa.DateTime)
+    comments = sa.Column(sa.Text, nullable=True)
+    attachment_id = sa.Column(sa.ForeignKey("attachment.id"), nullable=True)
 
     workflow_item = orm.relationship("WorkflowItem", back_populates="decisions")
+    attachment = orm.relationship("Attachment")
 
 
 class ServerSession(_BaseModel, Base):
