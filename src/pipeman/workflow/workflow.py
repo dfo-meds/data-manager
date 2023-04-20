@@ -175,7 +175,7 @@ class ItemDisplayWrapper:
                 )
                 info.append(template)
             data.append(markupsafe.Markup(markupsafe.escape("\n".join([str(x) for x in info])).replace("\n", "<br />")))
-            if skip_info and skip_info[0] < idx < (skip_info[1] - 1):
+            if skip_info[0] and skip_info[1] and skip_info[0] < idx < (skip_info[1] - 1):
                 data.append('skipped')
             elif self.item.completed_index is None and idx == 0:
                 data.append(current_step_state)
