@@ -4,6 +4,7 @@ from pipeman.util import System
 from .auth import AuthenticationManager, AuthenticatedUser, require_permission
 from .secure import SecurityHelper
 import flask
+import os
 
 
 @injector.inject
@@ -28,3 +29,17 @@ def init(system: System):
     system.register_init_app(auth_init_app)
     system.register_blueprint("pipeman.auth.app", "auth")
     system.register_cli("pipeman.auth.cli", "group")
+    system.register_setup_fn(setup)
+
+
+def setup():
+    admin_group = os.environ.get("PIPEMAN_ADMIN_GROUP", "superuser")
+    from .util import create_group, grant_permission
+    try:
+        create_group(admin_group, {'und': 'Administrators'})
+    except UserInputError:
+        pass
+    try:
+        grant_permission(admin_group, 'superuser')
+    except UserInputError:
+        pass

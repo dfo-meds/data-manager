@@ -105,6 +105,7 @@ class AuthenticatedUser(fl.UserMixin):
         self._extras = extras
         to = self.cfg.as_int(("pipeman", "session_expiry"), default=44640)
         self.session_timeout = datetime.datetime.now() + datetime.timedelta(minutes=to)
+        self._has_superuser_access = "superuser" in permissions and self.cfg.as_bool(("pipeman", "superuser_enabled"), default=True)
 
     def property(self, name: str) -> t.Any:
         """Retrieve the value of an extra user property as set by the authentication system."""
@@ -125,9 +126,9 @@ class AuthenticatedUser(fl.UserMixin):
             return True
         if permission_name == "_is_anonymous":
             return False
-        if permission_name == "_is_not_anonymous":
+        if self._has_superuser_access:
             return True
-        if "superuser" in self.permissions:
+        if permission_name == "_is_not_anonymous":
             return True
         return permission_name in self.permissions
 

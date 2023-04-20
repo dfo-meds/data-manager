@@ -68,14 +68,13 @@ class Database:
         self.log = logging.getLogger("pipeman.db")
         self.log_safe = logging.getLogger("pipeman.db.safe")
         self.log_safe.omit_extras()
-        self.log_safe.info(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
+        self.log_safe.debug(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
         self._unclean_warned_once = False
         self._closing_warned_once = False
 
     def _create_connection(self):
         if self.engine is None:
             if self._is_closed and not self._unclean_warned_once:
-                self.log_safe.info(f"Recreating connection DB out of context {injector.context_manager._get_context_hash()}")
                 self.log_safe.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
                 #self._unclean_warned_once = True
             # Create the engine from the connection string
