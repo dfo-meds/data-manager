@@ -185,8 +185,6 @@ class ItemDisplayWrapper:
                 if decision_list[step].attachment_id:
                     att = decision_list[step].attachment
                     link = flask.url_for('core.view_attachment', attachment_id=att.id)
-                    print(link)
-                    print(att.file_name)
                     info.append(markupsafe.Markup(f'{gettext("pipeman.label.witem.step.attachment")}: <a href="{link}">{markupsafe.escape(att.file_name)}</a>'))
             clean_info = [markupsafe.escape(x) for x in info]
             data.append(markupsafe.Markup('<br />'.join(clean_info)))
