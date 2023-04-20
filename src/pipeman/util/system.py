@@ -111,9 +111,6 @@ class System:
 
     def setup(self):
         """Run all the setup scripts."""
-        # Alembic migration should come first
-        res = subprocess.run([sys.executable, "-m", "alembic", "upgrade", "head"])
-        res.check_returncode()
         for cb in self._setup_cb:
             if isinstance(cb, str):
                 obj = load_object(cb)

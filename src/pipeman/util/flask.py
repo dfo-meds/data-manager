@@ -109,14 +109,14 @@ class CSPRegistry:
         self._cache_time = cache_time if cache_time is not None else self._static_cache_time
         self._is_static_resource = True
 
-    def allow_caching(self, response):
+    def allow_caching(self, response=None):
         # If caching is disabled, lets just not worry about it
         if not self._allow_caching_default:
             return False
         # No caching if we used a nonce or anything like it
         if not self._can_cache_page:
             return False
-        if response.status_code not in (200, 301):
+        if response and response.status_code not in (200, 301):
             return False
         # No caching for methods other than GET or HEAD
         if flask.request.method not in ('GET', 'HEAD'):

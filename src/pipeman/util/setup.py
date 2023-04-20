@@ -170,7 +170,7 @@ class SessionCookieInterface(SecureCookieSessionInterface):
 
     @injector.inject
     def should_set_cookie(self, app: "Flask", session: SessionMixin, cspr: CSPRegistry = None) -> bool:
-        return not cspr.allow_shared_caching()
+        return not (cspr.allow_caching() and cspr.allow_shared_caching())
 
 
 def core_init_app(system, app, config):

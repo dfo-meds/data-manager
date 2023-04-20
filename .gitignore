@@ -1,0 +1,4 @@
+/.pipeman.toml
+/*.db
+/venv
+/.idea

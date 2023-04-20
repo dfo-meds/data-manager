@@ -6,7 +6,11 @@ export PYTHONUNBUFFERED
 
 cd /srv/metadb/app || exit
 
-python cli.py core setup
+if [ "$1" == "-with-install" ] ; then
+  shift 1
+  python -m alembic upgrade head
+  python cli.py core setup
+fi
 
 # If there's a prestart.sh script in the /app directory, run it before starting
 PRE_START_PATH=/srv/metadb/prestart.sh
