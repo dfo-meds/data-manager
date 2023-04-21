@@ -1,0 +1,74 @@
+cnodc_activities:
+  display:
+    en: CNODC - Activity Codes
+    fr: CNDOC - Codes des activités
+  uri:
+  terms:
+    AC:
+      description:
+        en: Assign a new cruise number.
+        fr: Assigner un nouveau numero de croisière.
+    CF:
+      description:
+        en: Change a quality flag.
+        fr: Changer un indicateur de qualité.
+    CR:
+      description:
+        en: This is used to record when a record was processed through software.
+        fr: Signifie qu'une entrée a été traitée par un logiciel.
+    CV:
+      description:
+        en: Change a value in the data.
+        fr: Changer une valeur dans les donnees.
+    DC:
+      description:
+        en: The record was created by duplicate checking software.
+        fr: L'enregistrement a ete cree par le logiciel de verification des doublons.
+    ED:
+      description:
+        en: Adjust the height or multiply the height or set a parameter value.
+        fr: Ajuste la hauteur, multiplie la hauteur ou ajuste la valeur d'un parametre.
+    FB:
+      description:
+        en: All depths below this were flagged.
+        fr: Toutes les profondeurs en dessous d'une valueur ont etees marquess.
+    FR:
+      description:
+        en: Flag a range of values. The shallowest value appears as the value recorded.
+        fr: Marque un intervalle de valeurs. La valeur la moins profonde apparait comme la valeur enregistre.
+    HR:
+      description:
+        en: Data written to high resolution archive.
+        fr: Donnees ecrites dans l'archive a haute resolution.
+    IP:
+      description:
+        en: This history record operating on the complete input record.
+        fr: Cet historique enregistre les operations sur l'enregistrement en entier.
+    QC:
+      description:
+        en: Quality control program (deprecated 1990/04/03).
+        fr: Programme de controle de la qualite (hors d'usage 1990/04/03).
+    RD:
+      description:
+        en: The profile has gone through a reduction procedure.
+        fr: Le profile a subit une procedure de reduction.
+    SF:
+      description:
+        en: Set a flag or set the sweep code.
+        fr: Ajuste un marqueur ou un code de balayage.
+    SV:
+      description:
+        en: Save original value on decode.
+        fr: Sauvegarde la valeur originale lors du decodage.
+    UP:
+      description:
+        en: This was created by the update program.
+        fr: Ceci a ete cree par le programme de mise a jour.
+    S4:
+      description:
+        en: Flag all values in a profile as wrong
+        fr: Identifier toutes les valeurs d'un profil comme étants erronnées
+    MD:
+      description:
+        en: The information of this station was merged with information from a previously existing duplicate record from the same cruise number. The station number of the previous duplicate is stored in O_VALUE
+        fr: L'information de cette station a été fusionnée avec l'information d'un doublon du même numéro de croisière, lequel a été effacé. Le numéro de station du doublon effacé figure dans O_VALUE

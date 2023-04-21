@@ -2,6 +2,8 @@ from pipeman.dataset import MetadataRegistry
 from pipeman.util.system import System as _System
 from autoinject import injector as _injector
 import pathlib
+
+from pipeman.vocab import VocabularyRegistry
 from pipeman.workflow import WorkflowRegistry
 
 
@@ -12,7 +14,7 @@ def init_plugin(system: _System):
 
 
 @_injector.inject
-def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None):
+def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, vreg: VocabularyRegistry = None):
     root = pathlib.Path(__file__).absolute().parent
     from pipeman.auth.util import load_groups_from_yaml
     load_groups_from_yaml(root / "groups.yaml")
@@ -20,3 +22,4 @@ def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None):
     wreg.register_workflows_from_yaml(root / "workflows.yaml")
     mreg.register_profiles_from_yaml(root / "profiles.yaml")
     mreg.register_metadata_from_yaml(root / "metadata.yaml")
+    vreg.register_from_yaml(root / "vocabs.yaml")

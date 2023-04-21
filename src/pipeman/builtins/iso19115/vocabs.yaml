@@ -4,9 +4,11 @@ iso19115_maintenance_scope:
   uri:
   terms:
     dataset:
-      en: Dataset
+      display:
+        en: Dataset
     metadata:
-      en: Metadata
+      display:
+        en: Metadata
 iso19115_ci_date_type_code:
   display:
     en: ISO-19115 - Date Types

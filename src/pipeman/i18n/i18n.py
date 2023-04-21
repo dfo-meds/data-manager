@@ -101,7 +101,7 @@ class MultiLanguageString(BaseTranslatableString):
         for cl in priority_order:
             if cl in self.language_map and self.language_map[cl]:
                 return self.language_map[cl]
-        return tm.get_text("pipeman.common.unknown")
+        return ""
 
     def keys(self):
         return self.language_map.keys()
