@@ -340,11 +340,11 @@ class DatasetController:
             dataset.dataset_id
         )
         if status == "COMPLETE":
-            flask.flash(gettext("pipeman.dataset.message.activated"), "success")
+            flasht("pipeman.dataset.message.activated", "success")
         elif status == "FAILURE":
-            flask.flash(gettext("pipeman.dataset.error.during_activation"), "error")
+            flasht("pipeman.dataset.error.during_activation", "error")
         else:
-            flask.flash(gettext("pipeman.dataset.message.activation_in_progress"), "success")
+            flasht("pipeman.dataset.message.activation_in_progress", "success")
 
     def publish_dataset(self, dataset):
         status, _ = self.workflow.start_workflow(
