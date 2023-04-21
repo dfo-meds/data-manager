@@ -3,6 +3,7 @@ from autoinject import injector
 from pipeman.util import System
 from .auth import AuthenticationManager, AuthenticatedUser, require_permission
 from .secure import SecurityHelper
+from pipeman.util.errors import UserInputError
 import flask
 import os
 
