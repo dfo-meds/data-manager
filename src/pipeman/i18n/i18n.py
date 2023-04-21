@@ -96,13 +96,11 @@ class MultiLanguageString(BaseTranslatableString):
     def _render_str(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None, **kwargs):
         lang_opts = list(self.language_map.keys())
         lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
-        use_blank = lang in self.language_map
-        if lang in self.language_map and self.language_map[lang]:
-            return self.language_map[lang]
-        if "und" in self.language_map and self.language_map["und"]:
-            return self.language_map["und"]
-        if use_blank:
-            return ""
+        priority_order = [lang, "und", "en", "fr"]
+        priority_order.extend(self.language_map.keys())
+        for cl in priority_order:
+            if cl in self.language_map and self.language_map[cl]:
+                return self.language_map[cl]
         return tm.get_text("pipeman.common.unknown")
 
     def keys(self):
