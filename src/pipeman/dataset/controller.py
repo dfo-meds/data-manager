@@ -434,7 +434,8 @@ class DatasetController:
                     "modified_date": ds.modified_date,
                     "guid": ds.guid,
                     "pub_date": ds_data.published_date if ds_data else None
-                }
+                },
+                users=[u.id for u in ds.users]
             )
 
     def save_dataset(self, dataset):
@@ -581,6 +582,7 @@ class DatasetForm(PipemanFlaskForm):
                 "security_level": dataset.extras['security_level'],
                 "profiles": dataset.profiles,
                 "organization": dataset.organization_id,
+                "assigned_users": dataset.users or []
             })
         super().__init__(*args, **kwargs)
         self.organization.choices = self.ocontroller.list_organizations()
@@ -624,6 +626,13 @@ class ApprovedDatasetForm(PipemanFlaskForm):
         label=DelayedTranslationString("pipeman.common.display_name")
     )
 
+    profiles = wtf.SelectMultipleField(
+        DelayedTranslationString("pipeman.label.dataset.profiles"),
+        choices=[],
+        coerce=str,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
+    )
+
     assigned_users = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.label.dataset.assigned_users"),
         choices=[],
@@ -637,6 +646,8 @@ class ApprovedDatasetForm(PipemanFlaskForm):
         if dataset:
             self.dataset = dataset
             kwargs["names"] = dataset.display_names()
+            kwargs["profiles"] = dataset.profiles
+            kwargs["assigned_users"] = dataset.users or []
         super().__init__(*args, **kwargs)
         self.assigned_users.choices = user_list()
 
@@ -644,6 +655,7 @@ class ApprovedDatasetForm(PipemanFlaskForm):
         for key in self.names.data:
             self.dataset.set_display_name(key, self.names.data[key])
         self.dataset.users = self.assigned_users.data
+        self.dataset.profiles = self.profiles.data
         return self.dataset
 
 
