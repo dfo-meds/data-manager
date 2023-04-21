@@ -36,11 +36,23 @@
 {% if pubs %}
 <h2>{{'pipeman.label.dataset.published_versions' | gettext}}</h2>
 <ul>
-    {% for link, date in pubs %}
-    <li><a href="{{link}}">{{date | format_datetime}}</a></li>
+    {% for link, date, app_link in pubs %}
+    <li>
+        <a href="{{link}}">{{date | format_datetime}}</a>{% if app_link %} [<a href="{{app_link}}">{{'pipeman.label.dataset.witem_approval_link' | gettext }}</a>]{% endif %}
+    </li>
     {% endfor %}
 </ul>
 {% endif %}
+{% endif %}
+{% if atts %}
+<h2>{{'pipeman.label.dataset.attachments' | gettext}}</h2>
+<ul>
+    {% for link, display in atts %}
+    <li>
+        <a href="{{link}}">{{display}}</a>
+    </li>
+    {% endfor %}
+</ul>
 {% endif %}
 {% endblock %}
 {% block sidebar %}

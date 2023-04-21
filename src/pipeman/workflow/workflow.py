@@ -253,6 +253,7 @@ class WorkflowController:
                 context=json.dumps(workflow_context),
                 step_list=json.dumps(self.reg.step_list(workflow_type, workflow_name)),
                 created_date=datetime.datetime.now(),
+                created_by=flask_login.current_user.user_id,
                 completed_index=0,
                 status="IN_PROGRESS"
             )
@@ -544,7 +545,9 @@ class WorkflowController:
                 item.status = "COMPLETE"
             # "gettext('pipeman.label.witem.status.complete')"
             return None, None
-        return self.reg.construct_step(steps[next_index]), steps
+        step = self.reg.construct_step(steps[next_index])
+        step.set_item(item)
+        return step, steps
 
     def _start_next_step(self, item, session, steps=None, ctx=None):
         step, steps = self._build_next_step(item, steps, ctx)
@@ -605,9 +608,13 @@ class WorkflowController:
 class WorkflowStep:
 
     def __init__(self, step_name: str, item_config: dict):
+        self.item = None
         self.item_config = item_config
         self.step_name = step_name
         self.output = []
+
+    def set_item(self, item):
+        self.item = item
 
     def execute(self, context: dict) -> ItemResult:
         return self._execute_wrapper(self._execute, context)

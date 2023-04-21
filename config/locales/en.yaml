@@ -9,6 +9,10 @@ pipeman.label.witem.step.skipped: "Skipped"
 pipeman.label.witem.step.comments: "Comments"
 pipeman.label.witem.step.approval_file: "Documentation"
 pipeman.label.witem.step.attachment: Attachment
+pipeman.label.dataset.attachments: Attachments
+pipeman.label.dataset.activation_chain: Activation Chain
+pipeman.label.dataset.activation_chain_link: Approval List
+pipeman.label.dataset.witem_approval_link: Approval Chain
 cnodc.page.help.link: 'User Manual'
 cnodc.page.help.title: 'User Manual'
 cnodc.site_title: 'Canadian National Oceanographic Data Centre'

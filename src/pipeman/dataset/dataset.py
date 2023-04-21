@@ -1,9 +1,10 @@
+import markupsafe
 from autoinject import injector
 from pipeman.util import deep_update, load_object
 from pipeman.entity import FieldContainer
 from pipeman.entity.entity import CustomValidator, RecommendedFieldValidator, RequiredFieldValidator
 from pipeman.db import BaseObjectRegistry
-from pipeman.i18n import MultiLanguageString, gettext
+from pipeman.i18n import MultiLanguageString, gettext, MultiLanguageLink
 import copy
 from pipeman.workflow import WorkflowRegistry
 import logging
@@ -268,11 +269,22 @@ class Dataset(FieldContainer):
     def security_level_display(self, reg: MetadataRegistry = None):
         return reg.security_label_display(self.extras["security_level"])
 
+    def activation_chain_display(self):
+        link = flask.url_for('core.view_item', item_id=self.extras['activated_item_id'])
+        text = gettext("pipeman.label.dataset.activation_chain_link")
+        return markupsafe.Markup(f"<a href='{link}'>{markupsafe.escape(text)}</a>")
+
     def properties(self):
-        return [
+        props = [
             ('pipeman.label.dataset.status', self.status_display()), # gettext('pipeman.label.dataset.status')
             ('pipeman.label.dataset.activation_workflow', self.act_workflow_display()), # gettext('pipeman.label.dataset.activation_workflow')
             ('pipeman.label.dataset.publication_workflow', self.pub_workflow_display()),  # gettext('pipeman.label.dataset.publication_workflow')
             ('pipeman.label.dataset.security_level', self.security_level_display()),  #gettext('pipeman.label.dataset.security_level')
             ('pipeman.label.dataset.guid', self.guid()),  # gettext('pipeman.label.dataset.guid')
         ]
+        if 'activated_item_id' in self.extras and self.extras['activated_item_id']:
+            props.append((
+                'pipeman.label.dataset.activation_chain',  # gettext('pipeman.label.dataset.activation_chain')
+                self.activation_chain_display()
+            ))
+        return props

@@ -259,6 +259,7 @@ class Dataset(_BaseModel, _AuditableModel, Base):
     status = sa.Column(sa.String(255), nullable=False)
     security_level = sa.Column(sa.String(255), nullable=False)
     guid = sa.Column(sa.String(255), nullable=False, unique=True)
+    activated_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
 
     attachments = orm.relationship("Attachment", back_populates="dataset")
     organization = orm.relationship("Organization", back_populates="datasets")
@@ -316,8 +317,10 @@ class MetadataEdition(_BaseModel, _AuditableModel, Base):
     data = sa.Column(sa.Text)
     is_published = sa.Column(sa.Boolean, default=False, nullable=False)
     published_date = sa.Column(sa.DateTime, nullable=True, default=None)
+    approval_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
 
     dataset = orm.relationship("Dataset", back_populates="data")
+    approval_item = orm.relationship("WorkflowItem")
 
 
 class ConfigRegistry(_BaseModel, _AuditableModel, Base):

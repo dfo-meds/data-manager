@@ -767,6 +767,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
         props['last_success'] = datetime.datetime.strptime(props['last_success'], "%Y-%m-%d %H:%M:%S") if props['last_success'] else None
         props['last_error'] = datetime.datetime.strptime(props['last_error'], "%Y-%m-%d %H:%M:%S") if props['last_error'] else None
         return AuthenticatedUser(
+            user.id,
             user.username,
             user.display,
             permissions,

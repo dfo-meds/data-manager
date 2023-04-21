@@ -1,3 +1,4 @@
+import markupsafe
 from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
@@ -11,7 +12,7 @@ import flask
 import sqlalchemy as sa
 import wtforms as wtf
 from flask_wtf import FlaskForm
-from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString
+from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, format_datetime
 from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget, SecureBaseForm
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField, flasht, PipemanFlaskForm
 from pipeman.workflow import WorkflowController, WorkflowRegistry
@@ -184,25 +185,40 @@ class DatasetController:
     def view_dataset_page(self, dataset):
         groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
         labels = {x: self.reg.display_group_label(x) for x in groups}
-        return flask.render_template(
-            self.view_template,
-            dataset=dataset,
-            actions=self._build_action_list(dataset, False),
-            title=dataset.label(),
-            groups=groups,
-            group_labels=labels,
-            pubs=self._build_published_list(dataset)
-        )
-
-    def _build_published_list(self, dataset):
         with self.db as session:
-            ds = session.query(orm.Dataset).filter_by(id=dataset.container_id).first()
-            for rev in ds.data:
-                if rev.is_published:
-                    link = flask.url_for("core.view_dataset_revision",
-                                         dataset_id=rev.dataset_id,
-                                         revision_no=rev.revision_no)
-                    yield link, rev.published_date
+            return flask.render_template(
+                self.view_template,
+                dataset=dataset,
+                actions=self._build_action_list(dataset, False),
+                title=dataset.label(),
+                groups=groups,
+                group_labels=labels,
+                **self._build_extra_view_values(dataset, session)
+            )
+
+    def _build_extra_view_values(self, dataset, session):
+        ds = session.query(orm.Dataset).filter_by(id=dataset.container_id).first()
+        return {
+            "pubs": self._build_pub_list(ds),
+            "atts": self._build_att_list(ds)
+        }
+
+    def _build_att_list(self, ds):
+        for att in ds.attachments:
+            link = flask.url_for("core.view_attachment", attachment_id=att.id)
+            display = markupsafe.escape(f"{att.file_name} [{format_datetime(att.created_date)}]")
+            yield link, display
+
+    def _build_pub_list(self, ds):
+        for rev in ds.data:
+            if rev.is_published:
+                link = flask.url_for("core.view_dataset_revision",
+                                     dataset_id=rev.dataset_id,
+                                     revision_no=rev.revision_no)
+                app_link = None
+                if rev.approval_item_id:
+                    app_link = flask.url_for('core.view_item', item_id=rev.approval_item_id)
+                yield link, rev.published_date, app_link
 
     def dataset_validation_page(self, dataset):
         return flask.render_template(
@@ -433,7 +449,9 @@ class DatasetController:
                     "created_date": ds.created_date,
                     "modified_date": ds.modified_date,
                     "guid": ds.guid,
-                    "pub_date": ds_data.published_date if ds_data else None
+                    "pub_date": ds_data.published_date if ds_data else None,
+                    "activated_item_id": ds.activated_item_id,
+                    "approval_item_id": ds_data.approval_item_id if ds_data else None
                 },
                 users=[u.id for u in ds.users]
             )

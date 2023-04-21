@@ -2,8 +2,6 @@ from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.workflow import ItemResult
-from pipeman.dataset import DatasetController
-import zirconium as zr
 import datetime
 
 
@@ -18,6 +16,7 @@ def publish_dataset(step, context, db: Database = None):
             return ItemResult.FAILURE
         md.is_published = True
         md.published_date = datetime.datetime.now()
+        md.approval_item_id = step.item.id
         session.commit()
         return ItemResult.SUCCESS
 
@@ -29,6 +28,7 @@ def activate_dataset(step, context, db: Database = None):
         if not ds:
             return ItemResult.FAILURE
         ds.status = "ACTIVE"
+        ds.activated_item_id = step.item.id
         session.commit()
         return ItemResult.SUCCESS
 
