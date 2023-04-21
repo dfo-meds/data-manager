@@ -810,7 +810,7 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
         DelayedTranslationString("pipeman.label.witem.step.comments")
     )
 
-    file_name = wtf.FileField(
+    file_name = wtf.StringField(
         DelayedTranslationString("pipeman.label.witem.step.approval_file.name")
     )
 

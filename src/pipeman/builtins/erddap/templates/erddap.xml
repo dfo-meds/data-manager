@@ -46,7 +46,6 @@
     <recursive>true</recursive>
     <metadataFrom>last</metadataFrom>
     <addAttributes>
-        {{dataset['point_of_contact']['organization_name']['fr']}}
         {% if dataset['cdm_data_type'] %}
         <att name="cdm_data_type">{{dataset['cdm_data_type']['short_name']}}</att>
         {% endif %}

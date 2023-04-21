@@ -14,8 +14,8 @@ dataset_publication:
       - erddap_metadata_upload_staging
       - sysadmin_approval
       - publish_dataset
-      - iso19115_metadata_upload
-      - erddap_metadata_upload
+      - iso19115_metadata_upload_live
+      - erddap_metadata_upload_live
 dataset_activation:
   direct_activation:
     enabled: no

@@ -106,10 +106,13 @@ class UploadController:
                 metadata.update(storage_config['metadata'])
 
         for key in metadata:
-            metadata[key] = str(key)
+            metadata[key] = str(metadata[key])
 
         # Top level container client
-        client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'], credential=DefaultAzureCredential())
+        if "AccountKey=" in storage_config["connection_string"]:
+            client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'])
+        else:
+            client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'], credential=DefaultAzureCredential())
 
         # Calculate storage tier from config settings
         storage_tier = None if 'storage_tier' not in storage_config else getattr(StandardBlobTier, storage_config['storage_tier'])
@@ -177,10 +180,16 @@ class UploadController:
                 metadata.update(storage_config['metadata'])
 
         for key in metadata:
-            metadata[key] = str(key)
+            metadata[key] = str(metadata[key])
 
         # Get the top-level file share client
-        client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'], credential=DefaultAzureCredential())
+        print(storage_config['connection_string'])
+
+        # Top level container client
+        if "AccountKey=" in storage_config["connection_string"]:
+            client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'])
+        else:
+            client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'], credential=DefaultAzureCredential())
 
         if (isinstance(content, bytes) or isinstance(content, str)) and length is None:
             length = len(content)
