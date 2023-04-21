@@ -96,7 +96,8 @@ class AuthenticatedUser(fl.UserMixin):
     cfg: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self, username: str, display_name: str, permissions: list, organization_ids: list, dataset_ids: list, **extras):
+    def __init__(self, user_id: int, username: str, display_name: str, permissions: list, organization_ids: list, dataset_ids: list, **extras):
+        self.user_id = user_id
         self.permissions = permissions
         self.display = display_name
         self.username = username
@@ -146,6 +147,7 @@ class AnonymousUser(fl.AnonymousUserMixin):
 
     def __init__(self):
         self.display = "N/A"
+        self.user_id = None
         self.organizations = []
         self.datasets = []
 
