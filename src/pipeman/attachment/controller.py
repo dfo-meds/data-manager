@@ -304,9 +304,9 @@ class AttachmentController:
             content = self.canada_post.get_content(attachment.storage_name or storage_name, file_path=attachment.storage_path)
             return flask.send_file(content, as_attachment=True, download_name=attachment.file_name)
 
-    def create_attachment(self, file_upload, folder, dataset_id=None):
+    def create_attachment(self, file_upload, folder, dataset_id=None, file_name=None):
         storage_name = self.config.get(("pipeman", "attachment", "storage_name"), default="default")
-        filename = self.canada_post.clean_file_name(file_upload.filename)
+        filename = self.canada_post.clean_file_name(file_name if file_name else file_upload.filename)
         metadata = {
             "ActualName": filename,
         }

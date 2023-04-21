@@ -351,6 +351,19 @@ def activate_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
+@core.i18n_route("/datasets/<int:dataset_id>/attach", methods=["GET", "POST"])
+@require_permission("datasets.edit")
+@injector.inject
+def add_attachment(dataset_id, con: DatasetController = None):
+    try:
+        dataset = con.load_dataset(dataset_id)
+        if not con.has_access(dataset, "edit"):
+            return flask.abort(403)
+        return con.add_attachment_form(dataset)
+    except DatasetNotFoundError:
+        return flask.abort(404)
+
+
 @core.i18n_route("/datasets/<int:dataset_id>/validate", methods=["GET"])
 @require_permission("datasets.view")
 @injector.inject

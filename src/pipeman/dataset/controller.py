@@ -11,13 +11,13 @@ import flask_login
 import flask
 import sqlalchemy as sa
 import wtforms as wtf
-from flask_wtf import FlaskForm
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, format_datetime
-from pipeman.util.flask import TranslatableField, ConfirmationForm, paginate_query, ActionList, Select2Widget, SecureBaseForm
+from pipeman.util.flask import TranslatableField, ConfirmationForm, ActionList, Select2Widget, SecureBaseForm
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField, flasht, PipemanFlaskForm
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
+from pipeman.attachment import AttachmentController
 import wtforms.validators as wtfv
 import functools
 import re
@@ -30,6 +30,7 @@ class DatasetController:
     db: Database = None
     reg: MetadataRegistry = None
     workflow: WorkflowController = None
+    acontroller: AttachmentController = None
 
     @injector.construct
     def __init__(self, view_template="view_dataset.html", edit_template="form.html", meta_edit_template="metadata_form.html"):
@@ -118,6 +119,8 @@ class DatasetController:
             if self.has_access(ds, 'edit'):
                 actions.add_action("pipeman.dataset.page.edit_dataset.link", "core.edit_dataset", **kwargs)
                 actions.add_action("pipeman.dataset.page.edit_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
+                if not short_list:
+                    actions.add_action("pipeman.dataset.page.add_attachment.link", "core.add_attachment", **kwargs)
             if not short_list:
                 if self.has_access(ds, 'activate'):
                     actions.add_action("pipeman.dataset.page.activate_dataset.link", "core.activate_dataset", **kwargs)
@@ -195,6 +198,31 @@ class DatasetController:
                 group_labels=labels,
                 **self._build_extra_view_values(dataset, session)
             )
+
+    def add_attachment_form(self, dataset):
+        form = DatasetAttachmentForm()
+        if form.validate_on_submit():
+            if form.file_upload.data:
+                aid = self.acontroller.create_attachment(
+                    form.file_upload.data,
+                    f"dataset{dataset.dataset_id}",
+                    dataset.dataset_id,
+                    form.file_name.data
+                )
+                if aid is not None:
+                    flasht("pipeman.dataset.page.add_attachment.success", "success")
+                else:
+                    flasht("pipeman.dataset.page.add_attachment.error", "error")
+                return flask.redirect(flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
+            else:
+                flasht("pipeman.dataset.error.attachment_required", "error")
+        return flask.render_template(
+            "form.html",
+            form=form,
+            title=gettext("pipeman.dataset.page.add_attachment.title"),
+            instructions=gettext("pipeman.dataset.page.add_attachment.instructions"),
+            back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id)
+        )
 
     def _build_extra_view_values(self, dataset, session):
         ds = session.query(orm.Dataset).filter_by(id=dataset.container_id).first()
@@ -635,6 +663,21 @@ class DatasetForm(PipemanFlaskForm):
                 },
                 users=self.assigned_users.data
             )
+
+
+class DatasetAttachmentForm(PipemanFlaskForm):
+
+    file_name = wtf.StringField(
+        DelayedTranslationString("pipeman.label.attachment.file_name")
+    )
+
+    file_upload = wtf.FileField(
+        DelayedTranslationString("pipeman.label.attachment.file")
+    )
+
+    submit = wtf.SubmitField(
+        DelayedTranslationString("pipeman.common.submit")
+    )
 
 
 class ApprovedDatasetForm(PipemanFlaskForm):

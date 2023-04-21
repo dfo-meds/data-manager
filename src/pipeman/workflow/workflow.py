@@ -577,7 +577,8 @@ class WorkflowController:
             att_id = self.attachments.create_attachment(
                 form.file_submission.data,
                 f"witem{item.id}",
-                item.object_id if item.workflow_type.startswith("dataset") else None
+                item.object_id if item.workflow_type.startswith("dataset") else None,
+                form.file_name.data
             )
             if att_id is None:
                 flasht("pipeman.workflow.error.file_upload_error", "error")
@@ -807,6 +808,10 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
 
     comments = wtf.TextAreaField(
         DelayedTranslationString("pipeman.label.witem.step.comments")
+    )
+
+    file_name = wtf.FileField(
+        DelayedTranslationString("pipeman.label.witem.step.approval_file.name")
     )
 
     file_submission = wtf.FileField(

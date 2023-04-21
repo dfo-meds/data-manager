@@ -45,9 +45,21 @@ pipeman.auth_db.error.api_key_does_not_exist: "Aucune clé API de ce type"
 pipeman.auth.message.no_recent_logins: "Aucune connexion récente"
 pipeman.label.witem.step.comments: "Commentaire"
 pipeman.label.witem.step.attachment: "Pièce jointe"
-pipeman.label.dataset.attachments: "Pièces jointe"
+pipeman.label.dataset.attachments: "Pièces jointes"
+pipeman.label.dataset.attachment: "Pièce jointe"
 pipeman.label.dataset.activation_chain: Chaîne d’activation
 pipeman.label.dataset.activation_chain_link: Liste d’agrément
+
+pipeman.label.attachment.file: "Pièce jointe"
+pipeman.dataset.error.attachment_required: "Pièce jointe est requise"
+pipeman.label.attachment.file_name: "Nom de fichier"
+pipeman.label.witem.step.approval_file.name: "Nom de fichier"
+pipeman.dataset.page.add_attachment.link: "Télécharger pièce jointe"
+
+pipeman.dataset.page.add_attachment.success: "Fichier téléchargé avec succès"
+pipeman.dataset.page.add_attachment.error: "Une erreur s’est produite lors du téléchargement du fichier"
+pipeman.dataset.page.add_attachment.title: "Téléchargé un fichier"
+pipeman.dataset.page.add_attachment.instructions: ""
 pipeman.label.witem.step.approval_file: "Documentation"
 pipeman.auth.message.no_recent_failed_logins: "Aucune connexion récente ayant échoué"
 datatable.emptyTable: "Aucune donnée n'est disponible dans le tableau"

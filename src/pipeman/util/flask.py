@@ -62,6 +62,14 @@ def remove_control_chars(txt):
 
 class PipemanFlaskForm(FlaskForm):
 
+    def __init__(self, *args, **kwargs):
+        self.with_file_upload = False
+        super().__init__(*args, **kwargs)
+        for name in self._fields:
+            if isinstance(self._fields[name], wtf.FileField):
+                self.with_file_upload = True
+                break
+
     def validate_on_submit(self, extra_validators=None):
         if super().validate_on_submit(extra_validators):
             return True

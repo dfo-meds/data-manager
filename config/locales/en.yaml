@@ -13,6 +13,17 @@ pipeman.label.dataset.attachments: Attachments
 pipeman.label.dataset.activation_chain: Activation Chain
 pipeman.label.dataset.activation_chain_link: Approval List
 pipeman.label.dataset.witem_approval_link: Approval Chain
+pipeman.dataset.page.add_attachment.success: "File uploaded successfully"
+pipeman.dataset.page.add_attachment.error: "An error occurred while uploading the file"
+pipeman.dataset.page.add_attachment.title: "File Upload"
+pipeman.dataset.page.add_attachment.instructions: ""
+
+pipeman.label.attachment.file: Attachment
+pipeman.dataset.error.attachment_required: Attachment is required
+pipeman.label.attachment.file_name: File Name
+pipeman.label.witem.step.approval_file.name: File Name
+pipeman.dataset.page.add_attachment.link: Upload Attachment
+
 cnodc.page.help.link: 'User Manual'
 cnodc.page.help.title: 'User Manual'
 cnodc.site_title: 'Canadian National Oceanographic Data Centre'
