@@ -1,0 +1,12 @@
+internal_info:
+  fields:
+    internal_notes:
+      data_type: multitext
+      label:
+        en: Internal Notes
+        fr: Notes internes
+      multilingual: yes
+  display:
+    en: Internal
+    fr: Internes
+  order: 50000

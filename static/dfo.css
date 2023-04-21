@@ -16,6 +16,14 @@ body {
     vertical-align: text-top;
     flex-grow: 0;
 }
+textarea {
+    width: 400px;
+    height: 150px;
+}
+.form-control table th,
+.form-control table td {
+    vertical-align: top;
+}
 .topnav_container {
     width: 80%;
     flex-grow: 5;

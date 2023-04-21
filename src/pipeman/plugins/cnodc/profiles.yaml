@@ -1,0 +1,6 @@
+cnodc:
+  display:
+    en: CNODC Information
+    fr: Information de CNDOC
+  fields:
+    internal_notes:
