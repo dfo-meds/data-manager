@@ -30,7 +30,7 @@ iso19115_metadata_upload_live:
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: erddap_config
-  file_path_pattern: "live/iso19115/{guid}.xml"
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
 erddap_metadata_upload_live:
   label:
     en: Upload ERDDAP Config File
@@ -39,7 +39,7 @@ erddap_metadata_upload_live:
   profile_name: erddap
   format_name: erddapxml
   storage_name: erddap_config
-  file_path_pattern: "live/erddap.d/{guid}.xml"
+  file_path_pattern_key: "cnodc.metadata.patterns.live_erddap"
 iso19115_metadata_upload_staging:
   label:
     en: Upload ISO-19115 Metadata File
@@ -48,7 +48,7 @@ iso19115_metadata_upload_staging:
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: erddap_config
-  file_path_pattern: "staging/iso19115/{guid}.xml"
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
 erddap_metadata_upload_staging:
   label:
     en: Upload ERDDAP Config File
@@ -57,5 +57,5 @@ erddap_metadata_upload_staging:
   profile_name: erddap
   format_name: erddapxml
   storage_name: erddap_config
-  file_path_pattern: "staging/erddap.d/{guid}.xml"
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_erddap"
 

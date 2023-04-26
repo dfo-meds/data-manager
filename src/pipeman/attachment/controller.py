@@ -77,7 +77,10 @@ class UploadController:
             return None
 
         # Top level container client
-        client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'], credential=DefaultAzureCredential())
+        if "AccountKey=" in storage_config["connection_string"]:
+            client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'])
+        else:
+            client = ContainerClient.from_connection_string(storage_config['connection_string'], storage_config['container_name'], credential=DefaultAzureCredential())
 
         uri = urlparse(file_path)
         path_parts = [x for x in uri.path.split('/') if x.strip(" ")]
@@ -149,9 +152,11 @@ class UploadController:
             self.log.error(f"Share name missing for {storage_config['_name']}")
             return None
 
-        # Get the top-level file share client
-        client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'],
-                                                    credential=DefaultAzureCredential())
+        # Top level share client
+        if "AccountKey=" in storage_config["connection_string"]:
+            client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'])
+        else:
+            client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'], credential=DefaultAzureCredential())
 
         uri = urlparse(file_path)
         path_parts = [x for x in uri.path.split('/') if x.strip(" ")]
@@ -182,10 +187,9 @@ class UploadController:
         for key in metadata:
             metadata[key] = str(metadata[key])
 
-        # Get the top-level file share client
-        print(storage_config['connection_string'])
+        print(metadata)
 
-        # Top level container client
+        # Top level share client
         if "AccountKey=" in storage_config["connection_string"]:
             client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'])
         else:

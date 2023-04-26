@@ -2,10 +2,14 @@ from autoinject import injector
 from pipeman.dataset import DatasetController
 from pipeman.attachment import UploadController
 import datetime
+import zirconium as zr
 
 
-def _generate_file_path(step, pname, fname, ext, ds, pdate):
+@injector.inject
+def _generate_file_path(step, pname, fname, ext, ds, pdate, cfg: zr.ApplicationConfig = None):
     path_pattern = step.item_config['file_path_pattern'] if 'file_path_pattern' in step.item_config else "{guid}.{format_ext}"
+    if "file_path_pattern_key" in step.item_config:
+        path_pattern = cfg.as_str(step.item_config["file_path_pattern_key"].split("."), default=path_pattern)
     replacements = {
         "profile_name": pname,
         "format_name": fname,
