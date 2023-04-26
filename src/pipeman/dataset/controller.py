@@ -408,9 +408,10 @@ class DatasetController:
         else:
             flasht("pipeman.dataset.message.publication_in_progress", "success")
 
-    def generate_metadata_content(self, dataset, profile_name, format_name):
+    def generate_metadata_content(self, dataset, profile_name, format_name, environment="live"):
         args = {
-            "dataset": dataset
+            "dataset": dataset,
+            "environment": environment
         }
         for processor in self.reg.metadata_processors(dataset.profiles, profile_name, format_name):
             updates = processor(**args)
@@ -424,8 +425,8 @@ class DatasetController:
         content = re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip()
         return content, mime_type, encoding, extension
 
-    def generate_metadata_file(self, dataset, profile_name, format_name):
-        content, mime_type, encoding, _ = self.generate_metadata_content(dataset, profile_name, format_name)
+    def generate_metadata_file(self, dataset, profile_name, format_name, environment="live"):
+        content, mime_type, encoding, _ = self.generate_metadata_content(dataset, profile_name, format_name, environment)
         response = flask.Response(
             content,
             200,

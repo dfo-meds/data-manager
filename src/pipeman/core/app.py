@@ -433,6 +433,13 @@ def view_dataset_revision(dataset_id, revision_no, con: DatasetController = None
 @require_permission("datasets.view")
 @injector.inject
 def generate_metadata_format(dataset_id, revision_no, profile_name, format_name, con: DatasetController = None):
+    return generate_metadata_format_long(dataset_id, revision_no, profile_name, format_name, "live")
+
+
+@core.i18n_route("/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>/<environment>")
+@require_permission("datasets.view")
+@injector.inject
+def generate_metadata_format_long(dataset_id, revision_no, profile_name, format_name, environment, con: DatasetController = None):
     try:
         if not con.metadata_format_exists(profile_name, format_name):
             return flask.abort(404)
@@ -440,7 +447,7 @@ def generate_metadata_format(dataset_id, revision_no, profile_name, format_name,
         if not con.has_access(dataset, "view"):
             return flask.abort(403)
         try:
-            return con.generate_metadata_file(dataset, profile_name, format_name)
+            return con.generate_metadata_file(dataset, profile_name, format_name, environment)
         except Exception as ex:
             logging.getLogger("pipeman").exception(ex)
             flask.flash(str(gettext("pipeman.core.error.metadata_generation_error")), 'error')
@@ -449,10 +456,10 @@ def generate_metadata_format(dataset_id, revision_no, profile_name, format_name,
         return flask.abort(404)
 
 
-@core.i18n_route("/api/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>")
+@core.i18n_route("/api/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>/<environment>")
 @require_permission("datasets.view")
 @injector.inject
-def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_name, con: DatasetController = None):
+def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_name, environment, con: DatasetController = None):
     try:
         if not con.metadata_format_exists(profile_name, format_name):
             return flask.abort(404)
@@ -460,7 +467,7 @@ def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_n
         if not con.has_access(dataset, "view"):
             return flask.abort(403)
         try:
-            return con.generate_metadata_file(dataset, profile_name, format_name)
+            return con.generate_metadata_file(dataset, profile_name, format_name, environment)
         except Exception as ex:
             logging.getLogger("pipeman").exception(ex)
             return {'error': ''}, 500

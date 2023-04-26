@@ -37,7 +37,8 @@ def upload_metadata(step, context, dc: DatasetController = None, uc: UploadContr
     content, mime_type, encoding, ext = dc.generate_metadata_content(
         ds,
         pname,
-        fname
+        fname,
+        step.item_config["environment"] if "environment" in step.item_config else "live"
     )
     metadata = {
         "CreationDate": datetime.datetime.now().astimezone().replace(microsecond=0).isoformat(),

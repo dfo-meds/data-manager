@@ -45,6 +45,7 @@
     <fileNameRegex>{{dataset['erddap_data_file_pattern']}}</fileNameRegex>
     <recursive>true</recursive>
     <metadataFrom>last</metadataFrom>
+    <iso19115File>/cloud_data/config/{{environment}}/metadata/{{dataset.guid()}}.xml</iso19115File>
     <addAttributes>
         {% if dataset['cdm_data_type'] %}
         <att name="cdm_data_type">{{dataset['cdm_data_type']['short_name']}}</att>
