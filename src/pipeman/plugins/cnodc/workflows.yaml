@@ -12,10 +12,12 @@ dataset_publication:
       - pub_coord_approval
       - iso19115_metadata_upload_staging
       - erddap_metadata_upload_staging
+      - erddap_notify_staging
       - sysadmin_approval
       - publish_dataset
       - iso19115_metadata_upload_live
       - erddap_metadata_upload_live
+      - erddap_notify_live
 dataset_activation:
   direct_activation:
     enabled: no
