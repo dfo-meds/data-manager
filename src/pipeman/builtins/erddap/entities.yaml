@@ -21,100 +21,123 @@ variable:
       data_type: text
       label:
         en: Source Name
+      order: 0
     destination_name:
       data_type: text
       label:
         en: Destination Name
+      order: 100
     short_name:
       data_type: text
       label:
         en: Short Name
+      order: -50
     long_name:
       data_type: text
       label:
         en: Long Name
       multilingual: yes
+      order: -40
     source_data_type:
       data_type: vocabulary
       vocabulary_name: erddap_data_types
       label:
         en: Source Data Type
+      order: 10
     destination_data_type:
       data_type: vocabulary
       vocabulary_name: erddap_data_types
       label:
         en: Destination Data Type
+      order: 110
     min_value:
       data_type: decimal
       label:
         en: Actual Minimum Value
+      order: 2000
     max_value:
       data_type: decimal
       label:
         en: Actual Maximum Value
+      order: 2010
     encoding:
       data_type: vocabulary
       vocabulary_name: erddap_encodings
       label:
         en: Encoding
+      order: 4000
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories
       label:
         en: IOOS Category
+      order: 115
     fill_value:
       data_type: text
       label:
         en: Fill Value
+      order: 40
     scale_factor:
       data_type: float
       label:
         en: Scale Factor
+      order: 20
     add_offset:
       data_type: float
       label:
         en: Add Offset
+      order: 30
     standard_name:
       data_type: text
       label:
         en: CF Standard Name
+      order: 117
     time_precision:
       data_type: vocabulary
       vocabulary_name: erddap_time_precisions
       label:
         en: Time Precision
+      order: 3000
     time_zone:
       data_type: vocabulary
       vocabulary_name: timezones
       label:
         en: Time Zone
+      order: 3010
     units:
       data_type: text
       label:
         en: Units/DateTime Format
+      order: 120
     valid_min:
       data_type: decimal
       label:
         en: Minimum Valid Value
+      order: 2020
     valid_max:
       data_type: decimal
       label:
         en: Maximum Valid Value
+      order: 2030
     role:
       data_type: vocabulary
       vocabulary_name: erddap_roles
       label:
         en: Variable Role
+      order: 5000
     is_axis:
       data_type: boolean
       label:
         en: Is Axis?
+      order: 5010
     allow_subsets:
       data_type: boolean
       label:
         en: Allow Subsetting?
+      order: 5020
     altitude_proxy:
       data_type: boolean
       label:
         en: Is Altitude Proxy?
+      order: 5030
 
