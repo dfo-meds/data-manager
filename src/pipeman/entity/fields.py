@@ -488,7 +488,7 @@ class Keyword:
         # Only use translations
         display_dict = {
             "primary": None,
-            "secondary": []
+            "secondary": {}
         }
         if self.mode == "translate":
             if isinstance(self.translations, str):
