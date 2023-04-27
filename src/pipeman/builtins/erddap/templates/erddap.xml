@@ -27,16 +27,18 @@
 
 {%- macro render_bilingual_attr(attr_name_en, attr_name_fr, text) -%}
     {%- if text is string -%}
+    is_str
     <att name="{{attr_name_en}}">{{text}}</att>
-    {%- elif "und" in text and text['und'] -%}
+    {%- elif "und" in text -%}
+    is_und
     <att name="{{attr_name_en}}">{{text['und']}}</att>
-    {%- elif "en" in text and "fr" in text and text['en'] and text['fr'] -%}
+    {%- elif "en" in text and "fr" in text -%}
     <att name="{{attr_name_en}}">{{text["en"]}}  |  {{text['fr']}}</att>
     <att name="{{attr_name_en}}_en">{{text['en']}}</att>
     <att name="{{attr_name_fr}}_fr">{{text['fr']}}</att>
-    {%- elif "en" in text and text['en'] -%}
+    {%- elif "en" in text -%}
     <att name="{{attr_name_en}}">{{text['en']}}</att>
-    {%- elif "fr" in text and text['fr'] -%}
+    {%- elif "fr" in text -%}
     <att name="{{attr_name_en}}">{{text['fr']}}</att>
     {%- endif -%}
 {%- endmacro -%}
@@ -85,10 +87,9 @@
         {% endif %}
         {% if dataset['licenses'] %}
         <att name="license">
-{% for license in dataset['licenses'] %}{% if license['erddap_display'] %}
+{%- for license in dataset['licenses'] -%}{%- if license['erddap_display'] -%}
 {{ license['erddap_display'] }}
-
-{% endif %}{% endfor %}
+{%- endif -%}{%- endfor -%}
         </att>
         {% endif %}
         <att name="sourceUrl">(local files)</att>
@@ -99,7 +100,7 @@
         {{ render_bilingual_attr('summary', 'sommaire', dataset['abstract']) }}
         {% endif %}
         {% if dataset['title'] %}
-        {{ render_bilingual_attr('title', 'titre', dataset['abstract']) }}
+        {{ render_bilingual_attr('title', 'titre', dataset['title']) }}
         {% endif %}
         {% if dataset['credit'] %}
         {{ render_bilingual_attr('acknowledgement', 'reconnaissance', dataset['credit']) }}

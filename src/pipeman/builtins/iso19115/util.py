@@ -1,5 +1,6 @@
 from pipeman.entity.entity import ValidationResult, combine_object_path
 from pipeman.entity.fields import KeywordGroup
+import functools
 
 
 def validate_use_constraint(uc, object_path, profile, memo):
@@ -104,12 +105,13 @@ def separate_keywords(keywords):
     return groups
 
 
-def _has_other_languages(language_dict, default_locale):
+def _has_other_languages(language_dict, default_locale, supported_locales):
     for key in language_dict:
         if key == "und" or key == default_locale:
             continue
-        if language_dict[key]:
-            return True
+        if key not in supported_locales:
+            continue
+        return True
     return False
 
 
@@ -119,8 +121,10 @@ def preprocess_metadata(dataset, **kwargs):
     default_locale = def_loc['a2_language'] if def_loc else "en"
     locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
     olocales = dataset.data("other_locales") or []
+    supported = []
     for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
+        supported.append(other_loc['a2_language'])
     dataset_maintenance = []
     metadata_maintenance = []
     for maintenance in dataset.data("iso_maintenance"):
@@ -160,5 +164,5 @@ def preprocess_metadata(dataset, **kwargs):
         "dataset_maintenance": dataset_maintenance,
         "metadata_maintenance": metadata_maintenance,
         "grouped_keywords": separate_keywords(dataset.keywords()),
-        "check_alt_langs": _has_other_languages,
+        "check_alt_langs": functools.partial(_has_other_languages, supported_locales=supported),
     }

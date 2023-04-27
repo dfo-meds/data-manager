@@ -104,7 +104,11 @@ class MultiLanguageString(BaseTranslatableString):
         return ""
 
     def keys(self):
-        return self.language_map.keys()
+        keys = []
+        for key in self.language_map:
+            if self.language_map[key]:
+                keys.append(key)
+        return keys
 
     def __len__(self):
         return len(self.language_map)
@@ -115,10 +119,10 @@ class MultiLanguageString(BaseTranslatableString):
         raise KeyError(key)
 
     def __iter__(self):
-        return iter(self.language_map.keys())
+        return iter(self.keys())
 
     def __contains__(self, key):
-        return key in self.language_map
+        return key in self.language_map and self.language_map[key]
 
     def deep_copy(self, memodict):
         return MultiLanguageString(deepcopy(self.language_map))

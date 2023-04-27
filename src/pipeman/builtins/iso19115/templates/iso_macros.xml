@@ -34,7 +34,7 @@
   <lan:PT_FreeText>
     <lan:textGroup>
   {% for a2l in locale_mapping %}
-      {% if a2l in text and text[a2l] and (not a2l == "und") and (not a2l == default_locale) %}
+      {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
       <lan:LocalisedCharacterString locale="#{{a2l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
       {% endif %}
   {% endfor %}
