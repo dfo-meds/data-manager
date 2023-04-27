@@ -125,6 +125,13 @@ variable:
       label:
         en: Variable Role
       order: 5000
+    variable_order:
+      data_type: integer
+      label:
+        en: Variable Order
+      description:
+        en: Axis variables must be in the same order as the original NetCDF files (if used)
+      order: 5005
     is_axis:
       data_type: boolean
       label:

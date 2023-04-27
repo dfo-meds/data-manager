@@ -26,7 +26,14 @@ def preprocess_dataset(dataset, **kwargs):
         keywords.update(disp["secondary"].values())
     keywords = list(kw.replace(",", "") for kw in keywords)
     keywords.sort()
+    variable_order = []
+    for v in dataset['variables']:
+        order_no = v['variable_order'] or 0
+        variable_order.append((v, order_no))
+    variable_order.sort(key=lambda x: x[1])
+    variables = [v[0] for v in variable_order]
     return {
+        "variables": variables,
         "subset_vars": ",".join(subset_vars),
         "basic_keywords": ",".join(keywords),
         "altitude_proxy": altitude_proxy,

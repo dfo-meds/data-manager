@@ -40,6 +40,72 @@
     <att name="{{attr_name_en}}">{{text['fr']}}</att>
     {%- endif -%}
 {%- endmacro -%}
+
+{%- macro render_variable_attributes(var) -%}
+    <addAttributes>
+        {% if var['ioos_category'] %}
+        <att name="ioos_category">{{var['ioos_category']['short_name']}}</att>
+        {% endif %}
+        {% if var['long_name'] %}
+        {{ render_bilingual_attr('long_name', 'nom_long', var['long_name']) }}
+        {% endif %}
+        {% if var['standard_name'] %}
+        <att name="standard_name">{{var['standard_name']}}</att>
+        {% endif %}
+        {% if var['units'] %}
+        <att name="units">{{var['units']}}</att>
+        {% endif %}
+        {% if var['source_data_type']['short_name'] == 'String' and var['encoding'] %}
+        <att name="_Encoding">{{var['encoding']['short_name']}}</att>
+        {% endif %}
+        {% if var['fill_value'] %}
+        <att name="missing_value" type="{{var['destination_data_type']['short_name']}}">{{var['fill_value']}}</att>
+        {% endif %}
+        {% if var['scale_factor'] %}
+        <att name="scale_factor" type="{{var['destination_data_type']['short_name']}}">{{var['scale_factor']}}</att>
+        {% endif %}
+        {% if var['add_offset'] %}
+        <att name="add_offset" type="{{var['destination_data_type']['short_name']}}">{{var['add_offset']}}</att>
+        {% endif %}
+        {% if var['time_precision'] %}
+            {% if var['time_precision']['short_name'] == 'month' %}
+                <att name="time_precision">1970-01</att>
+            {% elif var['time_precision']['short_name'] == 'day' %}
+                <att name="time_precision">1970-01-01</att>
+            {% elif var['time_precision']['short_name'] == 'hour' %}
+                <att name="time_precision">1970-01-01T00Z</att>
+            {% elif var['time_precision']['short_name'] == 'minute' %}
+                <att name="time_precision">1970-01-01T00:00Z</att>
+            {% elif var['time_precision']['short_name'] == 'second' %}
+                <att name="time_precision">1970-01-01T00:00:00Z</att>
+            {% elif var['time_precision']['short_name'] == 'tenth_second' %}
+                <att name="time_precision">1970-01-01T00:00.0Z</att>
+            {% elif var['time_precision']['short_name'] == 'hundredth_second' %}
+                <att name="time_precision">1970-01-01T00:00.00Z</att>
+            {% elif var['time_precision']['short_name'] == 'millisecond' %}
+                <att name="time_precision">1970-01-01T00:00.000Z</att>
+            {% endif %}
+        {% endif %}
+        {% if var['time_zone'] %}
+        <att name="time_zone">{{var['time_zone']['short_name']}}</att>
+        {% endif %}
+        {% if var['min_value'] %}
+        <att name="actual_min">{{var['min_value']}}</att>
+        {% endif %}
+        {% if var['max_value'] %}
+        <att name="actual_max">{{var['max_value']}}</att>
+        {% endif %}
+        {% if var['valid_min'] %}
+        <att name="valid_min">{{var['valid_min']}}</att>
+        {% endif %}
+        {% if var['valid_max'] %}
+        <att name="valid_max">{{var['valid_max']}}</att>
+        {% endif %}
+        {% if var['role'] and var['role']['short_name'] in ('profile_id', 'timeseries_id', 'trajectory_id') %}
+        <att name="cf_role">{{var['role']['short_name']}}</att>
+        {% endif %}
+    </addAttributes>
+{%- endmacro -%}
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
     <fileDir>{{dataset['erddap_data_file_path']}}</fileDir>
     <fileNameRegex>{{dataset['erddap_data_file_pattern']}}</fileNameRegex>
@@ -145,80 +211,30 @@
         <!-- TODO: history-->
 
     </addAttributes>
-    {% for var in dataset['variables'] %}
-    <{% if var['is_axis'] %}axis{% else %}data{% endif %}Variable>
-        {% if var['source_name'] %}
-        <sourceName>{{var['source_name']}}</sourceName>
+    {% for var in variables %}
+        {% if var['is_axis'] %}
+        <axisVariable>
+            {% if var['source_name'] %}
+            <sourceName>{{var['source_name']}}</sourceName>
+            {% endif %}
+            {% if var['destination_name'] %}
+            <destinationName>{{var['destination_name']}}</destinationName>
+            {% endif %}
+            {{ render_variable_attributes(var) }}
+        </axisVariable>
+        {% else %}
+        <dataVariable>
+            {% if var['source_name'] %}
+            <sourceName>{{var['source_name']}}</sourceName>
+            {% endif %}
+            {% if var['destination_name'] %}
+            <destinationName>{{var['destination_name']}}</destinationName>
+            {% endif %}
+            {% if var['source_data_type'] %}
+            <dataType>{{var['source_data_type']['short_name']}}</dataType>
+            {% endif %}
+            {{ render_variable_attributes(var) }}
+        </dataVariable>
         {% endif %}
-        {% if var['destination_name'] %}
-        <destinationName>{{var['destination_name']}}</destinationName>
-        {% endif %}
-        {% if var['source_data_type'] %}
-        <dataType>{{var['source_data_type']['short_name']}}</dataType>
-        {% endif %}
-        <addAttributes>
-            {% if var['ioos_category'] %}
-            <att name="ioos_category">{{var['ioos_category']['short_name']}}</att>
-            {% endif %}
-            {% if var['long_name'] %}
-            {{ render_bilingual_attr('long_name', 'nom_long', var['long_name']) }}
-            {% endif %}
-            {% if var['standard_name'] %}
-            <att name="standard_name">{{var['standard_name']}}</att>
-            {% endif %}
-            {% if var['units'] %}
-            <att name="units">{{var['units']}}</att>
-            {% endif %}
-            {% if var['source_data_type']['short_name'] == 'String' and var['encoding'] %}
-            <att name="_Encoding">{{var['encoding']['short_name']}}</att>
-            {% endif %}
-            {% if var['fill_value'] %}
-            <att name="missing_value" type="{{var['destination_data_type']['short_name']}}">{{var['fill_value']}}</att>
-            {% endif %}
-            {% if var['scale_factor'] %}
-            <att name="scale_factor" type="{{var['destination_data_type']['short_name']}}">{{var['scale_factor']}}</att>
-            {% endif %}
-            {% if var['add_offset'] %}
-            <att name="add_offset" type="{{var['destination_data_type']['short_name']}}">{{var['add_offset']}}</att>
-            {% endif %}
-            {% if var['time_precision'] %}
-                {% if var['time_precision']['short_name'] == 'month' %}
-                    <att name="time_precision">1970-01</att>
-                {% elif var['time_precision']['short_name'] == 'day' %}
-                    <att name="time_precision">1970-01-01</att>
-                {% elif var['time_precision']['short_name'] == 'hour' %}
-                    <att name="time_precision">1970-01-01T00Z</att>
-                {% elif var['time_precision']['short_name'] == 'minute' %}
-                    <att name="time_precision">1970-01-01T00:00Z</att>
-                {% elif var['time_precision']['short_name'] == 'second' %}
-                    <att name="time_precision">1970-01-01T00:00:00Z</att>
-                {% elif var['time_precision']['short_name'] == 'tenth_second' %}
-                    <att name="time_precision">1970-01-01T00:00.0Z</att>
-                {% elif var['time_precision']['short_name'] == 'hundredth_second' %}
-                    <att name="time_precision">1970-01-01T00:00.00Z</att>
-                {% elif var['time_precision']['short_name'] == 'millisecond' %}
-                    <att name="time_precision">1970-01-01T00:00.000Z</att>
-                {% endif %}
-            {% endif %}
-            {% if var['time_zone'] %}
-            <att name="time_zone">{{var['time_zone']['short_name']}}</att>
-            {% endif %}
-            {% if var['min_value'] %}
-            <att name="actual_min">{{var['min_value']}}</att>
-            {% endif %}
-            {% if var['max_value'] %}
-            <att name="actual_max">{{var['max_value']}}</att>
-            {% endif %}
-            {% if var['valid_min'] %}
-            <att name="valid_min">{{var['valid_min']}}</att>
-            {% endif %}
-            {% if var['valid_max'] %}
-            <att name="valid_max">{{var['valid_max']}}</att>
-            {% endif %}
-            {% if var['role'] and var['role']['short_name'] in ('profile_id', 'timeseries_id', 'trajectory_id') %}
-            <att name="cf_role">{{var['role']['short_name']}}</att>
-            {% endif %}
-        </addAttributes>
-    </{% if var['is_axis'] %}axis{% else %}data{% endif %}Variable>
     {% endfor %}
 </dataset>
