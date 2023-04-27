@@ -27,10 +27,8 @@
 
 {%- macro render_bilingual_attr(attr_name_en, attr_name_fr, text) -%}
     {%- if text is string -%}
-    is_str
     <att name="{{attr_name_en}}">{{text}}</att>
     {%- elif "und" in text -%}
-    is_und
     <att name="{{attr_name_en}}">{{text['und']}}</att>
     {%- elif "en" in text and "fr" in text -%}
     <att name="{{attr_name_en}}">{{text["en"]}}  |  {{text['fr']}}</att>
