@@ -173,6 +173,12 @@ class SessionCookieInterface(SecureCookieSessionInterface):
         return not (cspr.allow_caching() and cspr.allow_shared_caching())
 
 
+def stable_dict_key_list(d: dict):
+    keys = list(d.keys())
+    keys.sort()
+    return keys
+
+
 def core_init_app(system, app, config):
     app.session_interface = SessionCookieInterface()
     if "flask" in config:
@@ -245,6 +251,7 @@ def core_init_app(system, app, config):
             'self_url': self_url,
             'csp_nonce': csp_nonce,
             'csp_allow': csp_allow,
+            'stable_dict_key_list': stable_dict_key_list,
         }
         for key in system._nav_menu:
             items[f'nav_{key}'] = build_nav(system._nav_menu[key])

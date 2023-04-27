@@ -247,7 +247,7 @@
       {% endif %}
       {# <!-- resourceFormat --> #}
       {% if grouped_keywords %}
-        {% for key in grouped_keywords %}
+        {% for key in stable_dict_key_list(grouped_keywords) %}
       <mri:descriptiveKeywords>
         {{ iso.render_keywords(grouped_keywords[key]) }}
       </mri:descriptiveKeywords>

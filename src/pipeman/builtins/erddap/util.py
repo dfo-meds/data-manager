@@ -18,9 +18,14 @@ def preprocess_dataset(dataset, **kwargs):
                 cdm_timeseries_vars.append(var['destination_name'])
             if var['role']['short_name'] == 'trajectory_id' or var['role']['short_name'] == 'trajectory_extra':
                 cdm_trajectory_vars.append(var['destination_name'])
-    #keywords = [x for x in dataset.keywords()]
-    #keywords.sort()
-    keywords = []
+    keywords = set()
+    for x in dataset.keywords():
+        disp = x.to_display("en")
+        if disp["primary"]:
+            keywords.add(disp["primary"])
+        keywords.update(disp["secondary"].values())
+    keywords = list(kw.replace(",", "") for kw in keywords)
+    keywords.sort()
     return {
         "subset_vars": ",".join(subset_vars),
         "basic_keywords": ",".join(keywords),

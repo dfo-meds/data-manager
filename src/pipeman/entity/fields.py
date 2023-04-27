@@ -484,6 +484,40 @@ class Keyword:
     def use_value_only(self):
         return self.machine_key and self.mode == "value"
 
+    def to_display(self, primary_locale):
+        # Only use translations
+        display_dict = {
+            "primary": None,
+            "secondary": []
+        }
+        if self.mode == "translate":
+            if isinstance(self.translations, str):
+                display_dict["primary"] = self.translations
+            else:
+                if primary_locale in self.translations:
+                    display_dict["primary"] = self.translations[primary_locale]
+                elif "und" in self.translations:
+                    display_dict["primary"] = self.translations["und"]
+                display_dict["secondary"] = {
+                    key: self.translations[key]
+                    for key in self.translations
+                    if key != "und" and key != primary_locale and self.translations[key]
+                }
+
+        # Only use the machine key
+        elif self.mode == "value":
+            display_dict["primary"] = self.machine_key
+
+        # Use a mix of both (machine key as undefined value)
+        else:
+            display_dict["primary"] = self.machine_key
+            display_dict["secondary"] = {
+                key: self.translations[key]
+                for key in self.translations
+                if key != "und" and self.translations[key]
+            }
+        return display_dict
+
     def key_identifier(self):
         if self._identifier:
             return self._identifier

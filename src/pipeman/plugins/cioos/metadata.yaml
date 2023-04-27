@@ -8,7 +8,7 @@ keywords:
       repeatable: yes
       keyword_config:
         is_keyword: yes
-        extraction_method: both
+        mode: both
         thesaurus:
           citation:
             title:
