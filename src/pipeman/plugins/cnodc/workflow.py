@@ -12,13 +12,13 @@ def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
     notify_endpoint = cfg.as_str(("cnodc", "erddaputil", erddap_cluster, "notify_base_url"), default=None)
     username = cfg.as_str(("cnodc", "erddaputil", erddap_cluster, "username"), default=None)
     password = cfg.as_str(("cnodc", "erddaputil", erddap_cluster, "password"), default=None)
-    if notify_endpoint is None:
+    if not notify_endpoint:
         step.output.append("skipped")
         return
-    if username is None:
+    if not username:
         step.output.append("skipped")
         return
-    if password is None:
+    if not password:
         step.output.append("skipped")
         return
     if not notify_endpoint.endswith("/"):

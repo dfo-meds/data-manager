@@ -11,11 +11,11 @@ variable:
       - destination_name
       - source_data_type
       - destination_data_type
-      - units
     recommended:
       - long_name
       - standard_name
       - ioos_category
+      - units
   fields:
     source_name:
       data_type: text
