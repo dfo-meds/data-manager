@@ -683,6 +683,8 @@ class DatasetAttachmentForm(PipemanFlaskForm):
 
 class ApprovedDatasetForm(PipemanFlaskForm):
 
+    reg: MetadataRegistry = None
+
     names = TranslatableField(
         wtf.StringField,
         label=DelayedTranslationString("pipeman.common.display_name")
@@ -703,6 +705,7 @@ class ApprovedDatasetForm(PipemanFlaskForm):
 
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
+    @injector.construct
     def __init__(self, *args, dataset=None, **kwargs):
         self.dataset = None
         if dataset:
@@ -712,6 +715,7 @@ class ApprovedDatasetForm(PipemanFlaskForm):
             kwargs["assigned_users"] = dataset.users or []
         super().__init__(*args, **kwargs)
         self.assigned_users.choices = user_list()
+        self.profiles.choices = self.reg.profiles_for_select()
 
     def build_dataset(self):
         for key in self.names.data:
