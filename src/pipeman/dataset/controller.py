@@ -422,7 +422,7 @@ class DatasetController:
             self.reg.metadata_format_template(profile_name, format_name),
             **args
         )
-        content = re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).lstrip()
+        content = re.sub("\n[ \t\n]{0,}\n", "\n", content.replace("\r\n", "\n")).strip("\r\n\t ")
         return content, mime_type, encoding, extension
 
     def generate_metadata_file(self, dataset, profile_name, format_name, environment="live"):
