@@ -32,13 +32,13 @@
   {% endif %}
   {% if check_alt_langs(text, default_locale) %}
   <lan:PT_FreeText>
-    <lan:textGroup>
   {% for a2l in locale_mapping %}
       {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
+    <lan:textGroup>
       <lan:LocalisedCharacterString locale="#{{a2l}}">{{text[a2l]}}</lan:LocalisedCharacterString>
+    </lan:textGroup>
       {% endif %}
   {% endfor %}
-    </lan:textGroup>
   </lan:PT_FreeText>
   {% endif %}
   {% endif %}
@@ -282,13 +282,13 @@
     <gco:CharacterString>{{ keyword_display["primary"] }}</gco:CharacterString>
     {% if keyword_display["secondary"] %}
     <lan:PT_FreeText>
-      <lan:textGroup>
     {% for a2l in locale_mapping %}
         {% if a2l in keyword_display["secondary"] %}
+      <lan:textGroup>
         <lan:LocalisedCharacterString locale="#{{a2l}}">{{keyword_display["secondary"][a2l]}}</lan:LocalisedCharacterString>
+      </lan:textGroup>
         {% endif %}
     {% endfor %}
-      </lan:textGroup>
     </lan:PT_FreeText>
     {% endif %}
     {% endwith %}
