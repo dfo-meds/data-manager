@@ -8,7 +8,7 @@ import pathlib
 
 
 def init(system: System):
-    system.register_setup_fn(setup_module)
+    system.on_setup(setup_module)
 
 
 @injector.inject

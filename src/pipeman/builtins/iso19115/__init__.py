@@ -10,8 +10,8 @@ from autoinject import injector
 def init_plugin(system: System = None):
     system.register_cli("pipeman.builtins.iso19115.cli", "iso19115")
     system.register_blueprint("pipeman.builtins.iso19115.app", "iso19115")
-    system.register_setup_fn("pipeman.builtins.iso19115.cli.do_update")
-    system.register_setup_fn(setup_plugin)
+    system.on_setup("pipeman.builtins.iso19115.cli.do_update")
+    system.on_setup(setup_plugin)
 
 
 @injector.inject

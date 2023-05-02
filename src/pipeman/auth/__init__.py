@@ -27,10 +27,10 @@ def auth_init_app(app: flask.Flask, am: AuthenticationManager):
 
 def init(system: System):
     """Initialize authentication-related systems."""
-    system.register_init_app(auth_init_app)
+    system.on_app_init(auth_init_app)
     system.register_blueprint("pipeman.auth.app", "auth")
     system.register_cli("pipeman.auth.cli", "group")
-    system.register_setup_fn(setup)
+    system.on_setup(setup)
 
 
 def setup():

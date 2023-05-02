@@ -24,6 +24,7 @@ technical:
       vocabulary_name: erddap_dataset_types
       label:
         en: ERDDAP Dataset Type
+        fr: Type de données ERDDAP
     erddap_data_file_path:
       data_type: text
       label:

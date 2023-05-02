@@ -54,6 +54,10 @@ class WorkflowRegistry:
         self._factories = []
         self._factories.append(DefaultStepFactory())
 
+    def __cleanup__(self):
+        self._steps.__cleanup__()
+        self._workflows.__cleanup__()
+
     def reload_types(self):
         self._steps.reload_types()
         self._workflows.reload_types()

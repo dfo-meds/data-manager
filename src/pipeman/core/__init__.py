@@ -10,7 +10,7 @@ def init(system):
     system.register_cli("pipeman.core.cli", "core")
     system.register_blueprint("pipeman.core.app", "base")
     system.register_blueprint("pipeman.core.app", "core")
-    system.register_init_app(core_init_app)
+    system.on_app_init(core_init_app)
 
 
 @injector.inject

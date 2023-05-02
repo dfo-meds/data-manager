@@ -10,8 +10,8 @@ import yaml
 def init_plugin(system: System = None):
     root = pathlib.Path(__file__).parent
     system.register_cli("pipeman.plugins.cioos.cli", "cioos")
-    system.register_setup_fn("pipeman.plugins.cioos.cli.do_update")
-    system.register_setup_fn(setup_plugin)
+    system.on_setup("pipeman.plugins.cioos.cli.do_update")
+    system.on_setup(setup_plugin)
 
 
 @injector.inject

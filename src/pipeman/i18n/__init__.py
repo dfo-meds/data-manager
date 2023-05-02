@@ -78,6 +78,6 @@ def add_lang_cb(app):
 
 
 def init(system):
-    system.register_init_app(create_jinja_filters)
-    system.register_init_app(add_lang_cb)
+    system.on_app_init(create_jinja_filters)
+    system.on_app_init(add_lang_cb)
     system.register_cli("pipeman.i18n.cli", "i18n")

@@ -7,7 +7,7 @@ import pathlib
 
 @injector.inject
 def init_plugin(system: System = None):
-    system.register_setup_fn(setup_plugin)
+    system.on_setup(setup_plugin)
 
 
 @injector.inject

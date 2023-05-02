@@ -10,7 +10,7 @@ from pipeman.workflow import WorkflowRegistry
 @_injector.inject
 def init_plugin(system: _System):
     system.register_blueprint("pipeman.plugins.cnodc.app", "cnodc")
-    system.register_setup_fn(setup_plugin)
+    system.on_setup(setup_plugin)
 
 
 @_injector.inject

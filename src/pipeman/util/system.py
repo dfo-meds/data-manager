@@ -7,8 +7,10 @@ import pkgutil
 import pathlib
 import typing as t
 from pipeman.util.errors import PipemanConfigurationError
-import subprocess
-import sys
+import threading
+
+
+CallableOrStr = t.Union[callable, str]
 
 
 def load_dynamic_class(cls_name: str) -> object:
@@ -36,11 +38,7 @@ class System:
         self.plugins = set()
         self._short_plugins = set()
         self.globals = {}
-        self._load_init = []
-        self._flask_init_cb = []
-        self._setup_cb = []
-        self._pre_init = []
-        self._cli_init_cb = []
+        self._hooks = {}
         self._flask_blueprints = []
         self._click_groups = []
         self._nav_menu = {}
@@ -50,6 +48,25 @@ class System:
         self.i18n_locale_dirs = []
         self._log = None
         self._nci = None
+        self._lock = threading.RLock()
+
+    def on(self, event_name: str, cb: CallableOrStr):
+        """Register an event callback function"""
+        with self._lock:
+            if event_name not in self._hooks:
+                self._hooks[event_name] = []
+            self._hooks[event_name].append(cb)
+
+    def fire(self, event_name: str, *args, **kwargs):
+        """Call all registered event callback functions with the given arguments"""
+        self._log.debug(f"Firing {event_name}")
+        if event_name in self._hooks:
+            for cb in self._hooks[event_name]:
+                if isinstance(cb, str):
+                    obj = load_object(cb)
+                    obj(*args, **kwargs)
+                else:
+                    cb(*args, **kwargs)
 
     def init(self):
         """Initialize the application for the first time."""
@@ -62,61 +79,72 @@ class System:
         from pipeman.util.setup import init_system_logging, init_registries
         init_system_logging(self)
         self._log.out("Initializing system")
+
         # Pre-init functions
-        self._log.debug("Executing pre-init functions...")
-        for obj_name in self._pre_init:
-            obj = load_object(obj_name)
-            obj(self)
-        self._log.debug("Loading plugins...")
+        self.fire("init.before", self)
+
         # Include plugins
+        self._log.debug("Loading plugins...")
         self._init_plugins()
-        self._log.debug("Setting up autoinject overrides")
+
         # Manage overrides
+        self._log.debug("Setting up autoinject overrides")
         self._init_overrides()
-        self._log.debug("Initializing locale directories")
+
         # Set up the translation directories
+        self._log.debug("Initializing locale directories")
         root = pathlib.Path(__file__).absolute().parent.parent
         self.i18n_dirs.update([
             str(root),
             str(pathlib.Path(".").absolute() / "templates"),
         ])
+
         # Reloading registeries
         self._log.debug("Loading registries")
         init_registries()
-        self._log.debug("Initializing callbacks")
+
         # Call the init callbacks
-        for fn in self._load_init:
-            fn()
+        self.fire("init")
+
+        # Post-load callback
+        self.fire("init.after")
+
         self._log.out("Init complete")
 
-    def register_setup_fn(self, setup_cb: callable):
+    def pre_setup(self, cb: CallableOrStr):
+        self.on("setup.before", cb)
+
+    def on_setup(self, setup_cb: CallableOrStr):
         """Register a function to call on setup."""
-        self._setup_cb.append(setup_cb)
+        self.on("setup", setup_cb)
 
-    def register_init_app(self, init_app_cb: callable):
+    def post_setup(self, cb: CallableOrStr):
+        self.on("setup.after", cb)
+
+    def on_app_init(self, init_app_cb: CallableOrStr):
         """Register a function to call when init_app() is called."""
-        self._flask_init_cb.append(init_app_cb)
+        self.on("init.app", init_app_cb)
 
-    def register_init_cli(self, init_cli_cb: callable):
+    def on_cli_init(self, init_cli_cb: CallableOrStr):
         """Register a function to call when init_cli() is called."""
-        self._cli_init_cb.append(init_cli_cb)
+        self.on("init.cli", init_cli_cb)
 
-    def pre_load(self, load_cb: str):
+    def pre_load(self, load_cb: CallableOrStr):
         """Register a function to call at the start of init()."""
-        self._pre_init.append(load_cb)
+        self.on("init.before", load_cb)
 
-    def on_load(self, load_cb: callable):
-        """Register a function to call when init() is done."""
-        self._load_init.append(load_cb)
+    def on_load(self, load_cb: CallableOrStr):
+        """Register a function to call during init()."""
+        self.on("init", load_cb)
+
+    def post_load(self, load_cb: CallableOrStr):
+        self.on("init.after", load_cb)
 
     def setup(self):
         """Run all the setup scripts."""
-        for cb in self._setup_cb:
-            if isinstance(cb, str):
-                obj = load_object(cb)
-                obj()
-            else:
-                cb()
+        self.fire("setup.before")
+        self.fire("setup")
+        self.fire("setup.after")
 
     def register_blueprint(self, module: str, blueprint_name: str, prefix: str = ""):
         """Register a blueprint to add to the main Flask application."""
@@ -153,12 +181,14 @@ class System:
     def init_app(self, app):
         """Initialize a Flask application."""
         from pipeman.util.setup import core_init_app
+
+        self.fire("init.app.before")
+
         # Load the Flask-specific configuration from the main config item
         core_init_app(self, app, self.config)
 
         # Call all of the init methods registered by plugins
-        for cb in self._flask_init_cb:
-            cb(app)
+        self.fire("init.app", app)
 
         universal_prefix = self.config.get(("pipeman", "base_path"), default="")
         if universal_prefix:
@@ -171,17 +201,19 @@ class System:
             bp = getattr(mod, bp_obj)
             app.register_blueprint(bp, url_prefix=f"{universal_prefix}{prefix}")
 
+        self.fire("init.app.after")
+
         # We want to kill the init context here so that we can save on resources
         self._nci.switch_context("flask_app")
         self._nci.destroy("init")
-
-        self._log.out(f"Flask preferred URL scheme: {app.config.get('PREFERRED_URL_SCHEME', '?')}")
 
         return app
 
     def init_cli(self):
         """Initialize the main click command."""
         from pipeman.cli import CommandLineInterface
+
+        self.fire("init.cli.before")
 
         # Register all the command groups provided by plugins
         commands = {}
@@ -193,8 +225,9 @@ class System:
         cli = CommandLineInterface(commands)
 
         # Allow modifications, if necessary
-        for cb in self._cli_init_cb:
-            cb(cli)
+        self.fire("init.cli", cli)
+
+        self.fire("init.cli.after")
 
         return cli
 

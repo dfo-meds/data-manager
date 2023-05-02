@@ -85,13 +85,10 @@ class _DisplayNameModel(_BaseModel):
         return self.short_name
 
 
-class Metric(_BaseModel, Base):
+class KeyValue(_BaseModel, Base):
 
-    metric_name = sa.Column(sa.String(256), index=True)
-    timestamp = sa.Column(sa.DateTime)
-    value = sa.Column(sa.String(1024))
-    source_info = sa.Column(sa.String(1024))
-    username = sa.Column(sa.String(1024))
+    key = sa.Column(sa.String(256), unique=True, nullable=False)
+    value = sa.Column(sa.Text, nullable=True)
 
 
 class Organization(_DisplayNameModel, _AuditableModel, Base):
@@ -131,7 +128,7 @@ class UserLoginRecord(_BaseModel, Base):
 
 class APIKey(_BaseModel, _AuditableModel, Base):
 
-    user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False)
+    user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False, index=True)
     display = sa.Column(sa.String(1024), nullable=True)
     prefix = sa.Column(sa.String(64), nullable=False, index=True)
     key_hash = sa.Column(sa.String(128), nullable=True)
@@ -172,8 +169,8 @@ class Entity(_BaseModel, _AuditableModel, Base):
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
-    parent_id = sa.Column(sa.Integer, nullable=True)
-    parent_type = sa.Column(sa.String(255), nullable=True)
+    parent_id = sa.Column(sa.Integer, nullable=True, index=True)
+    parent_type = sa.Column(sa.String(255), nullable=True, index=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
     organization = orm.relationship("Organization", back_populates="entities")
@@ -215,8 +212,8 @@ class EntityData(_BaseModel, _AuditableModel, Base):
         sa.UniqueConstraint("entity_id", "revision_no", name="unique_entity_revision_data"),
     )
 
-    entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False)
-    revision_no = sa.Column(sa.Integer, nullable=False)
+    entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False, index=True)
+    revision_no = sa.Column(sa.Integer, nullable=False, index=True)
     data = sa.Column(sa.Text)
 
     entity = orm.relationship("Entity", back_populates="data")
@@ -228,7 +225,9 @@ class VocabularyTerm(_BaseModel, _AuditableModel, Base):
     short_name = sa.Column(sa.String(255), nullable=False)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     descriptions = sa.Column(sa.Text, default=None, nullable=True)
-    __table_args__ = (sa.UniqueConstraint("vocabulary_name", "short_name", name="unique_vocab_short_term"),)
+    __table_args__ = (
+        sa.UniqueConstraint("vocabulary_name", "short_name", name="unique_vocab_short_term"),
+    )
 
     def set_display_name(self, language, display_name):
         dns = {}
@@ -251,7 +250,7 @@ class VocabularyTerm(_BaseModel, _AuditableModel, Base):
 class Dataset(_BaseModel, _AuditableModel, Base):
 
     is_deprecated = sa.Column(sa.Boolean)
-    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True)
+    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     profiles = sa.Column(sa.Text)
     pub_workflow = sa.Column(sa.String(255), nullable=False)
@@ -312,8 +311,8 @@ class MetadataEdition(_BaseModel, _AuditableModel, Base):
         sa.UniqueConstraint("dataset_id", "revision_no", name="unique_dataset_revision_data"),
     )
 
-    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False)
-    revision_no = sa.Column(sa.Integer, nullable=False)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False, index=True)
+    revision_no = sa.Column(sa.Integer, nullable=False, index=True)
     data = sa.Column(sa.Text)
     is_published = sa.Column(sa.Boolean, default=False, nullable=False)
     published_date = sa.Column(sa.DateTime, nullable=True, default=None)
@@ -353,7 +352,7 @@ class Attachment(_BaseModel, _AuditableModel, Base):
 
     file_name = sa.Column(sa.String(1024), nullable=False)
     storage_path = sa.Column(sa.String(1024), nullable=False)
-    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True, index=True)
     storage_name = sa.Column(sa.String(1024), nullable=True)
 
     dataset = orm.relationship("Dataset", back_populates="attachments")
@@ -361,7 +360,7 @@ class Attachment(_BaseModel, _AuditableModel, Base):
 
 class WorkflowDecision(_BaseModel, _AuditableModel, Base):
 
-    workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False)
+    workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False, index=True)
     step_name = sa.Column(sa.String(255))
     decider_id = sa.Column(sa.String(1024), nullable=False)
     decision = sa.Column(sa.Boolean)

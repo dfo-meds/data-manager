@@ -2,11 +2,50 @@ from pipeman.db import Database
 import pipeman.db.orm as orm
 from autoinject import injector
 import json
+
+from pipeman.dbconfig import ValueController
 from pipeman.util import deep_update
 from threading import RLock
 import yaml
 import datetime
 import decimal
+import time
+
+
+REFRESH_FREQUENCY = 15
+
+
+@injector.injectable_global
+class GlobalObjectRegistry:
+
+    def __init__(self):
+        self._registry = []
+        self._last_setup_run = None
+        self._last_setup_check = None
+
+    def register(self, obj):
+        self._registry.append(obj)
+
+    def unregister(self, obj):
+        if obj in self._registry:
+            self._registry.remove(obj)
+
+    @injector.inject
+    def check_all(self, vc: ValueController = None):
+        # Don't check everytime to prevent a lot of overhead (every 15 seconds)
+        if self._last_setup_check and (time.monotonic() - self._last_setup_check) < REFRESH_FREQUENCY:
+            return
+        self._last_setup_check = time.monotonic()
+
+        # Check if setup has actually run recently
+        setup_last_run = vc.get_value("setup_last_run")
+        if self._last_setup_run == setup_last_run:
+            return
+
+        # Do the reload
+        for obj in self._registry:
+            obj.reload_types()
+        self._last_setup_run = setup_last_run
 
 
 @injector.injectable
@@ -95,11 +134,21 @@ class ObjectController:
 
 class BaseObjectRegistry:
 
+    gor: GlobalObjectRegistry = None
+
+    @injector.construct
     def __init__(self, obj_type, ensure_fields=None):
         self._type_map = {}
         self._lock = RLock()
         self._obj_type = obj_type
         self._ensure_fields = ensure_fields
+        self.gor.register(self)
+
+    def __cleanup__(self):
+        self.gor.unregister(self)
+
+    def __del__(self):
+        self.gor.unregister(self)
 
     def __iter__(self):
         return iter(self._type_map)

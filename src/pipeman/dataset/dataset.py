@@ -22,6 +22,12 @@ class MetadataRegistry:
         self._security_labels = BaseObjectRegistry("security_label")
         self._dataset_output_processing_hooks = []
 
+    def __cleanup__(self):
+        self._fields.__cleanup__()
+        self._profiles.__cleanup__()
+        self._display_groups.__cleanup__()
+        self._security_labels.__cleanup__()
+
     def reload_types(self):
         self._fields.reload_types()
         self._profiles.reload_types()

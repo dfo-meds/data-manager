@@ -13,7 +13,7 @@ def init_plugin(system: _System):
     system.register_nav_item("change_password", "auth_db.change_password", "users.change_my_password", "_is_not_anonymous", 'user')
     system.register_nav_item("edit_profile", "auth_db.edit_profile", "users.edit_myself", "_is_not_anonymous", 'user')
     system.register_nav_item("users", "auth_db.list_users", "users.list_users", "auth_db.view.all", weight=100000000)
-    system.register_setup_fn(setup_plugin)
+    system.on_setup(setup_plugin)
 
 
 @_injector.inject
