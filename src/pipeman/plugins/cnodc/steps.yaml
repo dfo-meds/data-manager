@@ -25,7 +25,7 @@ sysadmin_approval:
 iso19115_metadata_upload_live:
   label:
     en: Upload ISO-19115 Metadata File (Live)
-  step_type: action
+  step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
   format_name: iso19115xml
@@ -35,7 +35,7 @@ iso19115_metadata_upload_live:
 erddap_metadata_upload_live:
   label:
     en: Upload ERDDAP Config File (Live)
-  step_type: action
+  step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
   format_name: erddapxml
@@ -45,7 +45,7 @@ erddap_metadata_upload_live:
 iso19115_metadata_upload_staging:
   label:
     en: Upload ISO-19115 Metadata File (Staging)
-  step_type: action
+  step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
   format_name: iso19115xml
@@ -55,7 +55,7 @@ iso19115_metadata_upload_staging:
 erddap_metadata_upload_staging:
   label:
     en: Upload ERDDAP Config File (Staging)
-  step_type: action
+  step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
   format_name: erddapxml
@@ -65,12 +65,12 @@ erddap_metadata_upload_staging:
 erddap_notify_staging:
   label:
     en: Notify ERDDAPUtil (Staging)
-  step_type: action
+  step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: staging
 erddap_notify_live:
   label:
     en: Notify ERDDAPUtil (Live)
-  step_type: action
+  step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: live

@@ -48,7 +48,5 @@ def setup(system: System = None):
 
 @core.command
 @injector.inject
-def cleanup():
-    #from .util import cleanup
-    #cleanup()
-    pass
+def cleanup(system: System = None):
+    system.cleanup()

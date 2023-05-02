@@ -127,7 +127,7 @@ def preprocess_metadata(dataset, **kwargs):
         supported.append(other_loc['a2_language'])
     dataset_maintenance = []
     metadata_maintenance = []
-    for maintenance in dataset.data("iso_maintenance"):
+    for maintenance in dataset.data("iso_maintenance") or []:
         if maintenance['scope']['short_name'] == "dataset":
             dataset_maintenance.append(maintenance)
         elif maintenance['scope']['short_name'] == "metadata":

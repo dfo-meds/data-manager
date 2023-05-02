@@ -5,8 +5,9 @@ import click
 class CommandLineInterface(click.MultiCommand):
     """Implements multicommand by storing a dictionary of commands to call."""
 
-    def __init__(self, commands: dict, *args, **kwargs):
+    def __init__(self, app, commands: dict, *args, **kwargs):
         self.commands = commands
+        self.app = app
         super().__init__(*args, **kwargs)
 
     def list_commands(self, ctx):
@@ -16,3 +17,8 @@ class CommandLineInterface(click.MultiCommand):
         if name in self.commands:
             return self.commands[name]
         return None
+
+    def __call__(self, *args, **kwargs):
+        with self.app.app_context():
+            with self.app.test_request_context():
+                super().__call__(*args, **kwargs)

@@ -449,27 +449,40 @@ class WorkflowController:
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "batch_process_time"), default=5)
         with self.db as session:
             start_time = time.monotonic_ns()
-            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
-                self._batch_execute(item, session)
-                elapsed_time = time.monotonic_ns() - start_time
-                if elapsed_time >= max_exec_time:
-                    break
+            cont = True
+            while cont:
+                cont = False
+                for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
+                    cont = True
+                    self._batch_execute(item, session)
+                    elapsed_time = time.monotonic_ns() - start_time
+                    if elapsed_time >= max_exec_time:
+                        cont = False
+                        break
+
 
     async def async_batch_process_items(self):
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "async_batch_process_time"), default=5)
         max_items = self.cfg.as_int(("pipeman", "async_max_items"), default=5)
         with self.db as session:
             start_time = time.monotonic_ns()
+            cont = True
             tasks = []
-            for item in session.query(orm.WorkflowItem).filter_by(status="ASYNC_EXECUTE"):
-                if (time.monotonic_ns() - start_time) > max_exec_time:
-                    break
-                tasks.append(asyncio.create_task(self._async_batch_execute(item, session)))
-                while len(tasks) >= max_items:
-                    await asyncio.sleep(0.5)
+            while cont:
+                cont = False
+                for item in session.query(orm.WorkflowItem).filter_by(status="ASYNC_EXECUTE"):
+                    cont = True
                     if (time.monotonic_ns() - start_time) > max_exec_time:
+                        cont = False
                         break
-                    tasks, _ = await asyncio.wait(tasks)
+                    tasks.append(asyncio.create_task(self._async_batch_execute(item, session)))
+                    while len(tasks) >= max_items:
+                        await asyncio.sleep(0.5)
+                        if (time.monotonic_ns() - start_time) > max_exec_time:
+                            cont = False
+                            break
+                        tasks, _ = await asyncio.wait(tasks)
+
             await asyncio.gather(*tasks)
 
     async def _async_batch_execute(self, item, session):

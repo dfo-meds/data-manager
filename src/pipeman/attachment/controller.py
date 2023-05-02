@@ -187,8 +187,6 @@ class UploadController:
         for key in metadata:
             metadata[key] = str(metadata[key])
 
-        print(metadata)
-
         # Top level share client
         if "AccountKey=" in storage_config["connection_string"]:
             client = ShareClient.from_connection_string(storage_config['connection_string'], storage_config['share_name'])

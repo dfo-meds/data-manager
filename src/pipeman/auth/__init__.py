@@ -2,10 +2,16 @@ import flask_login
 from autoinject import injector
 from pipeman.util import System
 from .auth import AuthenticationManager, AuthenticatedUser, require_permission
+from pipeman.db import Database
+import pipeman.db.orm as orm
+import sqlalchemy as sa
 from .secure import SecurityHelper
 from pipeman.util.errors import UserInputError
+import datetime
 import flask
+import logging
 import os
+import zirconium as zr
 
 
 @injector.inject
@@ -30,10 +36,11 @@ def init(system: System):
     system.on_app_init(auth_init_app)
     system.register_blueprint("pipeman.auth.app", "auth")
     system.register_cli("pipeman.auth.cli", "group")
-    system.on_setup(setup)
+    system.on_setup(_do_setup)
+    system.on_cleanup(_do_cleanup)
 
 
-def setup():
+def _do_setup():
     admin_group = os.environ.get("PIPEMAN_ADMIN_GROUP", "superuser")
     from .util import create_group, grant_permission
     try:
@@ -44,3 +51,24 @@ def setup():
         grant_permission(admin_group, 'superuser')
     except UserInputError:
         pass
+
+
+@injector.inject
+def _do_cleanup(db: Database = None, config: zr.ApplicationConfig = None):
+    with db as session:
+        # Handle ServerSession objects
+        dt = datetime.datetime.now()
+        logging.getLogger("pipeman.auth").out(f"Cleaning up user sessions older than {dt}")
+        q = sa.delete(orm.ServerSession).where(orm.ServerSession.valid_until < dt)
+        session.execute(q)
+        session.commit()
+
+        # Handle UserLoginRecord objects
+        keep_days = config.as_int(("pipeman", "authentication", "retain_login_records_days"), default=30)
+        if keep_days is None or keep_days < 14:
+            keep_days = 14
+        dt = datetime.datetime.now() - datetime.timedelta(days=keep_days)
+        logging.getLogger("pipeman.auth").out(f"Cleaning up user login records older than {dt}")
+        q = sa.delete(orm.UserLoginRecord).where(orm.UserLoginRecord.attempt_time < dt)
+        session.execute(q)
+        session.commit()

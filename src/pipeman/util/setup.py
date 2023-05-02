@@ -92,7 +92,7 @@ def build_nav(items: dict) -> list:
     nav = []
     for x in items:
         item = items[x]
-        if item["_permission"] and not flask_login.current_user.has_permission(item["_permission"]):
+        if item["_permission"] and not (flask_login.current_user and flask_login.current_user.has_permission(item["_permission"])):
             continue
         nav.append((
             gettext(item["_label"]),

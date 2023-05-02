@@ -140,11 +140,28 @@ class System:
     def post_load(self, load_cb: CallableOrStr):
         self.on("init.after", load_cb)
 
+    def pre_cleanup(self, cleanup_cb: CallableOrStr):
+        """Register a function to call at the start of cleanup()."""
+        self.on("cleanup.before", cleanup_cb)
+
+    def on_cleanup(self, cleanup_cb: CallableOrStr):
+        """Register a function to call during cleanup()."""
+        self.on("cleanup", cleanup_cb)
+
+    def post_cleanup(self, cleanup_cb: CallableOrStr):
+        self.on("cleanup.after", cleanup_cb)
+        
     def setup(self):
         """Run all the setup scripts."""
         self.fire("setup.before")
         self.fire("setup")
         self.fire("setup.after")
+
+    def cleanup(self):
+        """Run all the cleanup scripts."""
+        self.fire("cleanup.before")
+        self.fire("cleanup")
+        self.fire("cleanup.after")
 
     def register_blueprint(self, module: str, blueprint_name: str, prefix: str = ""):
         """Register a blueprint to add to the main Flask application."""
@@ -209,9 +226,11 @@ class System:
 
         return app
 
-    def init_cli(self):
+    def init_cli(self, _app):
         """Initialize the main click command."""
         from pipeman.cli import CommandLineInterface
+
+        self.init_app(_app)
 
         self.fire("init.cli.before")
 
@@ -222,7 +241,7 @@ class System:
             commands[reg_name] = getattr(mod, bp_obj)
 
         # Build the main group
-        cli = CommandLineInterface(commands)
+        cli = CommandLineInterface(_app, commands)
 
         # Allow modifications, if necessary
         self.fire("init.cli", cli)
