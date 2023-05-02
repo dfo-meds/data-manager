@@ -57,6 +57,8 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
             unpub_gate = None if keep_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_dataset_days)
             oldpub_gate = None if keep_old_pub_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_old_pub_dataset_days)
             remove_dataset_editions = []
+            remove_workflow_items = []
+            remove_attachments = []
             for ds in session.query(orm.Dataset):
                 latest_rev = ds.latest_revision()
                 latest_pub_rev = ds.latest_published_revision()
@@ -69,11 +71,24 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
                         continue
                     if (not rev.is_published) and (unpub_gate is None or rev.modified_date >= unpub_gate):
                         continue
+                    if rev.approval_item_id:
+                        remove_workflow_items.append(rev.approval_item_id)
+                        for decision in rev.approval_item.decisions:
+                            if decision.attachment_id:
+                                remove_attachments.append(decision.attachment_id)
                     remove_dataset_editions.append(rev.id)
             for chunk in _chunks(remove_dataset_editions, 1000):
                 q = sa.delete(orm.MetadataEdition).where(orm.MetadataEdition.id.in_(chunk))
                 session.execute(q)
-                session.commit()
+            for chunk in _chunks(remove_attachments, 1000):
+                q = sa.delete(orm.Attachment).where(orm.Attachment.id.in_(chunk))
+                session.execute(q)
+            for chunk in _chunks(remove_workflow_items, 1000):
+                q = sa.delete(orm.WorkflowDecision).where(orm.WorkflowDecision.workflow_item_id.in_(chunk))
+                session.execute(q)
+                q = sa.delete(orm.WorkflowItem).where(orm.WorkflowItem.id.in_(chunk))
+                session.execute(q)
+            session.commit()
 
 
 
