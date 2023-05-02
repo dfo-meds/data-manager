@@ -11,3 +11,4 @@ def init(system):
 def _do_cleanup(wc: WorkflowController = None):
     wc.batch_process_items()
     asyncio.run(wc.async_batch_process_items())
+    wc.cleanup_old_items()

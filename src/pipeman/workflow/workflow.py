@@ -445,6 +445,9 @@ class WorkflowController:
             return True
         return False
 
+    def cleanup_old_items(self):
+        pass
+
     def batch_process_items(self):
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "batch_process_time"), default=5)
         with self.db as session:
