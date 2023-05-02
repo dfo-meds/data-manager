@@ -22,6 +22,13 @@ else
     echo "There is no script $PRE_START_PATH"
 fi
 
+# Handle prometheus directory
+if [ -e "/srv/metadb/_prometheus" ] ; then
+  rm -r /srv/metadb/_prometheus
+else
+  mkdir /srv/metadb/_prometheus
+fi
+
 # Start Gunicorn or Flask
 if [ -z "$USE_FLASK" ]; then
   exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"

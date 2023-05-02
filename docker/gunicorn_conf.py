@@ -1,8 +1,14 @@
 from __future__ import print_function
 
-import json
 import multiprocessing
 import os
+
+from prometheus_client.multiprocess import mark_process_dead
+
+
+def child_exit(server, worker):
+    mark_process_dead(worker.pid)
+
 
 # Load defaults from environment
 workers_per_core_str = int(os.getenv("WORKERS_PER_CORE", 2))

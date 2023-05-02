@@ -22,6 +22,7 @@ import wtforms.validators as wtfv
 import functools
 import re
 import uuid
+from pipeman.util.metrics import BlockTimer, time_function
 
 
 @injector.injectable
@@ -449,77 +450,83 @@ class DatasetController:
 
     def load_dataset(self, dataset_id, revision_no=None):
         with self.db as session:
-            ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
+            with BlockTimer("pipeman_dataset_load_dataset_object", "Time to load a dataset object"):
+                ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
             if not ds:
                 raise DatasetNotFoundError(dataset_id)
-            ds_data = None
-            if revision_no == "pub":
-                ds_data = ds.latest_published_revision()
-            elif revision_no:
-                ds_data = ds.specific_revision(revision_no)
-            else:
-                ds_data = ds.latest_revision()
+            with BlockTimer("pipeman_dataset_load_dataset_revision", "Time to load the revision of the dataset object"):
+                if revision_no == "pub":
+                    ds_data = ds.latest_published_revision()
+                elif revision_no:
+                    ds_data = ds.specific_revision(revision_no)
+                else:
+                    ds_data = ds.latest_revision()
             if revision_no and not ds_data:
                 raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
-            return self.reg.build_dataset(
-                profiles=ds.profiles.replace("\r", "").split("\n"),
-                field_values=json.loads(ds_data.data) if ds_data else {},
-                dataset_id=ds.id,
-                ds_data_id=ds_data.id if ds_data else None,
-                revision_no=ds_data.revision_no if ds_data else None,
-                display_names=json.loads(ds.display_names) if ds.display_names else None,
-                is_deprecated=ds.is_deprecated,
-                org_id=ds.organization_id,
-                extras={
-                    "pub_workflow": ds.pub_workflow,
-                    "act_workflow": ds.act_workflow,
-                    "status": ds.status,
-                    "security_level": ds.security_level,
-                    "created_date": ds.created_date,
-                    "modified_date": ds.modified_date,
-                    "guid": ds.guid,
-                    "pub_date": ds_data.published_date if ds_data else None,
-                    "activated_item_id": ds.activated_item_id,
-                    "approval_item_id": ds_data.approval_item_id if ds_data else None
-                },
-                users=[u.id for u in ds.users]
-            )
+            with BlockTimer("pipeman_dataset_load_dataset_build", "Time to build a dataset object itself"):
+                return self.reg.build_dataset(
+                    profiles=ds.profiles.replace("\r", "").split("\n"),
+                    field_values=json.loads(ds_data.data) if ds_data else {},
+                    dataset_id=ds.id,
+                    ds_data_id=ds_data.id if ds_data else None,
+                    revision_no=ds_data.revision_no if ds_data else None,
+                    display_names=json.loads(ds.display_names) if ds.display_names else None,
+                    is_deprecated=ds.is_deprecated,
+                    org_id=ds.organization_id,
+                    extras={
+                        "pub_workflow": ds.pub_workflow,
+                        "act_workflow": ds.act_workflow,
+                        "status": ds.status,
+                        "security_level": ds.security_level,
+                        "created_date": ds.created_date,
+                        "modified_date": ds.modified_date,
+                        "guid": ds.guid,
+                        "pub_date": ds_data.published_date if ds_data else None,
+                        "activated_item_id": ds.activated_item_id,
+                        "approval_item_id": ds_data.approval_item_id if ds_data else None
+                    },
+                    users=[u.id for u in ds.users]
+                )
 
     def save_dataset(self, dataset):
         with self.db as session:
             ds = None
-            if dataset.dataset_id:
-                ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
-                if not ds:
-                    raise DatasetNotFoundError(dataset.dataset_id)
-                ds.is_deprecated = dataset.is_deprecated
-                ds.organization_id = int(dataset.organization_id) or None
-                ds.display_names = json.dumps(dataset.display_names())
-                ds.profiles = "\n".join(dataset.profiles)
-                if not ds.guid:
-                    ds.guid = str(uuid.uuid4())
-            else:
-                ds = orm.Dataset(
-                    organization_id=int(dataset.organization_id) or None,
-                    is_deprecated=dataset.is_deprecated,
-                    display_names=json.dumps(dataset.display_names()),
-                    profiles="\n".join(dataset.profiles),
-                    guid=str(uuid.uuid4())
-                )
-                session.add(ds)
-            for keyword in dataset.extras:
-                setattr(ds, keyword, dataset.extras[keyword])
-            session.commit()
-            dataset.dataset_id = ds.id
-            session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
-            for user_id in dataset.users:
-                q = orm.user_dataset.insert().values({
-                    "user_id": user_id,
-                    "dataset_id": ds.id
-                })
-                session.execute(q)
-            session.commit()
+            name = "pipeman_dataset_save_dataset_update" if dataset.dataset_id else "pipeman_dataset_save_dataset_insert"
+            desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
+            with BlockTimer(name, desc):
+                if dataset.dataset_id:
+                    ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
+                    if not ds:
+                        raise DatasetNotFoundError(dataset.dataset_id)
+                    ds.is_deprecated = dataset.is_deprecated
+                    ds.organization_id = int(dataset.organization_id) or None
+                    ds.display_names = json.dumps(dataset.display_names())
+                    ds.profiles = "\n".join(dataset.profiles)
+                    if not ds.guid:
+                        ds.guid = str(uuid.uuid4())
+                else:
+                    ds = orm.Dataset(
+                        organization_id=int(dataset.organization_id) or None,
+                        is_deprecated=dataset.is_deprecated,
+                        display_names=json.dumps(dataset.display_names()),
+                        profiles="\n".join(dataset.profiles),
+                        guid=str(uuid.uuid4())
+                    )
+                    session.add(ds)
+                for keyword in dataset.extras:
+                    setattr(ds, keyword, dataset.extras[keyword])
+                session.commit()
+                dataset.dataset_id = ds.id
+                session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
+                for user_id in dataset.users:
+                    q = orm.user_dataset.insert().values({
+                        "user_id": user_id,
+                        "dataset_id": ds.id
+                    })
+                    session.execute(q)
+                session.commit()
 
+    @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
     def save_metadata(self, dataset):
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
