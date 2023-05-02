@@ -8,6 +8,7 @@ import pipeman.util.flask
 from pipeman.attachment import AttachmentController
 from pipeman.util.flask import ConfirmationForm, ActionList, flasht
 from pipeman.util import deep_update
+import flask_wtf.file as fwf
 from pipeman.util.errors import StepNotFoundError, StepConfigurationError, WorkflowNotFoundError, WorkflowItemNotFoundError
 from autoinject import injector
 from pipeman.db import Database
@@ -834,8 +835,11 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
         DelayedTranslationString("pipeman.label.witem.step.approval_file.name")
     )
 
-    file_submission = wtf.FileField(
-        DelayedTranslationString("pipeman.label.witem.step.approval_file")
+    file_submission = fwf.FileField(
+        DelayedTranslationString("pipeman.label.witem.step.approval_file"),
+        validators=[
+            fwf.FileAllowed(["pdf", "jpg", "png"])
+        ]
     )
 
     submit = wtf.SubmitField(
@@ -844,4 +848,3 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
 
     def __init__(self):
         super().__init__()
-        self.with_file_upload = True

@@ -223,6 +223,13 @@ class Dataset(FieldContainer):
         self.extras = extras or {}
         self.users = users
 
+    def set_from_file_metadata(self, file_type: str, file_metadata: dict):
+        # TODO:
+        #   for each profile attached to this dataset that supports setting metadata from file_type
+        #     allow it to set the metadata
+        #   if anyone made changes, save the object
+        pass
+
     def revision_published_date(self):
         return self.extras["pub_date"] if "pub_date" in self.extras else None
 

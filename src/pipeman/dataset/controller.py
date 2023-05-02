@@ -21,6 +21,7 @@ from pipeman.attachment import AttachmentController
 import wtforms.validators as wtfv
 import functools
 import re
+import flask_wtf.file as fwf
 import uuid
 
 
@@ -672,8 +673,11 @@ class DatasetAttachmentForm(PipemanFlaskForm):
         DelayedTranslationString("pipeman.label.attachment.file_name")
     )
 
-    file_upload = wtf.FileField(
-        DelayedTranslationString("pipeman.label.attachment.file")
+    file_upload = fwf.FileField(
+        DelayedTranslationString("pipeman.label.attachment.file"),
+        validators=[
+            fwf.FileAllowed(["pdf", "jpg", "png"])
+        ]
     )
 
     submit = wtf.SubmitField(
