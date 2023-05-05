@@ -30,6 +30,8 @@ class YamlTranslationManager:
         self._dictionaries = {}
         self._dictionary_lookup = {}
         for dict_path in dpaths:
+            if not os.path.exists(dict_path):
+                continue
             for file in os.scandir(dict_path):
                 if file.name.endswith(".yaml") or file.name.endswith(".yml"):
                     self._dictionary_lookup[file.name[:file.name.rfind(".")]] = file.path
