@@ -9,37 +9,6 @@ erddap_dataset_types:
       en: Table from ASCII
     EDDGridFromNcFiles:
       en: Grid from NetCDF
-erddap_data_types:
-  display:
-    en: ERDDAP - Variable Data Types
-  uri:
-  terms:
-    boolean:
-      en: Boolean
-    byte:
-      en: Byte (8 bits, signed)
-    ubyte:
-      en: Byte (8 bits, unsigned)
-    short:
-      en: Short (16 bits, signed)
-    ushort:
-      en: Short (16 bits, unsigned)
-    int:
-      en: Integer (32 bits, signed)
-    uint:
-      en: Integer (32 bits, unsigned)
-    long:
-      en: "Long (64 bits, signed, not recommended)"
-    ulong:
-      en: "Long (64 bits, unsigned, not recommended)"
-    float:
-      en: Float (IEEE 754, 32 bits)
-    double:
-      en: Double (IEEE 754, 64 bits)
-    char:
-      en: Single UCS-2 Character (not recommended)
-    String:
-      en: Characters (UCS-2)
 erddap_encodings:
   display:
     en: ERDDAP - Encodings
@@ -158,16 +127,6 @@ erddap_time_precisions:
     millisecond:
       en: Millisecond
 erddap_roles:
-  display:
-    en: ERDDAP - Variable Roles
-  uri:
-  terms:
-    profile_id:
-      en: Profile ID
-    timeseries_id:
-      en: Timeseries ID
-    trajectory_id:
-      en: Trajectory ID
     profile_extra:
       en: Profile Extra Info
     timeseries_extra:

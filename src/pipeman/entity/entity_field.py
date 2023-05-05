@@ -49,8 +49,9 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         self.field_config["repeatable"] = True
 
     def is_empty(self):
-        for x in self._component_list():
-            return False
+        for x in self.component_list():
+            if not x.is_deprecated:
+                return False
         return True
 
     def display(self):
@@ -58,7 +59,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
 
     def data(self, **kwargs):
         _data = []
-        for c, _, _ in self._component_list():
+        for c, _, _ in self.component_list():
             if c.is_deprecated:
                 continue
             ent = self.ec.load_entity(c.entity_type, c.id)
@@ -76,10 +77,10 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         return flask.render_template(
             "component_ref.html",
             create_link=create_link,
-            entities=self._component_list()
+            entities=self.component_list()
         )
 
-    def _component_list(self):
+    def component_list(self):
         if not self.parent_id:
             return
         return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)

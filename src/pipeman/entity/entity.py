@@ -204,6 +204,11 @@ class FieldContainer:
         fields.sort(key=lambda x: self._fields[x].order)
         return fields
 
+    def get_field(self, fn):
+        if fn in self._fields:
+            return self._fields[fn]
+        return None
+
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
             if display_group is None or display_group == self._fields[fn].display_group:

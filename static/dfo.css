@@ -46,7 +46,7 @@ dl.term-list dt span.term-code {
 dl.term-list dd {
     margin-bottom: 6px;
     padding-bottom: 6px;
-    max-width: 500px;
+    max-width: 750px;
 }
 ul.validation-results li {
     list-style: none;

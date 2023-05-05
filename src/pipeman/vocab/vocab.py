@@ -121,6 +121,13 @@ class VocabularyTermController:
         with self.db as session:
             self.upsert_term(vocab_name, tsname, displays, descriptions, session)
 
+    def get_term_id(self, vocab_name, tsname):
+        with self.db as session:
+            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
+            if term:
+                return term.id
+            return None
+
     def upsert_term(self, vocab_name, tsname, display, description, session):
         term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
         if not term:

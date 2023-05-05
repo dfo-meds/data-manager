@@ -50,3 +50,5 @@ erddap:
       template: erddap.xml
       content_type: text/xml
       preprocess: pipeman.builtins.erddap.util.preprocess_dataset
+  mappers:
+    netcdf: pipeman.builtins.erddap.util.set_metadata_from_netcdf

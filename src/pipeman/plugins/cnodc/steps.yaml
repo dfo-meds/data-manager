@@ -49,7 +49,7 @@ iso19115_metadata_upload_staging:
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
   format_name: iso19115xml
-  storage_name: erddap_config
+  storage_name: erddap_staging_config
   environment: staging
   file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
 erddap_metadata_upload_staging:
@@ -59,7 +59,7 @@ erddap_metadata_upload_staging:
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
   format_name: erddapxml
-  storage_name: erddap_config
+  storage_name: erddap_staging_config
   environment: staging
   file_path_pattern_key: "cnodc.metadata.patterns.staging_erddap"
 erddap_notify_staging:

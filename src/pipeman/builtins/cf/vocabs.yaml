@@ -1,0 +1,208 @@
+netcdf_data_types:
+  display:
+    en: NetCDF Data Types
+  uri:
+  terms:
+    byte:
+      display:
+        en: Byte, signed
+      description:
+        en: Integer values in [-128, 127]
+    ubyte:
+      display:
+        en: Byte, unsigned
+      description:
+        en: Integer values in [0, 255]
+    short:
+      display:
+        en: Short, signed
+      description:
+        en: Integer values in [-32768, 32767]
+    ushort:
+      display:
+        en: Short, unsigned
+      description:
+        en: Integer values in [0, 65535]
+    int:
+      display:
+        en: Integer, signed
+      description:
+        en: Integer values in [-2147483648, 2147483647]
+    uint:
+      display:
+        en: Integer, unsigned
+      description:
+        en: Integer values in [0, 4294967295]
+    long:
+      display:
+        en: "Long (64-bit Integer), signed"
+      description:
+        en: Integer values in [-9223372036854775808, 9223372036854775807]
+    ulong:
+      display:
+        en: "Long (64-bit Integer), unsigned"
+      description:
+        en: Integer values in [0, 18446744073709551615]
+    float:
+      display:
+        en: Float
+      description:
+        en: Decimal values in [-3.4028235e38, +3.4028235e38], to a precision of at least 6 and at most 9 significant digits.
+    double:
+      display:
+        en: Double
+      description:
+        en: Decimal values in [-1.79769e308, +1.79769e308], to a precision of at least 15 and at most 17 significant digits.
+    char:
+      display:
+        en: Character
+      description:
+        en: A single character, encoded using an 8-bit encoding (typically ASCII or one-character of UTF-8, but the encoding can be specified)
+    String:
+      display:
+        en: String, atomic
+      description:
+        en: An atomic string in NetCDF4 files
+cf_standard_names:
+  display:
+    en: CF Standard Names
+  uri: http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html
+cf_axes:
+  display:
+    en: CF Axes
+  uri:
+  terms:
+    X:
+      display:
+        en: X (Longitude)
+    Y:
+      display:
+        en: Y (Latitude)
+    Z:
+      display:
+        en: Z (Vertical)
+    T:
+      display:
+        en: T (Time)
+udunit_prefixes:
+  display:
+    en: UDUnit Prefixes
+  uri: https://docs.unidata.ucar.edu/udunits/current/udunits2-prefixes.xml
+udunit_units:
+  display:
+    en: UDUnit Units (with CF extensions)
+  uri: https://docs.unidata.ucar.edu/udunits/current/#Database
+  terms:
+    degrees_north:
+      display:
+        en: Degrees (North)
+      description:
+        en: Latitude given in degrees where positive indicates north of the equator and negative indicates south
+    degrees_east:
+      display:
+        en: Degrees (East)
+      description:
+        en: Longitude given in degrees where positive indictes east of the prime meridian and negative indicates west
+    1:
+      display:
+        en: ratio
+      description:
+        en: Value between 0 and 1 representing parts per whole.
+    1e-2:
+      display:
+        en: percent
+      description:
+        en: Value between 0 and 100 representing parts per hundred.
+    1e-3:
+      display:
+        en: ppt
+      description:
+        en: Value between 0 and 1,000 representing parts per thousand.
+    1e-6:
+      display:
+        en: ppm
+      description:
+        en: Value between 0 and 1,000,000 representing parts per million.
+    1e-9:
+      display:
+        en: ppb
+      description:
+        en: Value between 0 and 1,000,000,000 representing parts per billion.
+cf_calendars:
+  display:
+    en: CF Calendars
+  uri:
+  terms:
+    standard:
+      display:
+        en: Standard (Mixed Gregorian/Julian)
+      description:
+        en: In this calendar, date/times after (and including) 1582-10-15 0:0:0 are in the Gregorian calendar, in which a year is a leap year if either (i) it is divisible by 4 but not by 100 or (ii) it is divisible by 400. Date/times before (and excluding) 1582-10-5 0:0:0 are in the Julian calendar. Year 1 AD or CE in the standard calendar is also year 1 of the julian calendar. In the standard calendar, 1582-10-15 0:0:0 is exactly 1 day later than 1582-10-4 0:0:0 and the intervening dates are undefined.
+    proleptic_gregorian:
+      display:
+        en: Proleptic Gregorian
+      description:
+        en: A calendar with the Gregorian rules for leap-years extended to dates before 1582-10-15. All dates consistent with these rules are allowed, both before and after 1582-10-15 0:0:0.
+    julian:
+      display:
+        en: Julian
+      description:
+        en: Julian calendar, in which a year is a leap year if it is divisible by 4, even if it is also divisible by 100.
+    noleap:
+      display:
+        en: No Leap Years (365 days)
+      description:
+        en: A calendar with no leap years, i.e., all years are 365 days long.
+    all_leap:
+      display:
+        en: All Leap Years (366 days)
+      description:
+        en: A calendar in which every year is a leap year, i.e., all years are 366 days long.
+    360_day:
+      display:
+        en: 360 Days
+      description:
+        en: A calendar in which all years are 360 days, and divided into 30 day months.
+    nonstandard:
+      display:
+        en: Non-Standard
+      description:
+        en: Used for when a non-standard calendar is being used (specify month_lengths, leap_year, and leap_month as needed).
+    none:
+      display:
+        en: No Calendar
+cf_directions:
+  display:
+    en: CF Directions
+  uri:
+  terms:
+    up:
+      display:
+        en: Up
+      description:
+        en: Positive values correspond to the "up" direction.
+    down:
+      display:
+        en: Down
+      description:
+        en: Positive values correspond to the "down" direction.
+cf_roles:
+  display:
+    en: CF Variable Roles
+  uri:
+  terms:
+    profile_id:
+      display:
+        en: Profile ID
+      description:
+        en: This variable uniquely identifies a profile.
+    timeseries_id:
+      display:
+        en: Timeseries ID
+      description:
+        en: This variable uniquely identifies a timeseries.
+    trajectory_id:
+      display:
+        en: Trajectory ID
+      description:
+        en: This variable uniquely identifies a trajectory.

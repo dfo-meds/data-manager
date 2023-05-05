@@ -171,6 +171,13 @@ class MetadataRegistry:
         text = MultiLanguageString(self._profiles[profile_name]["formatters"][format_name]["label"])
         return link, text
 
+    def set_metadata_from_file(self, dataset, file_type: str, file_metadata: dict):
+        for p in dataset.profiles:
+            if p in self._profiles and "mappers" in self._profiles[p] and file_type in self._profiles[p]["mappers"]:
+                obj_name = self._profiles[p]["mappers"][file_type]
+                obj = load_object(obj_name)
+                obj(dataset, file_type, file_metadata)
+
     def build_dataset(self, profiles, **kwargs):
         fields = set()
         ext_profiles = set()
@@ -224,11 +231,7 @@ class Dataset(FieldContainer):
         self.users = users
 
     def set_from_file_metadata(self, file_type: str, file_metadata: dict):
-        # TODO:
-        #   for each profile attached to this dataset that supports setting metadata from file_type
-        #     allow it to set the metadata
-        #   if anyone made changes, save the object
-        pass
+        self.mreg.set_metadata_from_file(self, file_type, file_metadata)
 
     def revision_published_date(self):
         return self.extras["pub_date"] if "pub_date" in self.extras else None

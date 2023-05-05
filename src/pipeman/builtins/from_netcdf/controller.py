@@ -56,6 +56,10 @@ class NetCDFController:
                     for key in nf.variables[vname].ncattrs()
                 }
                 variables[vname]["_dimensions"] = [x.name for x in nf.variables[vname].get_dims()]
+                if nf.variables[vname].datatype == str:
+                    variables[vname]["_data_type"] = 'str'
+                else:
+                    variables[vname]["_data_type"] = nf.variables[vname].datatype
             dataset.set_from_file_metadata("netcdf", {
                 "global": metadata,
                 "variables": variables,

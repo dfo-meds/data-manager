@@ -1,0 +1,150 @@
+variable:
+  validation:
+    required:
+      - source_name
+      - source_data_type
+    recommended:
+      - units
+      - standard_name
+      - long_name
+  fields:
+    source_name:
+      data_type: text
+      label:
+        en: Variable Name
+      description:
+        en: Enter the variable name as it appears in the NetCDF file
+      order: 0
+    source_data_type:
+      data_type: vocabulary
+      vocabulary_name: netcdf_data_types
+      label:
+        en: Packed Data Type
+      description:
+        en: Select the data type of the variable when packed
+      order: 10
+    long_name:
+      data_type: text
+      label:
+        en: Long Name
+      description:
+        en: Enter a longer description of the variable
+      multilingual: yes
+      order: 20
+    standard_name:
+      data_type: vocabulary
+      vocabulary_name: cf_standard_names
+      label:
+        en: CF Standard Name
+      description:
+        en: Select the standard name of the variable
+      order: 30
+    units:
+      data_type: text
+      label:
+        en: Units
+      description:
+        en: Specify the units of the variable when unpacked using UDUnit-compatible symbols
+      order: 40
+    calendar:
+      data_type: vocabulary
+      vocabulary_name: cf_calendars
+      label:
+        en: Calendar
+      description:
+        en: If the variable contains date/time values, select the calendar used
+      order: 50
+    positive:
+      data_type: vocabulary
+      vocabulary_name: cf_directions
+      label:
+        en: Positive Direction
+      description:
+        en: If the variable describes a vertical coordinate system, specify the direction of positive values
+      order: 60
+    fill_value:
+      data_type: text
+      label:
+        en: Missing Value
+      description:
+        en: Specify a value that indicates a missing value (defaults to the maximum value for the data type)
+      order: 70
+    scale_factor:
+      data_type: float
+      label:
+        en: Scale Factor
+      description:
+        en: Specify a scale factor to apply when unpacking values
+      order: 80
+    add_offset:
+      data_type: float
+      label:
+        en: Add Offset
+      description:
+        en: Enter an offset value to add when unpacking values
+      order: 90
+    destination_data_type:
+      data_type: vocabulary
+      vocabulary_name: netcdf_data_types
+      label:
+        en: Unpacked Data Type
+      description:
+        en: If the variable specifies a scale factor, specify the unpacked data type
+      order: 100
+    actual_min:
+      data_type: decimal
+      label:
+        en: Minimum Value
+      description:
+        en: Enter the actual minimum value for this variable within the dataset
+      order: 110
+    actual_max:
+      data_type: decimal
+      label:
+        en: Maximum Value
+      description:
+        en: Enter the actual maximum value for this variable within the dataset
+      order: 120
+    valid_min:
+      data_type: decimal
+      label:
+        en: Minimum Valid Value
+      description:
+        en: Enter the theoretical minimum value for this variable, if applicable
+      order: 130
+    valid_max:
+      data_type: decimal
+      label:
+        en: Maximum Valid Value
+      description:
+        en: Enter the theoretical maximum value for this variable, if applicable
+      order: 140
+    cf_role:
+      data_type: vocabulary
+      vocabulary_name: cf_roles
+      label:
+        en: CF Role
+      description:
+        en: If this variable uniquely identifies a timeseries, a profile, or a trajectory, select the appropriate option
+      order: 150
+    comment:
+      data_type: multitext
+      label:
+        en: Comment
+      description:
+        en: Enter comments about this variable to share with data users
+      order: 160
+    references:
+      data_type: multitext
+      label:
+        en: References
+      description:
+        en: Describe relevant references for this variable
+      order: 170
+    source:
+      data_type: multitext
+      label:
+        en: Comment
+      description:
+        en: Describe relevant source information for this variable
+      order: 180
