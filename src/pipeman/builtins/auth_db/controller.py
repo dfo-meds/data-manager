@@ -452,7 +452,7 @@ class CreateUserForm(PipemanFlaskForm):
         super().__init__(*args, **kwargs)
         self.group_list = groups_select()
         self.groups.choices = self.group_list
-        self.organizations.choices = self.oc.list_organizations()
+        self.organizations.choices = self.oc.list_organizations(include_global=False)
 
 
 class EditUserForm(PipemanFlaskForm):
@@ -501,7 +501,7 @@ class EditUserForm(PipemanFlaskForm):
         super().__init__(*args, **kwargs)
         self.group_list = groups_select()
         self.groups.choices = self.group_list
-        self.org_list = self.oc.list_organizations()
+        self.org_list = self.oc.list_organizations(include_global=False)
         self.organizations.choices = self.org_list
 
 
