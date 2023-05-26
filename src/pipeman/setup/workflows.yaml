@@ -41,3 +41,13 @@ dataset_activation:
         - activate_dataset
       cleanup:
         - return_to_draft
+text_translation:
+    default:
+      label:
+        en: Default Text Translation
+      steps:
+        - fetch_translation
+        - remove_in_translation_flag
+      cleanup:
+        - remove_in_translation_flag
+      enabled: yes

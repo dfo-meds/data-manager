@@ -6,7 +6,15 @@ export PYTHONUNBUFFERED
 
 cd /srv/metadb/app || exit
 
-if [ "$1" == "-with-install" ] ; then
+# Handle prometheus directory
+if [ -e "/srv/metadb/_prometheus" ] ; then
+  rm -r /srv/metadb/_prometheus/*
+else
+  mkdir /srv/metadb/_prometheus
+fi
+
+# Handle setup, if requested
+if [ "$1" = "-with-install" ] ; then
   shift 1
   python -m alembic upgrade head
   python cli.py core setup

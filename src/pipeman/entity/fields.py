@@ -5,7 +5,7 @@ import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString, MultiLanguageLink
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget, NoControlCharacters
+from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget, NoControlCharacters, flasht
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
@@ -48,13 +48,43 @@ class Field:
         return working
 
     def sanitize_form_input(self, val):
+        if self.allow_translation_requests():
+            if self.is_repeatable() and isinstance(val, list):
+                for k in val:
+                    if isinstance(val[k], dict) and '_translation_request' in val and val['_translation_request']:
+                        self._file_translation_request(val[k], k)
+            elif isinstance(val, dict) and "_translation_request" in val and val["_translation_request"]:
+                self._file_translation_request(val)
         return val
+
+    @injector.inject
+    def _file_translation_request(self, val: dict, index: int = None, wc: "pipeman.workflow.workflow.WorkflowController" = None):
+        if not any(val[x] and x not in ('_translation_request', 'und') for x in val):
+            flasht("pipeman.translatable_field.error_no_value_set", "warning", field_name=self.field_name)
+            val['_translation_request'] = False
+            return
+        if all(val[x] or x in ('_translation_request', 'und') for x in val):
+            flasht("pipeman.translatable_field.error_all_values_set", "warning", field_name=self.field_name)
+            val['_translation_request'] = False
+            return
+        ctx = {
+            'object_type': self.parent_type,
+            'object_id': self.parent_id,
+            'field_name': self.field_name,
+            'text_values': val,
+            'type': "field",
+            'index': index
+        }
+        wc.start_workflow('text_translation', 'default', ctx, self.parent_id, self.parent_type)
 
     def is_multilingual(self):
         return self.config("multilingual", default=False)
 
     def is_repeatable(self):
         return self.config("repeatable", default=False)
+
+    def allow_translation_requests(self):
+        return self.config("allow_translation_requests", default=self.is_multilingual())
 
     def is_empty(self):
         if self.value is None or self.value == "" or self.value == []:
@@ -136,12 +166,19 @@ class Field:
         if use_multilingual and use_repeatable:
             min_entries = max(len(self.value) if self.value else 0, 1)
             return wtf.FieldList(
-                TranslatableField(ctl_class, field_kwargs=field_args, label=""),
+                TranslatableField(ctl_class,
+                                  field_kwargs=field_args,
+                                  allow_translation_requests=self.allow_translation_requests(),
+                                  label="",
+                                  ),
                 min_entries=min_entries,
                 **parent_args
             )
         elif use_multilingual:
-            return TranslatableField(ctl_class, field_kwargs=field_args, **parent_args)
+            return TranslatableField(ctl_class,
+                                     field_kwargs=field_args,
+                                     allow_translation_requests=self.allow_translation_requests(),
+                                     **parent_args)
         elif use_repeatable:
             min_entries = max(len(self.value) if self.value else 0, 1)
             return wtf.FieldList(ctl_class(label="", **field_args), **parent_args, min_entries=min_entries)

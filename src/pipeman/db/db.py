@@ -4,9 +4,16 @@ import sqlalchemy.orm as orm
 import zirconium as zr
 from autoinject import injector
 import logging
-import traceback
+import time
+import prometheus_client as pc
 
 from .orm import Base
+
+
+class AsyncSessionWrapper:
+
+    pass
+
 
 
 class SessionWrapper:
@@ -62,23 +69,17 @@ class Database:
     def __init__(self):
         """Implement __init__()."""
         self.engine = None
+
         self._session = None
         self._transaction_stack = []
         self._is_closed = False
         self.log = logging.getLogger("pipeman.db")
-        self.log_safe = logging.getLogger("pipeman.db.safe")
-        self.log_safe.omit_extras()
-        self.log_safe.debug(f"Initializing DB in: {injector.context_manager._get_context_hash()}")
-        self._unclean_warned_once = False
-        self._closing_warned_once = False
 
     def _create_connection(self):
         if self.engine is None:
-            if self._is_closed and not self._unclean_warned_once:
-                self.log_safe.warning(f"Reconnecting SQLAlchemy engine on a closed object {hash(self)}")
-                #self._unclean_warned_once = True
             # Create the engine from the connection string
             self.engine = sa.engine_from_config(self.config["database"], prefix="")
+
 
     def __enter__(self) -> SessionWrapper:
         """Implement __enter__().

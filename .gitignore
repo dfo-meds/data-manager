@@ -1,4 +1,7 @@
 /.pipeman.toml
 /*.db
 /venv
+/.venv
 /.idea
+__pycache__
+/test*.py

@@ -3,6 +3,8 @@ import sqlalchemy.orm as orm
 from sqlalchemy.ext.declarative import declared_attr
 import json
 from pipeman.i18n import MultiLanguageString
+import enum
+
 
 meta = sa.MetaData(naming_convention={
     "ix": "ix_%(column_0_label)s",
@@ -337,6 +339,7 @@ class WorkflowItem(_BaseModel, _AuditableModel, Base):
     context = sa.Column(sa.Text)
     workflow_type = sa.Column(sa.String(255), index=True)
     workflow_name = sa.Column(sa.String(255), index=True)
+    object_type = sa.Column(sa.String(255), default="dataset", nullable=True)
     object_id = sa.Column(sa.Integer)
     step_list = sa.Column(sa.Text)
     completed_index = sa.Column(sa.Integer, default=None, nullable=True)
@@ -377,3 +380,37 @@ class ServerSession(_BaseModel, Base):
     guid = sa.Column(sa.String(1024), nullable=False, unique=True)
     valid_until = sa.Column(sa.DateTime, nullable=False)
     is_valid = sa.Column(sa.Boolean, nullable=False)
+
+
+class TranslationState(enum.Enum):
+
+    IN_PROGRESS = 0
+    SUCCESS = 1
+    FAILURE = 2
+    DELAYED = 9
+
+
+class TranslationRequest(_BaseModel, Base):
+
+    guid = sa.Column(sa.String(1024), nullable=False, index=True)
+    lang_key = sa.Column(sa.String(16), nullable=False, index=True)
+    source_hash = sa.Column(sa.String(128), nullable=False)
+    source_info = sa.Column(sa.Text)
+    translation = sa.Column(sa.Text, nullable=True, default=None)
+    state = sa.Column(sa.Enum(TranslationState), nullable=False, default=TranslationState.IN_PROGRESS)
+    handler_info = sa.Column(sa.Text)
+    allow_reuse = sa.Column(sa.Boolean, default=True)
+    error_text = sa.Column(sa.Text)
+
+    def set_translation(self, translation_text: str, allow_reuse: bool = True):
+        self.translation = translation_text
+        self.allow_reuse = allow_reuse
+        self.state = TranslationState.SUCCESS
+
+    def mark_failed(self, failed_reason: str):
+        self.error_text = failed_reason
+        self.allow_reuse = False
+        self.state = TranslationState.FAILURE
+
+    def delay(self):
+        self.state = TranslationState.DELAYED

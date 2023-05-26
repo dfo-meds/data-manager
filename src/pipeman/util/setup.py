@@ -2,6 +2,7 @@ import logging
 from autoinject import injector
 import zrlog
 from flask.sessions import SecureCookieSessionInterface, SessionMixin
+from .metrics import PromMetrics, time_function
 
 from pipeman.i18n import gettext
 import typing as t
@@ -30,6 +31,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 @injector.inject
+@time_function("pipeman_setup_check_request_session", "Time to execute check_request_session()")
 def check_request_session(db: Database = None):
     if flask.request.endpoint == "static":
         return
@@ -87,8 +89,13 @@ def _new_session(session):
     flask.session.modified = True
 
 
+@time_function("pipeman_setup_build_nav", "Time to build the navigation")
 def build_nav(items: dict) -> list:
     """Build a navigation menu from a list of items registered to the System object."""
+    return _build_nav(items)
+
+
+def _build_nav(items: dict) -> list:
     nav = []
     for x in items:
         item = items[x]
@@ -105,6 +112,7 @@ def build_nav(items: dict) -> list:
 
 
 @injector.inject
+@time_function("pipeman_setup_init_system_logging", "Time to initialize the logging")
 def init_system_logging(system, rinfo: RequestInfo = None):
     # Setup logging
     zrlog.init_logging()
@@ -119,6 +127,7 @@ def init_system_logging(system, rinfo: RequestInfo = None):
 
 
 @injector.inject
+@time_function("pipeman_setup_init_registries", "Time to initialize the registries")
 def init_registries(r1: MetadataRegistry = None, r2: VocabularyRegistry = None, r3: WorkflowRegistry = None, r4: EntityRegistry = None):
     r1.reload_types()
     r2.reload_types()
@@ -133,7 +142,9 @@ class TrustedProxyFix:
         self._proxy = ProxyFix(app, **kwargs)
         self._trusted = trust_from_ips
         self._log = logging.getLogger("pipeman.trusted_proxy")
+        self._history = {}
 
+    @time_function("pipeman_setup_is_upstream_trustworthy", "Time to check if the upstream is trustworthy")
     def _is_upstream_trustworthy(self, environ, start_response):
         if self._trusted == "*" or self._trusted is True:
             return True
@@ -180,12 +191,14 @@ def stable_dict_key_list(d: dict):
     return keys
 
 
-def core_init_app(system, app, config):
+@injector.inject
+def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
     app.session_interface = SessionCookieInterface()
     if "flask" in config:
         app.config.update(config["flask"] or {})
     if not app.config.get("SECRET_KEY"):
         raise PipemanConfigurationError("Secret key for Flask must be defined")
+    prom_metrics.init_app(app)
     flask_autoinject.init_app(app)
     # Set the URL Rule class to our custom one
     app.url_rule_class = CustomRule
@@ -212,6 +225,7 @@ def core_init_app(system, app, config):
     # Before request, make sure the session is permanent
     @app.before_request
     @injector.inject
+    @time_function("pipeman_setup_session_init", "Time to start the before request stuff")
     def session_init(rinfo: RequestInfo = None, cspr: CSPRegistry = None):
         if flask.request.endpoint == "static":
             cspr.set_static()
@@ -232,6 +246,7 @@ def core_init_app(system, app, config):
     # After the request, perform a few clean-up tasks
     @app.after_request
     @injector.inject
+    @time_function("pipeman_setup_add_response_headers", "Time to cleanup the request")
     def add_response_headers(response: flask.Response, cspr: CSPRegistry = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
         if flask.request.endpoint == "static":

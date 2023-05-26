@@ -18,7 +18,7 @@ ENV MODULE_NAME=app
 ENV VARIABLE_NAME=app
 ENV APP_MODULE=app:app
 ENV GUNICORN_CONF=/srv/metadb/gunicorn_conf.py
-
+ENV PROMETHEUS_MULTIPROC_DIR=/srv/metadb/_prometheus
 
 RUN pip install --upgrade pip
 

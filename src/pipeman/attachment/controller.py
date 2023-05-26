@@ -11,6 +11,7 @@ import uuid
 import shutil
 from urllib.parse import urlparse
 
+
 @injector.injectable_global
 class UploadController:
 

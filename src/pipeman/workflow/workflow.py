@@ -34,7 +34,6 @@ import yaml
 from flask_wtf.file import FileField
 
 
-
 class ItemResult(Enum):
 
     SUCCESS = "success"
@@ -249,12 +248,13 @@ class WorkflowController:
         else:
             return "in-progress"
 
-    def start_workflow(self, workflow_type, workflow_name, workflow_context, object_id=None):
+    def start_workflow(self, workflow_type, workflow_name, workflow_context, object_id=None, object_type="dataset"):
         with self.db as session:
             item = orm.WorkflowItem(
                 workflow_type=workflow_type,
                 workflow_name=workflow_name,
                 object_id=object_id,
+                object_type=object_type,
                 context=json.dumps(workflow_context),
                 step_list=json.dumps(self.reg.step_list(workflow_type, workflow_name)),
                 created_date=datetime.datetime.now(),
