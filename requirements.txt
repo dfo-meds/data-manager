@@ -1,7 +1,5 @@
-alembic
+# Core stuff
 autoinject>=1.2.0
-azure-core
-azure-storage-blob
 click
 flask
 flask-autoinject>=2.0.2
@@ -16,5 +14,15 @@ toml
 universalio
 zirconium>=1.1.0
 zrlog
-azure-identity
+
+# Database migrations
+alembic
+
+# Prometheus stats
 prometheus-flask-exporter
+
+# Azure file support
+azure-core
+azure-storage-blob
+azure-identity
+azure-storage-file-share

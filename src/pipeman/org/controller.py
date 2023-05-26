@@ -103,12 +103,12 @@ class OrganizationController:
             logging.getLogger("pipeman.org").out(f"Organization {org_name} created")
             return org.id
 
-    def list_organizations(self):
+    def list_organizations(self, include_global: bool = True):
         with self.db as session:
             all_access = flask_login.current_user.has_permission("organizations.manage.any")
             global_access = flask_login.current_user.has_permission("organizations.manage.global")
             orgs = []
-            if global_access:
+            if global_access and include_global:
                 orgs.append((0, DelayedTranslationString("pipeman.label.org.global_name")))
             for org in session.query(orm.Organization):
                 if all_access or flask_login.current_user.belongs_to(org.id):

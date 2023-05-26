@@ -6,6 +6,7 @@ import pipeman.db.orm as orm
 from autoinject import injector
 from flask_wtf import FlaskForm
 from wtforms.form import BaseForm
+from wtforms.widgets import html_params
 import pathlib
 from wtforms.meta import DefaultMeta
 from flask_wtf.csrf import _FlaskFormCSRF
@@ -92,6 +93,50 @@ class NoControlCharacters:
         for cchar in CONTROL_LIST:
             if cchar in txt and not cchar in self.exceptions:
                 raise wtfv.ValidationError(message or self.message)
+
+
+class BetterTableWidget:
+    """
+    Renders a list of fields as a set of table rows with th/td pairs.
+
+    If `with_table_tag` is True, then an enclosing <table> is placed around the
+    rows.
+
+    Hidden fields will not be displayed with a row, instead the field will be
+    pushed into a subsequent table row to ensure XHTML validity. Hidden fields
+    at the end of the field list will appear outside the table.
+    """
+
+    def __init__(self, with_table_tag=True):
+        self.with_table_tag = with_table_tag
+
+    def __call__(self, field, **kwargs):
+        html = []
+        if self.with_table_tag:
+            kwargs.setdefault("id", field.id)
+            html.append("<table %s>" % html_params(**kwargs))
+        hidden = ""
+        for subfield in field:
+            print(hash(subfield))
+            content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
+            if subfield.type in ("HiddenField", "CSRFTokenField"):
+                hidden += str(subfield)
+            elif subfield.type in ("BooleanField"):
+                html.append(
+                    "<tr><td colspan='2'>%s%s%s</td></tr>" % (content, str(subfield.label), hidden)
+                )
+                hidden = ""
+            else:
+                html.append(
+                    "<tr><th>%s</th><td>%s%s</td></tr>"
+                    % (str(subfield.label), hidden, content)
+                )
+                hidden = ""
+        if self.with_table_tag:
+            html.append("</table>")
+        if hidden:
+            html.append(hidden)
+        return Markup("".join(html))
 
 
 @injector.injectable
@@ -489,7 +534,6 @@ class SecureBaseForm(BaseForm):
         return False
 
 
-
 class ConfirmationForm(FlaskForm):
 
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
@@ -604,7 +648,7 @@ class EntitySelectField(wtf.Field):
     @staticmethod
     @injector.inject
     def results_list(entity_types, text, by_revision, db: Database = None):
-        # TODO security filtering on entity_Types
+        # TODO security filtering on entity_types
         results = {
             "results": [],
         }
@@ -730,7 +774,15 @@ class DynamicFormField(wtf.FormField):
 
     def __init__(self, fields, *args, **kwargs):
         self.field_list = fields
+        self.form = None
+        if "widget" not in kwargs:
+            kwargs["widget"] = BetterTableWidget()
         super().__init__(self._generate_form, *args, **kwargs)
+
+    def __getattr__(self, item):
+        if self.form is not None:
+            return getattr(self.form, item)
+        return None
 
     def _generate_form(self, formdata=None, obj=None,  **kwargs):
         defaults = {}
@@ -747,13 +799,27 @@ class TranslatableField(DynamicFormField):
     tm: TranslationManager = None
 
     @injector.construct
-    def __init__(self, template_field, field_kwargs=None, *args, use_undefined=True, **kwargs):
+    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, **kwargs):
         self.template_field = template_field
         self.use_undefined = use_undefined
+        self.allow_translation_requests = allow_translation_requests
         self.template_args = field_kwargs or {}
         if "label" in self.template_args:
             del self.template_args["label"]
         super().__init__(self._build_field_list(), *args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self.allow_translation_requests:
+            if self.form.data['_translation_request']:
+                for fn in self.form._fields:
+                    if fn != 'und':
+                        if self.form._fields[fn].render_kw:
+                            self.form._fields[fn].render_kw['disabled'] = True
+                        else:
+                            self.form._fields[fn].render_kw = {
+                                'disabled': True
+                            }
+        return super().__call__(*args, **kwargs)
 
     def _build_field_list(self):
         fields = {}
@@ -763,6 +829,10 @@ class TranslatableField(DynamicFormField):
             lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
             for lang in self.tm.supported_languages()
         })
+        if self.allow_translation_requests:
+            fields["_translation_request"] = wtf.BooleanField(
+                label=DelayedTranslationString("pipeman.translatable_field.make_translation_request")
+            )
         # gettext('languages.short.en')
         # gettext('languages.short.fr')
         return fields

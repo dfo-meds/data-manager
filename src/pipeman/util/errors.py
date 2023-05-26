@@ -69,3 +69,21 @@ class DataStoreNotFoundError(PipemanError):
 
 class PipemanConfigurationError(PipemanError):
     pass
+
+
+class _WrapperError(PipemanError):
+
+    def __init__(self, msg="", ex=None):
+        super().__init__(msg)
+
+
+class RecoverableError(_WrapperError):
+    pass
+
+
+class UnrecoverableError(_WrapperError):
+    pass
+
+
+class TranslationNotAvailableYet(RecoverableError):
+    pass
