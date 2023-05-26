@@ -1,11 +1,12 @@
 import time
-
+import os
 import prometheus_client as pc
 import prometheus_client.multiprocess as pcmp
 from prometheus_flask_exporter import PrometheusMetrics
 from autoinject import injector
 import threading
 import functools
+import logging
 
 
 @injector.injectable_global
@@ -15,11 +16,16 @@ class PromMetrics:
         self.metrics = None
         self.stats = {}
         self._lock = threading.RLock()
+        self.log = logging.getLogger(__name__)
+        self.collector = None
 
     def init_app(self, app):
         if self.metrics is None:
             reg = pc.CollectorRegistry()
-            collector = pcmp.MultiProcessCollector(reg)
+            if os.environ.get("PROMETHEUS_MULTIPROC_DIR", default=None):
+                self.collector = pcmp.MultiProcessCollector(reg)
+            else:
+                self.log.warning("PROMETHEUS_MULTIPROC_DIR not set, Prometheus metrics may be corrupt if using a multi-process WSGI server")
             self.metrics = PrometheusMetrics(app, registry=reg)
 
     def get_stat(self, name, documentation, cls):

@@ -6,8 +6,12 @@ import pipeman.db.orm as orm
 import json
 import hashlib
 import logging
+import sqlalchemy as sa
 import zirconium as zr
 from pipeman.util.errors import RecoverableError, UnrecoverableError, TranslationNotAvailableYet
+from pipeman.dataset import DatasetController
+from pipeman.entity import EntityController
+import datetime
 
 
 @injector.injectable
@@ -17,8 +21,28 @@ class TranslationEngine:
     config: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self):
+    def __init__(self, send_immediately: bool = True):
         self.log = logging.getLogger("pipeman.i18n.workflow")
+        self._send_translations_immediately = send_immediately
+
+    def cleanup_requests(self):
+        success_retention_days = self.config.as_int(("pipeman", "translation", "success_retention_days"), default=7)
+        failure_retention_days = self.config.as_int(("pipeman", "translation", "failure_retention_days"), default=31)
+        with self.db as session:
+            q = (
+                sa.delete(orm.TranslationRequest)
+                .where(orm.TranslationRequest.allow_reuse == False)
+                .where(orm.TranslationRequest.state == orm.TranslationState.SUCCESS)
+                .where(orm.TranslationRequest.created_date < (datetime.datetime.now() - datetime.timedelta(days=success_retention_days)))
+            )
+            session.execute(q)
+            q = (
+                sa.delete(orm.TranslationRequest)
+                .where(orm.TranslationRequest.state == orm.TranslationState.FAILURE)
+                .where(orm.TranslationRequest.created_date < (datetime.datetime.now() - datetime.timedelta(days=failure_retention_days)))
+            )
+            session.execute(q)
+            session.commit()
 
     def find_request(self, key, lang, original_text):
         with self.db as session:
@@ -35,6 +59,8 @@ class TranslationEngine:
                 )
                 session.add(trans_req)
                 session.commit()
+                if self._send_translations_immediately:
+                    self._do_translation(trans_req, session)
             return trans_req
 
     def _stable_hash(self, source_info: dict):
@@ -42,7 +68,7 @@ class TranslationEngine:
         keys = list(source_info.keys())
         keys.sort()
         for key in keys:
-            h.update(f"{key}::{source_info[key]}")
+            h.update(f"{key}::{source_info[key]}".encode("utf-8"))
         return h.hexdigest()
 
     def fetch_translation(self, key, lang, original_text) -> str:
@@ -91,6 +117,7 @@ class TranslationEngine:
         raise UnrecoverableError("No translation engine configured")
 
 
+@injector.inject
 def fetch_translation(step, context, trans_engine: TranslationEngine = None):
     if "guid" not in context:
         context["guid"] = str(uuid.uuid4())
@@ -111,26 +138,51 @@ def fetch_translation(step, context, trans_engine: TranslationEngine = None):
             state = 1
     if state > 0:
         # Still waiting on other items
-        return ItemResult.ASYNC_EXECUTE
+        return ItemResult.BATCH_DELAY
     else:
         # All done!
         context["_has_completed"] = True
         return ItemResult.SUCCESS
 
 
+def set_translation(step, context):
+    remove_in_translation_flag(step, context)
+
+
 def remove_in_translation_flag(step, context):
-    pass
+    if context['object_type'] == 'dataset' and context['type'] == 'field':
+        _update_dataset_field_translation(
+            context['object_id'],
+            context['field_name'],
+            context['index'],
+            context['text_values'] if '_has_completed' in context and context['_has_completed'] else None
+        )
+    else:
+        _update_entity_field_translation(
+            context['object_type'],
+            context['object_id'],
+            context['field_name'],
+            context['index'],
+            context['text_values'] if '_has_completed' in context and context['_has_completed'] else None
+        )
 
 
-"""
+@injector.inject
+def _update_entity_field_translation(entity_type, entity_id, field_name, index, translation, ec: EntityController):
+    entity = ec.load_entity(entity_type, entity_id)
+    _set_field_translation(entity, field_name, index, translation)
+    ec.save_entity(entity)
 
 
-        ctx = {
-            'object_type': self.parent_type,
-            'object_id': self.parent_id,
-            'field_name': self.field_name,
-            'text_values': val,
-            'type': "field",
-            'index': index
-        }
-"""
+@injector.inject
+def _update_dataset_field_translation(dataset_id, field_name, index, translation, dc: DatasetController):
+    dataset = dc.load_dataset(dataset_id)
+    _set_field_translation(dataset, field_name, index, translation)
+    dc.save_metadata(dataset)
+
+
+def _set_field_translation(field_container, field_name, index, translation):
+    field = field_container.get_field(field_name)
+    if field is None:
+        raise ValueError(f"No such field: {field_name}")
+    field.set_from_translation(translation, index)

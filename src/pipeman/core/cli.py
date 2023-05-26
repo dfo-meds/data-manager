@@ -50,3 +50,10 @@ def setup(system: System = None):
 @injector.inject
 def cleanup(system: System = None):
     system.cleanup()
+
+
+@core.command
+def cron():
+    from .util import CronDaemon
+    daemon = CronDaemon()
+    daemon.run_forever()

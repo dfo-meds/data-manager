@@ -81,3 +81,21 @@ def init(system):
     system.on_app_init(create_jinja_filters)
     system.on_app_init(add_lang_cb)
     system.register_cli("pipeman.i18n.cli", "i18n")
+    system.on_cron_start(_register_cron_jobs)
+    system.on_cleanup(_process_trans_requests)
+    system.on_cleanup(_cleanup_old_requests)
+
+
+def _register_cron_jobs(cron):
+    cron.register_periodic_job("load_translations", _process_trans_requests, minutes=5)
+    cron.register_periodic_job("cleanup_translations", _cleanup_old_requests, days=1)
+
+
+@injector.inject
+def _process_trans_requests(te: "pipeman.i18n.workflow.TranslationEngine" = None):
+    te.do_translations()
+
+
+@injector.inject
+def _cleanup_old_requests(te: "pipeman.i18n.workflow.TranslationEngine" = None):
+    te.cleanup_requests()

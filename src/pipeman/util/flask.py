@@ -831,7 +831,7 @@ class TranslatableField(DynamicFormField):
         })
         if self.allow_translation_requests:
             fields["_translation_request"] = wtf.BooleanField(
-                label=DelayedTranslationString("pipeman.translatable_field.make_translation_request")
+                label=DelayedTranslationString("pipeman.common.open_translation_request")
             )
         # gettext('languages.short.en')
         # gettext('languages.short.fr')

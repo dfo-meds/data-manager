@@ -111,6 +111,12 @@ class System:
 
         self._log.out("Init complete")
 
+    def on_cron_start(self, cb: CallableOrStr):
+        self.on("cron.start", cb)
+
+    def on_cron(self, cb: CallableOrStr):
+        self.on("cron", cb)
+
     def pre_setup(self, cb: CallableOrStr):
         self.on("setup.before", cb)
 

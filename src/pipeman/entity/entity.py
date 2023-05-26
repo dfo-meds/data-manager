@@ -10,6 +10,7 @@ from functools import cache
 from pipeman.db import BaseObjectRegistry
 from pipeman.i18n import gettext
 from threading import RLock
+import typing as t
 
 
 def entity_access(entity_type: str, op: str) -> bool:
@@ -204,7 +205,7 @@ class FieldContainer:
         fields.sort(key=lambda x: self._fields[x].order)
         return fields
 
-    def get_field(self, fn):
+    def get_field(self, fn) -> t.Optional[Field]:
         if fn in self._fields:
             return self._fields[fn]
         return None

@@ -43,6 +43,8 @@ class ItemResult(Enum):
     ASYNC_EXECUTE = "async_execute"
     DECISION_REQUIRED = "decision_required"
     REMOTE_EXECUTE_REQUIRED = "remote_required"
+    BATCH_DELAY = "batch_delay"
+    ASYNC_DELAY = "async_delay"
 
 
 @injector.injectable_global
@@ -226,7 +228,7 @@ class WorkflowController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self.log = logging.getLogger("pipeman.workflow")
 
     def interpret_result(self, result):
         if result == ItemResult.SUCCESS:
@@ -266,6 +268,26 @@ class WorkflowController:
             session.commit()
             self._start_next_step(item, session)
             return item.status, item.id
+
+    def check_exists(self, workflow_type, workflow_name, context_filters=None, object_id=None, object_type="dataset"):
+        with self.db as session:
+            for item in session.query(orm.WorkflowItem).filter_by(
+                workflow_type=workflow_type,
+                workflow_name=workflow_name,
+                object_id=object_id,
+                object_type=object_type
+            ).filter(orm.WorkflowItem.status.notin_(('FAILURE', 'CANCELLED', 'COMPLETE'))):
+                if context_filters is None:
+                    return True
+                else:
+                    ctx = json.loads(item.context) if item.context else {}
+                    for x in context_filters:
+                        if x not in ctx or not ctx[x] == context_filters[x]:
+                            break
+                    else:
+                        print(item.status)
+                        return True
+        return False
 
     def workflow_item_status_by_id(self, item_id):
         with self.db as session:
@@ -447,11 +469,19 @@ class WorkflowController:
         return False
 
     def cleanup_old_items(self):
+        # TODO: add old item removal for completed workflow items
+        self.log.info(f"Cleaning up old workflow items")
         pass
 
     def batch_process_items(self):
+        self.log.info(f"Starting batch processing jobs")
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "batch_process_time"), default=5)
         with self.db as session:
+            q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'BATCH_DELAY').values({
+                'status': 'BATCH_EXECUTE'
+            })
+            session.execute(q)
+            session.commit()
             start_time = time.monotonic_ns()
             cont = True
             while cont:
@@ -464,11 +494,16 @@ class WorkflowController:
                         cont = False
                         break
 
-
     async def async_batch_process_items(self):
+        self.log.info(f"Starting async batch jobs")
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "async_batch_process_time"), default=5)
         max_items = self.cfg.as_int(("pipeman", "async_max_items"), default=5)
         with self.db as session:
+            q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'ASYNC_DELAY').values({
+                'status': 'ASYNC_EXECUTE'
+            })
+            session.execute(q)
+            session.commit()
             start_time = time.monotonic_ns()
             cont = True
             tasks = []
@@ -515,6 +550,12 @@ class WorkflowController:
         elif result == ItemResult.BATCH_EXECUTE:
             item.status = "BATCH_EXECUTE"
             # "gettext('pipeman.label.witem.status.batch_execute')"
+        elif result == ItemResult.ASYNC_DELAY:
+            item.status = "ASYNC_DELAY"
+            # gettext('pipeman.label.witem.status.async_delay')
+        elif result == ItemResult.BATCH_DELAY:
+            item.status = 'BATCH_DELAY'
+            # gettext('pipeman.label.witem.status.batch_delay')
         elif result == ItemResult.ASYNC_EXECUTE:
             item.status = "ASYNC_EXECUTE"
             # "gettext('pipeman.label.witem.status.async_execute')"
@@ -536,6 +577,9 @@ class WorkflowController:
             self._handle_cleanup(item, session, steps, ctx, item.status)
             
     def _handle_cleanup(self, item, session, steps, ctx, end_state):
+        if '_in_cleanup' in ctx and ctx['_in_cleanup']:
+            self._start_next_step(item, session, steps, ctx)
+            return
         cleanup_steps = []
         try:
             cleanup_steps = self.reg.cleanup_step_list(item.workflow_type, item.workflow_name)
@@ -549,6 +593,7 @@ class WorkflowController:
         ctx['_final_completed_step'] = item.completed_index
         ctx['_first_cleanup_step'] = next_index + 1
         ctx['_cleanup_set_state'] = end_state
+        ctx['_in_cleanup'] = True
         item.step_list = json.dumps(steps)
         item.completed_index = next_index
         item.context = json.dumps(ctx)
@@ -835,7 +880,7 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
         DelayedTranslationString("pipeman.label.witem.step.approval_file.name")
     )
 
-    file_submission = fwf.FileField(
+    file_submission = FileField(
         DelayedTranslationString("pipeman.label.witem.step.approval_file"),
         validators=[
             fwf.FileAllowed(["pdf", "jpg", "png"])

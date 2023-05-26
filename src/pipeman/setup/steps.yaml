@@ -42,9 +42,14 @@ remove_in_translation_flag:
   label:
     en: Remove Flag
   step_type: action
-  action: pipeman.i18n.workflow.remove_in_translation_Flag
+  action: pipeman.i18n.workflow.remove_in_translation_flag
+set_translation:
+  label:
+    en: Set Translation
+  step_type: action
+  action: pipeman.i18n.workflow.set_translation
 fetch_translation:
   label:
     en: Fetch Translation
-  step_type: async
-  coro: pipeman.i18n.workflow.fetch_translation
+  step_type: batch
+  action: pipeman.i18n.workflow.fetch_translation

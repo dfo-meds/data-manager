@@ -18,6 +18,11 @@ def init(system):
     system.register_blueprint("pipeman.core.app", "core")
     system.on_app_init(core_init_app)
     system.on_cleanup(_do_cleanup)
+    system.on_cron_start(_register_cron)
+
+
+def _register_cron(cron):
+    cron.register_periodic_job("cleanup_datasets", _do_cleanup, days=7)
 
 
 @injector.inject
@@ -65,7 +70,7 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
                 for rev in ds.data:
                     if latest_rev.revision_no == rev.revision_no:
                         continue
-                    if latest_pub_rev.revision_no == rev.revision_no:
+                    if latest_pub_rev and latest_pub_rev.revision_no == rev.revision_no:
                         continue
                     if rev.is_published and (oldpub_gate is None or rev.modified_date >= oldpub_gate):
                         continue

@@ -10,8 +10,9 @@ class GoogleTranslationEngine(TranslationEngine):
 
     def __init__(self):
         super().__init__()
-        sa_file = self.config.as_str(("pipeman", "googlecloud", "service_account_file"), default=None)
-        self.allow_reuse = self.config.as_bool(("pipeman", "googlecloud", "cache_translations"), default=True)
+        sa_file = self.config.as_str(("pipeman", "translation", "googlecloud", "service_account_file"), default=None)
+        self.parent = self.config.as_str(("pipeman", "translation", "googlecloud", "parent"))
+        self.allow_reuse = self.config.as_bool(("pipeman", "translation", "googlecloud", "cache_translations"), default=True)
         if sa_file:
             self.translator = translate.TranslationServiceClient.from_service_account_file(
                sa_file

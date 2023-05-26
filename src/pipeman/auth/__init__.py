@@ -38,6 +38,11 @@ def init(system: System):
     system.register_cli("pipeman.auth.cli", "group")
     system.on_setup(_do_setup)
     system.on_cleanup(_do_cleanup)
+    system.on_cron_start(_register_cron)
+
+
+def _register_cron(cron):
+    cron.register_periodic_job("cleanup_login_records", _do_cleanup, days=1)
 
 
 def _do_setup():

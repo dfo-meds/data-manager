@@ -64,6 +64,7 @@
 |organizations.manage.any
 |organizations.manage.global
 |files.upload
+|translations.manage
 |vocabularies.view
 
 # Entity Types

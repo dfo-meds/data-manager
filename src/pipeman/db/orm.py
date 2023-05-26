@@ -54,11 +54,15 @@ class _BaseModel(object):
     id = sa.Column(sa.Integer, primary_key=True, nullable=False)
 
 
-class _AuditableModel:
+class _AuditableDateModel:
 
-    created_by = sa.Column(sa.ForeignKey("user.id"), nullable=True)
     created_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now())
     modified_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now(), onupdate=sa.func.now())
+
+
+class _AuditableModel(_AuditableDateModel):
+
+    created_by = sa.Column(sa.ForeignKey("user.id"), nullable=True)
 
 
 class _DisplayNameModel(_BaseModel):
@@ -390,7 +394,7 @@ class TranslationState(enum.Enum):
     DELAYED = 9
 
 
-class TranslationRequest(_BaseModel, Base):
+class TranslationRequest(_BaseModel, _AuditableDateModel, Base):
 
     guid = sa.Column(sa.String(1024), nullable=False, index=True)
     lang_key = sa.Column(sa.String(16), nullable=False, index=True)

@@ -291,6 +291,7 @@ class DatasetController:
         form = DatasetMetadataForm(dataset, display_group)
         if form.handle_form():
             self.save_metadata(dataset)
+            form = DatasetMetadataForm(dataset, display_group)
             flasht("pipeman.dataset.page.edit_metadata.success", "success")
         group_list = [
             (
@@ -500,7 +501,7 @@ class DatasetController:
                     if not ds:
                         raise DatasetNotFoundError(dataset.dataset_id)
                     ds.is_deprecated = dataset.is_deprecated
-                    ds.organization_id = int(dataset.organization_id) or None
+                    ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
                     ds.display_names = json.dumps(dataset.display_names())
                     ds.profiles = "\n".join(dataset.profiles)
                     if not ds.guid:

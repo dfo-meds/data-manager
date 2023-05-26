@@ -18,7 +18,7 @@ class ManualTranslationEntry:
         self.target_language = target_language
         self.translation = translation
         if not self.guid:
-            raise TranslatableError("pipeman.mtrans.errors.missing_guid")
+            raise TranslatableError("pipeman.mtrans.error.missing_guid")
 
 
 class ManualTranslationEngine(TranslationEngine):
@@ -29,9 +29,6 @@ class ManualTranslationEngine(TranslationEngine):
             for tr in session.query(orm.TranslationRequest).filter_by(
                 state=orm.TranslationState.DELAYED
             ):
-                info = json.loads(tr.handler_info) if tr.handler_info else {}
-                if '_checked' not in info or not info['_checked']:
-                    continue
                 if tr.source_hash in found_source_hashes:
                     continue
                 src_info = json.loads(tr.source_info)
@@ -48,13 +45,15 @@ class ManualTranslationEngine(TranslationEngine):
     def import_translation(self, translation: ManualTranslationEntry):
         with self.db as session:
             if not translation.translation:
-                raise TranslatableError("pipeman.mtrans.errors.no_translation", guid=translation.guid)
-            tr = session.query(guid=translation.guid).first()
+                raise TranslatableError("pipeman.mtrans.error.no_translation", guid=translation.guid)
+            tr = session.query(orm.TranslationRequest).filter_by(guid=translation.guid).first()
             if not tr:
-                raise TranslatableError("pipeman.mtrans.errors.no_such_request", guio=translation.guid)
+                raise TranslatableError("pipeman.mtrans.error.no_such_request", guio=translation.guid)
+            if not tr.state == orm.TranslationState.DELAYED:
+                raise TranslatableError("pipeman.mtrans.error.request_already_completed", guid=translation.guid)
             tr.set_translation(translation.translation, True)
             session.commit()
-            for tr2 in session.query(
+            for tr2 in session.query(orm.TranslationRequest).filter_by(
                 source_hash=tr.source_hash,
                 lang_key=tr.lang_key,
                 state=orm.TranslationState.DELAYED

@@ -47,7 +47,7 @@ text_translation:
         en: Default Text Translation
       steps:
         - fetch_translation
-        - remove_in_translation_flag
+        - set_translation
       cleanup:
         - remove_in_translation_flag
       enabled: yes

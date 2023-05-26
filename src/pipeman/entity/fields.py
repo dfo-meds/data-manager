@@ -53,19 +53,52 @@ class Field:
                 for k in val:
                     if isinstance(val[k], dict) and '_translation_request' in val and val['_translation_request']:
                         self._file_translation_request(val[k], k)
-            elif isinstance(val, dict) and "_translation_request" in val and val["_translation_request"]:
-                self._file_translation_request(val)
+                    elif k in self.value and '_translation_request' in self.value[k] and self.value[k]['_translation_request']:
+                        val[k]['_translation_request'] = True
+            elif isinstance(val, dict):
+                if "_translation_request" in val and val["_translation_request"]:
+                    self._file_translation_request(val)
+                elif '_translation_request' in self.value and self.value['_translation_request']:
+                    val['_translation_request'] = True
         return val
+
+    def set_from_translation(self, val: dict = None, index: int = None):
+        if index is not None:
+            if index not in self.value:
+                raise ValueError(f"No such index {index} in {self.parent_type}.{self.parent_id}.{self.field_name}")
+            self._set_from_translation(self.value[index], val)
+        else:
+            self._set_from_translation(self.value, val)
+
+    def _set_from_translation(self, current_value, new_value):
+        if not isinstance(current_value, dict):
+            raise ValueError(f"Field {self.parent_type}.{self.parent_id}.{self.field_name} no longer supports translations")
+        if new_value is not None:
+            current_value.update(new_value)
+        current_value["_translation_request"] = False
 
     @injector.inject
     def _file_translation_request(self, val: dict, index: int = None, wc: "pipeman.workflow.workflow.WorkflowController" = None):
         if not any(val[x] and x not in ('_translation_request', 'und') for x in val):
-            flasht("pipeman.translatable_field.error_no_value_set", "warning", field_name=self.field_name)
+            flasht("pipeman.field.error.translation_nothing_to_work_with", "warning", field_name=self.field_name, index=index)
             val['_translation_request'] = False
             return
         if all(val[x] or x in ('_translation_request', 'und') for x in val):
-            flasht("pipeman.translatable_field.error_all_values_set", "warning", field_name=self.field_name)
+            flasht("pipeman.field.error.translation_nothing_to_do", "warning", field_name=self.field_name, index=index)
             val['_translation_request'] = False
+            return
+        if wc.check_exists(
+            'text_translation',
+            'default',
+            object_type=self.parent_type,
+            object_id=self.parent_id,
+            context_filters={
+                'field_name': self.field_name,
+                'type': 'field',
+                'index': index
+            }
+        ):
+            flasht("pipeman.field.error.translation_already_in_progress", "warning", field_name=self.field_name, index=index)
             return
         ctx = {
             'object_type': self.parent_type,
@@ -76,6 +109,7 @@ class Field:
             'index': index
         }
         wc.start_workflow('text_translation', 'default', ctx, self.parent_id, self.parent_type)
+        flasht("pipeman.field.messages.translation_requested", "success", field_name=self.field_name, index=index)
 
     def is_multilingual(self):
         return self.config("multilingual", default=False)
@@ -92,13 +126,13 @@ class Field:
         if self.is_repeatable():
             for val in self.value:
                 if self.is_multilingual():
-                    if any(bool(val[x]) for x in val):
+                    if any(bool(val[x]) for x in val if x != '_translation_request'):
                         return False
                 elif bool(val):
                     return False
             return True
         elif self.is_multilingual():
-            return not any(bool(self.value[x]) for x in self.value)
+            return not any(bool(self.value[x]) for x in self.value if x != '_translation_request')
         else:
             return not bool(self.value)
 
