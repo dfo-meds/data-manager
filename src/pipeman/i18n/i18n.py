@@ -18,7 +18,7 @@ class TranslationManager:
 
     @injector.construct
     def __init__(self):
-        pass
+        self._metadata_languages = self.cfg.as_list(("pipeman", "metadata", "languages"), default=['en'])
 
     def get_text(self, text_key: str, default: str = None) -> str:
         return default if default is not None else text_key
@@ -27,7 +27,7 @@ class TranslationManager:
         return ['en']
 
     def metadata_supported_languages(self):
-        return self.cfg.as_list(("pipeman", "metadata", "languages"), default=['en'])
+        return self._metadata_languages
 
 
 class BaseTranslatableString:

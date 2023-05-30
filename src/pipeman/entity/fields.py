@@ -22,9 +22,28 @@ class HtmlList:
 
     def __str__(self):
         h = '<ul>'
-        h += ''.join(f'<li>{item}</li>' for item in self.items if item)
+        for item in self.items:
+            if isinstance(item, MultiLanguageString):
+                h += f'<li>{_render_mls(item)}</li>'
+            else:
+                h += f'<li>{markupsafe.escape(item)}</li>'
         h += '</ul>'
         return markupsafe.Markup(h)
+
+
+def _render_mls(mls: MultiLanguageString):
+    keys = [k for k in mls if (not k[0] == '_') and mls[k]]
+    if len(keys) == 1 and keys[0] == 'und':
+        return markupsafe.escape(mls['und'])
+    html = '<dl>'
+    for key in keys:
+        if key != 'und':
+            html += f'<dt>{gettext(f"languages.full.{key}")}</dt><dd>{markupsafe.escape(mls[key])}</dd>'
+    if 'und' in keys:
+        html += f'<dt>{gettext(f"languages.full.und")}</dt><dd>{markupsafe.escape(mls["und"])}</dd>'
+
+    html += '</dl>'
+    return markupsafe.Markup(html)
 
 
 class Field:
@@ -237,6 +256,7 @@ class Field:
                 TranslatableField(ctl_class,
                                   field_kwargs=field_args,
                                   allow_translation_requests=self.allow_translation_requests(),
+                                  use_metadata_languages=True,
                                   label="",
                                   ),
                 min_entries=min_entries,
@@ -246,6 +266,7 @@ class Field:
             return TranslatableField(ctl_class,
                                      field_kwargs=field_args,
                                      allow_translation_requests=self.allow_translation_requests(),
+                                     use_metadata_languages=True,
                                      **parent_args)
         elif use_repeatable:
             min_entries = max(len(self.value) if self.value else 0, 1)
@@ -338,10 +359,10 @@ class Field:
             return str(HtmlList(items))
         elif use_multilingual:
             if isinstance(self.value, str):
-                return MultiLanguageString({"und": self.value})
-            return MultiLanguageString({
+                return _render_mls(MultiLanguageString({"und": self.value}))
+            return _render_mls(MultiLanguageString({
                 x: self._format_for_ui(self.value[x]) for x in self.value
-            })
+            }))
         else:
             return self._format_for_ui(self.value)
 

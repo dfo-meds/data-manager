@@ -799,11 +799,12 @@ class TranslatableField(DynamicFormField):
     tm: TranslationManager = None
 
     @injector.construct
-    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, **kwargs):
+    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, use_metadata_languages: bool = False, **kwargs):
         self.template_field = template_field
         self.use_undefined = use_undefined
         self.allow_translation_requests = allow_translation_requests
         self.template_args = field_kwargs or {}
+        self._use_metadata_languages = use_metadata_languages
         if "label" in self.template_args:
             del self.template_args["label"]
         super().__init__(self._build_field_list(), *args, **kwargs)
@@ -827,7 +828,7 @@ class TranslatableField(DynamicFormField):
             fields['und'] = self.template_field(label=DelayedTranslationString("languages.short.und"), **self.template_args)
         fields.update({
             lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
-            for lang in self.tm.supported_languages()
+            for lang in (self.tm.metadata_supported_languages() if self._use_metadata_languages else self.tm.supported_languages())
         })
         if self.allow_translation_requests:
             fields["_translation_request"] = wtf.BooleanField(

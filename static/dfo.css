@@ -6,6 +6,16 @@ body {
     margin: 0;
     padding: 0;
 }
+table.property-list dl {
+    margin: 0;
+    padding: 0;
+}
+table.property-list dl dt {
+    width: 100px;
+    float: left;
+    clear: left;
+    font-weight: bold;
+}
 .user_info {
     float: right;
     width: 200px;
