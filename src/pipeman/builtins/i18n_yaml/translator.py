@@ -12,6 +12,7 @@ class YamlTranslationManager(TranslationManager):
 
     @injector.construct
     def __init__(self, extra_paths: t.Union[str, t.Iterable, None] = None):
+        super().__init__()
         self._allow_undefined = self.cfg.get(("pipeman", "i18n_yaml", "allow_undefined"), default=False)
         self.log = logging.getLogger("pipeman.i18n_yaml")
         dpaths = []
