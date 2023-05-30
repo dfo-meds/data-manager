@@ -1,18 +1,3 @@
-data_info:
-  fields:
-    short_institution:
-      order: 125
-      data_type: text
-      label:
-        en: Institution (Short)
-    project:
-      data_type: text
-      label:
-        en: Project
-    program:
-      data_type: text
-      label:
-        en: Program
 technical:
   fields:
     erddap_dataset_id:
@@ -29,16 +14,7 @@ technical:
       data_type: text
       label:
         en: ERDDAP Data File Path
-    standard_name_vocab:
-      data_type: text
-      label:
-        en: Standard Name Vocabulary
     erddap_data_file_pattern:
       data_type: text
       label:
         en: ERDDAP Data File Pattern
-    cdm_data_type:
-      data_type: vocabulary
-      label:
-        en: CDM Data Type
-      vocabulary_name: cdm_data_types

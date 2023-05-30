@@ -1,4 +1,26 @@
 from pipeman.vocab import VocabularyTermController
+import logging
+
+TIME_PRECISION_MAP = {
+    "month": "1970-01",
+    "day": "1970-01-01",
+    "hour": "1970-01-01T00Z",
+    "minute": "1970-01-01T00:00Z",
+    "second": "1970-01-01T00:00:00Z",
+    "tenth_second": "1970-01-01T00:00:00.0Z",
+    "hundredth_second": "1970-01-01T00:00:00.00Z",
+    "millisecond": "1970-01-01T00:00:00.000Z",
+}
+
+
+def time_precision_output(attrs: dict, target_name: str, field, config: dict, fc):
+    vocab_item = field.data()
+    if vocab_item:
+        tp_name = vocab_item['short_name']
+        if tp_name in TIME_PRECISION_MAP:
+            attrs[target_name] = TIME_PRECISION_MAP[tp_name]
+        else:
+            logging.getLogger("pipeman.erddap").error(f"Time precision value {tp_name} not recognized")
 
 
 def set_metadata_from_netcdf(dataset, file_type: str, metadata: dict, vtc: VocabularyTermController = None):
@@ -154,6 +176,8 @@ def _map_netcdf_datatype_to_erddap(netcdf_dt: str) -> str:
 
 
 def preprocess_dataset(dataset, **kwargs):
+    from pipeman.builtins.netcdf.util import _preprocess_for_both
+    vars = _preprocess_for_both(dataset, **kwargs)
     subset_vars = []
     altitude_proxy = None
     cdm_profile_vars = []
@@ -165,32 +189,18 @@ def preprocess_dataset(dataset, **kwargs):
         if var['altitude_proxy']:
             altitude_proxy = var['destination_name']
         if var['role']:
+            # TODO: fix the fact we removed the _extra names
             if var['role']['short_name'] == 'profile_id' or var['role']['short_name'] == 'profile_extra':
                 cdm_profile_vars.append(var['destination_name'])
             if var['role']['short_name'] == 'timeseries_id' or var['role']['short_name'] == 'timeseries_extra':
                 cdm_timeseries_vars.append(var['destination_name'])
             if var['role']['short_name'] == 'trajectory_id' or var['role']['short_name'] == 'trajectory_extra':
                 cdm_trajectory_vars.append(var['destination_name'])
-    keywords = set()
-    for x in dataset.keywords():
-        disp = x.to_display("en")
-        if disp["primary"]:
-            keywords.add(disp["primary"])
-        keywords.update(disp["secondary"].values())
-    keywords = list(kw.replace(",", "") for kw in keywords)
-    keywords.sort()
-    variable_order = []
-    for v in dataset['variables']:
-        order_no = v['variable_order'] or 0
-        variable_order.append((v, order_no))
-    variable_order.sort(key=lambda x: x[1])
-    variables = [v[0] for v in variable_order]
-    return {
-        "variables": variables,
+    vars.update({
         "subset_vars": ",".join(subset_vars),
-        "basic_keywords": ",".join(keywords),
         "altitude_proxy": altitude_proxy,
         "cdm_profile_vars": ",".join(cdm_profile_vars),
         "cdm_trajectory_vars": ",".join(cdm_trajectory_vars),
         "cdm_timeseries_vars": ",".join(cdm_timeseries_vars),
-    }
+    })
+    return vars

@@ -3,16 +3,24 @@ metadata_info:
     en: Metadata
     fr: Métadonnées
   order: 0
+
 data_info:
   display:
     en: Dataset
     fr: Ensemble de données
+  order: 10
+
+data_more_info:
+  display:
+    en: More Info
+    fr:
   order: 20
+
 keywords:
   display:
     en: Keywords
     fr: Mots-clé
-  order: 25
+  order: 100
   fields:
     custom_keywords:
       data_type: entity_ref
@@ -27,26 +35,35 @@ keywords:
         default_mode: translated
         thesaurus_field: thesaurus
         keyword_field: keyword
+
 extent:
   display:
-    en: Extent
-    fr: Etendue
+    en: Geographical
+    fr: Géographique
   order: 30
+
 technical:
   display:
     en: Technical
     fr: Technique
-  order: 100
+  order: 90
+
 publishing:
   display:
     en: Distribution
     fr: Acheminement
-  order: 150
+  order: 110
+
+custom:
+  display:
+    en: Custom Fields
+  order: 120
+
 variables:
   display:
     en: Variables
     fr: Variables
-  order: 200
+  order: 130
   fields:
     variables:
       data_type: component_ref
@@ -55,3 +72,9 @@ variables:
       label:
         en: Variables
         fr: Variables
+
+references:
+  display:
+    en: References
+    fr: Références
+  order: 80

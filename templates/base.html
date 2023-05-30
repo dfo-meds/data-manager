@@ -106,6 +106,7 @@
             let url_format = '{{'pipeman.error.html_js_url_format_error' | gettext}}';
             let tel_format = '{{'pipeman.error.html_js_tel_format_error' | gettext}}';
             let csrf_token = "{{ csrf_token() }}";
+            let add_item_text = '{{'pipeman.common.add_item' | gettext}}';
 
             $.ajaxSetup({
                 beforeSend: function(xhr, settings) {

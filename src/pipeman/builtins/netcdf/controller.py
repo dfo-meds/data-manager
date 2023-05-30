@@ -65,6 +65,7 @@ class NetCDFController:
                 "variables": variables,
                 "dimensions": dimensions
             })
+            self.dc.save_dataset(dataset)
         finally:
             if nf:
                 nf.close()

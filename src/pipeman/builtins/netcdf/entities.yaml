@@ -1,12 +1,22 @@
+use_constraint:
+  fields:
+    plain_text:
+      data_type: multitext
+      label:
+        en: Plain text
 variable:
   validation:
     required:
       - source_name
       - source_data_type
+      - dimensions
     recommended:
       - units
       - standard_name
       - long_name
+      - valid_min
+      - valid_max
+      - missing_value
   fields:
     source_name:
       data_type: text
@@ -23,6 +33,13 @@ variable:
       description:
         en: Select the data type of the variable when packed
       order: 10
+    dimensions:
+      data_type: text
+      label:
+        en: Dimensions
+      description:
+        en: A comma-separated list of dimensions in appropriate order (least to most rapidly changing)
+      order: 11
     long_name:
       data_type: text
       label:
@@ -31,6 +48,9 @@ variable:
         en: Enter a longer description of the variable
       multilingual: yes
       order: 20
+      netcdf:
+        mapping: long_name
+        processor: text
     standard_name:
       data_type: vocabulary
       vocabulary_name: cf_standard_names
@@ -39,6 +59,9 @@ variable:
       description:
         en: Select the standard name of the variable
       order: 30
+      netcdf:
+        mapping: standard_name
+        processor: vocabulary
     units:
       data_type: text
       label:
@@ -46,6 +69,8 @@ variable:
       description:
         en: Specify the units of the variable when unpacked using UDUnit-compatible symbols
       order: 40
+      netcdf:
+        mapping: units
     calendar:
       data_type: vocabulary
       vocabulary_name: cf_calendars
@@ -54,6 +79,9 @@ variable:
       description:
         en: If the variable contains date/time values, select the calendar used
       order: 50
+      netcdf:
+        mapping: calendar
+        processor: vocabulary
     positive:
       data_type: vocabulary
       vocabulary_name: cf_directions
@@ -62,13 +90,19 @@ variable:
       description:
         en: If the variable describes a vertical coordinate system, specify the direction of positive values
       order: 60
-    fill_value:
+      netcdf:
+        mapping: positive
+        processor: vocabulary
+    missing_value:
       data_type: text
       label:
         en: Missing Value
       description:
         en: Specify a value that indicates a missing value (defaults to the maximum value for the data type)
       order: 70
+      netcdf:
+        mapping: missing_value
+        processor: numeric
     scale_factor:
       data_type: float
       label:
@@ -76,6 +110,9 @@ variable:
       description:
         en: Specify a scale factor to apply when unpacking values
       order: 80
+      netcdf:
+        mapping: scale_factor
+        processor: numeric
     add_offset:
       data_type: float
       label:
@@ -83,6 +120,9 @@ variable:
       description:
         en: Enter an offset value to add when unpacking values
       order: 90
+      netcdf:
+        mapping: add_offset
+        processor: numeric
     destination_data_type:
       data_type: vocabulary
       vocabulary_name: netcdf_data_types
@@ -98,6 +138,9 @@ variable:
       description:
         en: Enter the actual minimum value for this variable within the dataset
       order: 110
+      netcdf:
+        mapping: actual_min
+        processor: numeric
     actual_max:
       data_type: decimal
       label:
@@ -105,6 +148,9 @@ variable:
       description:
         en: Enter the actual maximum value for this variable within the dataset
       order: 120
+      netcdf:
+        mapping: actual_max
+        processor: numeric
     valid_min:
       data_type: decimal
       label:
@@ -112,6 +158,9 @@ variable:
       description:
         en: Enter the theoretical minimum value for this variable, if applicable
       order: 130
+      netcdf:
+        mapping: valid_min
+        processor: numeric
     valid_max:
       data_type: decimal
       label:
@@ -119,6 +168,9 @@ variable:
       description:
         en: Enter the theoretical maximum value for this variable, if applicable
       order: 140
+      netcdf:
+        mapping: valid_max
+        processor: numeric
     cf_role:
       data_type: vocabulary
       vocabulary_name: cf_roles
@@ -127,6 +179,9 @@ variable:
       description:
         en: If this variable uniquely identifies a timeseries, a profile, or a trajectory, select the appropriate option
       order: 150
+      netcdf:
+        mapping: cf_role
+        processor: vocabulary
     comment:
       data_type: multitext
       label:
@@ -134,6 +189,8 @@ variable:
       description:
         en: Enter comments about this variable to share with data users
       order: 160
+      netcdf:
+        mapping: comment
     references:
       data_type: multitext
       label:
@@ -141,6 +198,8 @@ variable:
       description:
         en: Describe relevant references for this variable
       order: 170
+      netcdf:
+        mapping: references
     source:
       data_type: multitext
       label:
@@ -148,3 +207,32 @@ variable:
       description:
         en: Describe relevant source information for this variable
       order: 180
+      netcdf:
+        mapping: source
+    coverage_content_type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_coverage_content_type_code
+      label:
+        en: Coverage Content Type
+      description:
+        en: Coverage content type for the variable
+      netcdf:
+        mapping: coverage_content_type
+        processor: vocabulary
+    variable_order:
+      data_type: integer
+      label:
+        en: Variable Order
+      description:
+        en: Axis variables must be in the same order as the original NetCDF files (if used)
+      order: 5005
+    custom_metadata:
+      data_type: key_value
+      repeatable: true
+      label:
+        en: Custom Metadata
+      description:
+        en: Add other attributes to this variable
+      order: 500
+      netcdf:
+        processor: key_value_pairs

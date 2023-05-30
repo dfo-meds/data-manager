@@ -49,7 +49,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         self.field_config["repeatable"] = True
 
     def is_empty(self):
-        for x in self.component_list():
+        for x, _, _ in self.component_list():
             if not x.is_deprecated:
                 return False
         return True

@@ -1,64 +1,51 @@
-use_constraint:
-  fields:
-    erddap_display:
-      data_type: multitext
-      label:
-        en: ERDDAP License Text
 variable:
   validation:
     required:
-      - source_name
-      - destination_name
-      - source_data_type
       - destination_data_type
     recommended:
-      - long_name
-      - standard_name
       - ioos_category
-      - units
   fields:
     destination_name:
       data_type: text
       label:
         en: Destination Name
       order: 100
-    destination_data_type:
-      data_type: vocabulary
-      vocabulary_name: erddap_data_types
-      label:
-        en: Destination Data Type
-      order: 110
     encoding:
       data_type: vocabulary
       vocabulary_name: erddap_encodings
       label:
         en: Encoding
       order: 4000
+      netcdf:
+        mapping: _Encoding
+        processor: vocabulary
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories
       label:
         en: IOOS Category
       order: 115
+      netcdf:
+        mapping: ioos_category
+        processor: vocabulary
     time_precision:
       data_type: vocabulary
       vocabulary_name: erddap_time_precisions
       label:
         en: Time Precision
       order: 3000
+      netcdf:
+        mapping: time_precision
+        processor: pipeman.builtins.erddap.util.time_precision_output
     time_zone:
       data_type: vocabulary
       vocabulary_name: timezones
       label:
         en: Time Zone
       order: 3010
-    variable_order:
-      data_type: integer
-      label:
-        en: Variable Order
-      description:
-        en: Axis variables must be in the same order as the original NetCDF files (if used)
-      order: 5005
+      netcdf:
+        mapping: time_zone
+        processor: vocabulary
     is_axis:
       data_type: boolean
       label:
@@ -74,4 +61,3 @@ variable:
       label:
         en: Is Altitude Proxy?
       order: 5030
-

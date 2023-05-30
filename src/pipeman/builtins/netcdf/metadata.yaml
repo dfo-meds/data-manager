@@ -1,0 +1,74 @@
+#title
+#summary
+#keywords
+#id
+#naming_authority
+#history
+#source
+#processing_level
+data_more_info:
+  fields:
+    short_institution:
+      order: 125
+      data_type: text
+      label:
+        en: Institution (Short)
+      netcdf:
+        mapping: institution
+    project:
+      data_type: text
+      label:
+        en: Project
+      netcdf:
+        mapping: project
+    program:
+      data_type: text
+      label:
+        en: Program
+      netcdf:
+        mapping: program
+    standard_name_vocab:
+      data_type: text
+      label:
+        en: Standard Name Vocabulary
+      netcdf:
+        mapping: standard_name_vocab
+technical:
+  fields:
+    cdm_data_type:
+      data_type: vocabulary
+      label:
+        en: CDM Data Type
+      vocabulary_name: cdm_data_types
+      netcdf:
+        mapping: cdm_data_type
+        processor: vocabulary
+references:
+  fields:
+    source:
+      data_type: multitext
+      multilingual: yes
+      label:
+        en: Source Information
+      netcdf:
+        mapping: source
+    references:
+      data_type: multitext
+      multilingual: yes
+      label:
+        en: Reference Information
+      netcdf:
+        mapping: references
+custom:
+  display:
+    en: Custom Fields
+  fields:
+    custom_metadata:
+      data_type: key_value
+      repeatable: yes
+      order: 0
+      label:
+        en: Custom Metadata
+      netcdf:
+        mapping:
+        processor: key_value_pairs

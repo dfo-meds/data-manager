@@ -1,0 +1,97 @@
+netcdf:
+  display:
+    en: NetCDF Core
+  fields:
+    custom_metadata:
+    custom_keywords:
+    variables:
+acdd:
+  display:
+    en: ACDD 1.3
+  extends: netcdf
+  validation:
+    required:
+      - title
+    recommended:
+      - abstract
+      - dataset_id_desc
+      - source
+      - processing_desc
+      - credit
+      - licenses
+      - creation_date
+      - point_of_contact
+      - short_institution
+      - horizontal_ref_system
+      - vertical_ref_system
+      - standard_name_vocab
+      - bbox_east
+      - bbox_west
+      - bbox_north
+      - bbox_south
+      - start_time
+      - vertical_min
+      - vertical_max
+  fields:
+    title:
+    source:
+    cdm_data_type:
+    content_coverage_type:
+    references:
+    licenses:
+    project:
+    program:
+    bbox_west:
+    bbox_east:
+    bbox_north:
+    bbox_south:
+    wkt_polygon:
+    vertical_min:
+    vertical_max:
+    start_time:
+    end_time:
+    is_ongoing:
+    horizontal_ref_system:
+    vertical_ref_system:
+    canon_urls: ##
+    short_institution:
+    standard_name_vocab:
+    # creator and contributor
+    responsibles:
+    # publisher*
+    point_of_contact:
+    # date_modified
+    revision_date:
+    # date_created
+    creation_date:
+    # date_issued
+    publication_date:
+    # acknowledgement
+    credit:
+    # processing_level:
+    processing_system:
+    processing_desc:
+    processing_code:
+    # comment
+    supplemental:
+    # summary
+    abstract:
+    # id and naming_authority
+    dataset_id_code:
+    dataset_id_desc:
+    dataset_id_system:
+  formatters:
+    ncml:
+      label:
+        en: NcML
+      template: ncml.xml
+      content_type: text/xml
+      preprocess: pipeman.builtins.netcdf.util.preprocess_for_ncml
+    cdl:
+      label:
+        en: CDL
+      template: cdl.txt
+      content_type: text/plain
+      preprocess: pipeman.builtins.netcdf.util.preprocess_for_cdl
+  mappers:
+    netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf

@@ -1,8 +1,10 @@
+import flask
 from pipeman.util.flask import MultiLanguageBlueprint
-from .controller import NetCDFController
 from autoinject import injector
+from .controller import NetCDFController
 
-netcdf = MultiLanguageBlueprint("netcdf", __name__)
+# Just for registering the templates folder
+netcdf = MultiLanguageBlueprint("netcdf", __name__, template_folder="templates")
 
 
 @netcdf.i18n_route("/from-netcdf", methods=["GET", "POST"])

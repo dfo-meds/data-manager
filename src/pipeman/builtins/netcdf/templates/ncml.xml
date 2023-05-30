@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+  {%- macro format_attribute(name, val) -%}
+  {%- if val is string -%}
+  <attribute name="{{name}}" type="String" value="{{val}}" />
+  {%- elif is_multilingual_map(val) -%}
+    {%- if 'und' in val -%}
+    <attribute name="{{name}}" type="String" value="{{val['und']}}" />
+    {%- elif "en" in val and "fr" in val -%}
+    <attribute name="{{name}}" type="String" value="{{val['en']}} | {{val['fr']}}" />
+    {%- else -%}
+    <attribute name="{{name}}" type="String" value="{{val}}" />
+    {%- endif -%}
+  {%- else -%}
+  <attribute name="{{name}}" value="{{val}}" />
+  {%- endif -%}
+
+  {%- endmacro -%}
+
+    {%- for name in global_attributes -%}
+    {{ format_attribute(name, global_attributes[name])}}
+    {%- endfor %}
+
+    {%- for var_name, var_type, var_dims, var_attrs, var in variables -%}
+    <variable name="{{var_name}}" shape="{{var_dims}}" type="{{var_type}}">
+      {%- for name in var_attrs -%}
+      {{ format_attribute(name, var_attrs[name]) }}
+      {%- endfor -%}
+    </variable>
+    {%- endfor %}
+</netcdf>

@@ -8,8 +8,9 @@ from autoinject import injector
 
 @injector.inject
 def init_plugin(system: System = None):
-    system.register_cli("pipeman.builtins.cf.cli", "cf")
-    system.on_setup("pipeman.builtins.cf.cli.do_update")
+    system.register_cli("pipeman.builtins.netcdf.cli", "netcdf")
+    system.register_blueprint("pipeman.builtins.netcdf.app", "netcdf")
+    system.on_setup("pipeman.builtins.netcdf.cli.do_update")
     system.on_setup(setup_plugin)
 
 

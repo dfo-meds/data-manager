@@ -5,12 +5,13 @@ import wtforms.validators as wtfv
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString, MultiLanguageLink
 from pipeman.db import Database
 from autoinject import injector
-from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget, NoControlCharacters, flasht
+from pipeman.util.flask import TranslatableField, HtmlField, FlatPickrWidget, Select2Widget, NoControlCharacters, flasht, DynamicFormField, PipemanFlaskForm
 import json
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 import flask
+import logging
 import datetime
 
 
@@ -56,9 +57,9 @@ class Field:
                     elif k in self.value and '_translation_request' in self.value[k] and self.value[k]['_translation_request']:
                         val[k]['_translation_request'] = True
             elif isinstance(val, dict):
-                if "_translation_request" in val and val["_translation_request"]:
+                if val and "_translation_request" in val and val["_translation_request"]:
                     self._file_translation_request(val)
-                elif '_translation_request' in self.value and self.value['_translation_request']:
+                elif self.value and '_translation_request' in self.value and self.value['_translation_request']:
                     val['_translation_request'] = True
         return val
 
@@ -119,6 +120,39 @@ class Field:
 
     def allow_translation_requests(self):
         return self.config("allow_translation_requests", default=self.is_multilingual())
+
+    def set_from_raw(self, raw_value):
+        if self.is_repeatable():
+            if isinstance(raw_value, set) or isinstance(raw_value, list) or isinstance(raw_value, tuple):
+                if self.is_multilingual():
+                    self.value = [
+                        ({x: self._handle_raw(x) for x in y}
+                        if isinstance(y, dict)
+                        else {'und': self._handle_raw(y)})
+
+                        for y in raw_value
+                    ]
+                else:
+                    self.value = [self._handle_raw(x) for x in raw_value]
+            else:
+                if self.is_multilingual():
+                    self.value = [
+                        {x: self._handle_raw(raw_value[x]) for x in raw_value}
+                        if isinstance(raw_value, dict)
+                        else {'und': raw_value}
+                    ]
+                else:
+                    self.value = [self._handle_raw(raw_value)]
+        elif self.is_multilingual():
+            if isinstance(raw_value, dict):
+                self.value = {x: self._handle_raw(raw_value[x]) for x in raw_value}
+            else:
+                self.value = {'und': self._handle_raw(raw_value)}
+        else:
+            self.value = self._handle_raw(raw_value)
+
+    def _handle_raw(self, raw_value):
+        return raw_value
 
     def is_empty(self):
         if self.value is None or self.value == "" or self.value == []:
@@ -555,35 +589,43 @@ class Keyword:
     def use_value_only(self):
         return self.machine_key and self.mode == "value"
 
-    def to_display(self, primary_locale):
+    def to_display(self, primary_locale, use_prefixes: bool = False, prefix_separator: str = ":"):
         # Only use translations
         display_dict = {
             "primary": None,
-            "secondary": {}
+            "secondary": {},
+            'vocab': None
         }
+        prefix = self.thesaurus['prefix'] if use_prefixes and 'prefix' in self.thesaurus and self.thesaurus['prefix'] else ''
+        if prefix:
+            prefix = f"{prefix}{prefix_separator}"
+        if self.thesaurus:
+            title = self.thesaurus_title()
+            if title:
+                display_dict["vocab"] = f"{prefix}{title}"
         if self.mode == "translate":
             if isinstance(self.translations, str):
-                display_dict["primary"] = self.translations
+                display_dict["primary"] = f"{prefix}{self.translations}"
             else:
                 if primary_locale in self.translations:
-                    display_dict["primary"] = self.translations[primary_locale]
+                    display_dict["primary"] = f"{prefix}{self.translations[primary_locale]}"
                 elif "und" in self.translations:
-                    display_dict["primary"] = self.translations["und"]
+                    display_dict["primary"] = f"{prefix}{self.translations['und']}"
                 display_dict["secondary"] = {
-                    key: self.translations[key]
+                    key: f"{prefix}{self.translations[key]}"
                     for key in self.translations
                     if key != "und" and key != primary_locale and self.translations[key]
                 }
 
         # Only use the machine key
         elif self.mode == "value":
-            display_dict["primary"] = self.machine_key
+            display_dict["primary"] = f"{prefix}{self.machine_key}"
 
         # Use a mix of both (machine key as undefined value)
         else:
-            display_dict["primary"] = self.machine_key
+            display_dict["primary"] = f"{prefix}{self.machine_key}"
             display_dict["secondary"] = {
-                key: self.translations[key]
+                key: f"{prefix}{self.translations[key]}"
                 for key in self.translations
                 if key != "und" and self.translations[key]
             }
@@ -595,25 +637,29 @@ class Keyword:
         if self.machine_key:
             return self.machine_key
 
+    def thesaurus_title(self):
+        if not self.thesaurus:
+            return None
+        if not ('citation' in self.thesaurus and self.thesaurus['citation']):
+            return None
+        if not ('title' in self.thesaurus['citation'] and self.thesaurus['citation']['title']):
+            return None
+        title = self.thesaurus['citation']['title']
+        if isinstance(title, str):
+            return title
+        keys = ['und', 'en']
+        keys.extend(title.keys())
+        for key in keys:
+            if key in title and title[key]:
+                return title[key]
+        return None
+
     def thesaurus_group(self):
         if not self.thesaurus:
             return ''
-        if 'citation' not in self.thesaurus:
-            return ''
-        if not self.thesaurus['citation']:
-            return ''
-        if 'title' not in self.thesaurus['citation']:
-            return ''
-        if not self.thesaurus['citation']['title']:
-            return ''
-        if isinstance(self.thesaurus['citation']['title'], str):
-            return self.thesaurus['citation']['title']
-        keys = ['en', 'und']
-        keys.extend(self.thesaurus['citation']['title'].keys())
-        for key in keys:
-            if key in self.thesaurus['citation']['title'] and self.thesaurus['citation']['title'][key]:
-                return self.thesaurus['citation']['title'][key]
-        return ''
+        if 'prefix' in self.thesaurus:
+            return self.thesaurus['prefix']
+        return self.thesaurus_title() or ''
 
 
 class KeywordGroup:
@@ -735,6 +781,69 @@ class TextField(NoControlMixin, LengthValidationMixin, Field):
         if val == "" or val is None:
             return None
         return val
+
+
+class KeyValueForm(wtf.Form):
+
+    key = wtf.StringField(
+        gettext("pipeman.labels.kv_field.key")
+    )
+
+    value = wtf.TextAreaField(
+        gettext("pipeman.labels.kv_field.value")
+    )
+
+    data_type = wtf.SelectField(
+        gettext("pipeman.labels.kv_field.data_type"),
+        choices=[
+            ("str", gettext("pipeman.labels.kv_field.data_type.str")),
+            ("numeric", gettext("pipeman.labels.kv_field.data_type.numeric")),
+            ("numeric_list", gettext("pipeman.labels.kv_field.data_type.numeric_list")),
+        ],
+        default="str"
+    )
+
+
+class KeyValueField(Field):
+
+    # TODO: csrf_token is getting appended to some fields, we can get rid of them?
+
+    DATA_TYPE = "key_value"
+
+    def _control_class(self):
+        return wtf.FormField
+
+    def _extra_wtf_arguments(self) -> dict:
+        return {
+            "form_class": KeyValueForm
+        }
+
+    def validators(self) -> list:
+        return []
+
+    def _process_value(self, val, none_as_blank=True, **kwargs):
+        if not val:
+            return "" if none_as_blank else None
+        return val["key"], self._process_input_value(val["value"], val["data_type"])
+
+    def _format_for_ui(self, val):
+        key, val = self._process_value(val)
+        return f"{key} = {val}"
+
+    def _process_input_value(self, val, dtype):
+        try:
+            if dtype == 'str':
+                return str(val)
+            elif dtype == 'numeric':
+                return float(val) if '.' in val else int(val)
+            elif dtype == 'numeric_list':
+                return [float(v.strip()) if '.' in v else int(v.strip()) for v in val.split(",") if v.strip()]
+            else:
+                logging.getLogger("pipeman.fields").exception(f"Datatype not recognized {dtype} - {self.parent_type}.{self.parent_id}.{self.field_name}")
+                return "?data type not recognized?"
+        except (ValueError, TypeError) as ex:
+            logging.getLogger("pipeman.fields").exception(f"Error parsing KeyValue field value {self.parent_type}.{self.parent_id}.{self.field_name}")
+            return "?parse error?"
 
 
 class MultiLineTextField(TextField):

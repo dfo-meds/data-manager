@@ -36,6 +36,8 @@ class _BuiltInFactory(GenericFactory):
             fields.TelephoneField,
             fields.TimeField,
             fields.URLField,
+            #fields.CompositeField,
+            fields.KeyValueField,
             ef.EntityReferenceField,
             ef.ComponentReferenceField,
             fields.VocabularyReferenceField,

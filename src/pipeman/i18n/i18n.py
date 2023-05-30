@@ -1,7 +1,7 @@
 from copy import deepcopy
-
 from autoinject import injector
 import markupsafe
+import zirconium as zr
 
 
 @injector.injectable_global
@@ -14,11 +14,20 @@ class LanguageDetector:
 @injector.injectable_global
 class TranslationManager:
 
+    cfg: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self):
+        pass
+
     def get_text(self, text_key: str, default: str = None) -> str:
         return default if default is not None else text_key
 
     def supported_languages(self):
-        return ['en', 'fr']
+        return ['en']
+
+    def metadata_supported_languages(self):
+        return self.cfg.as_list(("pipeman", "metadata", "languages"), default=['en'])
 
 
 class BaseTranslatableString:

@@ -188,7 +188,8 @@ class MetadataRegistry:
                 if "extends" in self._profiles[p] and self._profiles[p]["extends"]:
                     profiles.append(self._profiles[p]["extends"])
         for profile in ext_profiles:
-            fields.update(self._profiles[profile]["fields"].keys())
+            if "fields" in self._profiles[profile] and self._profiles[profile]["fields"]:
+                fields.update(self._profiles[profile]["fields"].keys())
         field_list = {}
         for fn in fields:
             if fn not in self._fields:
@@ -202,7 +203,7 @@ class MetadataRegistry:
                 for dfn in dfns:
                     ds.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
             pn = MultiLanguageString(self._profiles[profile]["display"])
-            if "validation" in self._profiles[profile]:
+            if "validation" in self._profiles[profile] and self._profiles[profile]["validation"]:
                 validation = self._profiles[profile]["validation"]
                 if 'required' in validation and validation['required']:
                     for fn in validation['required']:
@@ -258,6 +259,8 @@ class Dataset(FieldContainer):
         formats = set()
         for profile in self.profiles:
             formats.update(self.mreg.metadata_formats(profile))
+        formats = list(formats)
+        formats.sort(key=lambda x: f"{x[0]}{x[1]}")
         for f in formats:
             yield self.mreg.metadata_format_link(*f, self.dataset_id, self.revision_no)
 

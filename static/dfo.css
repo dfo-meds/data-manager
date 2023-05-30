@@ -16,9 +16,64 @@ body {
     vertical-align: text-top;
     flex-grow: 0;
 }
+input[type="text"] {
+    width: 400px;
+}
+.remove-button {
+    cursor: pointer;
+}
+.remove-button a {
+    display: inline-block;
+    background-color: #800000;
+    color: #FFFFFF;
+    font-size: 15px;
+    width: 20px;
+    padding: 0;
+    margin: 0;
+    height: 20px;
+    text-align: center;
+    vertical-align: middle;
+    float: right;
+    cursor: pointer;
+}
+.remove-button a:hover {
+    background-color: #CC0000;
+    color: #FFFFFF;
+}
+.add-button {
+    cursor: pointer;
+}
+.add-button a {
+    background-color: #006600;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+    vertical-align: middle;
+    height: 20px;
+    font-size: 15px;
+}
+.add-button a:hover {
+    background-color: #009900;
+    color: #FFFFFF;
+}
 textarea {
     width: 400px;
-    height: 150px;
+    height: 80px;
+}
+.form-control ul {
+    margin: 0;
+    padding: 0;
+}
+.form-control ul li {
+    border-bottom: 1px solid #AAAAAA;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.form-control ul li:first {
+    margin-top: 0;
 }
 .form-control table th,
 .form-control table td {

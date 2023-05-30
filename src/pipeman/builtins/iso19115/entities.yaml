@@ -43,6 +43,10 @@ thesaurus:
       vocabulary_name: iso19115_md_keyword_type_code
       label:
         en: Keyword Type
+    prefix:
+      data_type: text
+      label:
+        en: Prefix
     citation:
       data_type: entity_ref
       entity_type: citation

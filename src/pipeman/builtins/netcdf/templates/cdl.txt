@@ -1,0 +1,31 @@
+{%- macro format_value(val) -%}
+  {%- if val is string -%}
+  "{{val}}"
+  {%- elif is_multilingual_map(val) -%}
+    {%- if 'und' in val -%}
+    "{{val['und']}}"
+    {%- elif "en" in val and "fr" in val -%}
+    "{{val['en']}} | {{val['fr']}}"
+    {%- else -%}
+    "{{val}}"
+    {%- endif -%}
+  {%- else -%}
+  {{val}}
+  {%- endif -%}
+
+{%- endmacro -%}
+
+netcdf {
+
+{% for name in global_attributes %}
+    :{{name}} = {{format_value(global_attributes[name])}};
+{% endfor -%}
+
+variables:
+{% for var_name, var_type, var_dims, var_attrs, var in variables %}
+    {{var_type}}   {{var_name}}({{var_dims}});
+    {% for attr_name in var_attrs %}
+        {{var_name}}:{{attr_name}} = {{format_value(var_attrs[attr_name])}};
+    {% endfor %}
+{% endfor -%}
+}

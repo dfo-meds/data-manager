@@ -14,6 +14,9 @@ metadata_info:
         en: Point of Contact
         fr: Point de contact
       order: 20
+      netcdf:
+        mapping: publisher
+        processor: contact
     canon_urls:
       data_type: entity_ref
       entity_type: resource
@@ -87,11 +90,7 @@ metadata_info:
         fr: Contraintes d'utilisation (métadonnées)
       order: 30
       repeatable: yes
-citation:
-  display:
-    en: Citation
-    fr: Citation
-  order: 15
+data_info:
   fields:
     title:
       data_type: text
@@ -100,6 +99,8 @@ citation:
         fr: Titre
       order: 10
       multilingual: yes
+      netcdf:
+        mapping: title
     dataset_id_code:
       data_type: text
       label:
@@ -120,26 +121,35 @@ citation:
         fr: Système d'identification
       entity_type: id_system
       order: 520
+      netcdf:
+        mapping:
     publication_date:
       data_type: date
       label:
         en: Publication Date
         fr: Date de publication
       order: 20
+      netcdf:
+        mapping: date_issued
+        processor: datetime
     revision_date:
       data_type: date
       label:
         en: Revision Date
         fr: Date de révision
       order: 30
+      netcdf:
+        mapping: date_modified
+        processor: datetime
     creation_date:
       data_type: date
       label:
         en: Creation Date
         fr: Date de création
       order: 40
-data_info:
-  fields:
+      netcdf:
+        mapping: date_created
+        processor: datetime
     abstract:
       data_type: multitext
       label:
@@ -147,6 +157,35 @@ data_info:
         fr: Abstrait
       order: 10
       multilingual: yes
+      netcdf:
+        mapping: summary
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
+      label:
+        en: Data Contacts
+        fr: Contacts pour les données
+      repeatable: yes
+      order: 10000000
+      netcdf:
+        mapping:
+        processor: contacts_by_role
+        role_map:
+          contributor: contributor*
+          creator: creator
+    licenses:
+      data_type: entity_ref
+      entity_type: use_constraint
+      label:
+        en: Usage Constraints (Data)
+        fr: Contraintes d'utilisation (données)
+      order: 50
+      repeatable: yes
+      netcdf:
+        mapping: license
+        processor: licenses
+data_more_info:
+  fields:
     purpose:
       data_type: multitext
       label:
@@ -161,6 +200,8 @@ data_info:
         fr: Remerciements
       order: 30
       multilingual: yes
+      netcdf:
+        mapping: acknowledgement
     info_link:
       data_type: entity_ref
       entity_type: resource
@@ -168,21 +209,6 @@ data_info:
         en: Primary Link
         fr: Lien principal
       order: 40
-    responsibles:
-      data_type: component_ref
-      entity_type: responsibility
-      label:
-        en: Data Contacts
-        fr: Contacts pour les données
-      repeatable: yes
-      order: 10000000
-    licenses:
-      data_type: entity_ref
-      entity_type: use_constraint
-      label:
-        en: Usage Constraints (Data)
-        fr: Contraintes d'utilisation (données)
-      order: 50
       repeatable: yes
     processing_code:
       data_type: text
@@ -190,6 +216,8 @@ data_info:
         en: Processing Level Code
         fr: Code de niveau de traitement
       order: 1000
+      netcdf:
+        mapping: processing_level
     processing_desc:
       data_type: multitext
       label:
@@ -218,6 +246,8 @@ data_info:
         fr: Renseignements supplémentaires
       multilingual: yes
       order: 2010
+      netcdf:
+        mapping: comment
 keywords:
   fields:
     topic_category:
@@ -238,6 +268,9 @@ extent:
         fr: Ouest
       min: -180
       max: 180
+      netcdf:
+        mapping: geospatial_long_min
+        processor: numeric
     bbox_east:
       data_type: decimal
       order: 20
@@ -246,6 +279,9 @@ extent:
         fr: Est
       min: -180
       max: 180
+      netcdf:
+        mapping: geospatial_long_max
+        processor: numeric
     bbox_north:
       data_type: decimal
       order: 30
@@ -254,6 +290,9 @@ extent:
         fr: Nord
       min: -90
       max: 90
+      netcdf:
+        mapping: geospatial_lat_max
+        processor: numeric
     bbox_south:
       data_type: decimal
       order: 40
@@ -262,24 +301,35 @@ extent:
         fr: Sud
       min: -90
       max: 90
+      netcdf:
+        mapping: geospatial_lat_min
+        processor: numeric
     wkt_polygon:
       data_type: multitext
       order: 50
       label:
         en: Polygon Boundary (WKT)
         fr: Limite polygonale (WKT)
+      netcdf:
+        mapping: geospatial_bounds
     vertical_min:
       data_type: decimal
       order: 150
       label:
         en: Vertical Minimum
         fr: Minimum vertical
+      netcdf:
+        mapping: geospatial_vertical_min
+        processor: numeric
     vertical_max:
       data_type: decimal
       order: 160
       label:
         en: Vertical Maximum
         fr: Maximum vertical
+      netcdf:
+        mapping: geospatial_vertical_max
+        processor: numeric
     vertical_ref_system:
       data_type: entity_ref
       entity_type: ref_system
@@ -287,18 +337,27 @@ extent:
         en: Vertical Reference System
         fr: Système de référence vertical
       order: 170
+      netcdf:
+        mapping: geospatial_bounds_vertical_crs
+        processor: ref_system
     start_time:
       data_type: datetime
       order: 200
       label:
         en: Start Time
         fr: Début
+      netcdf:
+        mapping: time_coverage_start
+        processor: datetime
     end_time:
       data_type: datetime
       order: 210
       label:
         en: End Time
         fr: Fin
+      netcdf:
+        mapping: time_coverage_end
+        processor: datetime
     is_ongoing:
       data_type: boolean
       order: 220
@@ -328,6 +387,9 @@ extent:
       label:
         en: Horizontal Reference System
         fr: Système de référence horizontal
+      netcdf:
+        mapping: geospatial_bounds_crs
+        processor: ref_system
     temporal_ref_system:
       data_type: entity_ref
       order: 230
@@ -336,10 +398,6 @@ extent:
         en: Temporal Reference System
         fr: Système de référence temporelle
 references:
-  display:
-    en: References
-    fr: Références
-  order: 50
   fields:
     additional_docs:
       data_type: entity_ref
@@ -400,6 +458,9 @@ technical:
       vocabulary_name: iso19115_md_coverage_content_type_code
       label:
         en: Content Coverage Type
+      netcdf:
+        mapping: content_coverage_type
+        processor: vocabulary
     iso_maintenance:
       data_type: component_ref
       entity_type: maintenance

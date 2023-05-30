@@ -4,11 +4,11 @@ from autoinject import injector
 
 
 @click.group
-def cf():
+def netcdf():
     pass
 
 
-@cf.command
+@netcdf.command
 def update():
     do_update()
 

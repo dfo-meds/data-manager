@@ -1,16 +1,14 @@
 import yaml
 import os
 from autoinject import injector
-from pipeman.i18n import LanguageDetector
-import zirconium as zr
+from pipeman.i18n import LanguageDetector, TranslationManager
 import logging
 import typing as t
 
 
-class YamlTranslationManager:
+class YamlTranslationManager(TranslationManager):
 
     ld: LanguageDetector = None
-    cfg: zr.ApplicationConfig = None
 
     @injector.construct
     def __init__(self, extra_paths: t.Union[str, t.Iterable, None] = None):

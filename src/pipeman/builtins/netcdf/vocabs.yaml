@@ -66,7 +66,7 @@ netcdf_data_types:
 cf_standard_names:
   display:
     en: CF Standard Names
-  uri: http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html
+  uri: http://cfconventions.org/Data/netcdf-standard-names/current/build/netcdf-standard-name-table.html
 cf_axes:
   display:
     en: CF Axes

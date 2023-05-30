@@ -5,6 +5,7 @@ from flask.sessions import SecureCookieSessionInterface, SessionMixin
 from .metrics import PromMetrics, time_function
 
 from pipeman.i18n import gettext
+from pipeman.i18n.i18n import BaseTranslatableString
 import typing as t
 import datetime
 import sqlalchemy as sa
@@ -278,12 +279,17 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
             'csp_nonce': csp_nonce,
             'csp_allow': csp_allow,
             'stable_dict_key_list': stable_dict_key_list,
+            'is_multilingual_map': is_multilingual_map
         }
         for key in system._nav_menu:
             items[f'nav_{key}'] = build_nav(system._nav_menu[key])
         return items
 
     app.extensions['csrf'] = CSRFProtect(app)
+
+
+def is_multilingual_map(obj):
+    return isinstance(obj, dict) or isinstance(obj, BaseTranslatableString)
 
 
 class CustomRule(Rule):

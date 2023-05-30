@@ -150,7 +150,7 @@ class FieldContainer:
             for key in keys:
                 yield MultiLanguageString(self._derived_fields[key]["label"], load_object(self._derived_fields[key]["cb"])(self))
         else:
-            for fn in self._ordered_field_names(display_group):
+            for fn in self.ordered_field_names(display_group):
                 if display_group is None or display_group == self._fields[fn].display_group:
                     field = self._fields[fn]
                     yield field.label(), field.display()
@@ -198,9 +198,9 @@ class FieldContainer:
         return self.data(key)
 
     def controls(self, display_group=None):
-        return {fn: self._fields[fn].control() for fn in self._ordered_field_names(display_group)}
+        return {fn: self._fields[fn].control() for fn in self.ordered_field_names(display_group)}
 
-    def _ordered_field_names(self, display_group=None):
+    def ordered_field_names(self, display_group=None):
         fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]
         fields.sort(key=lambda x: self._fields[x].order)
         return fields

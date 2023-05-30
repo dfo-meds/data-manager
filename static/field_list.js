@@ -30,22 +30,45 @@ function remove_item_from_list(list_item) {
 }
 
 $(document).ready(function() {
-    $("div.form-field-list").each(function() {
+    $("div.form-field-field-list").each(function() {
         let button_id = "form_button_" + current_num
-        $(this).find(".form-control").append("<div class='add-button'><a id='" + button_id + "'>Add Item</a></div>");
+        $(this).find(".form-control").append("<div class='add-button'><a id='" + button_id + "'>" + add_item_text + "</a></div>");
         $("#" + button_id).click(function() {
             let update_list = $(this).parent().parent().find("ul");
             let update_example = update_list.find("li:first").clone();
             let item_count = update_list.find("li").length;
-            let old_id = update_example.find("label").attr("for");
-            let new_id = old_id.slice(0, -1) + item_count;
+            update_example.find("[id]").each(function() {
+                id_tag = $(this).attr('id');
+                if (id_tag.indexOf("-0-") >= 0) {
+                    $(this).attr('id', id_tag.replace("-0-", "-" + item_count.toString() + "-"));
+                }
+                else if (id_tag.substring(id_tag.length - 2) == "-0") {
+                    $(this).attr('id', id_tag.substring(0, id_tag.length - 2) + "-" + item_count.toString());
+                }
+            })
+            update_example.find("[for]").each(function() {
+                id_tag = $(this).attr('for');
+                if (id_tag.indexOf("-0-") >= 0) {
+                    $(this).attr('for', id_tag.replace("-0-", "-" + item_count.toString() + "-"));
+                }
+                else if (id_tag.substring(id_tag.length - 2) == "-0") {
+                    $(this).attr('for', id_tag.substring(0, id_tag.length - 2) + "-" + item_count.toString());
+                }
+            })
+            update_example.find("[name]").each(function() {
+                id_tag = $(this).attr('name');
+                if (id_tag.indexOf("-0-") >= 0) {
+                    $(this).attr('name', id_tag.replace("-0-", "-" + item_count.toString() + "-"));
+                }
+                else if (id_tag.substring(id_tag.length - 2) == "-0") {
+                    $(this).attr('name', id_tag.substring(0, id_tag.length - 2) + "-" + item_count.toString());
+                }
+            })
             update_example.find(".remove-button").remove();
-            update_example.find("label").attr("for", new_id);
-            update_example.find("input").attr("id", new_id);
-            update_example.find("input").attr("name", new_id);
+            update_example.find("textarea").text('');
             update_example.find("input").val('');
-            let button_id = "form_button_" + current_num
-            update_example.append("<div class='remove-button'><a id='" + button_id + "'>-</a></div>");
+            let button_id = "form_button_" + current_num;
+            update_example.append("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
             update_list.append(update_example);
             $("#" + button_id).click(function() {
                 remove_item_from_list($(this).parent().parent());
@@ -54,8 +77,8 @@ $(document).ready(function() {
         });
         current_num += 1;
         $(this).find(".form-control li").each(function() {
-            let button_id = "form_button_" + current_num
-            $(this).append("<div class='remove-button'><a id='" + button_id + "'>-</a></div>");
+            let button_id = "form_button_" + current_num;
+            $(this).append("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
             $("#" + button_id).click(function() {
                 remove_item_from_list($(this).parent().parent());
             });

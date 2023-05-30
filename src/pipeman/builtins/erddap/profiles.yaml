@@ -1,11 +1,11 @@
 erddap:
   display:
-    en: Core ERDDAP
+    en: ERDDAP
+  extends: acdd
   validation:
     required:
       - erddap_dataset_id
       - cdm_data_type
-      - title
       - publication_date
       - info_link
       - short_institution
@@ -16,33 +16,15 @@ erddap:
       - erddap_dataset_type
       - licenses
       - erddap_data_file_pattern
-    recommended:
-      - abstract
   fields:
     erddap_dataset_id:
-    cdm_data_type:
-    project:
-    program:
-    title:
-    abstract:
-    credit:
-    publication_date:
-    info_link:
-    short_institution:
-    responsibles:
-    revision_date:
-    creation_date:
-    custom_keywords:
-    topic_category:
-    iso_maintenance:
-    spatial_representation_type:
-    content_coverage_type:
-    variables:
-    licenses:
     erddap_dataset_type:
     erddap_data_file_path:
     erddap_data_file_pattern:
-    standard_name_vocab:
+    info_link:
+    topic_category:
+    iso_maintenance:
+    spatial_representation_type:
   formatters:
     erddapxml:
       label:
@@ -50,5 +32,3 @@ erddap:
       template: erddap.xml
       content_type: text/xml
       preprocess: pipeman.builtins.erddap.util.preprocess_dataset
-  mappers:
-    netcdf: pipeman.builtins.erddap.util.set_metadata_from_netcdf
