@@ -8,7 +8,10 @@ import wtforms.validators as wtfv
 import flask_wtf.file as fwtff
 import netCDF4 as nc
 import tempfile
+import pathlib
 import os
+import logging
+import uuid
 
 
 @injector.injectable
@@ -23,7 +26,7 @@ class NetCDFController:
     def populate_from_netcdf(self):
         form = NetCDFTemplateForm(self.dc)
         if form.validate_on_submit():
-            if self._populate_from_netcdf(form.dataset_id.data, form.netcdf_file.data):
+            if self._populate_from_file(form.dataset_id.data, form.netcdf_file.data):
                 flasht("pipeman.from_netcdf.page.populate_from_netcdf.success", "success")
             else:
                 flasht("pipeman.from_netcdf.page.populate_from_netcdf.error", "error")
@@ -34,16 +37,39 @@ class NetCDFController:
             instructions=gettext("pipeman.from_netcdf.page.populate_from_netcdf.instructions")
         )
 
-    def _populate_from_netcdf(self, dataset_id, netcdf_file):
+    def _populate_from_file(self, dataset_id, file_data):
         dataset = self.dc.load_dataset(dataset_id)
-        tf = None
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                td = pathlib.Path(td)
+                tf = td / str(uuid.uuid4())
+                with open(tf, "wb") as h:
+                    file_data.save(h)
+                if file_data.filename.endswith(".nc"):
+                    return self._populate_from_netcdf(dataset, tf)
+                elif file_data.filename.endswith(".cdl"):
+                    return self._populate_from_cdl(dataset, tf)
+                elif file_data.filename.endswith(".xml") or file_data.filename.endswith(".ncml"):
+                    return self._populate_from_ncml(dataset, tf)
+                else:
+                    raise ValueError(f"Unrecognized file extension for {file_data.filename}")
+        except Exception as ex:
+            logging.getLogger("pipeman.netcdf").exception(f"Error processing uploaded file")
+            return False
+
+    def _populate_from_cdl(self, dataset, cdl_file: pathlib.Path):
+        # TODO
+        raise NotImplementedError()
+
+    def _populate_from_ncml(self, dataset, ncml_file: pathlib.Path):
+        # TODO
+        raise NotImplementedError()
+
+    def _populate_from_netcdf(self, dataset, netcdf_file: pathlib.Path):
         nf = None
         result = True
         try:
-            tf = tempfile.mktemp()
-            with open(tf, "wb") as h:
-                netcdf_file.save(h)
-            nf = nc.Dataset(tf, "r")
+            nf = nc.Dataset(str(netcdf_file), "r")
             metadata = {
                 key: nf.getncattr(key)
                 for key in nf.ncattrs()
@@ -69,7 +95,6 @@ class NetCDFController:
         finally:
             if nf:
                 nf.close()
-            os.unlink(tf)
         return result
 
 
@@ -90,7 +115,7 @@ class NetCDFTemplateForm(PipemanFlaskForm):
     netcdf_file = fwtff.FileField(
         DelayedTranslationString("pipeman.from_netcdf.page.populate_from_netcdf.netcdf_file"),
         validators=[
-            fwtff.FileAllowed(["nc"]),
+            fwtff.FileAllowed(['nc', 'cdl', 'xml', 'ncml']),
             fwtff.FileRequired()
         ]
     )
