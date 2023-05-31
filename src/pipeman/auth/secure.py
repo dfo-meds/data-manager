@@ -6,7 +6,7 @@ import zirconium as zr
 import re
 import math
 import base64
-import logging
+import zrlog
 import typing as t
 from pipeman.util import UserInputError
 import binascii
@@ -29,7 +29,7 @@ class PasswordGenerator:
             self.character_list = "ABCDEFGHIJKLMNOPQRSTVWXYZabcdefghijklmnopqrstvwxyz2345679@#$%&"
         entropy = math.log2(len(self.character_list)) * self.length
         if entropy < 50:
-            logging.getLogger("pipeman.auth").warning(f"Insufficient password entropy {entropy} for a random password.")
+            zrlog.get_logger("pipeman.auth").warning(f"Insufficient password entropy [{entropy}] for a random password.")
 
     def generate_password(self) -> str:
         """Generate a random password using secure functions."""
@@ -45,7 +45,7 @@ class SecurityHelper:
 
     @injector.construct
     def __init__(self):
-        self.log = logging.getLogger("pipeman.auth")
+        self.log = zrlog.get_logger("pipeman.auth")
         self.default_algo = self.cfg.as_str(("pipeman", "security", "hash_algorithm"), default="sha256")
         self.rounds = max(100000, self.cfg.as_int(("pipeman", "security", "hash_rounds"), default=521931))
         self.salt_size = self.cfg.as_int(("pipeman", "security", "salt_length"), default=32)
@@ -125,10 +125,12 @@ class SecurityHelper:
         """Parse an authorization header."""
         pieces = auth_header.split(".", maxsplit=2)
         if len(pieces) != 3:
+            self.log.error("Auth header has insufficient pieces")
             return None, None, None
         try:
             return pieces[0], pieces[1], base64.b64decode(pieces[2]).decode('utf-8')
         except (binascii.Error, UnicodeDecodeError):
+            self.log.exception(f"Exception while processing auth header")
             return None, None, None
 
     def generate_secret(self, secret_length_bytes: int) -> str:

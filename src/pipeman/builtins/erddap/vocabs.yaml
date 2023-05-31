@@ -9,6 +9,20 @@ erddap_dataset_types:
       en: Table from ASCII
     EDDGridFromNcFiles:
       en: Grid from NetCDF
+erddap_extra_roles:
+  display:
+    en: ERDDAP - Variable Roles
+  uri:
+  terms:
+    profile_extra:
+      display:
+        en: Profile Information
+    timeseries_extra:
+      display:
+        en: Timeseries Information
+    trajectory_extra:
+      display:
+        en: Trajectory Information
 erddap_encodings:
   display:
     en: ERDDAP - Encodings

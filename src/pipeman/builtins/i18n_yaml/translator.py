@@ -4,6 +4,7 @@ from autoinject import injector
 from pipeman.i18n import LanguageDetector, TranslationManager
 import logging
 import typing as t
+import zrlog
 
 
 class YamlTranslationManager(TranslationManager):
@@ -38,6 +39,7 @@ class YamlTranslationManager(TranslationManager):
         if self._allow_undefined:
             self._supported = ["und"]
         self._supported.extend(list(self._dictionary_lookup.keys()))
+        zrlog.get_logger("pipeman.i18n_yaml").info(f"Supported Languages: {','.join(self._supported)}")
 
     def supported_languages(self):
         return self._supported

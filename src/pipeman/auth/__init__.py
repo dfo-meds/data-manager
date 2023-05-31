@@ -9,7 +9,7 @@ from .secure import SecurityHelper
 from pipeman.util.errors import UserInputError
 import datetime
 import flask
-import logging
+import zrlog
 import os
 import zirconium as zr
 
@@ -47,6 +47,7 @@ def _register_cron(cron):
 
 def _do_setup():
     admin_group = os.environ.get("PIPEMAN_ADMIN_GROUP", "superuser")
+    zrlog.get_logger("pipeman.auth").info(f"Creating admin group {admin_group}")
     from .util import create_group, grant_permission
     try:
         create_group(admin_group, {'und': 'Administrators'})
@@ -60,10 +61,11 @@ def _do_setup():
 
 @injector.inject
 def _do_cleanup(db: Database = None, config: zr.ApplicationConfig = None):
+    log = zrlog.get_logger("pipeman.auth")
     with db as session:
         # Handle ServerSession objects
         dt = datetime.datetime.now()
-        logging.getLogger("pipeman.auth").out(f"Cleaning up user sessions older than {dt}")
+        log.info(f"Cleaning up user sessions older than {dt}")
         q = sa.delete(orm.ServerSession).where(orm.ServerSession.valid_until < dt)
         session.execute(q)
         session.commit()
@@ -73,7 +75,7 @@ def _do_cleanup(db: Database = None, config: zr.ApplicationConfig = None):
         if keep_days is None or keep_days < 14:
             keep_days = 14
         dt = datetime.datetime.now() - datetime.timedelta(days=keep_days)
-        logging.getLogger("pipeman.auth").out(f"Cleaning up user login records older than {dt}")
+        log.info(f"Cleaning up user login records older than {dt}")
         q = sa.delete(orm.UserLoginRecord).where(orm.UserLoginRecord.attempt_time < dt)
         session.execute(q)
         session.commit()

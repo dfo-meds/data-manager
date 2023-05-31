@@ -15,5 +15,5 @@ sqlalchemy
 toml
 universalio
 zirconium>=1.1.0
-zrlog
+zrlog>=0.3.0
 azure-identity

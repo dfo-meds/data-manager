@@ -6,7 +6,7 @@ import signal
 from pipeman.util import System
 import threading
 import zirconium as zr
-import logging
+import zrlog
 
 
 @injector.inject
@@ -64,8 +64,9 @@ class CronDaemon:
         self._cron_threads: dict[str, CronThread] = {}
         self._cron_thread_classes = {}
         self._periodic_jobs = {}
-        self.log = logging.getLogger("pipeman.cron")
+        self.log = zrlog.get_logger("pipeman.cron")
         self._exit_count = 0
+        self._max_exit_count = self.config.as_int(("pipeman", "daemon", "max_exit_count"), default=3)
 
     def register_cron_thread(self, cls: type, constructor: callable = None):
         self._cron_thread_classes[cls] = constructor or cls
@@ -74,13 +75,16 @@ class CronDaemon:
         self._periodic_jobs[name] = PeriodicJob(callback, seconds + (minutes * 60) + (hours * 3600) + (days * 3600 * 24), off_peak_only)
 
     def _exit_signal_handler(self, signum, frame):
+        self.log.debug(f"Received signal {signum}, attempting to halt")
         self.halt.set()
         self._exit_count += 1
-        if self._exit_count > 3:
+        if self._exit_count >= self._max_exit_count:
+            self.log.warning(f"Max exit count exceeded, crashing")
             raise KeyboardInterrupt()
 
     def register_exit_signal(self, sig_name: str):
         if hasattr(signal, sig_name):
+            self.log.debug(f"Registering signal {sig_name} to exit on")
             signal.signal(getattr(signal, sig_name), self._exit_signal_handler)
 
     def run_forever(self):
@@ -90,6 +94,7 @@ class CronDaemon:
                 self._inner_loop()
                 self.halt.wait(0.25)
         finally:
+            self.log.debug("Cleaning up...")
             self._cleanup()
 
     def _setup(self):

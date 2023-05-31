@@ -43,6 +43,17 @@ technical:
       netcdf:
         mapping: cdm_data_type
         processor: vocabulary
+    conventions:
+      data_type: vocabulary
+      repeatable: yes
+      label:
+        en: Conventions
+      vocabulary_name: netcdf_conventions
+      netcdf:
+        mapping: Conventions
+        processor: vocabulary
+        separator: ","
+        allow_many: yes
 references:
   fields:
     source:

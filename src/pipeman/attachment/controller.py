@@ -5,7 +5,7 @@ import pipeman.db.orm as orm
 from autoinject import injector
 from werkzeug.utils import secure_filename
 import zirconium as zr
-import logging
+import zrlog
 import pathlib
 import uuid
 import shutil
@@ -19,7 +19,7 @@ class UploadController:
 
     @injector.construct
     def __init__(self):
-        self.log = logging.getLogger("pipeman.uploads")
+        self.log = zrlog.get_logger("pipeman.upload")
 
     def clean_file_name(self, name):
         name = secure_filename(name)
@@ -87,6 +87,7 @@ class UploadController:
         path_parts = [x for x in uri.path.split('/') if x.strip(" ")]
         path = "/".join(path_parts[1:])
 
+        self.log.info(f"Downloading {path} [client: asb]")
         blob_client = client.get_blob_client(path)
         reader = blob_client.download_blob()
         return reader
@@ -126,6 +127,8 @@ class UploadController:
         if length == 0:
             length = None
 
+        self.log.info(f"Uploading file to {file_path} [client: asb]")
+
         # Actually upload the file
         blob_client = client.upload_blob(
             name=file_path,
@@ -163,6 +166,7 @@ class UploadController:
         path_parts = [x for x in uri.path.split('/') if x.strip(" ")]
         path = "/".join(path_parts[1:])
 
+        self.log.info(f"Downloading {path} [client: asf]")
         file_client = client.get_file_client(path)
         reader = file_client.download_file()
         return reader
@@ -210,6 +214,8 @@ class UploadController:
             if not dir_client.exists():
                 dir_client.create_directory()
 
+        self.log.info(f"Uploading file to {file_path} [client: asf]")
+
         # Actually do the file upload
         file_client = client.get_file_client(file_path)
         file_client.upload_file(
@@ -251,8 +257,9 @@ class UploadController:
             self.log.error(f"File path is not under root directory")
             return None
 
-        return file_path
+        self.log.info(f"Uploading file to {file_path} [client: local]")
 
+        return file_path
 
     def _upload_file_to_local(self, storage_config, file_path: str, content, metadata: dict = None, content_type: str = None, content_encoding: str = None, length: int = None):
 
@@ -280,6 +287,8 @@ class UploadController:
             self.log.error(ex)
             return None
 
+        self.log.info(f"Uploading file to {file_path} [client: local]")
+
         # Write the file
         if isinstance(content, str):
             with open(target, "w") as h:
@@ -305,13 +314,14 @@ class AttachmentController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self.log = zrlog.get_logger("pipeman.attachment")
 
-    def download_attachment(self, attachment_id):
+    def download_attachment(self, attachment_id: int):
         storage_name = self.config.get(("pipeman", "attachment", "storage_name"), default="default")
         with self.db as session:
             attachment = session.query(orm.Attachment).filter_by(id=attachment_id).first()
             if not attachment:
+                self.log.error(f"Attachment ID {attachment_id} does not exist")
                 return flask.abort(404)
             content = self.canada_post.get_content(attachment.storage_name or storage_name, file_path=attachment.storage_path)
             return flask.send_file(content, as_attachment=True, download_name=attachment.file_name)
@@ -329,6 +339,7 @@ class AttachmentController:
         real_name = str(uuid.uuid4())
         if "." in filename:
             real_name += filename[filename.find("."):]
+        self.log.info(f"Uploading attachment file to {storage_name}:{filename}")
         real_path = self.canada_post.upload_file(
             storage_name,
             f"{folder}/{real_name}",

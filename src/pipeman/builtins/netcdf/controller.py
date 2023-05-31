@@ -9,9 +9,9 @@ import flask_wtf.file as fwtff
 import netCDF4 as nc
 import tempfile
 import pathlib
-import os
 import logging
 import uuid
+import zrlog
 
 
 @injector.injectable
@@ -21,7 +21,7 @@ class NetCDFController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self.log = zrlog.get_logger("pipeman.netcdf")
 
     def populate_from_netcdf(self):
         form = NetCDFTemplateForm(self.dc)
@@ -45,6 +45,7 @@ class NetCDFController:
                 tf = td / str(uuid.uuid4())
                 with open(tf, "wb") as h:
                     file_data.save(h)
+                self.log.info("Setting metadata for {dataset_id} from uploaded file {file_data.filename}")
                 if file_data.filename.endswith(".nc"):
                     return self._populate_from_netcdf(dataset, tf)
                 elif file_data.filename.endswith(".cdl"):
@@ -54,7 +55,7 @@ class NetCDFController:
                 else:
                     raise ValueError(f"Unrecognized file extension for {file_data.filename}")
         except Exception as ex:
-            logging.getLogger("pipeman.netcdf").exception(f"Error processing uploaded file")
+            self.log.exception(f"Error processing uploaded file")
             return False
 
     def _populate_from_cdl(self, dataset, cdl_file: pathlib.Path):
@@ -92,6 +93,9 @@ class NetCDFController:
                 "dimensions": dimensions
             })
             self.dc.save_dataset(dataset)
+        except Exception as ex:
+            self.log.exception(f"Error processing NetCDF file")
+            result = False
         finally:
             if nf:
                 nf.close()
@@ -127,5 +131,3 @@ class NetCDFTemplateForm(PipemanFlaskForm):
     def __init__(self, dc: DatasetController):
         super().__init__()
         self.dataset_id.choices = dc.list_datasets_for_component()
-
-

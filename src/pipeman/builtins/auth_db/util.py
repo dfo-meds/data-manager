@@ -1,7 +1,7 @@
 from pipeman.util import UserInputError
 from pipeman.db import Database
 from autoinject import injector
-import logging
+import zrlog
 import pipeman.db.orm as orm
 
 
@@ -17,7 +17,7 @@ def remove_from_group(group_name, username, db: Database = None):
         st = orm.user_group.delete().where(orm.user_group.c.user_id == user.id).where(orm.user_group.c.group_id == group.id)
         session.execute(st)
         session.commit()
-        logging.getLogger("pipeman.plugins.auth_db").out(f"User {username} removed from group {group_name}")
+        zrlog.get_logger("pipeman.auth_db").notice(f"User {username} removed from group {group_name}")
 
 
 @injector.inject
@@ -38,7 +38,7 @@ def assign_to_organization(organization_name, username, db: Database = None):
             })
             session.execute(q)
             session.commit()
-        logging.getLogger("pipeman.plugins.auth_db").out(f"User {username} assigned to organization {organization_name}")
+        zrlog.get_logger("pipeman.auth_db").notice(f"User {username} assigned to organization {organization_name}")
 
 
 @injector.inject
@@ -54,4 +54,4 @@ def remove_from_organization(organization_name, username, db: Database = None):
             orm.user_organization.c.organization_id == org.id)
         session.execute(st)
         session.commit()
-        logging.getLogger("pipeman.plugins.auth_db").out(f"User {username} removed from organization {organization_name}")
+        zrlog.get_logger("pipeman.auth_db").notice(f"User {username} removed from organization {organization_name}")

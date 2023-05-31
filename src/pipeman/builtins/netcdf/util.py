@@ -11,6 +11,7 @@ import zirconium as zr
 import xml.etree.ElementTree as ET
 import logging
 import bs4
+import zrlog
 import datetime
 
 
@@ -40,8 +41,8 @@ def _preprocess_for_both(dataset, **kwargs):
             vocabularies.add(disp["vocab"])
     keywords = list(kw.replace(",", "") for kw in keywords)
     keywords.sort()
-    extras['basic_keywords'] = ','.join(keywords)
-    extras['basic_vocabularies'] = ','.join(vocabularies)
+    extras['global_attributes']['keywords'] = ','.join(keywords)
+    extras['global_attributes']['keywords_vocabulary'] = ','.join(vocabularies)
     return extras
 
 
@@ -69,25 +70,32 @@ def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **
 
 
 @injector.inject
-def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, ec: EntityController = None):
+def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
     _import_netcdf_attributes(dataset, metadata['global'], 'custom_metadata')
     variables = dataset.get_field('variables')
     current_list = {
         c['source_name']: c for c, _, _ in variables.component_list()
     }
     for var_name in metadata['variables'] or []:
+        var_attrs = metadata['variables'][var_name]
         if var_name not in current_list:
             real_var = ec.reg.new_entity('variable')
             real_var.set_display_name('und', var_name)
             real_var.parent_id = dataset.dataset_id
             real_var.parent_type = 'dataset'
-            _import_netcdf_attributes(real_var, metadata['variables'][var_name], 'custom_metadata')
-            ec.save_entity(real_var)
-            # create a new one
         else:
             real_var = current_list[var_name]
-            _import_netcdf_attributes(real_var, metadata['variables'][var_name], 'custom_metadata')
-            ec.save_entity(real_var)
+        if '_data_type' in var_attrs:
+            dt = var_attrs.pop('_data_type')
+            data_type = vtc.get_term_id('netcdf_data_types', _map_netcdf_datatype_to_erddap(dt))
+            if data_type:
+                real_var.get_field('source_data_type').set_from_raw(data_type)
+            else:
+                zrlog.get_logger('pipeman.netcdf').warning(f"NetCDF datatype {dt} not recognized")
+        if '_dimensions' in var_attrs:
+            real_var.get_field('dimensions').set_from_raw(','.join(var_attrs.pop('_dimensions')))
+        _import_netcdf_attributes(real_var, var_attrs, 'custom_metadata')
+        ec.save_entity(real_var)
 
 
 def _import_netcdf_attributes(fc: FieldContainer, attributes: dict, extra_field_name: str = None):
@@ -111,7 +119,9 @@ def _import_netcdf_attributes(fc: FieldContainer, attributes: dict, extra_field_
         extras = fc.get_field(extra_field_name)
         values = []
         for attr in attributes:
-            val = attributes[str]
+            if attr[0] == '_':
+                continue
+            val = attributes[attr]
             dtype = 'str'
             if isinstance(val, int) or isinstance(val, float):
                 dtype = 'numeric'
@@ -192,14 +202,57 @@ def _import_contacts_by_role(config: dict, attributes: dict, fc: FieldContainer,
     pass
 
 
+def _map_netcdf_datatype_to_erddap(netcdf_dt: str) -> str:
+    if netcdf_dt == 'str':
+        return 'String'
+    if netcdf_dt in ('S1', 'c'):
+        return 'char'
+    if netcdf_dt in ('i2', 'h', 's'):
+        return 'short'
+    if netcdf_dt in ('i1', 'b', 'B'):
+        return 'byte'
+    if netcdf_dt in ('i', 'l', 'i4'):
+        return 'int'
+    if netcdf_dt in ('f', 'f4'):
+        return 'float'
+    if netcdf_dt in ('d', 'f8'):
+        return 'double'
+    if netcdf_dt == 'i8':
+        return 'long'
+    if netcdf_dt == 'u8':
+        return 'ulong'
+    if netcdf_dt == 'u4':
+        return 'uint'
+    if netcdf_dt == 'u2':
+        return 'ushort'
+    if netcdf_dt == 'u1':
+        return 'ubyte'
+    raise ValueError(f'Unrecognized NetCDF datatype: {netcdf_dt}')
+
+
 @injector.inject
 def _import_vocab_value(config: dict, attributes: dict, fc: Field, field: Field, vtc: VocabularyTermController = None):
     target = config["mapping"]
+    sep = config['separator'] if 'separator' in config and config['separator'] else ','
     if target in attributes and attributes[target]:
-        term_id = vtc.get_term_id(fc.config('vocabulary_name'), attributes[target].strip())
-        if term_id:
-            attributes.pop(target)
-            field.set_from_raw(term_id)
+        if 'allow_many' in config and config['allow_many']:
+            term_ids = set()
+            skipped = []
+            for term_name in attributes.pop(target).split(sep):
+                term_id = vtc.get_term_id(fc.config('vocabulary_name'), term_name.strip())
+                if term_id:
+                    term_ids.add(term_id)
+                else:
+                    skipped.append(term_name)
+            if skipped:
+                attributes[target] = sep.join(skipped)
+            if term_ids:
+                field.set_from_raw(term_ids)
+        else:
+            term_id = vtc.get_term_id(fc.config('vocabulary_name'), attributes[target].strip())
+            if term_id:
+                attributes.pop(target)
+                field.set_from_raw(term_id)
 
 
 def _extract_netcdf_attributes(fc: FieldContainer):
@@ -253,7 +306,10 @@ def _datetime_processor(attrs: dict, target_name: str, field: Field, config: dic
 
 
 def _vocab_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
-    attrs[target_name] = field.data()['short_name']
+    if 'allow_many' in config and config['allow_many']:
+        return ",".join(x['short_name'] for x in field.data())
+    else:
+        attrs[target_name] = field.data()['short_name']
 
 
 def _numeric_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
@@ -297,13 +353,14 @@ def _contact_processor_initial(attrs: dict, target_prefix: str, field: Field, co
 
 def _contact_processor(attrs: dict, target_prefix: str, contact: Entity, config: dict):
     contact_info = _extract_info(contact)
+    sep = config['separator'] if 'separator' in config and config['separator'] else ','
     if 'allow_many' in config and config['allow_many']:
         for x in contact_info:
             key = f"{target_prefix}_{x}"
             if key not in attrs:
                 attrs[key] = contact_info[x]
             else:
-                attrs[key] += "," + contact_info[x]
+                attrs[key] += sep + contact_info[x]
     else:
         for x in contact_info:
             attrs[f"{target_prefix}_{x}"] = contact_info[x]
@@ -366,7 +423,7 @@ class CFVocabularyManager:
         self.fetch_ud_units()
 
     def fetch_cf_standard_names(self):
-        self.log.out(f"Loading CF standard names")
+        self.log.info(f"Loading CF standard names")
         # TODO convert to http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml
         terms = {}
         link = "http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"
@@ -389,7 +446,7 @@ class CFVocabularyManager:
         self.vtc.save_terms_from_dict("cf_standard_names", terms)
 
     def fetch_ud_prefixes(self):
-        self.log.out("Loading UDUnit prefixes")
+        self.log.info("Loading UDUnit prefixes")
         terms = {}
         links = [
             "https://docs.unidata.ucar.edu/udunits/current/udunits2-prefixes.xml",
@@ -416,7 +473,7 @@ class CFVocabularyManager:
         self.vtc.save_terms_from_dict("udunit_prefixes", terms)
 
     def fetch_ud_units(self):
-        self.log.out(f"Loading UDUnit units")
+        self.log.info(f"Loading UDUnit units")
         links = [
             "https://docs.unidata.ucar.edu/udunits/current/udunits2-base.xml",
             "https://docs.unidata.ucar.edu/udunits/current/udunits2-derived.xml",

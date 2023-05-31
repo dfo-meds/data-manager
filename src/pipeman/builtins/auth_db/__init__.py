@@ -3,6 +3,7 @@ from autoinject import injector as _injector
 from .controller import DatabaseEntityAuthenticationManager, DatabaseUserController
 from pipeman.util.errors import UserInputError
 import os
+import zrlog
 
 
 @_injector.inject
@@ -18,6 +19,7 @@ def init_plugin(system: _System):
 
 @_injector.inject
 def setup_plugin(duc: DatabaseUserController):
+    zrlog.get_logger("pipeman.auth_db").info("Creating admin account")
     username = os.environ.get("PIPEMAN_ADMIN_USERNAME", "admin")
     password = os.environ.get("PIPEMAN_ADMIN_PASSWORD", "PasswordPassword")
     display = os.environ.get("PIPEMAN_ADMIN_DISPLAY", "Administrator")

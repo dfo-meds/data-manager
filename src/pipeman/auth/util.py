@@ -2,7 +2,7 @@
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.util import UserInputError
-import logging
+import zrlog
 import json
 from pipeman.i18n import MultiLanguageString
 from autoinject import injector
@@ -49,7 +49,7 @@ def create_group(group_name: str, display_names: dict = None, db: Database = Non
             g.set_display_name(key, display_names[key])
         session.add(g)
         session.commit()
-        logging.getLogger("pipeman.auth").out(f"Created group {group_name}")
+        zrlog.get_logger("pipeman.auth").notice(f"Created group {group_name}")
 
 
 @injector.inject
@@ -61,7 +61,7 @@ def grant_permission(group_name: str, perm_name: str, db: Database = None):
             raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.add_permission(perm_name)
         session.commit()
-        logging.getLogger("pipeman.auth").out(f"Granted permission {perm_name} to {group_name}")
+        zrlog.get_logger("pipeman.auth").notice(f"Granted permission {perm_name} to {group_name}")
 
 
 @injector.inject
@@ -73,7 +73,7 @@ def revoke_permission(group_name: str, perm_name: str, db: Database = None):
             raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.remove_permission(perm_name)
         session.commit()
-        logging.getLogger("pipeman.auth").out(f"Revoked permission {perm_name} from {group_name}")
+        zrlog.get_logger("pipeman.auth").notice(f"Revoked permission {perm_name} from {group_name}")
 
 
 @injector.inject
@@ -85,4 +85,4 @@ def clear_permissions(group_name: str, db: Database = None):
             raise UserInputError("pipeman.auth.error.group_does_not_exist", group_name)
         g.clear_permissions()
         session.commit()
-        logging.getLogger("pipeman.auth").out(f"Cleared all permissions from {group_name}")
+        zrlog.get_logger("pipeman.auth").notice(f"Cleared all permissions from {group_name}")

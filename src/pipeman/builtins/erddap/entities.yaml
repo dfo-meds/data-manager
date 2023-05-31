@@ -37,6 +37,7 @@ variable:
       netcdf:
         mapping: time_precision
         processor: pipeman.builtins.erddap.util.time_precision_output
+        importer: pipeman.builtins.erddap.util.time_precision_input
     time_zone:
       data_type: vocabulary
       vocabulary_name: timezones
@@ -46,11 +47,12 @@ variable:
       netcdf:
         mapping: time_zone
         processor: vocabulary
-    is_axis:
-      data_type: boolean
+    erddap_role:
+      data_type: vocabulary
+      vocabulary_name: erddap_extra_roles
       label:
-        en: Is Axis?
-      order: 5010
+        en: ERDDAP Role
+      order: 3020
     allow_subsets:
       data_type: boolean
       label:

@@ -6,7 +6,7 @@ import pipeman.db.orm as orm
 import sqlalchemy as sa
 import datetime
 import zirconium as zr
-import logging
+import zrlog
 
 
 @injector.inject
@@ -38,7 +38,7 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
         # Handle entity data pruning
         keep_entity_days = cfg.as_int(("pipeman", "retain_entity_revisions_days"), default=365)
         if keep_entity_days > 0:
-            logging.getLogger("pipeman.entities").out(f"Pruning entities")
+            zrlog.get_logger("pipeman.entity").notice(f"Pruning unused entity versions older than {keep_entity_days}")
             dt = datetime.datetime.now() - datetime.timedelta(days=keep_entity_days)
             remove_revisions = []
             for ent in session.query(orm.Entity):
@@ -58,7 +58,7 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
         keep_dataset_days = cfg.as_int(("pipeman", "retain_unpub_dataset_revisions_days"), default=365)
         keep_old_pub_dataset_days = cfg.as_int(("pipeman", "retain_oldpub_dataset_revisions_days"), default=-1)
         if keep_dataset_days > 0 or keep_old_pub_dataset_days > 0:
-            logging.getLogger("pipeman.entities").out(f"Pruning datasets")
+            zrlog.get_logger("pipeman.dataset").notice(f"Pruning unused dataset versions older than {keep_dataset_days} and previous published datasets older than {keep_old_pub_dataset_days}")
             unpub_gate = None if keep_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_dataset_days)
             oldpub_gate = None if keep_old_pub_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_old_pub_dataset_days)
             remove_dataset_editions = []

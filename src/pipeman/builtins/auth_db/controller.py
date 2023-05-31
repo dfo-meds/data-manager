@@ -15,7 +15,7 @@ from pipeman.auth.util import groups_select
 from pipeman.org import OrganizationController
 import base64
 import datetime
-import logging
+import zrlog
 import binascii
 import sqlalchemy as sa
 import zirconium as zr
@@ -31,7 +31,7 @@ class DatabaseUserController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self.log = zrlog.get_logger("pipeman.auth_db")
 
     def set_api_access(self, username, is_enabled: bool):
         with self.db as session:
@@ -40,6 +40,7 @@ class DatabaseUserController:
                 raise UserInputError("pipeman.auth_db.error.user_does_not_exist")
             user.allowed_api_access = is_enabled
             session.commit()
+            self.log.notice(f"API access for {username} set to {is_enabled}")
 
     def create_api_key(self, username, display, expiry_days):
         with self.db as session:
@@ -65,6 +66,7 @@ class DatabaseUserController:
             )
             session.add(key)
             session.commit()
+            self.log.notice(f"API key for {prefix}.{username} created")
             print("API Key created. Please record these details as they will not be available again. Store them in a secure location.")
             print(f"Username: {username}")
             print(f"Prefix: {prefix}")
@@ -96,8 +98,8 @@ class DatabaseUserController:
             key.key_hash = key_hash
             key.expiry = datetime.datetime.now() + datetime.timedelta(days=expiry_days)
             session.commit()
-            print(
-                "API Key rotated. Please record these details as they will not be available again. Store them in a secure location.")
+            self.log.notice(f"API key rotated for {prefix}.{username}; old key expires {key.old_expiry}")
+            print("API Key rotated. Please record these details securely as they will not be available again.")
             print(f"Username: {username}")
             print(f"Prefix: {prefix}")
             print(f"Authorization: Bearer {auth_header}")
@@ -200,8 +202,10 @@ class DatabaseUserController:
                 ue = session.query(orm.User.id).filter_by(email=form.email.data).first()
                 if u:
                     flasht("pipeman.auth_db.error.username_already_exists", "error")
+                    self.log.warning(f"New user username conflicts with {u.id}")
                 elif ue:
                     flasht("pipeman.auth_db.error.email_already_exists", "error")
+                    self.log.warning(f"New user email conflicts with {ue.id}")
                 else:
                     pw = self.sh.random_password()
                     user = self._create_user(
@@ -224,7 +228,6 @@ class DatabaseUserController:
         skip_check = False
         if password is None:
             password = self.sh.random_password()
-            print(f"Randomly generated password: {password}")
             skip_check = True
         with self.db as session:
             u = session.query(orm.User.id).filter_by(username=username).first()
@@ -268,11 +271,13 @@ class DatabaseUserController:
                 "user_id": user_id
             })
             session.execute(q)
+            self.log.notice(f"User {user_id} added to organization {org_id}")
 
     def _remove_from_org(self, user_id, org_id, session):
         st = orm.user_organization.delete().where(orm.user_organization.c.user_id == user_id).where(
             orm.user_organization.c.organization_id == org_id)
         session.execute(st)
+        self.log.notice(f"User {user_id} removed from organization {org_id}")
 
     def assign_to_group_cli(self, group_name, username):
         with self.db as session:
@@ -305,10 +310,12 @@ class DatabaseUserController:
                 "user_id": user_id
             })
             session.execute(q)
+            self.log.notice(f"User {user_id} added to group {group_id}")
 
     def _remove_from_group(self, user_id, group_id, session):
         st = orm.user_group.delete().where(orm.user_group.c.user_id == user_id).where(orm.user_group.c.group_id == group_id)
         session.execute(st)
+        self.log.notice(f"User {user_id} removed from group {group_id}")
 
     def _create_user(self, username, display_name, email, password, session, skip_check=False):
         user = orm.User(
@@ -318,6 +325,7 @@ class DatabaseUserController:
         )
         self._set_password(user, password, skip_check)
         session.add(user)
+        self.log.notice(f"User {username} created")
         return user
 
     def view_user_page(self, user_id):
@@ -337,6 +345,7 @@ class DatabaseUserController:
                 ue = session.query(orm.User.id).filter_by(email=form.email.data).first()
                 if ue and not user.id == ue.id:
                     flasht("pipeman.auth_db.error.email_already_exists", "error")
+                    self.log.warning(f"Email on edit for {user_id} conflicts with {ue.id}")
                 else:
                     user.email = form.email.data
                     user.display = form.display.data
@@ -392,6 +401,7 @@ class DatabaseUserController:
             self.sh.check_password_strength(password)
         user.salt = self.sh.generate_salt()
         user.phash = self.sh.hash_secret(password, user.salt)
+        self.log.notice(f"Password updated for {user.username}")
 
     def unlock_user_account(self, username):
         with self.db as session:
@@ -401,6 +411,7 @@ class DatabaseUserController:
             st = sa.update(orm.UserLoginRecord).where(orm.UserLoginRecord.username == username).where(orm.UserLoginRecord.was_since_last_clear == True).values(was_since_last_clear=False)
             session.execute(st)
             session.commit()
+            self.log.notice(f"User account {username} unlocked")
 
 
 class CreateUserForm(PipemanFlaskForm):
@@ -556,7 +567,7 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
     @injector.construct
     def __init__(self, form_template_name: str = "form.html"):
         super().__init__(form_template_name)
-        self.log = logging.getLogger("pipeman.auth_db")
+        self.log = zrlog.get_logger("pipeman.auth_db")
         self._max_failed_logins = self.cfg.as_int(("pipeman", "auth_db", "max_failed_logins"), 5)
         self._max_failed_login_window = self.cfg.as_int(("pipeman", "auth_db", "failed_login_window_hours"), 24)
         self._lockout_time = self.cfg.as_int(("pipeman", "auth_db", "failed_login_lockout_time"), 24)
@@ -617,11 +628,13 @@ class DatabaseEntityAuthenticationManager(FormAuthenticationManager):
             cap_dt = datetime.datetime.now() - datetime.timedelta(hours=self._max_failed_login_window)
             failures = session.query(orm.UserLoginRecord).filter_by(username=user.username, lockable=True, was_success=False, was_since_last_clear=True).filter(orm.UserLoginRecord.attempt_time >= cap_dt).count()
             if failures >= self._max_failed_logins:
+                self.log.warning(f"User has too many recent logins, locking account {user.username}")
                 user.locked_until = datetime.datetime.now() + datetime.timedelta(hours=self._lockout_time)
                 session.commit()
                 flasht("pipeman.auth_db.error.too_many_recent_logins", "error")
 
     def _clear_login_records(self, username, session):
+        self.log.info(f"Clearing old logins for old {username}")
         st = (
             sa.update(orm.UserLoginRecord)
             .where(orm.UserLoginRecord.username == username)

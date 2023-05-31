@@ -236,3 +236,8 @@ variable:
       order: 500
       netcdf:
         processor: key_value_pairs
+    is_axis:
+      data_type: boolean
+      label:
+        en: Is Dimension?
+      order: 5010

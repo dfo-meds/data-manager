@@ -5,11 +5,10 @@ import zirconium as zr
 from autoinject import injector
 import typing as t
 from functools import wraps
-from pipeman.i18n import gettext
+import zrlog
 import datetime
 from urllib.parse import urlparse
 import itsdangerous
-import logging
 from pipeman.util.flask import flasht
 
 
@@ -28,7 +27,7 @@ class RequestSecurity:
         self._allowed_hosts = self.cfg.get(("pipeman", "security", "allowed_hosts"), default=[])
         self._require_https = self.cfg.as_bool(("pipeman", "security", "require_https"), default=False)
         self._check_get_refs = self.cfg.as_bool(("pipeman", "security", "check_get_referrers"), default=False)
-        self.log = logging.getLogger("pipeman.auth")
+        self.log = zrlog.get_logger("pipeman.auth")
         self._check_refs_default = self.cfg.as_bool(("pipeman", "security", "check_refs_default"), default=True)
         self._check_https_default = self.cfg.as_bool(("pipeman", "security", "check_https_default"), default=True)
 
@@ -59,7 +58,7 @@ class RequestSecurity:
             org = ref
         pieces = urlparse(org)
         if self._allowed_hosts and pieces.netloc not in self._allowed_hosts:
-            self.log.out(f"Host not found (is {pieces.netloc})")
+            self.log.warning(f"Request denied because of bad referrer [{pieces.netloc}]")
             return False
         return True
 
@@ -70,22 +69,23 @@ class RequestSecurity:
         if not self._require_https:
             return True
         pieces = urlparse(flask.request.url)
-        return pieces.scheme == "https"
+        if not pieces.scheme == "https":
+            self.log.warning(f"Request denied because of no HTTPS")
+            return False
+        return True
 
     def check_access(self, perm_names: t.Iterable, check_referrer: bool = None, check_https: bool = None):
         """Check all configured requirements to access the page."""
         if not self.require_permissions(perm_names):
-            self.log.warning("Access forbidden")
+            self.log.warning(f"Request denied because of missing privileges {','.join(perm_names)}")
             return RequestSecurity.FORBIDDEN
         if check_referrer is None:
             check_referrer = self._check_refs_default
         if check_referrer and not self.check_referrer():
-            self.log.warning("Bad referrer")
             return RequestSecurity.TO_SPLASH
         if check_https is None:
             check_https = self._check_https_default
         if check_https and not self.check_for_https():
-            self.log.warning("Missing HTTPS")
             return RequestSecurity.TO_SPLASH
         return RequestSecurity.ALLOWED
 
@@ -175,7 +175,7 @@ class AuthenticationManager:
 
     @injector.construct
     def __init__(self):
-        self.log = logging.getLogger("pipeman.auth")
+        self.log = zrlog.get_logger("pipeman.auth")
         self.login_success_route = self.config.as_str(("pipeman", "authentication", "login_success"), default="base.home")
         self.logout_success_route = self.config.as_str(("pipeman", "authentication", "logout_success"), default="base.home")
         self.unauthorized_route = self.config.as_str(("pipeman", "authentication", "unauthorized"), default="base.home")

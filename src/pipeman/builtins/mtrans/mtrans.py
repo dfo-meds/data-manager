@@ -58,6 +58,7 @@ class ManualTranslationEngine(TranslationEngine):
                 lang_key=tr.lang_key,
                 state=orm.TranslationState.DELAYED
             ):
+                self.log.debug(f"Setting translation for {tr2.id} to {translation.translation} from manual upload")
                 tr2.set_translation(translation.translation, False)
                 session.commit()
 

@@ -23,6 +23,7 @@ class GoogleTranslationEngine(TranslationEngine):
     def do_translation(self, tr: orm.TranslationRequest, session, info: dict):
         source_info = json.loads(tr.source_info)
         try:
+            self.log.info(f"Sending translation request {tr.id} to Google Translation")
             if 'en' in source_info:
                 response = self.translator.translate_text(
                     parent=self.parent,
@@ -39,7 +40,10 @@ class GoogleTranslationEngine(TranslationEngine):
                     target_language_code=tr.lang_key
                 )
             if response.translations and response.translations[0].translated_text:
+                self.log.debug(f"Translation for {tr.id} set to {response.translations[0].translated_text} by Google Translate")
                 tr.set_translation(response.translations[0].translated_text, self.allow_reuse)
                 session.commit()
+            else:
+                self.log.warning(f"Missing translation in response to {tr.id}: {response}")
         except GoogleAPIError as ex:
             raise RecoverableError("Error calling Google Translate API", ex)
