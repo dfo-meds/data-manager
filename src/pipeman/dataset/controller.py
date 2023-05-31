@@ -11,6 +11,7 @@ import flask_login
 import flask
 import sqlalchemy as sa
 import wtforms as wtf
+import zrlog
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, format_datetime
 from pipeman.util.flask import TranslatableField, ConfirmationForm, ActionList, Select2Widget, SecureBaseForm
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField, flasht, PipemanFlaskForm
@@ -39,31 +40,48 @@ class DatasetController:
         self.view_template = view_template
         self.edit_template = edit_template
         self.meta_template = meta_edit_template
+        self.log = zrlog.get_logger("pipeman.dataset")
 
     def metadata_format_exists(self, profile_name, format_name):
         return self.reg.metadata_format_exists(profile_name, format_name)
 
-    def has_access(self, dataset, operation):
+    def has_access(self, dataset, operation, is_attempt: bool = False):
         status = dataset.status if dataset.status is None or isinstance(dataset.status, str) else dataset.status()
         if operation == "activate" and not status == "DRAFT":
+            if is_attempt:
+                self.log.warning(f"Access denied to activate non-draft dataset [{dataset.id}]")
             return False
         if operation == "publish" and not status == "ACTIVE":
+            if is_attempt:
+                self.log.warning(f"Access denied to publish non-active dataset [{dataset.id}]")
             return False
         if operation == "edit" and status == "UNDER_REVIEW":
+            if is_attempt:
+                self.log.warning(f"Access denied to edit dataset under review [{dataset.id}]")
             return False
         if dataset.is_deprecated:
             if operation not in ("restore", "view"):
+                if is_attempt:
+                    self.log.warning(f"Access denied to {operation} deprecated dataset [{dataset.id}], invalid operation")
                 return False
             if not flask_login.current_user.has_permission(f"datasets.view.deprecated"):
+                if is_attempt:
+                    self.log.warning(f"Access denied to {operation} deprecated dataset [{dataset.id}], missing permissions")
                 return False
         elif operation == "restore":
+            if is_attempt:
+                self.log.warning(f"Access denied to restore non-deprecated dataset [{dataset.id}]")
             return False
         if flask_login.current_user.has_permission(f"datasets.{operation}.all"):
             return True
         if flask_login.current_user.has_permission(f"datasets.{operation}.organization"):
-            return self._has_organization_access(dataset, operation)
+            if self._has_organization_access(dataset, operation):
+                return True
         if flask_login.current_user.has_permission(f"datasets.{operation}.assigned"):
-            return flask_login.current_user.works_on(dataset.id)
+            if flask_login.current_user.works_on(dataset.id):
+                return True
+        if is_attempt:
+            self.log.warning(f"Access denied  to {operation} dataset [{dataset.id}], user missing access")
         return False
 
     def _has_organization_access(self, dataset, operation):
@@ -378,6 +396,7 @@ class DatasetController:
                                      back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):
+        self.log.info(f"Activating dataset {dataset.id}")
         status, _ = self.workflow.start_workflow(
             "dataset_activation",
             dataset.extras['act_workflow'],
@@ -394,6 +413,7 @@ class DatasetController:
             flasht("pipeman.dataset.message.activation_in_progress", "success")
 
     def publish_dataset(self, dataset):
+        self.log.info(f"Publishing dataset {dataset.id}")
         status, _ = self.workflow.start_workflow(
             "dataset_publication",
             dataset.extras['pub_workflow'],
@@ -439,18 +459,21 @@ class DatasetController:
         return response
 
     def remove_dataset(self, dataset):
+        self.log.info(f"Removing dataset {dataset.id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = True
             session.commit()
 
     def restore_dataset(self, dataset):
+        self.log.info(f"Restoring dataset {dataset.id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = False
             session.commit()
 
     def load_dataset(self, dataset_id, revision_no=None):
+        self.log.debug(f"Loading dataset {dataset_id}-{revision_no if revision_no else '_latest_'}")
         with self.db as session:
             with BlockTimer("pipeman_dataset_load_dataset_object", "Time to load a dataset object"):
                 ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
@@ -497,6 +520,7 @@ class DatasetController:
             desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
             with BlockTimer(name, desc):
                 if dataset.dataset_id:
+                    self.log.info(f"Saving dataset {dataset.id}")
                     ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
                     if not ds:
                         raise DatasetNotFoundError(dataset.dataset_id)
@@ -507,6 +531,7 @@ class DatasetController:
                     if not ds.guid:
                         ds.guid = str(uuid.uuid4())
                 else:
+                    self.log.info(f"Creating new dataset")
                     ds = orm.Dataset(
                         organization_id=int(dataset.organization_id) or None,
                         is_deprecated=dataset.is_deprecated,
@@ -530,12 +555,14 @@ class DatasetController:
 
     @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
     def save_metadata(self, dataset):
+        self.log.info(f"Saving metadata for dataset {dataset.id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             retries = 5
             while retries > 0:
                 retries -= 1
                 try:
+                    self.log.debug(f"Attempting to save metadata")
                     rev_nos = [dd.revision_no for dd in ds.data]
                     next_rev = 1 if not rev_nos else max(rev_nos) + 1
                     ds_data = orm.MetadataEdition(
@@ -548,6 +575,7 @@ class DatasetController:
                     session.commit()
                     break
                 except IntegrityError:
+                    self.log.exception(f"Error saving metadata, retries {retries}")
                     continue
 
 

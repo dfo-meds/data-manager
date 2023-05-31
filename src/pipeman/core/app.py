@@ -283,6 +283,7 @@ def create_dataset(con: DatasetController = None):
 @require_permission("attachments.view")
 @injector.inject
 def view_attachment(attachment_id, atc: AttachmentController = None):
+    # TODO: check access permissions??
     return atc.download_attachment(attachment_id)
 
 
@@ -292,7 +293,7 @@ def view_attachment(attachment_id, atc: AttachmentController = None):
 def view_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "view"):
+        if not con.has_access(dataset, "view", is_attempt=True):
             return flask.abort(403)
         return con.view_dataset_page(dataset)
     except DatasetNotFoundError:
@@ -305,7 +306,7 @@ def view_dataset(dataset_id, con: DatasetController = None):
 def edit_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "edit"):
+        if not con.has_access(dataset, "edit", is_attempt=True):
             return flask.abort(403)
         return con.edit_dataset_form(dataset)
     except DatasetNotFoundError:
@@ -318,7 +319,7 @@ def edit_dataset(dataset_id, con: DatasetController = None):
 def edit_dataset_metadata_base(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "edit"):
+        if not con.has_access(dataset, "edit", is_attempt=True):
             return flask.abort(403)
         return con.edit_metadata_form(dataset, None)
     except DatasetNotFoundError:
@@ -331,7 +332,7 @@ def edit_dataset_metadata_base(dataset_id, con: DatasetController = None):
 def edit_dataset_metadata(dataset_id, display_group, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "edit"):
+        if not con.has_access(dataset, "edit", is_attempt=True):
             return flask.abort(403)
         return con.edit_metadata_form(dataset, display_group)
     except DatasetNotFoundError:
@@ -344,7 +345,7 @@ def edit_dataset_metadata(dataset_id, display_group, con: DatasetController = No
 def activate_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "activate"):
+        if not con.has_access(dataset, "activate", is_attempt=True):
             return flask.abort(403)
         return con.activate_dataset_form(dataset)
     except DatasetNotFoundError:
@@ -357,7 +358,7 @@ def activate_dataset(dataset_id, con: DatasetController = None):
 def add_attachment(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "edit"):
+        if not con.has_access(dataset, "edit", is_attempt=True):
             return flask.abort(403)
         return con.add_attachment_form(dataset)
     except DatasetNotFoundError:
@@ -370,7 +371,7 @@ def add_attachment(dataset_id, con: DatasetController = None):
 def validate_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "view"):
+        if not con.has_access(dataset, "view", is_attempt=True):
             return flask.abort(403)
         return con.dataset_validation_page(dataset)
     except DatasetNotFoundError:
@@ -383,7 +384,7 @@ def validate_dataset(dataset_id, con: DatasetController = None):
 def publish_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "publish"):
+        if not con.has_access(dataset, "publish", is_attempt=True):
             return flask.abort(403)
         return con.publish_dataset_form(dataset)
     except DatasetNotFoundError:
@@ -396,7 +397,7 @@ def publish_dataset(dataset_id, con: DatasetController = None):
 def remove_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "remove"):
+        if not con.has_access(dataset, "remove", is_attempt=True):
             return flask.abort(403)
         return con.remove_dataset_form(dataset)
     except DatasetNotFoundError:
@@ -409,7 +410,7 @@ def remove_dataset(dataset_id, con: DatasetController = None):
 def restore_dataset(dataset_id, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id)
-        if not con.has_access(dataset, "restore"):
+        if not con.has_access(dataset, "restore", is_attempt=True):
             return flask.abort(403)
         return con.restore_dataset_form(dataset)
     except DatasetNotFoundError:
@@ -422,7 +423,7 @@ def restore_dataset(dataset_id, con: DatasetController = None):
 def view_dataset_revision(dataset_id, revision_no, con: DatasetController = None):
     try:
         dataset = con.load_dataset(dataset_id, revision_no)
-        if not con.has_access(dataset, "view"):
+        if not con.has_access(dataset, "view", is_attempt=True):
             return flask.abort(403)
         return con.view_revision_page(dataset)
     except DatasetNotFoundError:
@@ -444,7 +445,7 @@ def generate_metadata_format_long(dataset_id, revision_no, profile_name, format_
         if not con.metadata_format_exists(profile_name, format_name):
             return flask.abort(404)
         dataset = con.load_dataset(dataset_id, revision_no)
-        if not con.has_access(dataset, "view"):
+        if not con.has_access(dataset, "view", is_attempt=True):
             return flask.abort(403)
         try:
             return con.generate_metadata_file(dataset, profile_name, format_name, environment)
@@ -464,7 +465,7 @@ def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_n
         if not con.metadata_format_exists(profile_name, format_name):
             return flask.abort(404)
         dataset = con.load_dataset(dataset_id, revision_no)
-        if not con.has_access(dataset, "view"):
+        if not con.has_access(dataset, "view", is_attempt=True):
             return flask.abort(403)
         try:
             return con.generate_metadata_file(dataset, profile_name, format_name, environment)
