@@ -132,7 +132,7 @@ class CronDaemon:
         self._periodic_jobs = {}
         self.log = zrlog.get_logger("pipeman.cron")
         self._exit_count = 0
-        self._max_scheduled_tasks = 4
+        self._max_scheduled_tasks = self.config.as_int(("pipeman", "daemon", "max_thread_count"), default=4)
         self._max_exit_count = self.config.as_int(("pipeman", "daemon", "max_exit_count"), default=3)
         self._cleanup_sleep_time = self.config.as_float(("pipeman", "daemon", "exit_cleanup_sleep"), default=0.25)
         self._max_cleanup_time = self.config.as_int(("pipeman", "daemon", "max_cleanup_time_seconds"), default=5)

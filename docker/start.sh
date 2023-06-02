@@ -7,9 +7,9 @@ export PYTHONUNBUFFERED
 cd /srv/metadb/app || exit
 
 # Run the daemon
-if [ "$1" == "daemon"] ; then
+if [ "$1" == "cron"] ; then
 
-  python cli.py core daemon
+  python cli.py core cron
 
 # Upgrade or install
 elif [ "$1" == "upgrade" ] ; then

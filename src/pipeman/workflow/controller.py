@@ -550,15 +550,16 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
 class WorkflowCronThread(CronThread):
 
     db: Database = None
+    cfg: zr.ApplicationConfig = None
 
     @injector.construct
     def __init__(self):
         super().__init__()
-        self._sleep_interval = 5
-        self._reset_interval = 300
-        self._max_threads = 5
-        self._lock_time = 30  # minutes
-        self._finish_delay_time = 5
+        self._sleep_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_sleep_seconds"), default=5)
+        self._reset_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_reset_sleep_seconds"), default=300)
+        self._max_threads = self.cfg.as_int(("pipeman", "workflow", "max_sub_threads"), default=5)
+        self._lock_time = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
+        self._finish_delay_time = self.cfg.as_float(("pipeman", "workflow", "max_exit_delay_time_seconds"), default=5)
         self._last_reset = None
         self._tasks = UniqueTaskThreadManager(self.halt, self._max_threads)
 
