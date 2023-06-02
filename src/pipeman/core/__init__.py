@@ -7,6 +7,10 @@ import sqlalchemy as sa
 import datetime
 import zirconium as zr
 import zrlog
+from pipeman.entity import EntityRegistry
+from pipeman.dataset import MetadataRegistry
+from pipeman.vocab import VocabularyRegistry
+from pipeman.workflow import WorkflowRegistry
 
 
 @injector.inject
@@ -19,6 +23,7 @@ def init(system):
     system.on_app_init(core_init_app)
     system.on_cleanup(_do_cleanup)
     system.on_cron_start(_register_cron)
+    system.pre_setup(_reset_registries)
 
 
 def _register_cron(cron):
@@ -95,6 +100,13 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
                 session.execute(q)
             session.commit()
 
+
+@injector.inject
+def _reset_registries(mreg: MetadataRegistry = None, ereg: EntityRegistry = None, vreg: VocabularyRegistry = None, wreg: WorkflowRegistry = None):
+    mreg.remove_all()
+    ereg.remove_all()
+    vreg.remove_all()
+    wreg.remove_all()
 
 
 @injector.inject

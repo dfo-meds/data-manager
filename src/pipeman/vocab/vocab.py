@@ -16,7 +16,11 @@ class VocabularyRegistry(BaseObjectRegistry):
 
     def list_vocabularies(self):
         for vocab_name in self.sorted_keys():
-            yield vocab_name, self[vocab_name]["display"], self[vocab_name]["uri"]
+            yield (
+                vocab_name,
+                self[vocab_name]["display"] if "display" in self[vocab_name] else {"und": vocab_name},
+                self[vocab_name]["uri"] if 'uri' in self[vocab_name] else ''
+            )
 
     def display_name(self, vocab_name):
         return MultiLanguageString(self[vocab_name]["display"])

@@ -10,6 +10,7 @@ import yaml
 import datetime
 import decimal
 import time
+import zrlog
 
 
 REFRESH_FREQUENCY = 15
@@ -19,6 +20,7 @@ REFRESH_FREQUENCY = 15
 class GlobalObjectRegistry:
 
     def __init__(self):
+        self._log = zrlog.get_logger("pipeman.registries")
         self._registry = []
         self._last_setup_run = None
         self._last_setup_check = None
@@ -35,6 +37,7 @@ class GlobalObjectRegistry:
         # Don't check everytime to prevent a lot of overhead (every 15 seconds)
         if self._last_setup_check and (time.monotonic() - self._last_setup_check) < REFRESH_FREQUENCY:
             return
+        self._log.debug("Checking for registry updates")
         self._last_setup_check = time.monotonic()
 
         # Check if setup has actually run recently
@@ -42,6 +45,7 @@ class GlobalObjectRegistry:
         if self._last_setup_run == setup_last_run:
             return
 
+        self._log.info(f"Updating [{len(self._registry)}] registry files")
         # Do the reload
         for obj in self._registry:
             obj.reload_types()
@@ -61,6 +65,11 @@ class ObjectController:
         with self.db as session:
             for obj_def in session.query(orm.ConfigRegistry).filter_by(obj_type=obj_type):
                 yield obj_def.obj_name, ObjectController._from_json(obj_def.config) or {}
+
+    def clear_object_defs(self, obj_type):
+        with self.db as session:
+            session.query(orm.ConfigRegistry).filter_by(obj_type=obj_type).delete()
+            session.commit()
 
     def upsert_object_def(self, obj_type, obj_name, config):
         with self.db as session:
@@ -143,6 +152,7 @@ class BaseObjectRegistry:
         self._obj_type = obj_type
         self._ensure_fields = ensure_fields
         self.gor.register(self)
+        self._log = zrlog.get_logger("pipeman.registries")
 
     def __cleanup__(self):
         self.gor.unregister(self)
@@ -174,7 +184,7 @@ class BaseObjectRegistry:
             for obj_name, config in oc.get_object_defs(self._obj_type):
                 found.append(obj_name)
                 self._type_map[obj_name] = config
-            for obj_name in self._type_map:
+            for obj_name in list(self._type_map.keys()):
                 if obj_name not in found:
                     del self._type_map[obj_name]
 
@@ -191,9 +201,17 @@ class BaseObjectRegistry:
             self._type_map[obj_name] = config or {}
 
     def register_from_dict(self, cfg_dict):
-        for key in cfg_dict or {}:
+        cfg_dict = cfg_dict or {}
+        self._log.debug(f"Importing {len(cfg_dict)} object definitions of type [{self._obj_type}]")
+        for key in cfg_dict:
             self.register(key, **cfg_dict[key])
 
     def register_from_yaml(self, file_path):
+        self._log.notice(f"Importing object definitions of type [{self._obj_type}] from [{file_path}]")
         with open(file_path, "r", encoding="utf-8") as h:
             self.register_from_dict(yaml.safe_load(h))
+
+    @injector.inject
+    def remove_all(self, oc: ObjectController = None):
+        self._log.notice(f"Removing all object definitions of type [{self._obj_type}]")
+        oc.clear_object_defs(self._obj_type)

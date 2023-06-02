@@ -3,17 +3,9 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import zirconium as zr
 from autoinject import injector
-import logging
-import time
-import prometheus_client as pc
+import zrlog
 
 from .orm import Base
-
-
-class AsyncSessionWrapper:
-
-    pass
-
 
 
 class SessionWrapper:
@@ -69,17 +61,16 @@ class Database:
     def __init__(self):
         """Implement __init__()."""
         self.engine = None
-
         self._session = None
         self._transaction_stack = []
         self._is_closed = False
-        self.log = logging.getLogger("pipeman.db")
+        self._log = zrlog.get_logger("pipeman.db")
 
-    def _create_connection(self):
+    def _ensure_connection(self):
         if self.engine is None:
             # Create the engine from the connection string
+            self._log.debug(f"Opening database connection")
             self.engine = sa.engine_from_config(self.config["database"], prefix="")
-
 
     def __enter__(self) -> SessionWrapper:
         """Implement __enter__().
@@ -91,11 +82,13 @@ class Database:
         SessionWrapper
             An instance of SessionWrapper that wraps both the session and transaction object.
         """
-        self._create_connection()
+        self._ensure_connection()
         if self._session is None:
+            self._log.debug("Opening session")
             self._session = orm.Session(self.engine)
             self._transaction_stack = [self._session.begin()]
         else:
+            self._log.debug("Begining nested session")
             self._transaction_stack.append(self._session.begin_nested())
         return SessionWrapper(self, self._session, self._transaction_stack[-1])
 
@@ -109,49 +102,42 @@ class Database:
             Exception value
         exc_tb
             Exception traceback
-        If there is an error, the transaction is rolled back, otherwise it is committed. The
-        session is closed once the transaction stack is empty.
+        If there is an error, the transaction is rolled back, otherwise it is committed.
         """
-        r = False
         if self._transaction_stack:
             if exc_type:
+                self._log.debug("Automatic rollback")
                 self._transaction_stack[-1].rollback()
             else:
                 self._transaction_stack[-1].commit()
             del self._transaction_stack[-1]
         else:
-            if not self._closing_warned_once:
-                r = True
-                self.log_safe.error("Transaction stack empty when it shouldn't be!")
+            self._log.info(f"Database transaction stack empty during __exit__")
         if not self._transaction_stack:
             if self._session:
                 self._session.close()
                 self._session = None
             else:
-                if not self._closing_warned_once:
-                    r = True
-                    self.log_safe.error("Session empty when it shouldn't be!")
-            if self._is_closed:
-                if not self._closing_warned_once:
-                    r = True
-                    self.log_safe.warning("Closing engine because this should be closed and might not be properly closed later")
-                self.close()
-        if r:
-            #self._closing_warned_once = True
-            pass
+                self._log.info(f"Database session not set during __exit__")
+        if self._is_closed and not self._transaction_stack:
+            self.log.info(f"Database object used after cleanup called")
+            self._close()
 
     def __cleanup__(self):
-        self.close()
+        self._close()
         self._is_closed = True
 
-    def close(self):
+    def _close(self):
         while self._transaction_stack:
+            self._log.debug("Autorolling back transaction")
             self._transaction_stack[-1].rollback()
             del self._transaction_stack[-1]
         if self._session:
+            self._log.debug("Closing database session")
             self._session.close()
             self._session = None
         if self.engine is not None:
+            self._log.debug("Closing database engine")
             self.engine.dispose()
             self.engine = None
 
@@ -185,5 +171,7 @@ class Database:
             If true, the database is first dropped.
         """
         if recreate:
+            self._log.warning(f"Dropping all tables")
             Base.metadata.drop_all(self.engine)
+        self._log.notice("Creating all tables")
         Base.metadata.create_all(self.engine)

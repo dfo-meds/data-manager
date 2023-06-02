@@ -18,3 +18,13 @@ technical:
       data_type: text
       label:
         en: ERDDAP Data File Pattern
+publishing:
+  fields:
+    erddap_servers:
+      data_type: entity_ref
+      label:
+        en: ERDDAP Servers
+      description:
+        en: Select which ERDDAP server this dataset will be published on
+      entity_type: erddap_servers
+      repeatable: yes

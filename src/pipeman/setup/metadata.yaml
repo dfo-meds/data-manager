@@ -12,7 +12,7 @@ data_info:
 
 data_more_info:
   display:
-    en: More Info
+    en: Additional Info
     fr:
   order: 20
 

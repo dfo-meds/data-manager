@@ -94,6 +94,7 @@ def upload_translations(te: TranslationEngine = None):
                             ))
                         except TranslatableError as ex:
                             flasht("pipeman.mtrans.error.line_processing_error", "warning", lineno=idx, original=str(ex))
+                            logging.getLogger("pipeman.mtrans").warning(str(ex))
                         except Exception as ex:
                             flasht("pipeman.mtrans.error.other_error", "error")
                             logging.getLogger("pipeman.mtrans").exception(f"Error while processing updated translation file")

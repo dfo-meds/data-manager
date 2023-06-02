@@ -520,7 +520,7 @@ class DatasetController:
             desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
             with BlockTimer(name, desc):
                 if dataset.dataset_id:
-                    self.log.info(f"Saving dataset {dataset.id}")
+                    self.log.info(f"Saving dataset {dataset.dataset_id}")
                     ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
                     if not ds:
                         raise DatasetNotFoundError(dataset.dataset_id)
@@ -555,7 +555,7 @@ class DatasetController:
 
     @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
     def save_metadata(self, dataset):
-        self.log.info(f"Saving metadata for dataset {dataset.id}")
+        self.log.info(f"Saving metadata for dataset {dataset.dataset_id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             retries = 5

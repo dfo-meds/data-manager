@@ -140,13 +140,6 @@ erddap_time_precisions:
       en: 1/100 Second
     millisecond:
       en: Millisecond
-erddap_roles:
-    profile_extra:
-      en: Profile Extra Info
-    timeseries_extra:
-      en: Timeseries Extra Info
-    trajectory_extra:
-      en: Trajectory Extra Info
 cdm_data_types:
   display:
     en: CDM - Data Types

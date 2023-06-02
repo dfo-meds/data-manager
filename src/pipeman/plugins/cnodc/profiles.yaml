@@ -1,6 +1,10 @@
 cnodc:
   display:
-    en: CNODC Information
-    fr: Information de CNDOC
+    en: CNODC
+    fr: CNDOC
+  extends:
+    - cioosv2
+    - gociso19115
+    - cf1_10
   fields:
     internal_notes:

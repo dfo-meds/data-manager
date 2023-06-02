@@ -56,6 +56,10 @@ class WorkflowRegistry:
         self._factories = []
         self._factories.append(DefaultStepFactory())
 
+    def remove_all(self):
+        self._steps.remove_all()
+        self._workflows.remove_all()
+
     def __cleanup__(self):
         self._steps.__cleanup__()
         self._workflows.__cleanup__()

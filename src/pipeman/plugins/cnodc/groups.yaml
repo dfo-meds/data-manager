@@ -203,6 +203,8 @@ steward:
   permissions:
     - approvals.data_steward
     - attachments.view
+    - entities.view
+    - entities.view.all
     - entities.create
     - entities.edit.ref_system
     - entities.create.keyword

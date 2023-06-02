@@ -95,3 +95,7 @@ acdd:
       preprocess: pipeman.builtins.netcdf.util.preprocess_for_cdl
   mappers:
     netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf
+cf1_10:
+  display:
+    en: CF 1.10
+  extends: acdd

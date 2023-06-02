@@ -9,7 +9,7 @@ from pipeman.util.flask import TranslatableField
 import pipeman.db.orm as orm
 from pipeman.util.errors import EntityNotFoundError
 import json
-import datetime
+import zrlog
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
@@ -30,6 +30,7 @@ class EntityController:
     def __init__(self, view_template="view_entity.html", edit_template="form.html"):
         self.view_template = view_template
         self.edit_template = edit_template
+        self._log = zrlog.get_logger("pipeman.entity")
 
     def build_action_list(self, ent, short_list: bool = False):
         actions = ActionList()
@@ -179,11 +180,11 @@ class EntityController:
             title=gettext('pipeman.entity.page.create_entity.title')
         )
 
-    def has_access(self, entity_type, op):
-        return entity_access(entity_type, op)
+    def has_access(self, entity_type, op, log_access_failures: bool = False):
+        return entity_access(entity_type, op, log_access_failures)
 
-    def has_specific_access(self, entity, op):
-        return specific_entity_access(entity, op)
+    def has_specific_access(self, entity, op, log_access_failures: bool = False):
+        return specific_entity_access(entity, op, log_access_failures)
 
     def _entity_iterator(self, query, short_list: bool = True):
         for ent in query:
@@ -250,18 +251,21 @@ class EntityController:
         return dt
 
     def remove_entity(self, entity):
+        self._log.notice(f"Deprecating entity {entity.db_id}")
         with self.db as session:
             ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
             ent.is_deprecated = True
             session.commit()
 
     def restore_entity(self, entity):
+        self._log.notice(f"Restoring entity {entity.db_id}")
         with self.db as session:
             ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
             ent.is_deprecated = False
             session.commit()
 
     def load_entity(self, entity_type, entity_id, revision_no=None):
+        self._log.debug(f"Loading entity {entity_type}.{entity_id}.{revision_no or '-'}")
         with self.db as session:
             if entity_type is None:
                 e = session.query(orm.Entity).filter_by(id=entity_id).first()
@@ -285,6 +289,7 @@ class EntityController:
             return x
 
     def save_entity(self, entity):
+        self._log.info(f"Saving entity {entity.db_id}")
         with self.db as session:
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()

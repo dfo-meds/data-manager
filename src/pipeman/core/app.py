@@ -14,6 +14,7 @@ from pipeman.files import FileController
 from pipeman.i18n import gettext
 from pipeman.util.flask import EntitySelectField, MultiLanguageBlueprint, CSPRegistry
 import logging
+import zrlog
 
 
 base = flask.Blueprint("base", __name__)
@@ -68,6 +69,7 @@ def list_entities(reg: EntityRegistry):
 @injector.inject
 def list_entities_by_type(obj_type, con: EntityController):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
     if not con.has_access(obj_type, "view"):
         return flask.abort(403)
@@ -79,6 +81,7 @@ def list_entities_by_type(obj_type, con: EntityController):
 @injector.inject
 def list_entities_by_type_ajax(obj_type, con: EntityController):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
     if not con.has_access(obj_type, "view"):
         return flask.abort(403)
@@ -90,8 +93,9 @@ def list_entities_by_type_ajax(obj_type, con: EntityController):
 @injector.inject
 def create_entity(obj_type, con: EntityController = None):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not con.has_access(obj_type, "create"):
+    if not con.has_access(obj_type, "create", True):
         return flask.abort(403)
     return con.create_entity_form(obj_type)
 
@@ -102,7 +106,7 @@ def _get_container(parent_id, parent_type, dcon, econ):
             ds = dcon.load_dataset(parent_id)
         except DatasetNotFoundError:
             return flask.abort(404)
-        if not dcon.has_access(ds, "edit"):
+        if not dcon.has_access(ds, "edit", True):
             return flask.abort(403)
         return ds
     elif parent_type == "entity":
@@ -110,7 +114,7 @@ def _get_container(parent_id, parent_type, dcon, econ):
             ent = econ.load_entity(None, parent_id)
         except EntityNotFoundError:
             return flask.abort(404)
-        if not econ.has_specific_access(ent, "edit"):
+        if not econ.has_specific_access(ent, "edit", True):
             return flask.abort(403)
         return ent
     else:
@@ -123,8 +127,9 @@ def _get_container(parent_id, parent_type, dcon, econ):
 @injector.inject
 def create_component(obj_type, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if obj_type not in econ.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not econ.has_access(obj_type, "create"):
+    if not econ.has_access(obj_type, "create", True):
         return flask.abort(403)
     container = _get_container(parent_id, parent_type, dcon, econ)
     return econ.create_component_form(obj_type, container)
@@ -136,15 +141,16 @@ def create_component(obj_type, parent_id, parent_type, dcon: DatasetController =
 @injector.inject
 def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if obj_type not in econ.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not econ.has_access(obj_type, "edit"):
+    if not econ.has_access(obj_type, "edit", True):
         return flask.abort(403)
     entity = None
     try:
         entity = econ.load_entity(obj_type, obj_id)
     except EntityNotFoundError:
         return flask.abort(404)
-    if not econ.has_specific_access(entity, "edit"):
+    if not econ.has_specific_access(entity, "edit", True):
         return flask.abort(403)
     container = _get_container(parent_id, parent_type, dcon, econ)
     return econ.edit_component_form(entity, container)
@@ -156,15 +162,16 @@ def edit_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetContro
 @injector.inject
 def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if obj_type not in econ.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not econ.has_access(obj_type, "remove"):
+    if not econ.has_access(obj_type, "remove", True):
         return flask.abort(403)
     entity = None
     try:
         entity = econ.load_entity(obj_type, obj_id)
     except EntityNotFoundError:
         return flask.abort(404)
-    if not econ.has_specific_access(entity, "remove"):
+    if not econ.has_specific_access(entity, "remove", True):
         return flask.abort(403)
     container = _get_container(parent_id, parent_type, dcon, econ)
     return econ.remove_component_form(entity, container)
@@ -176,15 +183,16 @@ def remove_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCont
 @injector.inject
 def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetController = None, econ: EntityController = None):
     if obj_type not in econ.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not econ.has_access(obj_type, "restore"):
+    if not econ.has_access(obj_type, "restore", True):
         return flask.abort(403)
     entity = None
     try:
         entity = econ.load_entity(obj_type, obj_id)
     except EntityNotFoundError:
         return flask.abort(404)
-    if not econ.has_specific_access(entity, "restore"):
+    if not econ.has_specific_access(entity, "restore", True):
         return flask.abort(403)
     container = _get_container(parent_id, parent_type, dcon, econ)
     return econ.restore_component_form(entity, container)
@@ -195,12 +203,13 @@ def restore_component(obj_type, obj_id, parent_id, parent_type, dcon: DatasetCon
 @injector.inject
 def view_entity(obj_type, obj_id, con: EntityController = None):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not con.has_access(obj_type, "view"):
+    if not con.has_access(obj_type, "view", True):
         return flask.abort(403)
     try:
         entity = con.load_entity(obj_type, obj_id)
-        if not con.has_specific_access(entity, "view"):
+        if not con.has_specific_access(entity, "view", True):
             return flask.abort(403)
         return con.view_entity_page(entity)
     except EntityNotFoundError:
@@ -212,12 +221,13 @@ def view_entity(obj_type, obj_id, con: EntityController = None):
 @injector.inject
 def edit_entity(obj_type, obj_id, con: EntityController = None):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not con.has_access(obj_type, "edit"):
+    if not con.has_access(obj_type, "edit", True):
         return flask.abort(403)
     try:
         entity = con.load_entity(obj_type, obj_id)
-        if not con.has_specific_access(entity, "edit"):
+        if not con.has_specific_access(entity, "edit", True):
             return flask.abort(403)
         return con.edit_entity_form(entity)
     except EntityNotFoundError:
@@ -229,12 +239,13 @@ def edit_entity(obj_type, obj_id, con: EntityController = None):
 @injector.inject
 def remove_entity(obj_type, obj_id, con: EntityController = None):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not con.has_access(obj_type, "remove"):
+    if not con.has_access(obj_type, "remove", True):
         return flask.abort(403)
     try:
         entity = con.load_entity(obj_type, obj_id)
-        if not con.has_specific_access(entity, "remove"):
+        if not con.has_specific_access(entity, "remove", True):
             return flask.abort(403)
         return con.remove_entity_form(entity)
     except EntityNotFoundError:
@@ -246,12 +257,13 @@ def remove_entity(obj_type, obj_id, con: EntityController = None):
 @injector.inject
 def restore_entity(obj_type, obj_id, con: EntityController = None):
     if obj_type not in con.reg:
+        zrlog.get_logger("pipeman.entity").warning(f"Entity type {obj_type[0:256]} requested but does not exist")
         return flask.abort(404)
-    if not con.has_access(obj_type, "restore"):
+    if not con.has_access(obj_type, "restore", True):
         return flask.abort(403)
     try:
         entity = con.load_entity(obj_type, obj_id)
-        if not con.has_specific_access(entity, "restore"):
+        if not con.has_specific_access(entity, "restore", True):
             return flask.abort(403)
         return con.restore_entity_form(entity)
     except EntityNotFoundError:
@@ -596,7 +608,7 @@ def view_organization(org_id, oc: OrganizationController = None):
 def edit_organization(org_id, oc: OrganizationController = None):
     return oc.edit_organization_form(org_id)
 
-"""""
+"""
 @core.i18n_route("/api/fire-event/<event_name>", methods=['POST'])
 @require_permission("events.fire")
 @injector.inject

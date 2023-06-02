@@ -1,3 +1,19 @@
+erddap_servers:
+  display:
+    en: ERDDAP Servers
+  validation:
+    required:
+      - base_url
+  fields:
+    responsibles:
+      data_type: component_ref
+      entity_type: responsibility
+      label:
+        en: Distributor Parties
+    base_url:
+      data_type: text
+      label:
+        en: Base URL
 variable:
   validation:
     required:

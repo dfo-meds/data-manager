@@ -1,7 +1,7 @@
 erddap:
   display:
     en: ERDDAP
-  extends: acdd
+  extends: cf1_10
   validation:
     required:
       - erddap_dataset_id
@@ -25,6 +25,9 @@ erddap:
     topic_category:
     iso_maintenance:
     spatial_representation_type:
+    erddap_servers:
+  preprocess:
+    - pipeman.builtins.erddap.util.preprocess_metadata_all
   formatters:
     erddapxml:
       label:

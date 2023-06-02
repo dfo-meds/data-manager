@@ -9,7 +9,7 @@ keywords:
         is_keyword: yes
         mode: both
         thesaurus:
-          prefix: GC_CST
+          prefix: CST
           citation:
             title:
               en: Government of Canada Core Subject Thesaurus
@@ -39,7 +39,7 @@ keywords:
               url: https://www12.statcan.gc.ca/census-recensement/2021/ref/dict/az/Definition-eng.cfm?ID=geo008
               protocol:
                 short_name: "WWW:LINK"
-          prefix: GC_CD
+          prefix: GCPLC
           type:
             short_name: place
     goc_audience:
@@ -55,7 +55,7 @@ keywords:
           citation:
             title:
               en: Government of Canada Audiences
-          prefix: GC_AUD
+          prefix: GCAUD
           type:
             short_name: theme
 publishing:

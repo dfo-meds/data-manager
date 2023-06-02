@@ -835,7 +835,7 @@ dist_channel:
     en: Distribution Channel
   validation:
     required:
-      - distributor_contact
+      - responsibles
     recommended:
       - links
   fields:

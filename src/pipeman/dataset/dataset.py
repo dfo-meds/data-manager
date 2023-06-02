@@ -22,6 +22,12 @@ class MetadataRegistry:
         self._security_labels = BaseObjectRegistry("security_label")
         self._dataset_output_processing_hooks = []
 
+    def remove_all(self):
+        self._profiles.remove_all()
+        self._display_groups.remove_all()
+        self._fields.remove_all()
+        self._security_labels.remove_all()
+
     def __cleanup__(self):
         self._fields.__cleanup__()
         self._profiles.__cleanup__()
@@ -62,17 +68,21 @@ class MetadataRegistry:
         return MultiLanguageString(self._display_groups[display_group]['display'])
 
     def ordered_groups(self, display_groups):
-        reordered = [copy.deepcopy(self._display_groups[dg]) for dg in display_groups if dg in self._display_groups]
-        reordered.sort(key=lambda x: x['order'])
+        reordered = [
+            (
+                int(self._display_groups[dg]['order']) if 'order' in self._display_groups[dg] else 0,
+                self._display_groups[dg]['name']
+            )
+            for dg in display_groups
+            if dg in self._display_groups
+        ]
+        reordered.sort()
         for x in reordered:
-            yield x['name']
+            yield x[1]
 
-    def register_display_group(self, name, order, **config):
-        if order is None:
-            order = max(self._display_groups[dg]["order"] if "order" in self._display_groups[dg] else 1 for dg in self._display_groups) if self._display_groups else 0
-            order += 1
+    def register_display_group(self, name, **config):
         config['name'] = name
-        self._display_groups.register(name, order=order, **config)
+        self._display_groups.register(name, **config)
 
     def register_field(self, field_name, **config):
         self._fields.register(field_name, **config)
@@ -81,8 +91,7 @@ class MetadataRegistry:
         for dg_name in d or []:
             self.register_display_group(
                 dg_name,
-                display=d[dg_name]["display"] if "display" in d[dg_name] else {},
-                order=d[dg_name]["order"] if "order" in d[dg_name] else None
+                **d[dg_name]
             )
             if "fields" in d[dg_name]:
                 for fn in d[dg_name]["fields"]:
@@ -124,7 +133,11 @@ class MetadataRegistry:
                     yield load_object(hook)
         formatter = self._profiles[profile_name]["formatters"][format_name]
         if "preprocess" in formatter and formatter["preprocess"]:
-            yield load_object(formatter['preprocess'])
+            if isinstance(formatter['preprocess'], str):
+                yield load_object(formatter['preprocess'])
+            else:
+                for x in formatter['proeprocess']:
+                    yield load_object(x)
 
     def metadata_formats(self, profile_name):
         if 'formatters' in self._profiles[profile_name]:
@@ -186,7 +199,10 @@ class MetadataRegistry:
             if p in self._profiles and p not in ext_profiles:
                 ext_profiles.add(p)
                 if "extends" in self._profiles[p] and self._profiles[p]["extends"]:
-                    profiles.append(self._profiles[p]["extends"])
+                    if isinstance(self._profiles[p]["extends"], str):
+                        profiles.append(self._profiles[p]["extends"])
+                    else:
+                        profiles.extend(self._profiles[p]["extends"])
         for profile in ext_profiles:
             if "fields" in self._profiles[profile] and self._profiles[profile]["fields"]:
                 fields.update(self._profiles[profile]["fields"].keys())

@@ -5,6 +5,7 @@ import flask
 import flask_login
 from pipeman.i18n import MultiLanguageString
 import copy
+import zrlog
 from pipeman.util import deep_update, load_object
 from functools import cache
 from pipeman.db import BaseObjectRegistry
@@ -13,27 +14,39 @@ from threading import RLock
 import typing as t
 
 
-def entity_access(entity_type: str, op: str) -> bool:
+def entity_access(entity_type: str, op: str, log_access_failures: bool = False) -> bool:
     broad_perm = f"entities.{op}"
     general_access = f"entities.{op}.all"
     specific_perm = f"entities.{op}.{entity_type}"
     if not flask_login.current_user.has_permission(broad_perm):
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity_type}.{op} denied, missing {broad_perm}")
         return False
     if flask_login.current_user.has_permission(general_access):
         return True
     if not flask_login.current_user.has_permission(specific_perm):
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity_type}.{op} denied, missing {general_access} or {specific_perm}")
         return False
     return True
 
 
-def specific_entity_access(entity, op: str) -> bool:
+def specific_entity_access(entity, op: str, log_access_failures: bool = False) -> bool:
     if op == "remove" and entity.is_deprecated:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.remove denied, entity already removed")
         return False
     if op == "restore" and not entity.is_deprecated:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.restore denied, entity not removed")
         return False
     if flask_login.current_user.has_permission("organizations.manage.any"):
         return True
-    return entity.organization_id in flask_login.current_user.organizations
+    if entity.organization_id and entity.organization_id not in flask_login.current_user.organizations:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.{op} denied, no access")
+        return False
+    return True
 
 
 @injector.injectable_global
@@ -202,7 +215,7 @@ class FieldContainer:
 
     def ordered_field_names(self, display_group=None):
         fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]
-        fields.sort(key=lambda x: self._fields[x].order)
+        fields.sort(key=lambda x: (self._fields[x].order, x))
         return fields
 
     def get_field(self, fn) -> t.Optional[Field]:

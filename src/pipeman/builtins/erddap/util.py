@@ -1,5 +1,55 @@
 from pipeman.vocab import VocabularyTermController
 import logging
+from pipeman.dataset.dataset import Dataset
+
+
+def preprocess_metadata_all(dataset: Dataset, **kwargs):
+    erddap_ds_id = dataset["erddap_dataset_id"]
+    erddap_data_type = dataset['erddap_dataset_type']
+    f = dataset.get_field('erddap_servers')
+    servers = dataset['erddap_servers']
+    if not (erddap_ds_id and erddap_data_type and servers):
+        return
+    dtype_dir = 'tabledap'
+    if erddap_data_type['short_name'].startswith('EDDGrid'):
+        dtype_dir = 'griddap'
+    erddap_distribution_servers = []
+    for server in servers:
+        base_url = server['base_url']
+        if not base_url:
+            continue
+        erddap_distribution_servers.append({
+            'responsibles': server['responsibles'],
+            'links': [
+                {
+                    'url': _assemble_erddap_link(base_url, dtype_dir, erddap_ds_id),
+                    'protocol': {
+                        'short_name': f'ERDDAP:{dtype_dir}'
+                    },
+                    'function': {
+                        'function': 'download'
+                    },
+                    'name': {
+                        'und': 'ERDDAP',
+                    }
+                }
+            ]
+        })
+    if 'iso19115_custom_distribution_channels' in kwargs:
+        kwargs['iso19115_custom_distribution_channels'].extend(erddap_distribution_servers)
+        return
+    else:
+        return {
+            'iso19115_custom_distribution_channels': erddap_distribution_servers
+        }
+
+
+def _assemble_erddap_link(erddap_base, dtype_dir, dataset_id):
+    if not erddap_base[-1] == '/':
+        return f"{erddap_base}/{dtype_dir}/{dataset_id}"
+    else:
+        return f"{erddap_base}{dtype_dir}/{dataset_id}"
+
 
 TIME_PRECISION_MAP = {
     "month": "1970-01",

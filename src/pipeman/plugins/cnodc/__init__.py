@@ -5,6 +5,7 @@ import pathlib
 
 from pipeman.vocab import VocabularyRegistry
 from pipeman.workflow import WorkflowRegistry
+from pipeman.entity import EntityRegistry
 
 
 @_injector.inject
@@ -14,10 +15,11 @@ def init_plugin(system: _System):
 
 
 @_injector.inject
-def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, vreg: VocabularyRegistry = None):
+def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, vreg: VocabularyRegistry = None, ereg: EntityRegistry = None):
     root = pathlib.Path(__file__).absolute().parent
     from pipeman.auth.util import load_groups_from_yaml
     load_groups_from_yaml(root / "groups.yaml")
+    ereg.register_from_yaml(root / "entities.yaml")
     wreg.register_steps_from_yaml(root / "steps.yaml")
     wreg.register_workflows_from_yaml(root / "workflows.yaml")
     mreg.register_profiles_from_yaml(root / "profiles.yaml")

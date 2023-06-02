@@ -290,6 +290,13 @@
   </mdb:distributionInfo>
   {% endfor %}
   {% endif %}
+  {% if iso19115_custom_distribution_channels %}
+  {% for dc in iso19115_custom_distribution_channels %}
+  <mdb:distributionInfo>
+      {{ iso.render_distribution(dc) }}
+  </mdb:distributionInfo>
+  {% endfor %}
+  {% endif %}
   {# <!-- dataQualityInfo --> #}
   {# <!-- resourceLineage --> #}
   {# <!-- portrayalCatalogueInfo --> #}
