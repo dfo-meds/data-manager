@@ -6,6 +6,7 @@ from pipeman.i18n import MultiLanguageString, gettext
 from pipeman.db import BaseObjectRegistry
 import json
 import csv
+import zrlog
 
 
 @injector.injectable_global
@@ -13,6 +14,7 @@ class VocabularyRegistry(BaseObjectRegistry):
 
     def __init__(self):
         super().__init__("vocabulary")
+        self._log = zrlog.get_logger("pipeman.vocab")
 
     def list_vocabularies(self):
         for vocab_name in self.sorted_keys():
@@ -36,6 +38,7 @@ class VocabularyRegistry(BaseObjectRegistry):
 
     @injector.inject
     def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
+        self._log.notice(f"Loading terms from {term_file} to {vocab_name}")
         with open(term_file, "r", encoding="utf-8") as h:
             r = csv.reader(h)
             header = None
@@ -54,7 +57,7 @@ class VocabularyTermController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self._log = zrlog.get_logger("pipeman.vocab")
 
     def list_vocabularies_page(self):
         return flask.render_template(
@@ -73,11 +76,11 @@ class VocabularyTermController:
     def list_terms_page(self, vocabulary_name):
         return flask.render_template(
             "list_terms.html",
-            terms=self._term_iterator(vocabulary_name),
+            terms=self.list_terms(vocabulary_name),
             title=self.reg.display_name(vocabulary_name)
         )
 
-    def _term_iterator(self, vocabulary_name):
+    def list_terms(self, vocabulary_name):
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocabulary_name):
                 display_names = json.loads(term.display_names) if term.display_names else {}
@@ -87,6 +90,7 @@ class VocabularyTermController:
                 yield term.short_name, MultiLanguageString(display_names), MultiLanguageString(descriptions)
 
     def clear_terms_from_dict(self, vocab_name):
+        self._log.notice(f"Clearing all terms from {vocab_name}")
         with self.db as session:
             session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name).delete()
             session.commit()

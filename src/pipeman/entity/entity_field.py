@@ -7,6 +7,7 @@ from pipeman.i18n import gettext, MultiLanguageLink, MultiLanguageString
 import typing as t
 import flask
 import markupsafe
+import zrlog
 
 
 class EntityRefMixin:
@@ -130,6 +131,7 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
             ent_id, rev_no = EntitySelectField.parse_entity_option(val, False)
             return self.ec.load_entity(None, ent_id, rev_no)
         except ValueError:
+            zrlog.get_logger("pipeman.entity_field").warning(f"Requested entity {val} does not exist")
             return None
 
     def sanitize_form_input(self, val):

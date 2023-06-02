@@ -3,7 +3,7 @@ from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext
 from pipeman.util.errors import UserInputError
-import logging
+import zrlog
 import flask_login
 from pipeman.i18n import DelayedTranslationString, MultiLanguageString
 import json
@@ -21,7 +21,7 @@ class OrganizationController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self._log = zrlog.get_logger("pipeman.org")
 
     def list_organizations_page(self):
         with self.db as session:
@@ -100,7 +100,7 @@ class OrganizationController:
                 )
                 session.add(org)
             session.commit()
-            logging.getLogger("pipeman.org").out(f"Organization {org_name} created")
+            self._log.notice(f"Organization {org_name} updated or inserted")
             return org.id
 
     def list_organizations(self, include_global: bool = True):

@@ -55,6 +55,10 @@ class EntityRegistry(BaseObjectRegistry):
     def __init__(self):
         super().__init__("entity")
 
+    def list_entity_types(self):
+        for et in self:
+            yield et, self[et]
+
     def display(self, key):
         keys = self[key]["display"].copy()
         keys['und'] = key

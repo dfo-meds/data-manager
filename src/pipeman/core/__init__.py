@@ -17,6 +17,7 @@ from pipeman.workflow import WorkflowRegistry
 def init(system):
     system.register_cli("pipeman.core.cli", "org")
     system.register_cli("pipeman.core.cli", "workflow")
+    system.register_cli("pipeman.core.cli", "report")
     system.register_cli("pipeman.core.cli", "core")
     system.register_blueprint("pipeman.core.app", "base")
     system.register_blueprint("pipeman.core.app", "core")

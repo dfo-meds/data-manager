@@ -88,6 +88,10 @@ class WorkflowRegistry:
             for obj_name in d[cat_name] or {}:
                 self.register_workflow(obj_name, cat_name, **d[cat_name][obj_name])
 
+    def list_all_steps(self):
+        for s in self._steps:
+            yield s, self._steps[s]
+
     def register_workflows_from_yaml(self, f):
         with open(f, "r", encoding="utf-8") as h:
             self.register_workflows_from_dict(yaml.safe_load(h))
@@ -120,7 +124,11 @@ class WorkflowRegistry:
             raise WorkflowNotFoundError(key)
         return self._workflows[key]["cleanup"] if "cleanup" in self._workflows[key] and self._workflows[key] else []
 
-    def list_workflows(self, workflow_type):
+    def list_all_workflows(self):
+        for key in self._workflows:
+            yield key, self._workflows[key]
+
+    def list_workflows(self, workflow_type: str):
         for key in self._workflows:
             if not key.startswith(f"{workflow_type}__"):
                 continue

@@ -11,7 +11,7 @@ import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 import markupsafe
 import flask
-import logging
+import zrlog
 import datetime
 
 
@@ -58,6 +58,7 @@ class Field:
         self.parent_id = parent_id
         self.parent_type = parent_type
         self._default_thesaurus = None
+        self._log = zrlog.get_logger("pipeman.field")
 
     def config(self, *keys, default=None):
         working = self.field_config
@@ -271,7 +272,6 @@ class Field:
         elif use_repeatable:
             min_entries = max(len(self.value) if self.value else 0, 1)
             return wtf.FieldList(ctl_class(label="", **field_args), **parent_args, min_entries=min_entries)
-            pass
         else:
             return ctl_class(**parent_args, **field_args)
 
@@ -335,7 +335,7 @@ class Field:
         return args
 
     def _parent_arguments(self) -> set:
-        return set(["label", "description", "default"])
+        return {"label", "description", "default"}
 
     def _extra_wtf_arguments(self) -> dict:
         return {}
@@ -860,10 +860,10 @@ class KeyValueField(Field):
             elif dtype == 'numeric_list':
                 return [float(v.strip()) if '.' in v else int(v.strip()) for v in val.split(",") if v.strip()]
             else:
-                logging.getLogger("pipeman.fields").exception(f"Datatype not recognized {dtype} - {self.parent_type}.{self.parent_id}.{self.field_name}")
+                self._log.error(f"Datatype not recognized {dtype} - {self.parent_type}.{self.parent_id}.{self.field_name}")
                 return "?data type not recognized?"
         except (ValueError, TypeError) as ex:
-            logging.getLogger("pipeman.fields").exception(f"Error parsing KeyValue field value {self.parent_type}.{self.parent_id}.{self.field_name}")
+            self._log.exception(f"Error parsing KeyValue field value {self.parent_type}.{self.parent_id}.{self.field_name}")
             return "?parse error?"
 
 

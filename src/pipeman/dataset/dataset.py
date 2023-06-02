@@ -111,6 +111,20 @@ class MetadataRegistry:
     def register_profiles_from_yaml(self, yaml_file):
         self._profiles.register_from_yaml(yaml_file)
 
+    def profile_contains_field(self, profile_name, field_name, include_extended: bool = True) -> bool:
+        _check = [profile_name]
+        if include_extended:
+            _check = self.build_extended_profile_list(_check)
+        for pn in _check:
+            if pn in self._profiles and "fields" in self._profiles[pn]:
+                if field_name in self._profiles[pn]["fields"]:
+                    return True
+        return False
+
+    def field_list(self):
+        for fn in self._fields:
+            yield fn, self._fields[fn]
+
     def profiles_for_select(self):
         return [
             (x, MultiLanguageString(self._profiles[x]["display"]))
@@ -191,8 +205,7 @@ class MetadataRegistry:
                 obj = load_object(obj_name)
                 obj(dataset, file_type, file_metadata)
 
-    def build_dataset(self, profiles, **kwargs):
-        fields = set()
+    def build_extended_profile_list(self, profiles):
         ext_profiles = set()
         while profiles:
             p = profiles.pop()
@@ -203,6 +216,11 @@ class MetadataRegistry:
                         profiles.append(self._profiles[p]["extends"])
                     else:
                         profiles.extend(self._profiles[p]["extends"])
+        return ext_profiles
+
+    def build_dataset(self, profiles, **kwargs):
+        fields = set()
+        ext_profiles = self.build_extended_profile_list(profiles)
         for profile in ext_profiles:
             if "fields" in self._profiles[profile] and self._profiles[profile]["fields"]:
                 fields.update(self._profiles[profile]["fields"].keys())

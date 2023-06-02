@@ -5,7 +5,7 @@ from pipeman.db import Database
 import pipeman.db.orm as orm
 import json
 import hashlib
-import logging
+import zrlog
 import sqlalchemy as sa
 import zirconium as zr
 from pipeman.util.errors import RecoverableError, UnrecoverableError, TranslationNotAvailableYet
@@ -22,10 +22,11 @@ class TranslationEngine:
 
     @injector.construct
     def __init__(self, send_immediately: bool = True):
-        self.log = logging.getLogger("pipeman.i18n.workflow")
+        self._log = zrlog.get_logger("pipeman.i18n.workflow")
         self._send_translations_immediately = send_immediately
 
     def cleanup_requests(self):
+        self._log.notice(f"Cleaning up old requests")
         success_retention_days = self.config.as_int(("pipeman", "translation", "success_retention_days"), default=7)
         failure_retention_days = self.config.as_int(("pipeman", "translation", "failure_retention_days"), default=31)
         with self.db as session:
@@ -44,7 +45,7 @@ class TranslationEngine:
             session.execute(q)
             session.commit()
 
-    def find_request(self, key, lang, original_text):
+    def _find_request(self, key, lang, original_text):
         with self.db as session:
             trans_req = session.query(orm.TranslationRequest).filter_by(
                 guid=key,
@@ -72,7 +73,7 @@ class TranslationEngine:
         return h.hexdigest()
 
     def fetch_translation(self, key, lang, original_text) -> str:
-        trans_req = self.find_request(key, lang, original_text)
+        trans_req = self._find_request(key, lang, original_text)
         if trans_req.state == orm.TranslationState.FAILURE:
             raise UnrecoverableError(f"Translation request {trans_req.id} failed")
         elif trans_req.state == orm.TranslationState.SUCCESS:
