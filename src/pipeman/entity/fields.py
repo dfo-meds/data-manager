@@ -424,7 +424,7 @@ class LengthValidationMixin:
     def validators(self):
         validators = super().validators()
         min_val = self.config("min", default=None)
-        max_val = self.config("min", default=None)
+        max_val = self.config("max", default=None)
         if min_val is not None and max_val is not None:
             validators.append(wtfv.Length(
                 min=min_val,
@@ -449,7 +449,7 @@ class NumberValidationMixin:
     def validators(self):
         validators = super().validators()
         min_val = self.config("min", default=None)
-        max_val = self.config("min", default=None)
+        max_val = self.config("max", default=None)
         if min_val is not None and max_val is not None:
             validators.append(wtfv.NumberRange(
                 min=min_val,
