@@ -25,7 +25,7 @@ class TranslationEngine:
         self._log = zrlog.get_logger("pipeman.i18n.workflow")
         self._send_translations_immediately = send_immediately
 
-    def cleanup_requests(self):
+    def cleanup_requests(self, st):
         self._log.notice(f"Cleaning up old requests")
         success_retention_days = self.config.as_int(("pipeman", "translation", "success_retention_days"), default=7)
         failure_retention_days = self.config.as_int(("pipeman", "translation", "failure_retention_days"), default=31)
@@ -37,6 +37,9 @@ class TranslationEngine:
                 .where(orm.TranslationRequest.created_date < (datetime.datetime.now() - datetime.timedelta(days=success_retention_days)))
             )
             session.execute(q)
+            session.commit()
+            if st and st.halt.is_set():
+                return
             q = (
                 sa.delete(orm.TranslationRequest)
                 .where(orm.TranslationRequest.state == orm.TranslationState.FAILURE)
@@ -81,12 +84,14 @@ class TranslationEngine:
         else:
             raise TranslationNotAvailableYet()
 
-    def do_translations(self):
+    def do_translations(self, st):
         with self.db as session:
             for trans_req in session.query(orm.TranslationRequest).filter_by(
                 state=orm.TranslationState.IN_PROGRESS
             ):
                 self._do_translation(trans_req, session)
+                if st and st.halt.is_set():
+                    break
 
     def _do_translation(self, tr: orm.TranslationRequest, session):
         # Handle caching here automatically so we don't need to worry about it

@@ -92,10 +92,10 @@ def _register_cron_jobs(cron):
 
 
 @injector.inject
-def _process_trans_requests(te: "pipeman.i18n.workflow.TranslationEngine" = None):
-    te.do_translations()
+def _process_trans_requests(st=None, te: "pipeman.i18n.workflow.TranslationEngine" = None):
+    te.do_translations(st)
 
 
 @injector.inject
-def _cleanup_old_requests(te: "pipeman.i18n.workflow.TranslationEngine" = None):
-    te.cleanup_requests()
+def _cleanup_old_requests(st=None, te: "pipeman.i18n.workflow.TranslationEngine" = None):
+    te.cleanup_requests(st)

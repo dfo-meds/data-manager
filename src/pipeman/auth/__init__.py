@@ -60,7 +60,7 @@ def _do_setup():
 
 
 @injector.inject
-def _do_cleanup(db: Database = None, config: zr.ApplicationConfig = None):
+def _do_cleanup(st=None, db: Database = None, config: zr.ApplicationConfig = None):
     log = zrlog.get_logger("pipeman.auth")
     with db as session:
         # Handle ServerSession objects
@@ -69,7 +69,8 @@ def _do_cleanup(db: Database = None, config: zr.ApplicationConfig = None):
         q = sa.delete(orm.ServerSession).where(orm.ServerSession.valid_until < dt)
         session.execute(q)
         session.commit()
-
+        if st and st.halt.is_set():
+            return
         # Handle UserLoginRecord objects
         keep_days = config.as_int(("pipeman", "authentication", "retain_login_records_days"), default=30)
         if keep_days is None or keep_days < 14:

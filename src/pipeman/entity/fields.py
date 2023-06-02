@@ -99,7 +99,7 @@ class Field:
         current_value["_translation_request"] = False
 
     @injector.inject
-    def _file_translation_request(self, val: dict, index: int = None, wc: "pipeman.workflow.workflow.WorkflowController" = None):
+    def _file_translation_request(self, val: dict, index: int = None, wc: "pipeman.workflow.controller.WorkflowController" = None):
         if not any(val[x] and x not in ('_translation_request', 'und') for x in val):
             flasht("pipeman.field.error.translation_nothing_to_work_with", "warning", field_name=self.field_name, index=index)
             val['_translation_request'] = False
@@ -108,6 +108,7 @@ class Field:
             flasht("pipeman.field.error.translation_nothing_to_do", "warning", field_name=self.field_name, index=index)
             val['_translation_request'] = False
             return
+        print(wc)
         if wc.check_exists(
             'text_translation',
             'default',

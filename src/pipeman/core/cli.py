@@ -59,7 +59,7 @@ def cleanup(system: System = None):
 
 @core.command
 def cron():
-    from .util import CronDaemon
+    from pipeman.util.cron import CronDaemon
     daemon = CronDaemon()
     daemon.run_forever()
 

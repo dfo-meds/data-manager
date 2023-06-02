@@ -32,13 +32,14 @@ def _register_cron(cron):
 
 
 @injector.inject
-def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
+def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None):
     def _chunks(iter, size=1000):
         i = 0
         m = len(iter)
         while i < m:
             yield iter[i:i+size]
             i += size
+
     with db as session:
 
         # Handle entity data pruning
@@ -55,7 +56,11 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
                     if rev.modified_date >= dt:
                         continue
                     remove_revisions.append(rev.id)
+                if st and st.halt.is_set():
+                    break
             for chunk in _chunks(remove_revisions):
+                if st and st.halt.is_set():
+                    break
                 q = sa.delete(orm.EntityData).where(orm.EntityData.id.in_(chunk))
                 session.execute(q)
                 session.commit()
@@ -88,18 +93,28 @@ def _do_cleanup(db: Database = None, cfg: zr.ApplicationConfig = None):
                             if decision.attachment_id:
                                 remove_attachments.append(decision.attachment_id)
                     remove_dataset_editions.append(rev.id)
+                if st and st.halt.is_set():
+                    break
             for chunk in _chunks(remove_dataset_editions, 1000):
+                if st and st.halt.is_set():
+                    break
                 q = sa.delete(orm.MetadataEdition).where(orm.MetadataEdition.id.in_(chunk))
                 session.execute(q)
+                session.commit()
             for chunk in _chunks(remove_attachments, 1000):
+                if st and st.halt.is_set():
+                    break
                 q = sa.delete(orm.Attachment).where(orm.Attachment.id.in_(chunk))
                 session.execute(q)
+                session.commit()
             for chunk in _chunks(remove_workflow_items, 1000):
+                if st and st.halt.is_set():
+                    break
                 q = sa.delete(orm.WorkflowDecision).where(orm.WorkflowDecision.workflow_item_id.in_(chunk))
                 session.execute(q)
                 q = sa.delete(orm.WorkflowItem).where(orm.WorkflowItem.id.in_(chunk))
                 session.execute(q)
-            session.commit()
+                session.commit()
 
 
 @injector.inject

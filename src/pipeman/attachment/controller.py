@@ -316,13 +316,16 @@ class AttachmentController:
     def __init__(self):
         self.log = zrlog.get_logger("pipeman.attachment")
 
-    def download_attachment(self, attachment_id: int):
+    def download_attachment(self, attachment_id: int, dc: "pipeman.dataset.controller.DatasetController" = None):
         storage_name = self.config.get(("pipeman", "attachment", "storage_name"), default="default")
         with self.db as session:
             attachment = session.query(orm.Attachment).filter_by(id=attachment_id).first()
             if not attachment:
                 self.log.error(f"Attachment ID {attachment_id} does not exist")
                 return flask.abort(404)
+            if attachment.dataset_id:
+                if not dc.has_access(attachment.dataset, 'view', True):
+                    return flask.abort(403)
             content = self.canada_post.get_content(attachment.storage_name or storage_name, file_path=attachment.storage_path)
             return flask.send_file(content, as_attachment=True, download_name=attachment.file_name)
 

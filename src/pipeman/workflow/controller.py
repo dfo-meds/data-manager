@@ -23,6 +23,8 @@ from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, CustomDispl
 from flask_wtf.file import FileField
 from .workflow import WorkflowRegistry
 from .steps import ItemResult, StepStatus, ItemNextAction
+from pipeman.util.cron import CronThread, UniqueTaskThreadManager
+import functools
 
 
 class ItemDisplayWrapper:
@@ -351,33 +353,12 @@ class WorkflowController:
             self._log.warning(f"Unrecognized acces mode {mode}")
         return False
 
-    def cleanup_old_items(self):
+    def cleanup_old_items(self, st = None):
         # TODO: add old item removal for completed workflow items
         #self._log.info(f"Cleaning up old workflow items")
         self._log.warning(f"Cleanup not implemented")
 
-    def batch_process_items(self):
-        self._log.info(f"Starting batch processing jobs")
-        max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "batch_process_time"), default=5)
-        with self.db as session:
-            q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'BATCH_DELAY').values({
-                'status': 'BATCH_EXECUTE'
-            })
-            session.execute(q)
-            session.commit()
-            start_time = time.monotonic_ns()
-            cont = True
-            while cont:
-                cont = False
-                for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
-                    cont = True
-                    self._batch_execute(item, session)
-                    elapsed_time = time.monotonic_ns() - start_time
-                    if elapsed_time >= max_exec_time:
-                        cont = False
-                        break
-
-    async def async_batch_process_items(self):
+    async def async_batch_process_items(self, st = None):
         self._log.info(f"Starting async batch jobs")
         max_exec_time = 1000000000 * self.cfg.as_int(("pipeman", "async_batch_process_time"), default=5)
         max_items = self.cfg.as_int(("pipeman", "async_max_items"), default=5)
@@ -394,13 +375,13 @@ class WorkflowController:
                 cont = False
                 for item in session.query(orm.WorkflowItem).filter_by(status="ASYNC_EXECUTE"):
                     cont = True
-                    if (time.monotonic_ns() - start_time) > max_exec_time:
+                    if st.halt.is_set() or (time.monotonic_ns() - start_time) > max_exec_time:
                         cont = False
                         break
                     tasks.append(asyncio.create_task(self._async_batch_execute(item, session)))
                     while len(tasks) >= max_items:
                         await asyncio.sleep(0.5)
-                        if (time.monotonic_ns() - start_time) > max_exec_time:
+                        if (st and st.halt.is_set()) or (time.monotonic_ns() - start_time) > max_exec_time:
                             cont = False
                             break
                         tasks, _ = await asyncio.wait(tasks)
@@ -415,7 +396,7 @@ class WorkflowController:
         result = await step.async_execute(ctx)
         self._handle_step_result(step, result, item, session, steps, ctx)
 
-    def _handle_step_result(self, step, result, item, session, steps, ctx):
+    def _handle_step_result(self, step, result, item, session, steps, ctx, st = None):
         if step.output:
             outputs = json.loads(item.step_output) if item.step_output else {}
             if str(item.completed_index) in outputs:
@@ -429,17 +410,18 @@ class WorkflowController:
             item.completed_index += 1
             item.context = json.dumps(ctx)
             session.commit()
-            self._start_next_step(item, session, steps, ctx)
+            if st is None or not st.halt.is_set():
+                self._start_next_step(item, session, steps, ctx)
         elif next_step == ItemNextAction.FAILURE:
             item.context = json.dumps(ctx)
             session.commit()
-            self._handle_cleanup(item, session, steps, ctx, item.status)
+            self._handle_cleanup(item, session, steps, ctx, item.status, st=st)
         else:
             item.context = json.dumps(ctx)
             session.commit()
 
-    def _handle_cleanup(self, item, session, steps, ctx, end_state):
-        if '_in_cleanup' in ctx and ctx['_in_cleanup']:
+    def _handle_cleanup(self, item, session, steps, ctx, end_state, st = None):
+        if '_in_cleanup' in ctx and ctx['_in_cleanup'] and (st is None or not st.halt.is_set()):
             self._start_next_step(item, session, steps, ctx)
             return
         cleanup_steps = None
@@ -460,7 +442,8 @@ class WorkflowController:
         item.completed_index = next_index
         item.context = json.dumps(ctx)
         session.commit()
-        self._start_next_step(item, session, steps, ctx)
+        if st is None or not st.halt.is_set():
+            self._start_next_step(item, session, steps, ctx)
 
     def _build_next_step(self, item, steps=None, ctx=None):
         steps = steps or json.loads(item.step_list)
@@ -485,14 +468,21 @@ class WorkflowController:
         result = step.execute(ctx)
         self._handle_step_result(step, result, item, session, steps, ctx)
 
-    def _batch_execute(self, item, session):
-        step, steps = self._build_next_step(item)
-        if step is None:
+    def batch_process(self, st, item_id):
+        with self.db as session:
+            item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
+            if not item:
+                self._log.warning(f"Item ID {item_id} requested but not found")
+                return
+            step, steps = self._build_next_step(item)
+            if step is None:
+                session.commit()
+                return
+            ctx = self._build_context(item)
+            result = step.batch(ctx)
+            self._handle_step_result(step, result, item, session, steps, ctx, st=st)
+            item.locked_since = None
             session.commit()
-            return
-        ctx = self._build_context(item)
-        result = step.batch(ctx)
-        self._handle_step_result(step, result, item, session, steps, ctx)
 
     def _make_decision(self, item, session, decision: bool, form=None):
         step, steps = self._build_next_step(item)
@@ -555,3 +545,62 @@ class WorkflowItemForm(pipeman.util.flask.PipemanFlaskForm):
 
     def __init__(self):
         super().__init__()
+
+
+class WorkflowCronThread(CronThread):
+
+    db: Database = None
+
+    @injector.construct
+    def __init__(self):
+        super().__init__()
+        self._sleep_interval = 5
+        self._reset_interval = 300
+        self._max_threads = 5
+        self._lock_time = 30  # minutes
+        self._finish_delay_time = 5
+        self._last_reset = None
+        self._tasks = UniqueTaskThreadManager(self.halt, self._max_threads)
+
+    def run(self):
+        while not self.halt.is_set():
+            if self._last_reset is None or (time.monotonic() - self._last_reset) > self._reset_interval:
+                self._reset_delayed_jobs()
+            self._check_for_jobs()
+            self._tasks.sow()
+            self.halt.wait(self._sleep_interval)
+        self._tasks.wait_for_all(self._finish_delay_time)
+
+    def _check_for_jobs(self):
+        with self.db as session:
+            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
+                if self.halt.is_set():
+                    break
+                item.status = "BATCH_IN_PROGRESS"
+                item.locked_since = datetime.datetime.now()
+                session.commit()
+                self._tasks.execute(f'workflow_item{item.id}',
+                                    functools.partial(self._handle_batch_job, item_id=item.id))
+
+    @injector.inject
+    def _handle_batch_job(self, st, item_id, wc: WorkflowController=None):
+        wc.batch_process(st, item_id)
+
+    def _reset_delayed_jobs(self):
+        with self.db as session:
+            q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'BATCH_DELAY').values({
+                'status': 'BATCH_EXECUTE'
+            })
+            session.execute(q)
+            session.commit()
+            if self.halt.is_set():
+                return
+            gate = datetime.datetime.now() - datetime.timedelta(minutes=self._lock_time)
+            q = (
+                    sa.update(orm.WorkflowItem)
+                    .where(orm.WorkflowItem.status == 'BATCH_IN_PROGRESS')
+                    .where(orm.WorkflowItem.locked_since < gate)
+                    .values({'status': 'BATCH_EXECUTE', 'locked_since': None})
+            )
+            session.execute(q)
+            session.commit()

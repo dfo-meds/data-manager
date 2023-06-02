@@ -295,7 +295,6 @@ def create_dataset(con: DatasetController = None):
 @require_permission("attachments.view")
 @injector.inject
 def view_attachment(attachment_id, atc: AttachmentController = None):
-    # TODO: check access permissions??
     return atc.download_attachment(attachment_id)
 
 
