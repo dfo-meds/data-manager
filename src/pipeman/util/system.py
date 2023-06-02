@@ -8,6 +8,7 @@ import pathlib
 import typing as t
 from pipeman.util.errors import PipemanConfigurationError
 import threading
+import zrlog
 
 
 CallableOrStr = t.Union[callable, str]
@@ -46,7 +47,7 @@ class System:
         self.i18n_dirs = set()
         self.user_timeout = 0
         self.i18n_locale_dirs = []
-        self._log = None
+        self.log = None
         self._nci = None
         self._lock = threading.RLock()
 
@@ -59,7 +60,7 @@ class System:
 
     def fire(self, event_name: str, *args, **kwargs):
         """Call all registered event callback functions with the given arguments"""
-        self._log.debug(f"Firing {event_name}")
+        self.log.debug(f"Firing {event_name}")
         if event_name in self._hooks:
             for cb in self._hooks[event_name]:
                 if isinstance(cb, str):
@@ -78,21 +79,21 @@ class System:
         # System logging
         from pipeman.util.setup import init_system_logging, init_registries
         init_system_logging(self)
-        self._log.out("Initializing system")
+        self.log.out("Initializing system")
 
         # Pre-init functions
         self.fire("init.before", self)
 
         # Include plugins
-        self._log.debug("Loading plugins...")
+        self.log.debug("Loading plugins...")
         self._init_plugins()
 
         # Manage overrides
-        self._log.debug("Setting up autoinject overrides")
+        self.log.debug("Setting up autoinject overrides")
         self._init_overrides()
 
         # Set up the translation directories
-        self._log.debug("Initializing locale directories")
+        self.log.debug("Initializing locale directories")
         root = pathlib.Path(__file__).absolute().parent.parent
         self.i18n_dirs.update([
             str(root),
@@ -100,7 +101,7 @@ class System:
         ])
 
         # Reloading registeries
-        self._log.debug("Loading registries")
+        self.log.debug("Loading registries")
         init_registries()
 
         # Call the init callbacks
@@ -109,7 +110,7 @@ class System:
         # Post-load callback
         self.fire("init.after")
 
-        self._log.out("Init complete")
+        self.log.out("Init complete")
 
     def on_cron_start(self, cb: CallableOrStr):
         self.on("cron.start", cb)
@@ -279,12 +280,12 @@ class System:
         # Lastly, all the deplayed plugins
         for name in delayed_load:
             self._load_plugin(name)
-        self._log.out(f"Plugins initialized: {','.join(self._short_plugins)}")
+        self.log.out(f"Plugins initialized: {','.join(self._short_plugins)}")
 
     def _load_plugin(self, name: str):
         """Load a plugin from its fully qualified name."""
         if name not in self.plugins:
-            self._log.debug(f"Loading plugin {name}")
+            self.log.debug(f"Loading plugin {name}")
             # Import it
             mod = importlib.import_module(name)
             # Call init_plugin() if it exists
@@ -295,7 +296,7 @@ class System:
             name_pieces = name.split(".")
             sname = ".".join(name_pieces[2:])
             self._short_plugins.add(sname)
-            self._log.debug(f"Plugin {name} loaded")
+            self.log.debug(f"Plugin {name} loaded")
 
     def _init_overrides(self):
         """Override default objects with declared sub-classes as required."""

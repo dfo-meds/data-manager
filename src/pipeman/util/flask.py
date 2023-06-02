@@ -18,6 +18,7 @@ from markupsafe import Markup, escape
 from pipeman.i18n import gettext, LanguageDetector
 from pipeman.util.errors import FormValueError
 import wtforms.validators as wtfv
+import zrlog
 
 import sqlalchemy as sa
 import flask_login
@@ -157,6 +158,7 @@ class CSPRegistry:
         self._static_cache_time = self.cfg.as_int(("csp", "static_cache_time"), default=7200)
         self._allow_caching_default = self.cfg.as_bool(("csp", "allow_caching"), default=True)
         self._is_static_resource = False
+        self._log = zrlog.get_logger("pipeman.csp")
 
     def set_static(self, cache_time=None):
         self._cache_time = cache_time if cache_time is not None else self._static_cache_time
@@ -165,14 +167,18 @@ class CSPRegistry:
     def allow_caching(self, response=None):
         # If caching is disabled, lets just not worry about it
         if not self._allow_caching_default:
+            self._log.debug("Caching disabled")
             return False
         # No caching if we used a nonce or anything like it
         if not self._can_cache_page:
+            self._log.debug("Caching disabled, nonce used")
             return False
         if response and response.status_code not in (200, 301):
+            self._log.debug("Non-success error code, caching disabled")
             return False
         # No caching for methods other than GET or HEAD
         if flask.request.method not in ('GET', 'HEAD'):
+            self._log.debug("Request method was not GET or HEAD, caching disabled")
             return False
         # Otherwise we can probably cache this resource
         return True
@@ -184,9 +190,11 @@ class CSPRegistry:
             return True
         # No caching if we used an authorization header in the request
         if flask.request.headers.get("Authorization", default=None) is not None:
+            self._log.debug("Authorization header present, shared cache disabled")
             return False
         # No caching if the user is authenticated
         if flask_login.current_user.is_authenticated:
+            self._log.debug("Authenticated page, shared cache disabled")
             return False
         return True
 
@@ -467,36 +475,6 @@ class ActionList:
         return self.render()
 
 
-def paginate_query(query, min_page_size=10, max_page_size=250, default_page_size=50):
-    count = query.count()
-    page_size = flask.request.args.get("size", "")
-    if not page_size.isdigit():
-        page_size = default_page_size
-    else:
-        page_size = int(page_size)
-        if page_size > max_page_size:
-            page_size = max_page_size
-        elif page_size < min_page_size:
-            page_size = min_page_size
-    max_pages = max(1, math.ceil(count / page_size))
-    page = flask.request.args.get("page", "")
-    if not page.isdigit():
-        page = 1
-    else:
-        page = int(page)
-        if page > 1 and page > max_pages:
-            page = max_pages
-    return (
-        query.limit(page_size).offset((page - 1) * page_size),
-        {
-            "current_page": page,
-            "page_size": page_size,
-            "page_count": max_pages,
-            "item_count": count
-        }
-    )
-
-
 class SecureBaseForm(BaseForm):
 
     class Meta(DefaultMeta):
@@ -647,8 +625,7 @@ class EntitySelectField(wtf.Field):
 
     @staticmethod
     @injector.inject
-    def results_list(entity_types, text, by_revision, db: Database = None):
-        # TODO security filtering on entity_types
+    def results_list(entity_types, text, by_revision, db: Database = None, ec: "pipeman.entity.controller.EntityController" = None):
         results = {
             "results": [],
         }
@@ -660,15 +637,11 @@ class EntitySelectField(wtf.Field):
                 q = q.filter_by(entity_type=entity_types[0])
             else:
                 q = q.filter(orm.Entity.entity_type.in_(entity_types))
+            q = q.filter(sa.and_(*ec.base_filters()))
             if text:
                 if "%" not in text:
                     text = f"%{text}%"
                 q = q.filter(orm.Entity.display_names.ilike(text))
-            if not flask_login.current_user.has_permission("organization.manage_any"):
-                q = q.filter(sa.or_(
-                    orm.Entity.organization_id.in_(flask_login.current_user.organizations),
-                    orm.Entity.organization_id == None
-                ))
             q = q.order_by(orm.Entity.id)
             for ent in q:
                 results['results'].append(EntitySelectField._build_entry(ent, by_revision))

@@ -1,9 +1,8 @@
 import logging
 from autoinject import injector
-import zrlog
 from flask.sessions import SecureCookieSessionInterface, SessionMixin
 from .metrics import PromMetrics, time_function
-
+import pipeman
 from pipeman.i18n import gettext
 from pipeman.i18n.i18n import BaseTranslatableString
 import typing as t
@@ -15,10 +14,9 @@ import flask_login
 from pipeman.util.flask import CSPRegistry, csp_nonce, csp_allow
 from werkzeug.routing import Rule
 import flask_autoinject
-from pipeman.util.logging import PipemanLogger
 from pipeman.util.errors import PipemanConfigurationError
 from pipeman.util.flask import self_url, RequestInfo
-from pipeman.util.logging import set_request_info
+import zrlog
 from pipeman.db import Database
 import pipeman.db.orm as orm
 import uuid
@@ -51,8 +49,9 @@ def check_request_session(db: Database = None):
 @injector.inject
 def invalidate_session(db: Database = None):
     sess = flask.session.get("_pipeman_uuid", default=None)
-    with db as session:
-        if sess:
+    if sess:
+        zrlog.get_logger("pipeman.session").info("Invalidating session")
+        with db as session:
             session.query(orm.ServerSession).filter_by(guid=sess).delete()
             session.commit()
         _new_session(session)
@@ -117,14 +116,29 @@ def _build_nav(items: dict) -> list:
 def init_system_logging(system, rinfo: RequestInfo = None):
     # Setup logging
     zrlog.init_logging()
-    logging.setLoggerClass(PipemanLogger)
-    system._log = logging.getLogger("pipeman.system")
-    set_request_info({
+    zrlog.set_extras({
         "sys_username": rinfo.sys_username(),
         "sys_emulated": rinfo.sys_emulated_username(),
         "sys_logon": rinfo.sys_logon_time(),
         "sys_remote": rinfo.sys_remote_addr()
     })
+    # Defaults ensure that these variables exist in all log output from now on
+    zrlog.set_default_extra("sys_username", "")
+    zrlog.set_default_extra("sys_emulated", "")
+    zrlog.set_default_extra("sys_logon", "")
+    zrlog.set_default_extra("sys_remote", "")
+    zrlog.set_default_extra("username", "")
+    zrlog.set_default_extra("remote_ip", "")
+    zrlog.set_default_extra("proxy_ip", "")
+    zrlog.set_default_extra("correlation_id", "")
+    zrlog.set_default_extra("client_id", "")
+    zrlog.set_default_extra("request_url", "")
+    zrlog.set_default_extra("user_agent", "")
+    zrlog.set_default_extra("referrer", "")
+    zrlog.set_default_extra("request_method", "")
+    zrlog.set_default_extra("version", pipeman.__version__)
+
+    system.log = zrlog.get_logger("pipeman.system")
 
 
 @injector.inject
@@ -142,7 +156,7 @@ class TrustedProxyFix:
         self._app = app
         self._proxy = ProxyFix(app, **kwargs)
         self._trusted = trust_from_ips
-        self._log = logging.getLogger("pipeman.trusted_proxy")
+        self._log = zrlog.get_logger("pipeman.trusted_proxy")
         self._history = {}
 
     @time_function("pipeman_setup_is_upstream_trustworthy", "Time to check if the upstream is trustworthy")
@@ -208,9 +222,9 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
     # Adjust the user timeout as necessary
     system.user_timeout = config.as_int(("pipeman", "session_expiry"), default=44640)
     app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(minutes=system.user_timeout + 1)
-
+    system.log.info(f"Usertime set to {system.user_timeout} seconds")
     if config.as_bool(("pipeman", "proxy_fix", "enabled"), default=False):
-        system._log.info("Proxy fix: enabled")
+        system.log.info("Proxy fix: enabled")
         app.wsgi_app = TrustedProxyFix(
             app.wsgi_app,
             trust_from_ips=config.get(("pipeman", "proxy_fix", "trusted_upstreams"), default="*"),
@@ -221,7 +235,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
             x_prefix=config.get(("pipeman", "proxy_fix", "x_prefix"), default=1)
         )
     else:
-        system._log.info("Proxy fix: disabled")
+        system.log.info("Proxy fix: disabled")
 
     # Before request, make sure the session is permanent
     @app.before_request
@@ -231,7 +245,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
         if flask.request.endpoint == "static":
             cspr.set_static()
         check_request_session()
-        set_request_info({
+        zrlog.set_extras({
             "username": rinfo.username(),
             "remote_ip": rinfo.remote_ip(),
             "proxy_ip": rinfo.proxy_ip(),
@@ -242,7 +256,8 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
             "referrer": rinfo.referrer(),
             "request_method": rinfo.request_method(),
         })
-        logging.getLogger("pipeman").debug(f"Request context: {injector.context_manager._get_context_hash()}")
+
+    system.access_log = zrlog.get_logger("pipeman.access_log")
 
     # After the request, perform a few clean-up tasks
     @app.after_request
@@ -252,14 +267,13 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
         cspr.add_csp_policy('img-src', 'https://cdn.datatables.net')
         if flask.request.endpoint == "static":
             # Avoid spamming crap into the log for every static resource
-            logging.getLogger("pipeman.access_log").debug(
+            system.access_log.debug(
                 f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
             )
         else:
-            logging.getLogger("pipeman.access_log").out(
+            system.access_log.notice(
                 f"{flask.request.method} \"{flask.request.url}\" {response.status_code}"
             )
-
         response = cspr.add_headers(response)
         return response
 
@@ -269,7 +283,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
         try:
             gor.check_all()
         except Exception as ex:
-            logging.getLogger("pipeman.teardown").exception(ex)
+            zrlog.get_logger("pipeman.teardown").exception("Error while refreshing object registry")
 
     # Add the menu items and self_url() function to every template
     @app.context_processor

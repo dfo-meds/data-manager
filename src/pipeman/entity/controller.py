@@ -205,11 +205,11 @@ class EntityController:
 
     def _entity_query(self, entity_type, session):
         q = session.query(orm.Entity).filter_by(entity_type=entity_type)
-        for filter in self._base_filters():
+        for filter in self.base_filters():
             q = q.filter(filter)
         return q.order_by(orm.Entity.id)
 
-    def _base_filters(self):
+    def base_filters(self):
         filters = []
         if not flask_login.current_user.has_permission("organization.manage_any"):
             filters.append(sa.or_(
@@ -237,7 +237,7 @@ class EntityController:
         return table.ajax_response()
 
     def _list_entities_table(self, entity_type):
-        filters = self._base_filters()
+        filters = self.base_filters()
         dq = DataQuery(orm.Entity, entity_type=entity_type, extra_filters=filters)
         dt = DataTable(
             table_id="entity_list",

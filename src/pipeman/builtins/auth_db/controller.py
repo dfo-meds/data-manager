@@ -3,11 +3,10 @@ from pipeman.auth import AuthenticatedUser, SecurityHelper
 from pipeman.db.db import Database
 from autoinject import injector
 import pipeman.db.orm as orm
-from pipeman.util.flask import ConfirmationForm, paginate_query, ActionList, Select2Widget, RequestInfo
+from pipeman.util.flask import ConfirmationForm, ActionList, Select2Widget, RequestInfo
 from pipeman.i18n import gettext, DelayedTranslationString
 import flask
 import flask_login
-from flask_wtf import FlaskForm
 import wtforms as wtf
 import wtforms.validators as wtfv
 from pipeman.util.errors import UserInputError

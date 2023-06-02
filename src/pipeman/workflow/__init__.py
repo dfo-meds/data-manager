@@ -1,4 +1,6 @@
-from .workflow import WorkflowController, WorkflowRegistry, ItemResult
+from .workflow import WorkflowRegistry
+from .controller import WorkflowController
+from .steps import ItemResult
 from autoinject import injector
 import asyncio
 from pipeman.core.util import CronDaemon
