@@ -458,8 +458,6 @@ class CFVocabularyManager:
                 name = prefix.find("name").text
                 value = prefix.find("value").text
                 symbol = prefix.find("symbol").text
-                if not symbol:
-                    print(prefix)
                 terms[symbol] = {
                     "display": {
                         "und": name,

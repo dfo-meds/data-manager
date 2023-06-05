@@ -1,327 +1,385 @@
-cioos.validation.metadata_owner_ind_no_orcid: 'ORCID is required'
-cioos.validation.metadata_owner_no_email: 'Email address is empty'
-cioos.validation.metadata_owner_no_id_code: 'Identifier code is empty'
-cioos.validation.metadata_owner_no_id_code_or_name: 'Identifier code or name is required'
-cioos.validation.metadata_owner_no_id_code_space: 'Identifier system is missing a code space'
-cioos.validation.metadata_owner_no_id_system: 'Identifier system is empty'
-cioos.validation.metadata_owner_org_no_ror: 'ROR is required'
-pipeman.label.witem.step.skipped: "Skipped"
-pipeman.label.witem.step.comments: "Comments"
-pipeman.label.witem.step.approval_file: "Documentation"
-pipeman.label.witem.step.attachment: Attachment
-pipeman.label.dataset.attachments: Attachments
-pipeman.label.dataset.activation_chain: Activation Chain
-pipeman.label.dataset.activation_chain_link: Approval List
-pipeman.label.dataset.witem_approval_link: Approval Chain
-pipeman.dataset.page.add_attachment.success: "File uploaded successfully"
-pipeman.dataset.page.add_attachment.error: "An error occurred while uploading the file"
-pipeman.dataset.page.add_attachment.title: "File Upload"
-pipeman.dataset.page.add_attachment.instructions: ""
-
-pipeman.label.attachment.file: Attachment
-pipeman.dataset.error.attachment_required: Attachment is required
-pipeman.label.attachment.file_name: File Name
-pipeman.label.witem.step.approval_file.name: File Name
-pipeman.dataset.page.add_attachment.link: Upload Attachment
-
-cnodc.page.help.link: 'User Manual'
-cnodc.page.help.title: 'User Manual'
-cnodc.site_title: 'Canadian National Oceanographic Data Centre'
-cnodc.usage_warning: 'Unauthorized use of this tool is not allowed.'
-cnodc.usage_warning.header: 'Usage Warning'
-cnodc.user_welcome: 'Welcome'
-cnodc.welcome_message: 'Welcome to the CNODC data management dashboard'
-datatable.decimal: "."
-datatable.emptyTable: "No data available in table"
-datatable.info: "Showing _START_ to _END_ of _TOTAL_ entries"
-datatable.infoEmpty: "Showing 0 to 0 of 0 entries"
-datatable.infoFiltered: "(filtered from _MAX_ total entries)"
-datatable.thousands: ","
-datatable.lengthMenu: "Show _MENU_ entries"
-datatable.loadingRecords: "Loading..."
-datatable.search: "Search:"
-datatable.zeroRecords: "No matching records found"
-datatable.paginate.first: "First"
-datatable.paginate.last: "Last"
-datatable.paginate.next: "Next"
-datatable.paginate.previous: "Previous"
-datatable.aria.sortAscending: ": activate to sort column ascending"
-datatable.aria.sortDescending: ": activate to sort column descending"
-languages.short.en: 'ENG'
-languages.short.fr: 'FRA'
-languages.short.und: 'UND'
-languages.full.en: 'English'
-languages.full.fr: 'French'
-languages.full.und: 'Undefined'
-pipeman.auth.error.blank_password: 'Password is empty'
-pipeman.auth.error.group_already_exists: 'Group already exist'
-pipeman.auth.error.group_does_not_exist: 'Group does not exist'
-pipeman.auth.error.hash_not_available: 'Hash algorithm not available'
-pipeman.auth.error.login_required: 'Login required'
-pipeman.auth.error.not_authorized: 'Access not authorized'
-pipeman.auth.error.password_too_long: 'Password is too long'
-pipeman.auth.error.too_short_password: 'Password is too short'
-pipeman.auth.message.no_recent_failed_logins: 'No recent failed logins'
-pipeman.auth.message.no_recent_logins: 'No recent logins'
-pipeman.auth_db.error.account_locked: 'Your account is locked'
-pipeman.auth_db.error.api_key_does_not_exist: 'No such API key'
-pipeman.auth_db.error.email_already_exists: 'A user with that email already exists'
-pipeman.auth_db.error.too_many_recent_logins: 'Too many recent logins'
-pipeman.auth_db.error.user_does_not_exist: 'User does not exist'
-pipeman.auth_db.error.username_already_exists: 'User already exists'
-pipeman.auth_db.page.change_password.instructions: ''
-pipeman.auth_db.page.change_password.success: 'Your password has been changed'
-pipeman.auth_db.page.change_password.title: 'Change Password'
-pipeman.auth_db.page.create_user.link: 'New User'
-pipeman.auth_db.page.create_user.success: 'User created, password set to |{password}|'
-pipeman.auth_db.page.create_user.title: 'Create User'
-pipeman.auth_db.page.edit_myself.success: 'Your profile has been updated'
-pipeman.auth_db.page.edit_myself.title: 'Update My Profile'
-pipeman.auth_db.page.edit_user.link: 'Edit'
-pipeman.auth_db.page.edit_user.success: 'User account updated'
-pipeman.auth_db.page.edit_user.title: 'Edit User'
-pipeman.auth_db.page.list_users.title: 'List Users'
-pipeman.auth_db.page.reset_password.instructions: "This will reset the user's password to a random string"
-pipeman.auth_db.page.reset_password.link: 'Reset Password'
-pipeman.auth_db.page.reset_password.success: 'User password reset to |{password}|'
-pipeman.auth_db.page.reset_password.title: 'Reset Password'
-pipeman.auth_db.page.view_myself.info_header: 'Recent Activity'
-pipeman.auth_db.page.view_myself.title: 'My Profile'
-pipeman.auth_db.page.view_user.link: 'View'
-pipeman.auth_form.page.login.error: 'Error logging in'
-pipeman.auth_form.page.login.success: 'Login successful'
-pipeman.auth_form.page.login.title: 'Login'
-pipeman.auth_form.page.logout.success: 'You have been logged out'
-pipeman.common.actions: 'Actions'
-pipeman.common.active: 'Active'
-pipeman.common.add_item: 'Add Item'
-pipeman.common.back: 'Back'
-pipeman.common.clear: 'Clear'
-pipeman.common.deprecated: 'Deprecated'
-pipeman.common.display_name: 'Display Name'
-pipeman.common.empty_list: 'No Items'
-pipeman.common.na: 'N/A'
-pipeman.common.no: 'No'
-pipeman.common.pages: 'Pages'
-pipeman.common.placeholder: 'None'
-pipeman.common.submit: 'Submit'
-pipeman.common.unknown: 'Unknown'
-pipeman.common.yes: 'Yes'
-pipeman.core.error.metadata_generation_error: 'An error occurred generated the metadata file'
-pipeman.entity.page.list_entity_types.title: 'List Element Types'
-pipeman.core.page.welcome.title: 'Welcome'
-pipeman.dataset.error.during_activation: 'Error during activation'
-pipeman.dataset.error.during_publication: 'Error during plication'
-pipeman.dataset.message.activated: 'Dataset activated'
-pipeman.dataset.message.activation_in_progress: 'Dataset activation in progress'
-pipeman.dataset.message.no_fields: ''
-pipeman.dataset.message.publication_in_progress: 'Dataset publication in progress'
-pipeman.dataset.message.published: 'Dataset published'
-pipeman.dataset.message.revision_warning: 'You are viewing a specific revision'
-pipeman.dataset.page.activate_dataset.instructions: ''
-pipeman.dataset.page.activate_dataset.link: 'Activate'
-pipeman.dataset.page.activate_dataset.title: 'Activate Dataset'
-pipeman.dataset.page.create_dataset.link: 'Create Dataset'
-pipeman.dataset.page.create_dataset.success: 'Dataset created'
-pipeman.dataset.page.create_dataset.title: 'Create Dataset'
-pipeman.dataset.page.edit_dataset.link: 'Edit'
-pipeman.dataset.page.edit_dataset.success: 'Dataset saved'
-pipeman.dataset.page.edit_dataset.title: 'Edit Dataset'
-pipeman.dataset.page.edit_metadata.link: 'Edit Metadata'
-pipeman.dataset.page.edit_metadata.success: 'Metadata saved'
-pipeman.dataset.page.edit_metadata.title: 'Edit Metadata'
-pipeman.dataset.page.list_datasets.title: 'List Datasets'
-pipeman.dataset.page.publish_dataset.instructions: ''
-pipeman.dataset.page.publish_dataset.link: 'Publish'
-pipeman.dataset.page.publish_dataset.title: 'Publish Dataset'
-pipeman.dataset.page.remove_dataset.instructions: ''
-pipeman.dataset.page.remove_dataset.link: 'Remove'
-pipeman.dataset.page.remove_dataset.success: 'Dataset removed'
-pipeman.dataset.page.remove_dataset.title: 'Remove Dataset'
-pipeman.dataset.page.restore_dataset.instructions: ''
-pipeman.dataset.page.restore_dataset.link: 'Restore'
-pipeman.dataset.page.restore_dataset.success: 'Dataset restored'
-pipeman.dataset.page.restore_dataset.title: 'Restore Dataset'
-pipeman.dataset.page.validate_dataset.link: 'Validate'
-pipeman.dataset.page.validate_dataset.title: 'Validate Dataset'
-pipeman.dataset.page.view_current.link: 'View Current Revision'
-pipeman.dataset.page.view_dataset.link: 'View'
-pipeman.entity.message.add_components_after_creation: '(Not Available)'
-pipeman.entity.page.create_component.success: 'Element created'
-pipeman.entity.page.create_component.title: 'Create Element'
-pipeman.entity.page.create_entity.link: 'Create'
-pipeman.entity.page.create_entity.success: 'Element created'
-pipeman.entity.page.create_entity.title: 'Create Element'
-pipeman.entity.page.edit_component.link: 'Edit'
-pipeman.entity.page.edit_component.success: 'Element saved'
-pipeman.entity.page.edit_component.title: 'Edit Element'
-pipeman.entity.page.edit_entity.link: 'Edit'
-pipeman.entity.page.edit_entity.success: 'Element saved'
-pipeman.entity.page.edit_entity.title: 'Edit Element'
-pipeman.entity.page.list_entities.title: 'List Elements'
-pipeman.entity.page.remove_component.instructions: ''
-pipeman.entity.page.remove_component.link: 'Remove'
-pipeman.entity.page.remove_component.success: 'Element removed'
-pipeman.entity.page.remove_component.title: 'Remove Element'
-pipeman.entity.page.remove_entity.instructions: ''
-pipeman.entity.page.remove_entity.link: 'Remove'
-pipeman.entity.page.remove_entity.success: 'Element removed'
-pipeman.entity.page.remove_entity.title: 'Remove Element'
-pipeman.entity.page.restore_component.instructions: ''
-pipeman.entity.page.restore_component.link: 'Restore'
-pipeman.entity.page.restore_component.success: 'Element restored'
-pipeman.entity.page.restore_component.title: 'Restore Element'
-pipeman.entity.page.restore_entity.confirmation: ''
-pipeman.entity.page.restore_entity.link: 'Restore'
-pipeman.entity.page.restore_entity.success: 'Element restored'
-pipeman.entity.page.restore_entity.title: 'Restore Element'
-pipeman.entity.page.view_entity.link: 'View'
-pipeman.entity.page.view_entity.title: 'View Element'
-pipeman.entity_field.error.bad_entity_id: 'Invalid entity ID'
-pipeman.entity_field.error.bad_revision_no: 'Invalid revision number'
-pipeman.entity_field.error.malformed_revision_str: 'Malformed revision number'
-pipeman.entity_field.error.missing_entity_id: 'Missing entity ID'
-pipeman.entity_field.error.missing_revision_piece: 'Missing revision number'
-pipeman.entity_field.error.no_entity_access: 'No access to this entity type'
-pipeman.entity_field.error.no_such_entity: 'No such entity'
-pipeman.entity_field.error.no_such_revision: 'No such revision'
-pipeman.error.control_char_in_str: 'Invalid control character in field value'
-pipeman.error.fields_must_match: 'Fields must match'
-pipeman.error.form: 'Form Error [{field}]: {error}'
-pipeman.error.html_js_email_format_error: 'Invalid email address'
-pipeman.error.html_js_input_error: 'Invalid format'
-pipeman.error.html_js_missing_value: 'Missing value'
-pipeman.error.html_js_overflow: 'Value must be less than {max}'
-pipeman.error.html_js_pattern_error: 'Invalid pattern {pattern}'
-pipeman.error.html_js_step_error: 'Invalid step {step}'
-pipeman.error.html_js_tel_format_error: 'Invalid telephone number'
-pipeman.error.html_js_too_long: 'Value must be shorter than {max}'
-pipeman.error.html_js_too_short: 'Value must be longer than {min}'
-pipeman.error.html_js_underflow: 'Value must be greater than {min}'
-pipeman.error.html_js_url_format_error: 'Invalid URL format'
-pipeman.error.length_between: 'Length must be between {min} and {max}'
-pipeman.error.length_greater_than_max: 'Length must be at most {max}'
-pipeman.error.length_less_than_min: 'Length must be at least {min}'
-pipeman.error.range_between: 'Value must be between {min} and {max}'
-pipeman.error.range_greater_than_max: 'Value must be at most {max}'
-pipeman.error.range_less_than_min: 'Value must be at least {min}'
-pipeman.error.required_field: 'This field is required'
-pipeman.formats.date: '%Y-%m-%d'
-pipeman.formats.datetime: '%Y-%m-%d %H:%M:%S'
-pipeman.label.dataset.activation_workflow: 'Activation Workflow'
-pipeman.label.dataset.assigned_users: 'Assigned Users'
-pipeman.label.dataset.guid: 'UUID'
-pipeman.label.dataset.id: 'ID'
-pipeman.label.dataset.metadata: 'Metadata'
-pipeman.label.dataset.metadata_files: 'Metadata Files'
-pipeman.label.dataset.organization: 'Organization'
-pipeman.label.dataset.profiles: 'Profiles'
-pipeman.label.dataset.properties: 'Properties'
-pipeman.label.dataset.publication_workflow: 'Publication Workflow'
-pipeman.label.dataset.published_versions: 'Published Versions'
-pipeman.label.dataset.security_level: 'Security Level'
-pipeman.label.dataset.status: 'Status'
-pipeman.label.dataset.status.active: 'Active'
-pipeman.label.dataset.status.draft: 'Draft'
-pipeman.label.dataset.status.under_review: 'Under Review'
-pipeman.label.dataset.status.unknown: 'Unknown'
-pipeman.label.entity.component_removed: 'Removed'
-pipeman.label.entity.dataset: 'Dataset'
-pipeman.label.entity.id: 'ID'
-pipeman.label.entity.organization_name: 'Organization'
-pipeman.label.entity.dataset.link: 'View Related Dataset'
-pipeman.label.entity.status: 'Status'
-pipeman.label.org.global_name: 'Global'
-pipeman.label.org.short_name: 'Short Name'
-pipeman.label.user.display_name: 'Display Name'
-pipeman.label.user.email: 'Email'
-pipeman.label.user.groups: 'Groups'
-pipeman.label.user.id: 'ID'
-pipeman.label.user.last_error: 'Last Failed Login Time'
-pipeman.label.user.last_error_ip: 'Last Failed Login IP'
-pipeman.label.user.last_success: 'Last Login Time'
-pipeman.label.user.last_success_ip: 'Last Login IP'
-pipeman.label.user.organizations: 'Organizations'
-pipeman.label.user.password: 'Password'
-pipeman.label.user.repeat_password: 'Repeat Password'
-pipeman.label.user.total_errors: 'Total Errors'
-pipeman.label.user.username: 'Username'
-pipeman.label.witem.created: 'Created'
-pipeman.label.witem.id: 'ID'
-pipeman.label.witem.name: 'Name'
-pipeman.label.witem.object_link: 'Object Link'
-pipeman.label.witem.properties: 'Properties'
-pipeman.label.witem.status: 'Status'
-pipeman.label.witem.status.async_execute: 'Executing (Async)'
-pipeman.label.witem.status.batch_execute: 'Executing (Batch)'
-pipeman.label.witem.status.cancelled: 'Cancelled'
-pipeman.label.witem.status.complete: 'Completed'
-pipeman.label.witem.status.decision_required: 'Decision Required'
-pipeman.label.witem.status.failure: 'Failed'
-pipeman.label.witem.status.in-progress: 'In Progress'
-pipeman.label.witem.status.in_progress: 'In Progress'
-pipeman.label.witem.status.remote_exec_queued: 'Executing (Remote)'
-pipeman.label.witem.status.unknown: 'Unknown'
-pipeman.label.witem.step.complete: 'Completed'
-pipeman.label.witem.step.cancelled: 'Cancelled'
-pipeman.label.witem.step.failure: 'Failed'
-pipeman.label.witem.step.gate_cancelled: 'Item cancelled on {date} by {decider}'
-pipeman.label.witem.step.gate_completed: 'Item approved on {date} by {decider}'
-pipeman.label.witem.step.in-progress: 'In Progress'
-pipeman.label.witem.step.name: 'Name'
-pipeman.label.witem.step.notes: 'Notes'
-pipeman.label.witem.step.pending: 'Pending'
-pipeman.label.witem.step.status: 'Status'
-pipeman.label.witem.steps: 'Steps'
-pipeman.label.witem.type: 'Type'
-pipeman.label.witem.type.dataset_activation: 'Dataset Activation'
-pipeman.label.witem.type.dataset_publication: 'Dataset Publication'
-pipeman.label.witem.type.receive_send_item: 'Receive New File'
-pipeman.label.witem.type.send_file: 'Send File'
-pipeman.org.error.org_already_exists: 'Organization already exists'
-pipeman.org.error.org_does_not_exist: 'Organization does not exist'
-pipeman.org.page.create_organization.link: 'Create Organization'
-pipeman.org.page.create_organization.success: 'Organization created'
-pipeman.org.page.create_organization.title: 'Create Organization'
-pipeman.org.page.edit_organization.link: 'Edit'
-pipeman.org.page.edit_organization.success: 'Organization saved'
-pipeman.org.page.edit_organization.title: 'Edit Organization'
-pipeman.org.page.list_organizations.title: 'List Organizations'
-pipeman.org.page.view_organization.link: 'View'
-pipeman.org.page.view_organization.title: 'View Organization'
-pipeman.session.logout: 'Logout'
-pipeman.session.refresh_ajax_error: 'Error refreshing session'
-pipeman.session.refresh_link: 'Refresh Session'
-pipeman.session.timeout_warning: 'Session will timeout'
-pipeman.validation.error.recommended_field: 'Metadata field is recommended'
-pipeman.validation.error.required_field: 'Metadata field is required'
-pipeman.validation.level.error: 'Error'
-pipeman.validation.level.success: 'Success'
-pipeman.validation.level.warning: 'Warning'
-pipeman.vocab.page.list_vocabularies.title: 'Vocabularies'
-pipeman.workflow.page.cancel.instructions: ''
-pipeman.workflow.page.cancel.link: 'Cancel'
-pipeman.workflow.page.cancel.success: 'Action item cancelled'
-pipeman.workflow.page.cancel.title: 'Cancel Action'
-pipeman.workflow.page.continue.instructions: ''
-pipeman.workflow.page.continue.link: 'Approve'
-pipeman.workflow.page.continue.success: 'Action item approved'
-pipeman.workflow.page.continue.title: 'Approve Action'
-pipeman.workflow.page.list_items.title: 'List Action Items'
-pipeman.workflow.page.view_item.link: 'View'
-pipeman.workflow.page.view_item.title: 'View Item'
-language_names.fr: "Français"
-language_names.en: "English"
-pipeman.home: "Home"
-pipeman.datasets: Datasets
-pipeman.entities: Elements
-pipeman.action-items: Action Items
-pipeman.action-history: Action History
-pipeman.organizations: Organizations
-pipeman.vocabularies: Vocabularies
-auth_db.list_users: Users
-auth_db.me: My Profile
 auth_db.change_password: Change Password
 auth_db.edit_profile: Edit Profile
-pipeman.menu.logout: Logout
+auth_db.list_users: Users
+auth_db.me: My Profile
+cioos.validation.metadata_owner_ind_no_orcid: ORCID is required
+cioos.validation.metadata_owner_no_email: Email address is empty
+cioos.validation.metadata_owner_no_id_code: Identifier code is empty
+cioos.validation.metadata_owner_no_id_code_or_name: Identifier code or name is required
+cioos.validation.metadata_owner_no_id_code_space: Identifier system is missing a code space
+cioos.validation.metadata_owner_no_id_system: Identifier system is empty
+cioos.validation.metadata_owner_org_no_ror: ROR is required
+cnodc.page.help.link: User Manual
+cnodc.page.help.title: User Manual
+cnodc.site_title: Canadian National Oceanographic Data Centre
+cnodc.usage_warning: Unauthorized use of this tool is not allowed.
+cnodc.usage_warning.header: Usage Warning
+cnodc.user_welcome: Welcome
+cnodc.welcome_message: Welcome to the CNODC data management dashboard
+datatable.aria.sortAscending: ': activate to sort column ascending'
+datatable.aria.sortDescending: ': activate to sort column descending'
+datatable.decimal: .
+datatable.emptyTable: No data available in table
+datatable.info: Showing _START_ to _END_ of _TOTAL_ entries
+datatable.infoEmpty: Showing 0 to 0 of 0 entries
+datatable.infoFiltered: (filtered from _MAX_ total entries)
+datatable.lengthMenu: Show _MENU_ entries
+datatable.loadingRecords: Loading...
+datatable.paginate.first: First
+datatable.paginate.last: Last
+datatable.paginate.next: Next
+datatable.paginate.previous: Previous
+datatable.search: 'Search:'
+datatable.thousands: ','
+datatable.zeroRecords: No matching records found
+language_names.en: English
+language_names.fr: Français
+languages.full.en: English
+languages.full.fr: French
+languages.full.und: Undefined
+languages.short.en: ENG
+languages.short.fr: FRA
+languages.short.und: UND
+pipeman.action-history: Action History
+pipeman.action-items: Action Items
+pipeman.auth.error.account_locked: Your account is locked
+pipeman.auth.error.api_key_does_not_exist: No such API key
+pipeman.auth.error.blank_password: Password is empty
+pipeman.auth.error.email_already_exists: A user with that email already exists
+pipeman.auth.error.group_already_exists: Group already exist
+pipeman.auth.error.group_does_not_exist: Group does not exist
+pipeman.auth.error.hash_not_available: Hash algorithm not available
+pipeman.auth.error.login_required: Login required
+pipeman.auth.error.not_authorized: Access not authorized
+pipeman.auth.error.password_too_long: Password is too long
+pipeman.auth.error.too_many_recent_logins: Too many recent logins
+pipeman.auth.error.too_short_password: Password is too short
+pipeman.auth.error.user_does_not_exist: User does not exist
+pipeman.auth.error.username_already_exists: User already exists
+pipeman.auth.message.no_recent_failed_logins: No recent failed logins
+pipeman.auth.message.no_recent_logins: No recent logins
+pipeman.auth.page.change_password.error_no_password_for_account: ''
+pipeman.auth.page.change_password.instructions: ''
+pipeman.auth.page.change_password.success: Your password has been changed
+pipeman.auth.page.change_password.title: Change Password
+pipeman.auth.page.create_user.link: New User
+pipeman.auth.page.create_user.success: User created, password set to |{password}|
+pipeman.auth.page.create_user.title: Create User
+pipeman.auth.page.edit_myself.success: Your profile has been updated
+pipeman.auth.page.edit_myself.title: Update My Profile
+pipeman.auth.page.edit_user.link: Edit
+pipeman.auth.page.edit_user.success: User account updated
+pipeman.auth.page.edit_user.title: Edit User
+pipeman.auth.page.form_login.error: An error occurred while logging you in
+pipeman.auth.page.form_login.title: Login - Local Account
+pipeman.auth.page.list_users.title: List Users
+pipeman.auth.page.login.success: You have been successfully logged in
+pipeman.auth.page.login_select.title: Login
+pipeman.auth.page.logout.success: You have been successfully logged out
+pipeman.auth.page.reset_password.instructions: This will reset the user's password
+  to a random string
+pipeman.auth.page.reset_password.link: Reset Password
+pipeman.auth.page.reset_password.success: User password reset to |{password}|
+pipeman.auth.page.reset_password.title: Reset Password
+pipeman.auth.page.view_myself.info_header: Recent Activity
+pipeman.auth.page.view_myself.title: My Profile
+pipeman.auth.page.view_user.link: View
+pipeman.auth_db.page.view_myself.info_header: ''
+pipeman.auth_msal.page.login.error_no_original: An error occurred while executing
+  your request
+pipeman.auth_msal.page.login.error_no_response: The response from Azure could not
+  be processed
+pipeman.auth_msal.page.login.error_token_acquisition: The response from Azure could
+  not be handled
+pipeman.auth_msal.page.login.msal_error: An error occurred while processing your request
+pipeman.common.actions: Actions
+pipeman.common.active: Active
+pipeman.common.add_item: Add Item
+pipeman.common.back: Back
+pipeman.common.clear: Clear
+pipeman.common.deprecated: Deprecated
+pipeman.common.display_name: Display Name
+pipeman.common.empty_list: No Items
+pipeman.common.na: N/A
+pipeman.common.no: 'No'
+pipeman.common.open_translation_request: 'Request Translation'
+pipeman.common.pages: Pages
+pipeman.common.placeholder: None
+pipeman.common.submit: Submit
+pipeman.common.unknown: Unknown
+pipeman.common.yes: 'Yes'
+pipeman.core.error.metadata_generation_error: An error occurred generated the metadata
+  file
+pipeman.core.page.welcome.title: Welcome
+pipeman.dataset.error.attachment_required: Attachment is required
+pipeman.dataset.error.during_activation: Error during activation
+pipeman.dataset.error.during_publication: Error during plication
+pipeman.dataset.message.activated: Dataset activated
+pipeman.dataset.message.activation_in_progress: Dataset activation in progress
+pipeman.dataset.message.no_fields: ''
+pipeman.dataset.message.publication_in_progress: Dataset publication in progress
+pipeman.dataset.message.published: Dataset published
+pipeman.dataset.message.revision_warning: You are viewing a specific revision
+pipeman.dataset.page.activate_dataset.instructions: ''
+pipeman.dataset.page.activate_dataset.link: Activate
+pipeman.dataset.page.activate_dataset.title: Activate Dataset
+pipeman.dataset.page.add_attachment.error: An error occurred while uploading the file
+pipeman.dataset.page.add_attachment.instructions: ''
+pipeman.dataset.page.add_attachment.link: Upload Attachment
+pipeman.dataset.page.add_attachment.success: File uploaded successfully
+pipeman.dataset.page.add_attachment.title: File Upload
+pipeman.dataset.page.create_dataset.link: Create Dataset
+pipeman.dataset.page.create_dataset.success: Dataset created
+pipeman.dataset.page.create_dataset.title: Create Dataset
+pipeman.dataset.page.edit_dataset.link: Edit
+pipeman.dataset.page.edit_dataset.success: Dataset saved
+pipeman.dataset.page.edit_dataset.title: Edit Dataset
+pipeman.dataset.page.edit_metadata.link: Edit Metadata
+pipeman.dataset.page.edit_metadata.success: Metadata saved
+pipeman.dataset.page.edit_metadata.title: Edit Metadata
+pipeman.dataset.page.list_datasets.title: List Datasets
+pipeman.dataset.page.publish_dataset.instructions: ''
+pipeman.dataset.page.publish_dataset.link: Publish
+pipeman.dataset.page.publish_dataset.title: Publish Dataset
+pipeman.dataset.page.remove_dataset.instructions: ''
+pipeman.dataset.page.remove_dataset.link: Remove
+pipeman.dataset.page.remove_dataset.success: Dataset removed
+pipeman.dataset.page.remove_dataset.title: Remove Dataset
+pipeman.dataset.page.restore_dataset.instructions: ''
+pipeman.dataset.page.restore_dataset.link: Restore
+pipeman.dataset.page.restore_dataset.success: Dataset restored
+pipeman.dataset.page.restore_dataset.title: Restore Dataset
+pipeman.dataset.page.validate_dataset.link: Validate
+pipeman.dataset.page.validate_dataset.title: Validate Dataset
+pipeman.dataset.page.view_current.link: View Current Revision
+pipeman.dataset.page.view_dataset.link: View
+pipeman.datasets: Datasets
+pipeman.entities: Elements
+pipeman.entity.message.add_components_after_creation: (Not Available)
+pipeman.entity.page.create_component.success: Element created
+pipeman.entity.page.create_component.title: Create Element
+pipeman.entity.page.create_entity.link: Create
+pipeman.entity.page.create_entity.success: Element created
+pipeman.entity.page.create_entity.title: Create Element
+pipeman.entity.page.edit_component.link: Edit
+pipeman.entity.page.edit_component.success: Element saved
+pipeman.entity.page.edit_component.title: Edit Element
+pipeman.entity.page.edit_entity.link: Edit
+pipeman.entity.page.edit_entity.success: Element saved
+pipeman.entity.page.edit_entity.title: Edit Element
+pipeman.entity.page.list_entities.title: List Elements
+pipeman.entity.page.list_entity_types.title: List Element Types
+pipeman.entity.page.remove_component.instructions: ''
+pipeman.entity.page.remove_component.link: Remove
+pipeman.entity.page.remove_component.success: Element removed
+pipeman.entity.page.remove_component.title: Remove Element
+pipeman.entity.page.remove_entity.instructions: ''
+pipeman.entity.page.remove_entity.link: Remove
+pipeman.entity.page.remove_entity.success: Element removed
+pipeman.entity.page.remove_entity.title: Remove Element
+pipeman.entity.page.restore_component.instructions: ''
+pipeman.entity.page.restore_component.link: Restore
+pipeman.entity.page.restore_component.success: Element restored
+pipeman.entity.page.restore_component.title: Restore Element
+pipeman.entity.page.restore_entity.confirmation: ''
+pipeman.entity.page.restore_entity.link: Restore
+pipeman.entity.page.restore_entity.success: Element restored
+pipeman.entity.page.restore_entity.title: Restore Element
+pipeman.entity.page.view_entity.link: View
+pipeman.entity.page.view_entity.title: View Element
+pipeman.entity_field.error.bad_entity_id: Invalid entity ID
+pipeman.entity_field.error.bad_revision_no: Invalid revision number
+pipeman.entity_field.error.malformed_revision_str: Malformed revision number
+pipeman.entity_field.error.missing_entity_id: Missing entity ID
+pipeman.entity_field.error.missing_revision_piece: Missing revision number
+pipeman.entity_field.error.no_entity_access: No access to this entity type
+pipeman.entity_field.error.no_such_entity: No such entity
+pipeman.entity_field.error.no_such_revision: No such revision
+pipeman.error.control_char_in_str: Invalid control character in field value
+pipeman.error.fields_must_match: Fields must match
+pipeman.error.form: 'Form Error [{field}]: {error}'
+pipeman.error.html_js_email_format_error: Invalid email address
+pipeman.error.html_js_input_error: Invalid format
+pipeman.error.html_js_missing_value: Missing value
+pipeman.error.html_js_overflow: Value must be less than {max}
+pipeman.error.html_js_pattern_error: Invalid pattern {pattern}
+pipeman.error.html_js_step_error: Invalid step {step}
+pipeman.error.html_js_tel_format_error: Invalid telephone number
+pipeman.error.html_js_too_long: Value must be shorter than {max}
+pipeman.error.html_js_too_short: Value must be longer than {min}
+pipeman.error.html_js_underflow: Value must be greater than {min}
+pipeman.error.html_js_url_format_error: Invalid URL format
+pipeman.error.length_between: Length must be between {min} and {max}
+pipeman.error.length_greater_than_max: Length must be at most {max}
+pipeman.error.length_less_than_min: Length must be at least {min}
+pipeman.error.range_between: Value must be between {min} and {max}
+pipeman.error.range_greater_than_max: Value must be at most {max}
+pipeman.error.range_less_than_min: Value must be at least {min}
+pipeman.error.required_field: This field is required
+pipeman.field.error.translation_already_in_progress: 'Translation already in progress'
+pipeman.field.error.translation_nothing_to_do: 'All language fields already populated'
+pipeman.field.error.translation_nothing_to_work_with: 'At least one original language must be present'
+pipeman.field.messages.translation_requested: 'Translation request opened'
+pipeman.formats.date: '%Y-%m-%d'
+pipeman.formats.datetime: '%Y-%m-%d %H:%M:%S'
+pipeman.home: Home
+pipeman.label.attachment.file: Attachment
+pipeman.label.attachment.file_name: File Name
+pipeman.label.dataset.activation_chain: Activation Chain
+pipeman.label.dataset.activation_chain_link: Approval List
+pipeman.label.dataset.activation_workflow: Activation Workflow
+pipeman.label.dataset.assigned_users: Assigned Users
+pipeman.label.dataset.attachments: Attachments
+pipeman.label.dataset.guid: UUID
+pipeman.label.dataset.id: ID
+pipeman.label.dataset.metadata: Metadata
+pipeman.label.dataset.metadata_files: Metadata Files
+pipeman.label.dataset.organization: Organization
+pipeman.label.dataset.profiles: Profiles
+pipeman.label.dataset.properties: Properties
+pipeman.label.dataset.publication_workflow: Publication Workflow
+pipeman.label.dataset.published_versions: Published Versions
+pipeman.label.dataset.security_level: Security Level
+pipeman.label.dataset.status: Status
+pipeman.label.dataset.status.active: Active
+pipeman.label.dataset.status.draft: Draft
+pipeman.label.dataset.status.under_review: Under Review
+pipeman.label.dataset.status.unknown: Unknown
+pipeman.label.dataset.witem_approval_link: Approval Chain
+pipeman.label.entity.component_removed: Removed
+pipeman.label.entity.dataset: Dataset
+pipeman.label.entity.dataset.link: View Related Dataset
+pipeman.label.entity.id: ID
+pipeman.label.entity.organization_name: Organization
+pipeman.label.entity.status: Status
+pipeman.label.org.global_name: Global
+pipeman.label.org.short_name: Short Name
+pipeman.label.translation.upload: 'Translation CSV'
+pipeman.label.user.display_name: Display Name
+pipeman.label.user.email: Email
+pipeman.label.user.groups: Groups
+pipeman.label.user.id: ID
+pipeman.label.user.last_error: Last Failed Login Time
+pipeman.label.user.last_error_ip: Last Failed Login IP
+pipeman.label.user.last_success: Last Login Time
+pipeman.label.user.last_success_ip: Last Login IP
+pipeman.label.user.organizations: Organizations
+pipeman.label.user.password: Password
+pipeman.label.user.repeat_password: Repeat Password
+pipeman.label.user.total_errors: Total Errors
+pipeman.label.user.username: Username
+pipeman.label.witem.created: Created
+pipeman.label.witem.id: ID
+pipeman.label.witem.name: Name
+pipeman.label.witem.object_link: Object Link
+pipeman.label.witem.properties: Properties
+pipeman.label.witem.status: Status
+pipeman.label.witem.status.async_delay: 'Delayed (Async)'
+pipeman.label.witem.status.async_execute: Executing (Async)
+pipeman.label.witem.status.batch_delay: 'Delayed (Batch)'
+pipeman.label.witem.status.batch_execute: Executing (Batch)
+pipeman.label.witem.status.cancelled: Cancelled
+pipeman.label.witem.status.complete: Completed
+pipeman.label.witem.status.decision_required: Decision Required
+pipeman.label.witem.status.failure: Failed
+pipeman.label.witem.status.in-progress: In Progress
+pipeman.label.witem.status.in_progress: In Progress
+pipeman.label.witem.status.remote_exec_queued: Executing (Remote)
+pipeman.label.witem.status.unknown: Unknown
+pipeman.label.witem.step.approval_file: Documentation
+pipeman.label.witem.step.approval_file.name: File Name
+pipeman.label.witem.step.attachment: Attachment
+pipeman.label.witem.step.cancelled: Cancelled
+pipeman.label.witem.step.comments: Comments
+pipeman.label.witem.step.complete: Completed
+pipeman.label.witem.step.failure: Failed
+pipeman.label.witem.step.gate_cancelled: Item cancelled on {date} by {decider}
+pipeman.label.witem.step.gate_completed: Item approved on {date} by {decider}
+pipeman.label.witem.step.in-progress: In Progress
+pipeman.label.witem.step.name: Name
+pipeman.label.witem.step.notes: Notes
+pipeman.label.witem.step.pending: Pending
+pipeman.label.witem.step.skipped: Skipped
+pipeman.label.witem.step.status: Status
+pipeman.label.witem.steps: Steps
+pipeman.label.witem.type: Type
+pipeman.label.witem.type.dataset_activation: Dataset Activation
+pipeman.label.witem.type.dataset_publication: Dataset Publication
+pipeman.label.witem.type.receive_send_item: Receive New File
+pipeman.label.witem.type.send_file: Send File
+pipeman.label.witem.workflow_name: 'Workflow Name'
+pipeman.label.witem.workflow_type: 'Workflow Type'
+pipeman.labels.kv_field.data_type: 'Data Type'
+pipeman.labels.kv_field.data_type.numeric: 'Numeric'
+pipeman.labels.kv_field.data_type.numeric_list: 'Numeric (comma-separated list)'
+pipeman.labels.kv_field.data_type.str: 'Text'
+pipeman.labels.kv_field.key: 'Key'
+pipeman.labels.kv_field.value: 'Value'
+pipeman.login.database: Local Account
+pipeman.login.msal: Microsoft Account
+pipeman.menu.download_translations: Download Translations
 pipeman.menu.login: Login
+pipeman.menu.logout: Logout
+pipeman.menu.upload_translations: Upload Translations
+pipeman.mtrans.error.line_processing_error: 'There was an error while processing the translation on row {lineno}: {original}'
+pipeman.mtrans.error.missing_guid: The uploaded CSV file is missing a GUID value in
+  row {lineno}
+pipeman.mtrans.error.missing_translation: The uploaded CSV file is missing a translation
+  in row {lineno}
+pipeman.mtrans.error.no_guid_column: The uploaded CSV file is missing a column named
+  'guid'
+pipeman.mtrans.error.no_such_request: Request does not exist
+pipeman.mtrans.error.no_translation: Missing translation
+pipeman.mtrans.error.no_translation_column: The uploaded CSV file is missing a column
+  named 'translation'
+pipeman.mtrans.error.not_enough_columns: The uploaded CSV file is missing a value
+  in row {lineno}
+pipeman.mtrans.error.other_error: There was an unknown error while processing the
+  translation on row {lineno}
+pipeman.mtrans.error.request_already_completed: Already completed
+pipeman.mtrans.page.upload.instructions: ''
+pipeman.mtrans.page.upload.title: 'Upload Translation File'
+pipeman.mtrans.page.upload_translations.success: Translation import complete
+pipeman.netcdf.page.populate_from_netcdf.dataset: Dataset
+pipeman.netcdf.page.populate_from_netcdf.error: An error occurred while populated
+  the metadata from the NetCDF file
+pipeman.netcdf.page.populate_from_netcdf.instructions: ''
+pipeman.netcdf.page.populate_from_netcdf.netcdf_file: File
+pipeman.netcdf.page.populate_from_netcdf.success: Metadata populated from NetCDF file
+pipeman.netcdf.page.populate_from_netcdf.title: Import Metadata From NetCDF
+pipeman.org.error.org_already_exists: Organization already exists
+pipeman.org.error.org_does_not_exist: Organization does not exist
+pipeman.org.page.create_organization.link: Create Organization
+pipeman.org.page.create_organization.success: Organization created
+pipeman.org.page.create_organization.title: Create Organization
+pipeman.org.page.edit_organization.link: Edit
+pipeman.org.page.edit_organization.success: Organization saved
+pipeman.org.page.edit_organization.title: Edit Organization
+pipeman.org.page.list_organizations.title: List Organizations
+pipeman.org.page.view_organization.link: View
+pipeman.org.page.view_organization.title: View Organization
+pipeman.organizations: Organizations
+pipeman.session.logout: Logout
+pipeman.session.refresh_ajax_error: Error refreshing session
+pipeman.session.refresh_link: Refresh Session
+pipeman.session.timeout_warning: Session will timeout
+pipeman.validation.error.recommended_field: Metadata field is recommended
+pipeman.validation.error.required_field: Metadata field is required
+pipeman.validation.level.error: Error
+pipeman.validation.level.success: Success
+pipeman.validation.level.warning: Warning
+pipeman.vocab.page.list_vocabularies.title: Vocabularies
+pipeman.vocabularies: Vocabularies
+pipeman.workflow.error.file_upload_error: 'Error uploading file'
+pipeman.workflow.page.cancel.instructions: ''
+pipeman.workflow.page.cancel.link: Cancel
+pipeman.workflow.page.cancel.success: Action item cancelled
+pipeman.workflow.page.cancel.title: Cancel Action
+pipeman.workflow.page.continue.instructions: ''
+pipeman.workflow.page.continue.link: Approve
+pipeman.workflow.page.continue.success: Action item approved
+pipeman.workflow.page.continue.title: Approve Action
+pipeman.workflow.page.list_items.title: List Action Items
+pipeman.workflow.page.view_item.link: View
+pipeman.workflow.page.view_item.title: View Item
+pipeman.label.witem.type.text_translation: Text Translation

@@ -5,9 +5,9 @@
     <tbody>
     <tr><th>{{'pipeman.label.user.display_name' | gettext}}</th><td>{{current_user.display}}</td></tr>
     <tr><th>{{'pipeman.label.user.username' | gettext}}</th><td>{{current_user.username}}</td></tr>
-    <tr><th>{{'pipeman.label.user.last_success' | gettext}}</th><td>{% if current_user.property('last_success') %}{{current_user.property('last_success') | format_datetime}}{% else %}{{'pipeman.auth.message.no_recent_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_success' | gettext}}</th><td>{% if current_user.property('last_success') %}{{current_user.property('last_success')}}{% else %}{{'pipeman.auth.message.no_recent_logins' | gettext}}{% endif %}</td></tr>
     <tr><th>{{'pipeman.label.user.last_success_ip' | gettext}}</th><td>{% if current_user.property('last_success_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.common.na' | gettext}}{% endif %}</td></tr>
-    <tr><th>{{'pipeman.label.user.last_error' | gettext}}</th><td>{% if current_user.property('last_error') %}{{current_user.property('last_error') | format_datetime}}{% else %}{{'pipeman.auth.message.no_recent_failed_logins' | gettext}}{% endif %}</td></tr>
+    <tr><th>{{'pipeman.label.user.last_error' | gettext}}</th><td>{% if current_user.property('last_error') %}{{current_user.property('last_error')}}{% else %}{{'pipeman.auth.message.no_recent_failed_logins' | gettext}}{% endif %}</td></tr>
     <tr><th>{{'pipeman.label.user.last_error_ip' | gettext}}</th><td>{% if current_user.property('last_error_ip') %}{{current_user.property('last_error_ip')}}{% else %}{{'pipeman.common.na' | gettext}}{% endif %}</td></tr>
     <tr><th>{{'pipeman.label.user.total_errors' | gettext}}</th><td>{{current_user.property('total_errors')}}</td></tr>
     </tbody>

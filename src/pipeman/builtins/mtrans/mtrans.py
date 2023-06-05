@@ -18,7 +18,7 @@ class ManualTranslationEntry:
         self.target_language = target_language
         self.translation = translation
         if not self.guid:
-            raise TranslatableError("pipeman.mtrans.error.missing_guid")
+            raise ValueError("Missing GUID")
 
 
 class ManualTranslationEngine(TranslationEngine):

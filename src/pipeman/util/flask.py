@@ -118,7 +118,6 @@ class BetterTableWidget:
             html.append("<table %s>" % html_params(**kwargs))
         hidden = ""
         for subfield in field:
-            print(hash(subfield))
             content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
             if subfield.type in ("HiddenField", "CSRFTokenField"):
                 hidden += str(subfield)
@@ -165,6 +164,7 @@ class CSPRegistry:
         self._is_static_resource = True
 
     def allow_caching(self, response=None):
+        return False
         # If caching is disabled, lets just not worry about it
         if not self._allow_caching_default:
             self._log.debug("Caching disabled")

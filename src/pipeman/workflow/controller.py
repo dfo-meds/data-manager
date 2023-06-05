@@ -234,7 +234,7 @@ class WorkflowController:
     def _format_object_link(self, data_row):
         obj_link = None
         obj_name = str(data_row.object_id)
-        if data_row.workflow_type.startswith("dataset"):
+        if data_row.workflow_type.startswith("dataset") or data_row.object_type == 'dataset':
             with self.db as session:
                 obj = session.query(orm.Dataset).filter_by(id=data_row.object_id).first()
                 if obj:
@@ -332,25 +332,30 @@ class WorkflowController:
             if mode == 'view':
                 if flask_login.current_user.has_permission('action_items.view.completed_steps'):
                     return True
-                self._log.warning(f"Access to view completed item denied, missing action_items.view.completed_steps")
+                if log_access_failure:
+                    self._log.warning(f"Access to view completed item denied, missing action_items.view.completed_steps")
                 return False
-            self._log.warning(f"Cannot make decisions for completed items")
+            if log_access_failure:
+                self._log.warning(f"Cannot make decisions for completed items")
             return False
         ctx = json.loads(item.context)
         if mode == 'view':
             if step.allow_view(ctx):
                 return True
             else:
-                self._log.warning(f"View access to {item.id} denied")
+                if log_access_failure:
+                    self._log.warning(f"View access to {item.id} denied")
                 return False
         elif mode == 'decide':
             if step.allow_decision(ctx):
                 return True
             else:
-                self._log.warning(f"Decision access to {item.id} denied")
+                if log_access_failure:
+                    self._log.warning(f"Decision access to {item.id} denied")
                 return False
         else:
-            self._log.warning(f"Unrecognized acces mode {mode}")
+            if log_access_failure:
+                self._log.warning(f"Unrecognized acces mode {mode}")
         return False
 
     def cleanup_old_items(self, st = None):

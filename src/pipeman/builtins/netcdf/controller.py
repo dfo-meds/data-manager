@@ -27,14 +27,14 @@ class NetCDFController:
         form = NetCDFTemplateForm(self.dc)
         if form.validate_on_submit():
             if self._populate_from_file(form.dataset_id.data, form.netcdf_file.data):
-                flasht("pipeman.from_netcdf.page.populate_from_netcdf.success", "success")
+                flasht("pipeman.netcdf.page.populate_from_netcdf.success", "success")
             else:
-                flasht("pipeman.from_netcdf.page.populate_from_netcdf.error", "error")
+                flasht("pipeman.netcdf.page.populate_from_netcdf.error", "error")
         return flask.render_template(
             "form.html",
             form=form,
-            title=gettext("pipeman.from_netcdf.page.populate_from_netcdf.title"),
-            instructions=gettext("pipeman.from_netcdf.page.populate_from_netcdf.instructions")
+            title=gettext("pipeman.netcdf.page.populate_from_netcdf.title"),
+            instructions=gettext("pipeman.netcdf.page.populate_from_netcdf.instructions")
         )
 
     def _populate_from_file(self, dataset_id, file_data):
@@ -105,7 +105,7 @@ class NetCDFController:
 class NetCDFTemplateForm(PipemanFlaskForm):
 
     dataset_id = wtf.SelectField(
-        DelayedTranslationString("pipeman.from_netcdf.page.populate_from_netcdf.dataset"),
+        DelayedTranslationString("pipeman.netcdf.page.populate_from_netcdf.dataset"),
         choices=[],
         coerce=int,
         widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
@@ -117,7 +117,7 @@ class NetCDFTemplateForm(PipemanFlaskForm):
     )
 
     netcdf_file = fwtff.FileField(
-        DelayedTranslationString("pipeman.from_netcdf.page.populate_from_netcdf.netcdf_file"),
+        DelayedTranslationString("pipeman.netcdf.page.populate_from_netcdf.netcdf_file"),
         validators=[
             fwtff.FileAllowed(['nc', 'cdl', 'xml', 'ncml']),
             fwtff.FileRequired()

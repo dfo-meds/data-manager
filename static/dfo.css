@@ -6,6 +6,28 @@ body {
     margin: 0;
     padding: 0;
 }
+.login-select {
+    margin: 0;
+    padding: 0;
+}
+.login-select li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.login-select li a {
+    display: block;
+    text-align: center;
+    width: 300px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: #26374A;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+}
+.login-select li a:hover {
+    background-color: #37485B;
+}
 table.property-list dl {
     margin: 0;
     padding: 0;
@@ -28,6 +50,10 @@ table.property-list dl dt {
 }
 input[type="text"] {
     width: 400px;
+}
+input#username,
+input[type="password"] {
+    width: 200px;
 }
 .remove-button {
     cursor: pointer;

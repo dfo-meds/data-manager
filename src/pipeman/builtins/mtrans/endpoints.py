@@ -84,7 +84,7 @@ def upload_translations(te: TranslationEngine = None):
                         flasht("pipeman.mtrans.error.missing_guid", "warning", lineno=idx)
                         continue
                     elif not line[header[1]]:
-                        flasht("pipeman.mtrans.error.missing_translation", "warning", lineno=idx)
+                        flasht("pipeman.mtrans.error.missing_translation", "warning", lineno=idx, guid=line[header[0]])
                         continue
                     else:
                         try:
@@ -96,7 +96,7 @@ def upload_translations(te: TranslationEngine = None):
                             flasht("pipeman.mtrans.error.line_processing_error", "warning", lineno=idx, original=str(ex))
                             logging.getLogger("pipeman.mtrans").warning(str(ex))
                         except Exception as ex:
-                            flasht("pipeman.mtrans.error.other_error", "error")
+                            flasht("pipeman.mtrans.error.other_error", "error", lineno=idx)
                             logging.getLogger("pipeman.mtrans").exception(f"Error while processing updated translation file")
                 else:
                     flasht("pipeman.mtrans.page.upload_translations.success", "success")

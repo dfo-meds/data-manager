@@ -12,6 +12,7 @@ import flask
 import zrlog
 import os
 import zirconium as zr
+from .controller import DatabaseUserController
 
 
 @injector.inject
@@ -27,8 +28,10 @@ def auth_init_app(app: flask.Flask, am: AuthenticationManager):
     lm.login_view = "auth.login"
     lm.user_loader(am.load_user)
     lm.request_loader(am.login_from_request)
-    lm.unauthorized_handler(am.unauthorized_handler)
+    lm.unauthorized_handler(am.unauthorized)
     lm.anonymous_user = am.anonymous_user
+    if 'csrf' in app.extensions:
+        app.extensions['csrf'].exempt('pipeman.auth.app.login_by_redirect')
 
 
 def init(system: System):
@@ -39,6 +42,31 @@ def init(system: System):
     system.on_setup(_do_setup)
     system.on_cleanup(_do_cleanup)
     system.on_cron_start(_register_cron)
+    system.register_blueprint("pipeman.auth.app", "users")
+    system.register_cli("pipeman.auth.cli", "user")
+    system.register_nav_item("me", "auth_db.me", "users.view_myself", "_is_not_anonymous", 'user')
+    system.register_nav_item("change_password", "auth_db.change_password", "users.change_my_password", "_is_not_anonymous", 'user')
+    system.register_nav_item("edit_profile", "auth_db.edit_profile", "users.edit_myself", "_is_not_anonymous", 'user')
+    system.register_nav_item("users", "auth_db.list_users", "users.list_users", "auth_db.view.all", weight=100000000)
+    system.on_setup(setup_plugin)
+
+
+@injector.inject
+def setup_plugin(duc: DatabaseUserController = None):
+    zrlog.get_logger("pipeman.auth").info("Creating admin account")
+    username = os.environ.get("PIPEMAN_ADMIN_USERNAME", "admin")
+    password = os.environ.get("PIPEMAN_ADMIN_PASSWORD", "PasswordPassword")
+    display = os.environ.get("PIPEMAN_ADMIN_DISPLAY", "Administrator")
+    email = os.environ.get("PIPEMAN_ADMIN_EMAIL", "admin@example.com")
+    admin_group = os.environ.get("PIPEMAN_ADMIN_GROUP", "superuser")
+    try:
+        duc.create_user_cli(username, email, display, password)
+    except UserInputError as ex:
+        pass
+    try:
+        duc.assign_to_group_cli(admin_group, username)
+    except UserInputError as ex:
+        pass
 
 
 def _register_cron(cron):

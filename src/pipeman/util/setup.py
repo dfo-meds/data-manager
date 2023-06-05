@@ -76,6 +76,7 @@ def _validate_session(user_session):
 
 def _new_session(session):
     # new session
+    zrlog.get_logger("pipeman.session").info(f"Clearing session")
     flask.session.clear()
     flask.session["_pipeman_uuid"] = str(uuid.uuid4())
     q = sa.insert(orm.ServerSession).values({
@@ -208,7 +209,7 @@ def stable_dict_key_list(d: dict):
 
 @injector.inject
 def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
-    app.session_interface = SessionCookieInterface()
+    #app.session_interface = SessionCookieInterface()
     if "flask" in config:
         app.config.update(config["flask"] or {})
     if not app.config.get("SECRET_KEY"):
@@ -244,7 +245,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
     def session_init(rinfo: RequestInfo = None, cspr: CSPRegistry = None):
         if flask.request.endpoint == "static":
             cspr.set_static()
-        check_request_session()
+        #check_request_session()
         zrlog.set_extras({
             "username": rinfo.username(),
             "remote_ip": rinfo.remote_ip(),
@@ -293,7 +294,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
             'csp_nonce': csp_nonce,
             'csp_allow': csp_allow,
             'stable_dict_key_list': stable_dict_key_list,
-            'is_multilingual_map': is_multilingual_map
+            'is_multilingual_map': is_multilingual_map,
         }
         for key in system._nav_menu:
             items[f'nav_{key}'] = build_nav(system._nav_menu[key])
