@@ -269,7 +269,7 @@ extent:
       min: -180
       max: 180
       netcdf:
-        mapping: geospatial_long_min
+        mapping: geospatial_lon_min
         processor: numeric
     bbox_east:
       data_type: decimal
@@ -280,7 +280,7 @@ extent:
       min: -180
       max: 180
       netcdf:
-        mapping: geospatial_long_max
+        mapping: geospatial_lon_max
         processor: numeric
     bbox_north:
       data_type: decimal

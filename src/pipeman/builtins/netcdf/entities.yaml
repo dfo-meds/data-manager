@@ -71,6 +71,7 @@ variable:
       order: 40
       netcdf:
         mapping: units
+        processor: text
     calendar:
       data_type: vocabulary
       vocabulary_name: cf_calendars
@@ -98,7 +99,7 @@ variable:
       label:
         en: Missing Value
       description:
-        en: Specify a value that indicates a missing value (defaults to the maximum value for the data type)
+        en: Specify a value that indicates a missing value (defaults to the maximum value for the data type). If the data has a scale or offset, enter the pre-scaled/offset value.
       order: 70
       netcdf:
         mapping: missing_value
@@ -146,7 +147,7 @@ variable:
       label:
         en: Maximum Value
       description:
-        en: Enter the actual maximum value for this variable within the dataset
+        en: Enter the actual maximum value for this variable within the dataset. If the data has a scale or offset, enter the pre-scaled/offset value.
       order: 120
       netcdf:
         mapping: actual_max
@@ -156,7 +157,7 @@ variable:
       label:
         en: Minimum Valid Value
       description:
-        en: Enter the theoretical minimum value for this variable, if applicable
+        en: Enter the theoretical minimum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
       order: 130
       netcdf:
         mapping: valid_min
@@ -166,7 +167,7 @@ variable:
       label:
         en: Maximum Valid Value
       description:
-        en: Enter the theoretical maximum value for this variable, if applicable
+        en: Enter the theoretical maximum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
       order: 140
       netcdf:
         mapping: valid_max

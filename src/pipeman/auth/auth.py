@@ -625,7 +625,7 @@ class AuthenticationManager:
                 datasets,
                 **props
             )
-            if auth_handler:
+            if auth_handler and auth_handler in self._login_managers:
                 self._login_managers[auth_handler].update_user(full_user)
             return full_user
 

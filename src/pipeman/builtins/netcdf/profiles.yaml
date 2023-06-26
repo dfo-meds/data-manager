@@ -5,6 +5,9 @@ netcdf:
     custom_metadata:
     custom_keywords:
     variables:
+  mappers:
+    netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf
+  action_callback: pipeman.builtins.netcdf.util.netcdf_dataset_actions
 acdd:
   display:
     en: ACDD 1.3
@@ -93,8 +96,6 @@ acdd:
       template: cdl.txt
       content_type: text/plain
       preprocess: pipeman.builtins.netcdf.util.preprocess_for_cdl
-  mappers:
-    netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf
 cf1_10:
   display:
     en: CF 1.10

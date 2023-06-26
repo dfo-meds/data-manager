@@ -12,6 +12,7 @@ import pathlib
 import logging
 import uuid
 import zrlog
+import typing as t
 
 
 @injector.injectable
@@ -23,11 +24,14 @@ class NetCDFController:
     def __init__(self):
         self.log = zrlog.get_logger("pipeman.netcdf")
 
-    def populate_from_netcdf(self):
-        form = NetCDFTemplateForm(self.dc)
+    def populate_from_netcdf(self, dataset_id: t.Optional[int] = None):
+        form = NetCDFTemplateForm(self.dc, dataset_id)
         if form.validate_on_submit():
             if self._populate_from_file(form.dataset_id.data, form.netcdf_file.data):
                 flasht("pipeman.netcdf.page.populate_from_netcdf.success", "success")
+                return flask.redirect(
+                    flask.url_for("core.view_dataset", dataset_id=form.dataset_id.data)
+                )
             else:
                 flasht("pipeman.netcdf.page.populate_from_netcdf.error", "error")
         return flask.render_template(
@@ -45,7 +49,7 @@ class NetCDFController:
                 tf = td / str(uuid.uuid4())
                 with open(tf, "wb") as h:
                     file_data.save(h)
-                self.log.info("Setting metadata for {dataset_id} from uploaded file {file_data.filename}")
+                self.log.info(f"Setting metadata for {dataset_id} from uploaded file {file_data.filename}")
                 if file_data.filename.endswith(".nc"):
                     return self._populate_from_netcdf(dataset, tf)
                 elif file_data.filename.endswith(".cdl"):
@@ -92,7 +96,7 @@ class NetCDFController:
                 "variables": variables,
                 "dimensions": dimensions
             })
-            self.dc.save_dataset(dataset)
+            self.dc.save_metadata(dataset)
         except Exception as ex:
             self.log.exception(f"Error processing NetCDF file")
             result = False
@@ -128,6 +132,12 @@ class NetCDFTemplateForm(PipemanFlaskForm):
         DelayedTranslationString("pipeman.common.submit")
     )
 
-    def __init__(self, dc: DatasetController):
-        super().__init__()
-        self.dataset_id.choices = dc.list_datasets_for_component()
+    def __init__(self, dc: DatasetController, dataset_id = None):
+        dataset_id = int(dataset_id)
+        options = dc.list_datasets_for_component()
+        kwargs = {}
+        if dataset_id and any(dataset_id == x[0] for x in options):
+            kwargs["dataset_id"] = dataset_id
+        super().__init__(**kwargs)
+        self.dataset_id.choices = options
+

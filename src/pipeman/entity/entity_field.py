@@ -127,6 +127,8 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.display_names())
 
     def _process_value(self, val, **kwargs):
+        if val is None:
+            return None
         try:
             ent_id, rev_no = EntitySelectField.parse_entity_option(val, False)
             return self.ec.load_entity(None, ent_id, rev_no)

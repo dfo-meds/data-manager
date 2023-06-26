@@ -15,6 +15,31 @@ body {
     margin: 0;
     padding: 0;
 }
+.bubble-list {
+    margin: 0;
+    padding: 0;
+}
+.bubble-list li {
+    margin: 0;
+    padding: 0;
+    float: left;
+    list-style: none;
+    border: 1px solid #37485B;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    padding: 2px 6px;
+}
+ul.profile-list li.direct {
+    font-weight: bold;
+}
+ul.profile-list li.extended {
+    font-style: italic;
+}
+table.property-list td {
+    max-width: 800px;
+    overflow-wrap: anywhere;
+}
 .login-select li a {
     display: block;
     text-align: center;

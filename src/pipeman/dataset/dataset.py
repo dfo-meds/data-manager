@@ -131,6 +131,11 @@ class MetadataRegistry:
             for x in self._profiles
         ]
 
+    def profile_label(self, profile_name):
+        if profile_name in self._profiles:
+            return MultiLanguageString(self._profiles[profile_name]["display"])
+        return MultiLanguageString({"und": profile_name})
+
     def metadata_format_exists(self, profile_name, format_name):
         if profile_name not in self._profiles:
             return False
@@ -160,6 +165,12 @@ class MetadataRegistry:
 
     def metadata_format_template(self, profile_name, format_name):
         return self._profiles[profile_name]["formatters"][format_name]["template"]
+
+    def extend_action_list(self, items, dataset, short_list, for_revision):
+        profs = [dataset.profiles] if isinstance(dataset.profiles, str) else dataset.profiles
+        for prof in self.build_extended_profile_list(profs):
+            if 'action_callback' in self._profiles[prof]:
+                load_object(self._profiles[prof]['action_callback'])(items, dataset, short_list, for_revision)
 
     def metadata_format_content_type(self, profile_name, format_name):
         # Defaults
@@ -206,6 +217,7 @@ class MetadataRegistry:
                 obj(dataset, file_type, file_metadata)
 
     def build_extended_profile_list(self, profiles):
+        profiles = list(profiles)
         ext_profiles = set()
         while profiles:
             p = profiles.pop()
@@ -219,6 +231,8 @@ class MetadataRegistry:
         return ext_profiles
 
     def build_dataset(self, profiles, **kwargs):
+        if isinstance(profiles, str):
+            profiles = [profiles]
         fields = set()
         ext_profiles = self.build_extended_profile_list(profiles)
         for profile in ext_profiles:
@@ -230,7 +244,7 @@ class MetadataRegistry:
                 logging.getLogger("pipeman.fields").error(f"Field {fn} not defined, skipping")
             else:
                 field_list[fn] = self._fields[fn]
-        ds = Dataset(field_list=field_list, profiles=ext_profiles, **kwargs)
+        ds = Dataset(field_list=field_list, profiles=ext_profiles, base_profiles=profiles, **kwargs)
         for profile in ext_profiles:
             if "derived_fields" in self._profiles[profile] and self._profiles[profile]["derived_fields"]:
                 dfns = self._profiles[profile]["derived_fields"]
@@ -256,14 +270,19 @@ class Dataset(FieldContainer):
     mreg: MetadataRegistry = None
 
     @injector.construct
-    def __init__(self, profiles, dataset_id=None, ds_data_id=None, revision_no=None, extras: dict = None, users: list = None, **kwargs):
+    def __init__(self, profiles, dataset_id=None, ds_data_id=None, revision_no=None, extras: dict = None, users: list = None, base_profiles: list = None, **kwargs):
         super().__init__("dataset", dataset_id, **kwargs)
         self.profiles = profiles
+        self.base_profiles = base_profiles
         self.dataset_id = dataset_id
         self.metadata_id = ds_data_id
         self.revision_no = revision_no
         self.extras = extras or {}
         self.users = users
+
+    def list_profiles(self):
+        for x in self.profiles:
+            yield x, x in self.base_profiles
 
     def set_from_file_metadata(self, file_type: str, file_metadata: dict):
         self.mreg.set_metadata_from_file(self, file_type, file_metadata)
@@ -340,4 +359,12 @@ class Dataset(FieldContainer):
                 'pipeman.label.dataset.activation_chain',  # gettext('pipeman.label.dataset.activation_chain')
                 self.activation_chain_display()
             ))
+        props.append(('pipeman.label.dataset.profiles', self.profile_display()))
         return props
+
+    def profile_display(self):
+        content = '<ul class="profile-list bubble-list">'
+        for pname, is_direct in sorted(self.list_profiles(), key=lambda x: f"{0 if x[1] else 1}{x[0]}"):
+            content += f'<li class="{"extended" if not is_direct else "direct"}">{self.mreg.profile_label(pname)}</li>'
+        content += '</ul>'
+        return markupsafe.Markup(content)

@@ -372,6 +372,9 @@ pipeman.vocab.page.list_vocabularies.title: Vocabularies
 pipeman.vocabularies: Vocabularies
 pipeman.workflow.error.file_upload_error: 'Error uploading file'
 pipeman.workflow.page.cancel.instructions: ''
+pipeman.dataset.page.copy_dataset.link: 'Copy'
+pipeman.dataset.page.copy_dataset.title: 'Copy Dataset'
+pipeman.netcdf.page.populate_from_netcdf.link: 'Upload NetCDF Metadata'
 pipeman.workflow.page.cancel.link: Cancel
 pipeman.workflow.page.cancel.success: Action item cancelled
 pipeman.workflow.page.cancel.title: Cancel Action

@@ -131,25 +131,28 @@ class DatasetController:
             "dataset_id": ds.dataset_id if hasattr(ds, "dataset_id") else ds.id
         }
         if short_list:
-            actions.add_action("pipeman.dataset.page.view_dataset.link", "core.view_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.view_dataset.link", "core.view_dataset", 0, **kwargs)
         if for_revision:
-            actions.add_action("pipeman.dataset.page.view_current.link", "core.view_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.view_current.link", "core.view_dataset", 0, **kwargs)
         else:
-            actions.add_action("pipeman.dataset.page.validate_dataset.link", "core.validate_dataset", **kwargs)
+            actions.add_action("pipeman.dataset.page.validate_dataset.link", "core.validate_dataset", 40, **kwargs)
+            if flask_login.current_user.has_permission("datasets.create"):
+                actions.add_action("pipeman.dataset.page.copy_dataset.link", "core.copy_dataset", 50, **kwargs)
             if self.has_access(ds, 'edit'):
-                actions.add_action("pipeman.dataset.page.edit_dataset.link", "core.edit_dataset", **kwargs)
-                actions.add_action("pipeman.dataset.page.edit_metadata.link", "core.edit_dataset_metadata_base", **kwargs)
+                actions.add_action("pipeman.dataset.page.edit_dataset.link", "core.edit_dataset", 1, **kwargs)
+                actions.add_action("pipeman.dataset.page.edit_metadata.link", "core.edit_dataset_metadata_base", 2, **kwargs)
                 if not short_list:
-                    actions.add_action("pipeman.dataset.page.add_attachment.link", "core.add_attachment", **kwargs)
+                    actions.add_action("pipeman.dataset.page.add_attachment.link", "core.add_attachment", 5, **kwargs)
+            if self.has_access(ds, "remove"):
+                actions.add_action("pipeman.dataset.page.remove_dataset.link", "core.remove_dataset", 99, **kwargs)
             if not short_list:
                 if self.has_access(ds, 'activate'):
-                    actions.add_action("pipeman.dataset.page.activate_dataset.link", "core.activate_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.activate_dataset.link", "core.activate_dataset", 3, **kwargs)
                 if self.has_access(ds, "publish"):
-                    actions.add_action("pipeman.dataset.page.publish_dataset.link", "core.publish_dataset", **kwargs)
-                if self.has_access(ds, "remove"):
-                    actions.add_action("pipeman.dataset.page.remove_dataset.link", "core.remove_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.publish_dataset.link", "core.publish_dataset", 4, **kwargs)
                 if self.has_access(ds, "restore"):
-                    actions.add_action("pipeman.dataset.page.restore_dataset.link", "core.restore_dataset", **kwargs)
+                    actions.add_action("pipeman.dataset.page.restore_dataset.link", "core.restore_dataset", 100, **kwargs)
+        self.reg.extend_action_list(actions, ds, short_list, for_revision)
         return actions
 
     def _dataset_iterator(self, query):
@@ -276,6 +279,17 @@ class DatasetController:
             title=gettext("pipeman.dataset.page.validate_dataset.title"),
             errors=dataset.validate()
         )
+
+    def copy_dataset_form(self, dataset):
+        form = DatasetForm(dataset=dataset)
+        if form.validate_on_submit():
+            ds = form.build_dataset()
+            self.save_dataset(ds, as_copy=True)
+            flasht("pipeman.dataset.page.copy_dataset.success", "success")
+            return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
+        return flask.render_template(self.edit_template,
+                                     form=form,
+                                     title=gettext("pipeman.dataset.page.copy_dataset.title"))
 
     def edit_dataset_form(self, dataset):
         form = None
@@ -513,11 +527,13 @@ class DatasetController:
                     users=[u.id for u in ds.users]
                 )
 
-    def save_dataset(self, dataset):
+    def save_dataset(self, dataset, as_copy: bool = False):
         with self.db as session:
             ds = None
             name = "pipeman_dataset_save_dataset_update" if dataset.dataset_id else "pipeman_dataset_save_dataset_insert"
             desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
+            if as_copy:
+                dataset.dataset_id = None
             with BlockTimer(name, desc):
                 if dataset.dataset_id:
                     self.log.info(f"Saving dataset {dataset.dataset_id}")
@@ -537,11 +553,15 @@ class DatasetController:
                         is_deprecated=dataset.is_deprecated,
                         display_names=json.dumps(dataset.display_names()),
                         profiles="\n".join(dataset.profiles),
-                        guid=str(uuid.uuid4())
+                        guid=str(uuid.uuid4()),
+                        created_by=flask_login.current_user.get_id()
                     )
                     session.add(ds)
                 for keyword in dataset.extras:
-                    setattr(ds, keyword, dataset.extras[keyword])
+                    if keyword not in ('guid', 'created_date', 'modified_date',):
+                        setattr(ds, keyword, dataset.extras[keyword])
+                if as_copy:
+                    ds.status = 'DRAFT'
                 session.commit()
                 dataset.dataset_id = ds.id
                 session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
@@ -551,6 +571,15 @@ class DatasetController:
                         "dataset_id": ds.id
                     })
                     session.execute(q)
+                if as_copy:
+                    ds_data = orm.MetadataEdition(
+                        dataset_id=ds.id,
+                        revision_no=1,
+                        data=json.dumps(dataset.values()),
+                        created_date=datetime.datetime.now(),
+                        created_by=flask_login.current_user.get_id()
+                    )
+                    session.add(ds_data)
                 session.commit()
 
     @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
@@ -569,7 +598,8 @@ class DatasetController:
                         dataset_id=ds.id,
                         revision_no=next_rev,
                         data=json.dumps(dataset.values()),
-                        created_date=datetime.datetime.now()
+                        created_date=datetime.datetime.now(),
+                        created_by=flask_login.current_user.get_id()
                     )
                     session.add(ds_data)
                     session.commit()
@@ -664,7 +694,7 @@ class DatasetForm(PipemanFlaskForm):
                 "pub_workflow": dataset.extras['pub_workflow'],
                 "act_workflow": dataset.extras['act_workflow'],
                 "security_level": dataset.extras['security_level'],
-                "profiles": dataset.profiles,
+                "profiles": dataset.base_profiles,
                 "organization": dataset.organization_id,
                 "assigned_users": dataset.users or []
             })
@@ -751,7 +781,7 @@ class ApprovedDatasetForm(PipemanFlaskForm):
         if dataset:
             self.dataset = dataset
             kwargs["names"] = dataset.display_names()
-            kwargs["profiles"] = dataset.profiles
+            kwargs["profiles"] = dataset.base_profiles
             kwargs["assigned_users"] = dataset.users or []
         super().__init__(*args, **kwargs)
         self.assigned_users.choices = user_list()

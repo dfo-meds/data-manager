@@ -458,15 +458,17 @@ class ActionList:
     def __bool__(self):
         return bool(self.action_items)
 
-    def add_action(self, label_str, endpoint, **kwargs):
+    def add_action(self, label_str, endpoint, order: int = 0, **kwargs):
         self.action_items.append((
             flask.url_for(endpoint, **kwargs),
-            label_str
+            label_str,
+            order
         ))
 
     def render(self, html_cls="action_list"):
+        self.action_items.sort(key=lambda x: x[2])
         mu = f'<ul class="{html_cls}">'
-        for path, txt in self.action_items:
+        for path, txt, _ in self.action_items:
             mu += f'<li><a href="{escape(path)}">{escape(gettext(txt))}</a></li>'
         mu += '</ul>'
         return Markup(mu)

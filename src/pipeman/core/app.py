@@ -324,6 +324,19 @@ def edit_dataset(dataset_id, con: DatasetController = None):
         return flask.abort(404)
 
 
+@core.i18n_route("/datasets/<int:dataset_id>/copy", methods=["POST", "GET"])
+@require_permission("datasets.create")
+@injector.inject
+def copy_dataset(dataset_id, con: DatasetController = None):
+    try:
+        dataset = con.load_dataset(dataset_id)
+        if not con.has_access(dataset, "view", is_attempt=True):
+            return flask.abort(403)
+        return con.copy_dataset_form(dataset)
+    except DatasetNotFoundError:
+        return flask.abort(404)
+
+
 @core.i18n_route("/datasets/<int:dataset_id>/metadata", methods=["POST", "GET"])
 @require_permission("datasets.edit")
 @injector.inject

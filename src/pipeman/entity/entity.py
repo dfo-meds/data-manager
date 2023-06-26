@@ -156,7 +156,7 @@ class FieldContainer:
     def _load_fields(self, field_list: dict, field_values: dict = None):
         for field_name in field_list:
             field_config = copy.deepcopy(field_list[field_name])
-            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_type, self.container_id)
+            self._fields[field_name] = self.creator.build_field(field_name, field_config.get('data_type'), field_config, self.container_type, self.container_id)
             if field_values and field_name in field_values:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 

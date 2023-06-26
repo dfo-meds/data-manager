@@ -1,4 +1,8 @@
+import netCDF4._netCDF4
+import numpy
 import requests
+
+from pipeman.util.flask import ActionList
 from pipeman.vocab import VocabularyTermController
 from pipeman.dataset.dataset import Dataset
 from pipeman.util import load_object
@@ -13,6 +17,15 @@ import logging
 import bs4
 import zrlog
 import datetime
+
+UTC = datetime.timezone(datetime.timedelta(seconds=0), "UTC")
+
+def netcdf_dataset_actions(items: ActionList, dataset, short_list: bool = True, for_revision: bool = False):
+    if not (short_list or for_revision):
+        items.add_action("pipeman.netcdf.page.populate_from_netcdf.link",
+                         "netcdf.populate_from_netcdf_dsid",
+                         30,
+                         dataset_id=dataset.dataset_id if hasattr(dataset, "dataset_id") else dataset.id)
 
 
 def preprocess_for_ncml(dataset, **kwargs):
@@ -47,7 +60,7 @@ def _preprocess_for_both(dataset, **kwargs):
 
 
 def _autodetect_mapping(field: Field):
-    dt = field.config("data_type")
+    dt = field.config('data_type')
     if dt == 'vocabulary':
         return 'vocabulary'
     elif dt == 'key_value':
@@ -73,9 +86,10 @@ def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **
 def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
     _import_netcdf_attributes(dataset, metadata['global'], 'custom_metadata')
     variables = dataset.get_field('variables')
-    current_list = {
-        c['source_name']: c for c, _, _ in variables.component_list()
-    }
+    current_list = {}
+    for c, _, _ in variables.component_list():
+        c_ent = ec.load_entity(c.entity_type, c.id)
+        current_list[c_ent.data('source_name')] = c_ent
     for var_name in metadata['variables'] or []:
         var_attrs = metadata['variables'][var_name]
         if var_name not in current_list:
@@ -83,11 +97,12 @@ def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, e
             real_var.set_display_name('und', var_name)
             real_var.parent_id = dataset.dataset_id
             real_var.parent_type = 'dataset'
+            real_var.get_field('source_name').set_from_raw(var_name)
         else:
             real_var = current_list[var_name]
         if '_data_type' in var_attrs:
             dt = var_attrs.pop('_data_type')
-            data_type = vtc.get_term_id('netcdf_data_types', _map_netcdf_datatype_to_erddap(dt))
+            data_type = vtc.get_term_name('netcdf_data_types', _map_netcdf_datatype_to_erddap(dt))
             if data_type:
                 real_var.get_field('source_data_type').set_from_raw(data_type)
             else:
@@ -109,7 +124,7 @@ def _import_netcdf_attributes(fc: FieldContainer, attributes: dict, extra_field_
         processor = None
         if 'importer' in config and config['importer']:
             processor = config['importer']
-        elif 'processor' in config and config['processor'] and not "." in config['processor']:
+        elif 'processor' in config and config['processor'] and "." not in config['processor']:
             processor = config['processor']
         else:
             processor = _autodetect_mapping(field)
@@ -117,23 +132,26 @@ def _import_netcdf_attributes(fc: FieldContainer, attributes: dict, extra_field_
             _import_field_value(processor, config, attributes, fc, field)
     if extra_field_name:
         extras = fc.get_field(extra_field_name)
-        values = []
+        values = {
+            v['key']: v
+            for v in extras.value
+        } if extras.value else {}
         for attr in attributes:
             if attr[0] == '_':
                 continue
             val = attributes[attr]
             dtype = 'str'
-            if isinstance(val, int) or isinstance(val, float):
+            if isinstance(val, int) or isinstance(val, float) or isinstance(val, numpy.int8) or isinstance(val, numpy.float64):
                 dtype = 'numeric'
-            elif isinstance(val, list) or isinstance(val, tuple):
+            elif isinstance(val, list) or isinstance(val, tuple) or isinstance(val, numpy.ndarray):
                 dtype = 'numeric_list'
                 val = ','.join(str(x) for x in val)
-            values.append({
+            values[attr] = {
                 'key': attr,
-                'value': str(attributes[attr]),
-                'data_type': 'dtype'
-            })
-        extras.set_from_raw(values)
+                'value': str(val),
+                'data_type': dtype
+            }
+        extras.set_from_raw([values[x] for x in values])
 
 
 def _import_field_value(processor, *args):
@@ -153,12 +171,18 @@ def _import_field_value(processor, *args):
         _import_contact(*args)
     elif processor == 'contacts_by_role':
         _import_contacts_by_role(*args)
+    elif processor == "licenses":
+        _import_license(*args)
     else:
         try:
             obj = load_object(processor)
             obj(*args)
         except (AttributeError, ModuleNotFoundError) as ex:
             logging.getLogger("pipeman.netcdf").exception(f"Error loading netcdf field importer: {processor} ")
+
+
+def _import_license(config: dict, attributes: dict, fc: FieldContainer, field: Field):
+    pass
 
 
 @injector.inject
@@ -184,7 +208,20 @@ def _import_datetime_value(config: dict, attributes: dict, fc: FieldContainer, f
     target = config["mapping"]
     if target in attributes:
         dt = attributes.pop(target)
-        field.set_from_raw(datetime.datetime.fromisoformat(dt) if dt else None)
+        # Pre 3.11, doesn't handle time zones so we'll fake support for that.
+        if dt.endswith('Z') or (len(dt) > 6 and dt[-6] in ('+', '-')):
+            if dt.endswith('Z'):
+                dt_ = datetime.datetime.fromisoformat(dt[:-1])
+                field.set_from_raw(dt_.replace(tzinfo=UTC))
+            else:
+                dt_ = datetime.datetime.fromisoformat(dt[:-6])
+                offset = int(dt[-5:-3]) * 3600
+                offset += int(dt[-2:]) * 60
+                offset *= -1 if dt[-6] == '-' else 1
+                field.set_from_raw(dt_.replace(tzinfo=datetime.timezone(datetime.timedelta(seconds=offset))).astimezone(tz=UTC))
+        else:
+            dt_ = datetime.datetime.fromisoformat(dt[:-1])
+            field.set_from_raw(dt_.replace(tzinfo=UTC))
 
 
 def _import_ref_system(config: dict, attributes: dict, fc: FieldContainer, field: Field):
@@ -203,7 +240,9 @@ def _import_contacts_by_role(config: dict, attributes: dict, fc: FieldContainer,
 
 
 def _map_netcdf_datatype_to_erddap(netcdf_dt: str) -> str:
-    if netcdf_dt == 'str':
+    if isinstance(netcdf_dt, netCDF4._netCDF4.VLType):
+        netcdf_dt = netcdf_dt.dtype
+    if netcdf_dt == 'str' or netcdf_dt == str:
         return 'String'
     if netcdf_dt in ('S1', 'c'):
         return 'char'
@@ -231,7 +270,7 @@ def _map_netcdf_datatype_to_erddap(netcdf_dt: str) -> str:
 
 
 @injector.inject
-def _import_vocab_value(config: dict, attributes: dict, fc: Field, field: Field, vtc: VocabularyTermController = None):
+def _import_vocab_value(config: dict, attributes: dict, fc: FieldContainer, field: Field, vtc: VocabularyTermController = None):
     target = config["mapping"]
     sep = config['separator'] if 'separator' in config and config['separator'] else ','
     if target in attributes and attributes[target]:
@@ -239,7 +278,7 @@ def _import_vocab_value(config: dict, attributes: dict, fc: Field, field: Field,
             term_ids = set()
             skipped = []
             for term_name in attributes.pop(target).split(sep):
-                term_id = vtc.get_term_id(fc.config('vocabulary_name'), term_name.strip())
+                term_id = vtc.get_term_name(field.config('vocabulary_name'), term_name.strip())
                 if term_id:
                     term_ids.add(term_id)
                 else:
@@ -249,7 +288,7 @@ def _import_vocab_value(config: dict, attributes: dict, fc: Field, field: Field,
             if term_ids:
                 field.set_from_raw(term_ids)
         else:
-            term_id = vtc.get_term_id(fc.config('vocabulary_name'), attributes[target].strip())
+            term_id = vtc.get_term_name(field.config('vocabulary_name'), attributes[target].strip())
             if term_id:
                 attributes.pop(target)
                 field.set_from_raw(term_id)
@@ -396,8 +435,8 @@ def _variables(dataset):
     _order.sort(key=lambda x: x[1])
     for var, _ in _order:
         yield (var['source_name'],
-               var['source_data_type']['short_name'],
-               " ".join(x.strip() for x in var['dimensions'].split(",")),
+               var['source_data_type']['short_name'] if var['source_data_type'] else "?",
+               " ".join(x.strip() for x in var['dimensions'].split(",")) if var['dimensions'] else '',
                _variable_attributes(var),
                var
                )

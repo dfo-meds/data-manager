@@ -294,14 +294,14 @@ class EntityController:
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
                 e.display_names = json.dumps(entity.display_names())
-                e.organization_id = int(entity.organization_id) or None
+                e.organization_id = int(entity.organization_id) if entity.organization_id else None
                 e.parent_id = entity.parent_id if entity.parent_id else None
                 e.parent_type = entity.parent_type if entity.parent_type else None
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
                     display_names=json.dumps(entity.display_names()),
-                    organization_id=int(entity.organization_id) or None,
+                    organization_id=int(entity.organization_id) if entity.organization_id else None,
                     parent_id=entity.parent_id,
                     parent_type=entity.parent_type
                 )
