@@ -17,13 +17,14 @@ class EntityRefMixin:
         keyword_display_field = self.config("keyword_config", "display_field", default=None)
         keyword_machine_field = self.config("keyword_config", "machine_name_field", default=None)
         for ent in self.data():
-            keywords.append(Keyword(
-                ent.container_id,
-                ent.data(keyword_machine_field) if keyword_machine_field else None,
-                ent.data(keyword_display_field) if keyword_display_field else ent.display_names(),
-                self.build_thesaurus(ent),
-                self.keyword_mode()
-            ))
+            if ent is not None:
+                keywords.append(Keyword(
+                    ent.container_id,
+                    ent.data(keyword_machine_field) if keyword_machine_field else None,
+                    ent.data(keyword_display_field) if keyword_display_field else ent.display_names(),
+                    self.build_thesaurus(ent),
+                    self.keyword_mode()
+                ))
         return keywords
 
     def related_entities(self):
@@ -100,6 +101,9 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
 
     def _control_class(self):
         return EntitySelectField
+
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        return False
 
     def label(self) -> t.Union[str, MultiLanguageString]:
         return super().label()

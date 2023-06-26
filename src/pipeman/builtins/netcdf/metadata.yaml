@@ -83,3 +83,21 @@ custom:
       netcdf:
         mapping:
         processor: key_value_pairs
+keywords:
+  fields:
+    cf_standard_names:
+      data_type: vocabulary
+      vocabulary_name: cf_standard_names
+      repeatable: yes
+      label:
+        en: CF Standard Variables
+      keyword_config:
+        is_keyword: yes
+        mode: value
+        thesaurus:
+          prefix: CF
+          citation:
+            title:
+              en: CF Standard Name Table
+          type:
+            short_name: theme

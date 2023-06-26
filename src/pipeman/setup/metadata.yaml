@@ -32,7 +32,7 @@ keywords:
         fr: Mots-clé
       keyword_config:
         is_keyword: yes
-        default_mode: translated
+        mode: translate
         thesaurus_field: thesaurus
         keyword_field: keyword
 

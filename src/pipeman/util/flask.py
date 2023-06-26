@@ -698,7 +698,7 @@ class EntitySelectField(wtf.Field):
 
     @staticmethod
     def parse_entity_option(value, by_revision):
-        entity_id = value or None
+        entity_id = str(value) or None
         revision_no = None
         if by_revision:
             if "|" not in value:

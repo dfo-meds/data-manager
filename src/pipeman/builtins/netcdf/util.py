@@ -1,3 +1,5 @@
+import json
+
 import netCDF4._netCDF4
 import numpy
 import requests
@@ -26,7 +28,6 @@ def netcdf_dataset_actions(items: ActionList, dataset, short_list: bool = True, 
                          "netcdf.populate_from_netcdf_dsid",
                          30,
                          dataset_id=dataset.dataset_id if hasattr(dataset, "dataset_id") else dataset.id)
-
 
 def preprocess_for_ncml(dataset, **kwargs):
     extras = _preprocess_for_both(dataset, **kwargs)
@@ -84,6 +85,8 @@ def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **
 
 @injector.inject
 def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
+    if 'keywords' in metadata['global']:
+        _process_keywords(dataset, metadata['global'].pop('keywords'), ec)
     _import_netcdf_attributes(dataset, metadata['global'], 'custom_metadata')
     variables = dataset.get_field('variables')
     current_list = {}
@@ -111,6 +114,73 @@ def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, e
             real_var.get_field('dimensions').set_from_raw(','.join(var_attrs.pop('_dimensions')))
         _import_netcdf_attributes(real_var, var_attrs, 'custom_metadata')
         ec.save_entity(real_var)
+
+
+def _process_keywords(dataset: Dataset, keywords: str, ec: EntityController):
+    _custom_map = None
+    for keyword in keywords.split(","):
+        dict_name = None
+        if ':' in keyword:
+            dict_name, keyword = keyword.split(":")
+        keyword = keyword.strip("\r\n\t ")
+        dict_name = dict_name.strip("\r\n\t ")
+        if keyword == "":
+            continue
+        for field in dataset.ordered_field_names():
+            if dataset.get_field(field).update_from_keyword(keyword, dict_name):
+                break
+        else:
+            field = dataset.get_field('custom_keywords')
+            if _custom_map is None:
+                _custom_map = {
+                    'thesaurus': {},
+                    'keywords': []
+                }
+                for t, _, _ in ec.list_entities('thesaurus'):
+                    content = json.loads(t.latest_revision().data) if t.latest_revision() else {}
+                    if 'prefix' in content and content['prefix']:
+                        _custom_map['thesaurus'][str(t.id)] = content['prefix']
+                for t, _, _ in ec.list_entities('keyword'):
+                    content = json.loads(t.latest_revision().data) if t.latest_revision() else {}
+                    prefix = None
+                    thesaurus_id = None
+                    if 'thesaurus' in content:
+                        thesaurus_id = int(content['thesaurus']) if content['thesaurus'] else None
+                        if str(content['thesaurus']) in _custom_map['thesaurus']:
+                            prefix = _custom_map['thesaurus'][str(thesaurus_id)]
+                    keywords = set([content['keyword'][x] for x in content['keyword'] if x[0] != '_' and content['keyword'][x]]) if 'keyword' in content and content['keyword'] else {}
+                    _custom_map['keywords'].append((keywords, thesaurus_id, prefix, t.id))
+            for kws, tid, prefix, kid in _custom_map['keywords']:
+                if prefix is not None and dict_name is not None and dict_name != prefix:
+                    continue
+                if keyword not in kws:
+                    continue
+                values = field.value
+                values.append(kid)
+                field.set_from_raw(list(set(values)))
+                break
+            else:
+                actual_tid = None
+                if dict_name is not None:
+                    for tid in _custom_map['thesaurus']:
+                        if _custom_map['thesaurus'] == dict_name:
+                            actual_tid = str(tid)
+                            break
+                    else:
+                        new_t = ec.reg.new_entity('thesaurus')
+                        new_t.get_field('prefix').set_from_raw(dict_name)
+                        ec.save_entity(new_t)
+                        _custom_map['thesaurus'][str(new_t.db_id)] = dict_name
+                        actual_tid = str(new_t.db_id)
+                new_k = ec.reg.new_entity('keyword')
+                new_k.set_display_name('und', keyword)
+                new_k.get_field('keyword').set_from_raw({"und": keyword})
+                new_k.get_field('thesaurus').set_from_raw(actual_tid)
+                ec.save_entity(new_k)
+                _custom_map['keywords'].append(({keyword}, actual_tid, dict_name, new_k.db_id))
+                values = field.value
+                values.append(new_k.db_id)
+                field.set_from_raw(list(set(values)))
 
 
 def _import_netcdf_attributes(fc: FieldContainer, attributes: dict, extra_field_name: str = None):

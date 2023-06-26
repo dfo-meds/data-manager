@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                 xmlns:srv="http://www.isotc211.org/2005/srv"
+                 xmlns:gco="http://www.isotc211.org/2005/gco"
+                 xmlns:xlink="http://www.w3.org/1999/xlink"
+                 xmlns:gfc="http://www.isotc211.org/2005/gfc"
+                 xmlns:gmi="http://www.isotc211.org/2005/gmi"
+                 xmlns:gsr="http://www.isotc211.org/2005/gsr"
+                 xmlns:gss="http://www.isotc211.org/2005/gss"
+                 xmlns:gts="http://www.isotc211.org/2005/gts"
+                 xmlns:gmx="http://www.isotc211.org/2005/gmx"
+                 xmlns:gml="http://www.opengis.net/gml/3.2"
+                 xmlns="http://www.isotc211.org/2005/gmd"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/gmd/gmd.xsd http://www.isotc211.org/2005/srv http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/srv/srv.xsd http://www.geconnections.org/nap/napMetadataTools/napXsd/napm http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/napm/napm.xsd">
+  {% import 'iso19139_macros.xml' as iso with context %}
+  <gmd:fileIdentifier>
+    <gco:CharacterString>{{ dataset.guid() }}</gco:CharacterString>
+  </gmd:fileIdentifier>
+
+  <!-- HERE -->
+  <mdb:defaultLocale>
+    {{iso.render_locale(dataset['default_locale'], True)}}
+  </mdb:defaultLocale>
+  {% if dataset['parent_metadata'] %}
+  <mdb:parentMetadata>
+    {{ iso.render_citation(dataset['parent_metadata']) }}
+  </mdb:parentMetadata>
+  {% endif %}
+  <mdb:metadataScope>
+    <mdb:MD_MetadataScope>
+      <mdb:resourceScope>
+        <mcc:MD_ScopeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="dataset" />
+      </mdb:resourceScope>
+    </mdb:MD_MetadataScope>
+  </mdb:metadataScope>
+  {% for resp in responsibilities %}
+  <mdb:contact>
+    {{ iso.render_responsibility(resp['role']['short_name'], resp['contact']) }}
+  </mdb:contact>
+  {% endfor %}
+  {% for date in dates %}
+  <mdb:dateInfo>
+    {{ iso.render_date(date['type']['short_name'], date['date']) }}
+  </mdb:dateInfo>
+  {% endfor %}
+  {% if dataset['metadata_standards'] %}
+  {% for standard in dataset['metadata_standards'] %}
+  <mdb:metadataStandard>
+    {{ iso.render_citation(standard) }}
+  </mdb:metadataStandard>
+  {% endfor %}
+  {% endif %}
+  {% if dataset['metadata_profiles'] %}
+  {% for profile in dataset['metadata_profiles'] %}
+  <mdb:metadataProfile>
+    {{ iso.render_citation(profile) }}
+  </mdb:metadataProfile>
+  {% endfor %}
+  {% endif %}
+  {% if dataset['alt_metadata'] %}
+  {% for alt_md in dataset['alt_metadata'] %}
+  <mdb:alternativeMetadataReference>
+    {{ iso.render_citation(alt_md) }}
+  </mdb:alternativeMetadataReference>
+  {% endfor %}
+  {% endif %}
+  {% if dataset['other_locales'] %}
+  {% for locale in dataset['other_locales'] %}
+  <mdb:otherLocale>
+        {{iso.render_locale(locale, True)}}
+  </mdb:otherLocale>
+  {% endfor %}
+  {% endif %}
+  {% if dataset['canon_urls'] %}
+  {% for meta_url in dataset['canon_urls'] %}
+  <mdb:metadataLinkage>
+    {{ iso.render_resource(meta_url) }}
+  </mdb:metadataLinkage>
+  {% endfor %}
+  {% endif %}
+  {# <!-- spatialRepresentationInfo --> #}
+  {% if dataset['horizontal_ref_system'] %}
+  <mdb:referenceSystemInfo>
+     {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
+  </mdb:referenceSystemInfo>
+  {% endif %}
+  {% if dataset['vertical_ref_system'] %}
+  <mdb:referenceSystemInfo>
+     {{iso.render_ref_system(dataset['vertical_ref_system'])}}
+  </mdb:referenceSystemInfo>
+  {% endif %}
+  {% if dataset['temporal_ref_system'] %}
+  <mdb:referenceSystemInfo>
+     {{iso.render_ref_system(dataset['temporal_ref_system'])}}
+  </mdb:referenceSystemInfo>
+  {% endif %}
+  {# <!-- metadataExtensionInfo --> #}
+  <mdb:identificationInfo>
+    <mri:MD_DataIdentification>
+      <mri:citation>
+        {{iso.render_citation(dataset_citation)}}
+      </mri:citation>
+      {% if dataset['abstract'] %}
+      <mri:abstract xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['abstract'])}}</mri:abstract>
+      {% endif %}
+      {% if dataset['purpose'] %}
+      <mri:purpose xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['purpose'])}}</mri:purpose>
+      {% endif %}
+      {% if dataset['credit'] %}
+      <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['credit'])}}</mri:credit>
+      {% endif %}
+      {% if dataset['status'] %}
+      {% for stat in dataset['status'] %}
+      <mri:status>
+        <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{stat['short_name']}}" />
+      </mri:status>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['point_of_contact'] %}
+      <mri:pointOfContact>
+        {{ iso.render_responsibility("pointOfContact", dataset['point_of_contact']) }}
+      </mri:pointOfContact>
+      {% endif %}
+      {% if dataset['spatial_representation_type'] %}
+      {% for srt in dataset['spatial_representation_type'] %}
+      <mri:spatialRepresentationType>
+        <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{srt['short_name']}}" />
+      </mri:spatialRepresentationType>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['spatial_resolution'] %}
+      {% for sr in dataset['spatial_resolution'] %}
+      <mri:spatialResolution>
+        {{ iso.render_spatial_res(sr) }}
+      </mri:spatialResolution>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['temporal_resolution'] %}
+      {% for tr in dataset['temporal_resolution'] %}
+      <mri:temporalResolution>
+        {{ iso.render_temporal_res(tr) }}
+      </mri:temporalResolution>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['topic_category'] %}
+      {% for tc in dataset['topic_category'] %}
+      <mri:topicCategory>
+        <mri:MD_TopicCategoryCode>{{tc['short_name']}}</mri:MD_TopicCategoryCode>
+      </mri:topicCategory>
+      {% endfor %}
+      {% endif %}
+      <mri:extent>
+        <gex:EX_Extent>
+          {% if dataset['bbox_north'] %}
+          <gex:geographicElement>
+            <gex:EX_GeographicBoundingBox>
+              <gex:extentTypeCode>
+                <gco:Boolean>true</gco:Boolean>
+              </gex:extentTypeCode>
+              <gex:westBoundLongitude>
+                <gco:Decimal>{{dataset['bbox_west']}}</gco:Decimal>
+              </gex:westBoundLongitude>
+              <gex:eastBoundLongitude>
+                <gco:Decimal>{{dataset['bbox_east']}}</gco:Decimal>
+              </gex:eastBoundLongitude>
+              <gex:southBoundLatitude>
+                <gco:Decimal>{{dataset['bbox_south']}}</gco:Decimal>
+              </gex:southBoundLatitude>
+              <gex:northBoundLatitude>
+                <gco:Decimal>{{dataset['bbox_north']}}</gco:Decimal>
+              </gex:northBoundLatitude>
+            </gex:EX_GeographicBoundingBox>
+          </gex:geographicElement>
+          {% endif %}
+          {% if dataset['start_time'] %}
+          <gex:temporalElement>
+            <gex:EX_TemporalExtent>
+              <gex:extent>
+                {{ iso.render_time_period(dataset['start_time'], dataset['end_time'], dataset['is_ongoing']) }}
+              </gex:extent>
+            </gex:EX_TemporalExtent>
+          </gex:temporalElement>
+          {% endif %}
+          {% if dataset['vertical_min'] %}
+          <gex:verticalElement>
+            <gex:EX_VerticalExtent>
+              <gex:minimumValue>
+                <gco:Real>{{dataset['vertical_min']}}</gco:Real>
+              </gex:minimumValue>
+              <gex:maximumValue>
+                <gco:Real>{{dataset['vertical_max']}}</gco:Real>
+              </gex:maximumValue>
+              {% if dataset['vertical_ref_system'] %}
+              <gex:verticalCRSId>
+                {{ iso.render_ref_system(dataset['vertical_ref_system']) }}
+              </gex:verticalCRSId>
+              {% endif %}
+            </gex:EX_VerticalExtent>
+          </gex:verticalElement>
+          {% endif %}
+        </gex:EX_Extent>
+      </mri:extent>
+      {% if dataset['additional_docs'] %}
+      {% for doc in dataset['additional_docs'] %}
+      <mri:additionalDocumentation>
+        {{ iso.render_citation(doc) }}
+      </mri:additionalDocumentation>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['processing_code'] %}
+      <mri:processingLevel>
+        {{ iso.render_id(dataset['processing_code'], dataset['processing_desc'], dataset['processing_system']) }}
+      </mri:processingLevel>
+      {% endif %}
+      <mri:resourceMaintenance>
+        {% if dataset['resource_maintenance_frequency'] %}
+        {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency']['short_name'], dataset_maintenance) }}
+        {% else %}
+        {{ iso.render_maintenance_info("", dataset_maintenance) }}
+        {% endif %}
+      </mri:resourceMaintenance>
+      {% if dataset['graphics'] %}
+      {% for graphic in dataset['graphics'] %}
+      <mri:graphicOverview>
+        {{ iso.render_graphic(graphic) }}
+      </mri:graphicOverview>
+      {% endfor %}
+      {% endif %}
+      {# <!-- resourceFormat --> #}
+      {% if grouped_keywords %}
+        {% for key in stable_dict_key_list(grouped_keywords) %}
+      <mri:descriptiveKeywords>
+        {{ iso.render_keywords(grouped_keywords[key]) }}
+      </mri:descriptiveKeywords>
+        {% endfor %}
+      {% endif %}
+      {# <!-- resourceSpecificUsage --> #}
+      {% if dataset['licenses'] %}
+      {% for license in dataset['licenses'] %}
+      <mri:resourceConstraints>
+        {{ iso.render_constraint(license) }}
+      </mri:resourceConstraints>
+      {% endfor %}
+      {% endif %}
+      {# <!-- associatedResource --> #}
+      {% if dataset['dataset_locale'] %}
+      <mri:defaultLocale>
+        {{iso.render_locale(dataset['dataset_locale'])}}
+      </mri:defaultLocale>
+      {% endif %}
+      {% if dataset['dataset_other_locales'] %}
+      {% for locale in dataset['dataset_other_locales'] %}
+      <mri:otherLocale>
+        {{iso.render_locale(locale)}}
+      </mri:otherLocale>
+      {% endfor %}
+      {% endif %}
+      {% if dataset['environment_desc'] %}
+      <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
+      {% endif %}
+      {% if dataset['supplemental'] %}
+      <mri:supplementalInformation>{{ iso.render_text(dataset['supplemental']) }}</mri:supplementalInformation>
+      {% endif %}
+    </mri:MD_DataIdentification>
+  </mdb:identificationInfo>
+  {# <!-- contentInfo --> #}
+  {% if dataset['distributors'] %}
+  {% for dc in dataset['distributors'] %}
+  <mdb:distributionInfo>
+      {{ iso.render_distribution(dc) }}
+  </mdb:distributionInfo>
+  {% endfor %}
+  {% endif %}
+  {% if iso19115_custom_distribution_channels %}
+  {% for dc in iso19115_custom_distribution_channels %}
+  <mdb:distributionInfo>
+      {{ iso.render_distribution(dc) }}
+  </mdb:distributionInfo>
+  {% endfor %}
+  {% endif %}
+  {# <!-- dataQualityInfo --> #}
+  {# <!-- resourceLineage --> #}
+  {# <!-- portrayalCatalogueInfo --> #}
+  {% if dataset['meta_licenses'] %}
+  {% for license in dataset['meta_licenses'] %}
+  <mdb:metadataConstraints>
+    {{ iso.render_constraint(license) }}
+  </mdb:metadataConstraints>
+  {% endfor %}
+  {% endif %}
+  {# <!-- applicationSchemaInfo --> #}
+  <mdb:metadataMaintenance>
+      {% if dataset['metadata_maintenance_frequency'] %}
+      {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency']['short_name'], metadata_maintenance) }}
+      {% else %}
+      {{ iso.render_maintenance_info("", metadata_maintenance) }}
+      {% endif %}
+  </mdb:metadataMaintenance>
+  {# <!-- acquisitionInfo --> #}
+</gmd:MD_Metadata>

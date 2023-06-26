@@ -23,10 +23,7 @@ class HtmlList:
     def __str__(self):
         h = '<ul>'
         for item in self.items:
-            if isinstance(item, MultiLanguageString):
-                h += f'<li>{_render_mls(item)}</li>'
-            else:
-                h += f'<li>{markupsafe.escape(item)}</li>'
+            h += f'<li>{markupsafe.escape(item)}</li>'
         h += '</ul>'
         return markupsafe.Markup(h)
 
@@ -108,7 +105,6 @@ class Field:
             flasht("pipeman.field.error.translation_nothing_to_do", "warning", field_name=self.field_name, index=index)
             val['_translation_request'] = False
             return
-        print(wc)
         if wc.check_exists(
             'text_translation',
             'default',
@@ -215,6 +211,19 @@ class Field:
             return set()
         return self._extract_keywords()
 
+    def update_from_keyword(self, keyword: str, keyword_dictionary: str = None) -> bool:
+        if not self.config("keyword_config", "is_keyword", default=False):
+            return False
+        if keyword_dictionary is not None:
+            prefix = self.config("keyword_config", "thesaurus", "prefix", default = None)
+            full_name = self.config("keyword_config", "thesaurus", "citation", "title", "und", default=None)
+            if keyword_dictionary not in (prefix, full_name):
+                return False
+        return self._update_from_keyword(keyword, keyword_dictionary)
+
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        return False
+
     def keyword_mode(self):
         method = "value"
         method = self.config("keyword_config", "extraction_method", default=method)
@@ -237,10 +246,13 @@ class Field:
         if self.is_repeatable():
             keywords = []
             for value in self.value:
-                keywords.append(self._value_to_keyword(value))
+                if value is not None:
+                    keywords.append(self._value_to_keyword(value))
             return keywords
-        else:
+        elif self.value is not None:
             return [self._value_to_keyword(self.value)]
+        else:
+            return []
 
     def _value_to_keyword(self, value):
         return Keyword(str(value), str(value), None, self.build_thesaurus())
@@ -618,7 +630,7 @@ class Keyword:
             "secondary": {},
             'vocab': None
         }
-        prefix = self.thesaurus['prefix'] if use_prefixes and 'prefix' in self.thesaurus and self.thesaurus['prefix'] else ''
+        prefix = self.thesaurus['prefix'] if use_prefixes and self.thesaurus and 'prefix' in self.thesaurus and self.thesaurus['prefix'] else ''
         if prefix:
             prefix = f"{prefix}{prefix_separator}"
         if self.thesaurus:
@@ -720,6 +732,18 @@ class ChoiceField(Field):
 
     def _get_display_text(self, value):
         return self.field_config["values"][value]
+
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        opts = [x[0] for x in self.choices()]
+        if keyword not in opts:
+            return False
+        if self.is_repeatable():
+            values = self.value
+            values.append(keyword)
+            self.set_from_raw(list(set(values)))
+        else:
+            self.set_from_raw(keyword)
+        return True
 
     def choices(self):
         if self._values is None:
@@ -988,6 +1012,13 @@ class VocabularyReferenceField(ChoiceField):
         super().__init__(*args, **kwargs)
         self._value_cache = None
 
+    def _format_for_ui(self, val):
+        if val is None or val == "":
+            return ""
+        txt = self._get_display_text(val)
+        link = flask.url_for("core.vocabulary_term_list", vocab_name=self.field_config["vocabulary_name"], _anchor=val)
+        return MultiLanguageLink(link, txt, new_tab=True)
+
     def _get_display_text(self, value):
         with self.db as session:
             term = session.query(orm.VocabularyTerm).filter_by(
@@ -995,8 +1026,11 @@ class VocabularyReferenceField(ChoiceField):
                 short_name=value
             ).first()
             if term and term.display_names:
-                return json.loads(term.display_names)
-        return {}
+                names = json.loads(term.display_names)
+                if 'und' not in names:
+                    names['und'] = value
+                return names
+        return {'und': value}
 
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
@@ -1024,4 +1058,7 @@ class VocabularyReferenceField(ChoiceField):
             term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config["vocabulary_name"], short_name=val).first()
             if term is not None:
                 return VocabularyTerm(term.short_name, term.display_names)
-        return VocabularyTerm()
+        if none_as_blank:
+            return VocabularyTerm()
+        else:
+            return None

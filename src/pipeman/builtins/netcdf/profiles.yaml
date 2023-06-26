@@ -35,6 +35,7 @@ acdd:
       - start_time
       - vertical_min
       - vertical_max
+      - cf_standard_names
   fields:
     title:
     source:
@@ -83,6 +84,7 @@ acdd:
     dataset_id_code:
     dataset_id_desc:
     dataset_id_system:
+    cf_standard_names:
   formatters:
     ncml:
       label:
