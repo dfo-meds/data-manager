@@ -6,7 +6,19 @@ internal_info:
         en: Internal Notes
         fr: Notes internes
       multilingual: yes
+    file_storage_location:
+      data_type: multitext
+      label:
+        en: Storage Location
+      multilingual: yes
   display:
     en: Internal
     fr: Internes
   order: 50000
+publishing:
+  fields:
+    via_meds_request_form:
+      data_type: boolean
+      label:
+        en: Request via MEDS Request Form
+

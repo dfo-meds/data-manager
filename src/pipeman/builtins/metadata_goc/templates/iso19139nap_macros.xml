@@ -1,0 +1,501 @@
+<templates xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:gmd="http://www.isotc211.org/2005/gmd"
+ xmlns:srv="http://www.isotc211.org/2005/srv"
+ xmlns:gco="http://www.isotc211.org/2005/gco"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:gfc="http://www.isotc211.org/2005/gfc"
+ xmlns:gmi="http://www.isotc211.org/2005/gmi"
+ xmlns:gsr="http://www.isotc211.org/2005/gsr"
+ xmlns:gss="http://www.isotc211.org/2005/gss"
+ xmlns:gts="http://www.isotc211.org/2005/gts"
+ xmlns:gmx="http://www.isotc211.org/2005/gmx"
+ xmlns:gml="http://www.opengis.net/gml/3.2"
+ xmlns="http://www.isotc211.org/2005/gmd"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  {% macro render_text(text) %}
+  {% if text is string %}
+  <gmd:CharacterString>{{text}}</gmd:CharacterString>
+  {% else %}
+  {% if default_locale in text %}
+  <gmd:CharacterString>{{text[default_locale]}}</gmd:CharacterString>
+  {% elif "und" in text %}
+  <gmd:CharacterString>{{text['und']}}</gmd:CharacterString>
+  {% endif %}
+  {% if check_alt_langs(text, default_locale) %}
+  <gmd:PT_FreeText>
+  {% for a2l in locale_mapping %}
+      {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
+    <gmd:textGroup>
+      <gmd:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{text[a2l]}}</gmd:LocalisedCharacterString>
+    </gmd:textGroup>
+      {% endif %}
+  {% endfor %}
+  </gmd:PT_FreeText>
+  {% endif %}
+  {% endif %}
+{% endmacro %}
+
+
+{% macro render_distribution(dc) %}
+  <gmd:MD_Distribution>
+    {# <!-- distribution format --> #}
+
+    {% if dc and dc['responsibles'] %}
+      {% for dcc in dc['responsibles'] %}
+    <gmd:distributor>
+      <gmd:MD_Distributor>
+        <gmd:distributorContact>
+          {{ render_responsibility(dcc['role']['short_name'], dcc['contact']) }}
+        </gmd:distributorContact>
+        {# <!-- distributionOrderPorcess, distributorFormat, distributorTransferOptions --> #}
+      </gmd:MD_Distributor>
+    </gmd:distributor>
+      {% endfor %}
+    {% endif %}
+
+    {% if dc['links'] %}
+      <gmd:transferOptions>
+          <gmd:MD_DigitalTransferOptions>
+            <gmd:onLine>
+            {% for link in dc['links'] %}
+              {{ render_resource(link) }}
+            {% endfor %}
+            </gmd:onLine>
+          </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+    {% endif %}
+  </gmd:MD_Distribution>
+{% endmacro %}
+
+{% macro render_resource(resource) %}
+<gmd:CI_OnlineResource>
+  <gmd:linkage xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(resource['url']) }}</gmd:linkage>
+  {% if resource['protocol'] %}
+  <gmd:protocol>{{ render_text(resource['protocol']['short_name']) }}</gmd:protocol>
+  {% endif %}
+  {% if resource['app_profile'] %}
+  <gmd:applicationProfile>{{ render_text(resource['app_profile']) }}</gmd:applicationProfile>
+  {% endif %}
+  {% if resource['name'] %}
+  <gmd:name xsi:type="gmd:PT_FreeText_PropertyType">
+    {{render_text(resource['name'])}}
+  </gmd:name>
+  {% endif %}
+  {% if resource['description'] %}
+  <gmd:description xsi:type="gmd:PT_FreeText_PropertyType">
+    {{render_text(resource['description'])}}
+  </gmd:description>
+  {% endif %}
+  {% if resource['function'] %}
+  <gmd:function>
+    {% with code_list, code_value, text_value = nap_code_map(resource['function']['short_name'], 'CI_OnLineFunctionCode') %}
+    <gmd:CI_OnLineFunctionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_OnLineFunctionCode>
+    {% endwith %}
+  </gmd:function>
+  {% endif %}
+</gmd:CI_OnlineResource>
+{% endmacro %}
+
+  {% macro render_distance(value, unit) %}
+  <gco:Distance uom="{{unit}}">{{value}}</gco:Distance>
+  {% endmacro %}
+
+  {% macro render_spatial_res(res) %}
+    {% if res['scale'] %}
+    <gmd:MD_Resolution>
+      <gmd:equivalentScale>
+        <gmd:MD_RepresentativeFraction>
+          <gmd:denominator><gco:Integer>{{res['scale']}}</gco:Integer></gmd:denominator>
+        </gmd:MD_RepresentativeFraction>
+      </gmd:equivalentScale>
+    </gmd:MD_Resolution>
+    {% endif %}
+    {% if res['distance'] %}
+    <gmd:MD_Resolution>
+      <gmd:distance>
+        {{ render_distance(res['distance'], res['distance_units']) }}
+      </gmd:distance>
+    </gmd:MD_Resolution>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro render_time_period(start, end, is_ongoing) %}
+  <gml:TimePeriod gml:id="time_period">
+    <gml:beginPosition>{{start.isoformat(timespec='milliseconds')}}</gml:beginPosition>
+    {% if is_ongoing %}
+    <gml:endPosition indeterminatePosition="now" />
+    {% else %}
+    <gml:endPosition>{{end.isoformat(timespec='milliseconds')}}</gml:endPosition>
+    {% endif %}
+  </gml:TimePeriod>
+  {% endmacro %}
+
+  {% macro render_temporal_res(res) %}
+  <gco:TM_PeriodDuration>P{{res['years'] or 0}}Y{{res['months'] or 0}}M{{res['days'] or 0}}DT{{res['hours'] or 0}}H{{res['minutes'] or 0}}M{{res['seconds'] or 0}}S</gco:TM_PeriodDuration>
+  {% endmacro %}
+
+{% macro render_responsibility(code, contact) %}
+<gmd:CI_ResponsibleParty>
+  {{ render_contact(contact) }}
+  <gmd:role>
+    {% with code_list, code_value, text_value = nap_code_map(code, 'CI_RoleCode') %}
+    <gmd:CI_RoleCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_RoleCode>
+    {% endwith %}
+  </gmd:role>
+</gmd:CI_ResponsibleParty>
+{% endmacro %}
+
+{% macro render_short_date(date) %}
+  <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
+{% endmacro %}
+
+{% macro render_date(code, date) %}
+<gmd:CI_Date>
+  <gmd:date>
+    <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
+  </gmd:date>
+  <gmd:dateType>
+    {% with code_list, code_value, text_value = nap_code_map(code, 'CI_DateTypeCode') %}
+    <gmd:CI_DateTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_DateTypeCode>
+    {% endwith %}
+  </gmd:dateType>
+</gmd:CI_Date>
+{% endmacro %}
+
+{% macro render_citation(citation) %}
+<gmd:CI_Citation>
+  <gmd:title xsi:type="gmd:PT_FreeText_PropertyType">
+    {{ render_text(citation['title']) }}
+  </gmd:title>
+  {% if citation['alt_title'] %}
+  <gmd:alternateTitle xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(citation['alt_title']) }}</gmd:alternateTitle>
+  {% endif %}
+  {% if citation["publication_date"] %}
+  <gmd:date>{{ render_date('publication', citation['publication_date']) }}</gmd:date>
+  {% endif %}
+  {% if citation["revision_date"] %}
+  <gmd:date>{{ render_date('revision', citation['revision_date']) }}</gmd:date>
+  {% endif %}
+  {% if citation["creation_date"] %}
+  <gmd:date>{{ render_date('creation', citation['creation_date']) }}</gmd:date>
+  {% endif %}
+  {% if citation['edition'] %}
+  <gmd:edition xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</gmd:edition>
+  {% endif %}
+  {% if citation['edition_date'] %}
+  <gmd:editionDate><gco:DateTime>{{citation['edition_date'].isoformat(timespec='milliseconds')}}</gco:DateTime></gmd:editionDate>
+  {% endif %}
+  {% if citation["id_code"] %}
+  <gmd:identifier>
+    {{ render_id(citation['id_code'], citation['id_description'], citation['id_system']) }}
+  </gmd:identifier>
+  {% endif %}
+  {% if citation['responsibles'] %}
+  {% for resp in citation['responsibles'] %}
+  <gmd:citedResponsibleParty>{{ render_responsibility(resp['role']['short_name'], resp['contact']) }}</gmd:citedResponsibleParty>
+  {% endfor %}
+  {% endif %}
+  {% if citation['presentation_form'] %}
+  <gmd:presentationForm>
+    {% with code_list, code_value, text_value = nap_code_map(citation['presentation_form']['short_name'], 'CI_PresentationFormCode') %}
+    <gmd:CI_PresentationFormCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_PresentationFormCode>
+    {% endwith %}
+  </gmd:presentationForm>
+  {% endif %}
+  {# <!-- series --> #}
+  {% if citation['details'] %}
+  <gmd:otherCitationDetails xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(citation['details'])}}</gmd:otherCitationDetails>
+  {% endif %}
+  {% if citation['isbn'] %}
+  <gmd:ISBN>{{ render_text(citation['isbn']) }}</gmd:ISBN>
+  {% endif %}
+  {% if citation['issn'] %}
+  <gmd:ISSN>{{ render_text(citation['issn'])}}</gmd:ISSN>
+  {% endif %}
+</gmd:CI_Citation>
+{% endmacro %}
+
+{% macro render_locale(locale, with_id=False) %}
+  {{ render_locale_details(locale) }}
+{% endmacro %}
+
+{% macro render_locale_details(locale) %}
+  {% with a, lang_code_value, b = nap_code_map(locale['language'], 'LanguageCode') %}
+    {% with b, country_code_value, b = nap_code_map(locale['country'], 'CountryCode') %}
+  <gmd:language>{{lang_code_value}}{% if country_code_value %}; {{country_code_value}}{% endif %}</gmd:language>
+    {% endwith %}
+    {% endwith %}
+  {% if locale['encoding'] %}
+  <gmd:characterSet>
+    {% with code_list, code_value, text_value = nap_code_map(locale['encoding']['short_name'], 'CharacterSetCode') %}
+    <gmd:MD_CharacterSetCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_CharacterSetCode>
+    {% endwith %}
+  </gmd:characterSet>
+  {% endif %}
+{% endmacro %}
+
+
+{% macro render_long_locale(locale) %}
+<gmd:PT_Locale id="{{locale['a3_language']}}">
+  <gmd:languageCode>
+    {% with code_list, code_value, text_value = nap_code_map(locale['language'], 'LanguageCode') %}
+    <gmd:LanguageCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:LanguageCode>
+    {% endwith %}
+  </gmd:languageCode>
+  {% if locale['country'] %}
+  <gmd:country>
+    {% with code_list, code_value, text_value = nap_code_map(locale['country'], 'CountryCode') %}
+    <gmd:CountryCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CountryCode>
+    {% endwith %}
+  </gmd:country>
+  {% endif %}
+  {% if locale['encoding'] %}
+  <gmd:characterEncoding>
+    {% with code_list, code_value, text_value = nap_code_map(locale['encoding']['short_name'], 'CharacterSetCode') %}
+    <gmd:MD_CharacterSetCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_CharacterSetCode>
+    {% endwith %}
+  </gmd:characterEncoding>
+  {% endif %}
+</gmd:PT_Locale>
+{% endmacro %}
+
+{% macro render_ref_system(ref_system) %}
+<gmd:MD_ReferenceSystem>
+  <gmd:referenceSystemIdentifier>
+    <gmd:RS_Identifier>
+      {% if ref_system['code'] %}
+      <gmd:code>
+        <gco:CharacterString>{{ref_system['code']}}</gco:CharacterString>
+      </gmd:code>
+      {% endif %}
+      {% if ref_system['system'] and ref_system['system']['code_space'] %}
+      <gmd:codeSpace>
+        <gco:CharacterString>{{ref_system['system']['code_space']}}</gco:CharacterString>
+      </gmd:codeSpace>
+      {% endif %}
+      {% if ref_system['system'] and ref_system['system']['version'] %}
+      <gmd:version>
+        <gco:CharacterString>{{ref_system['system']['version']}}</gco:CharacterString>
+      </gmd:version>
+      {% endif %}
+    </gmd:RS_Identifier>
+  </gmd:referenceSystemIdentifier>
+</gmd:MD_ReferenceSystem>
+{% endmacro %}
+{% macro render_keywords(kwgroup) %}
+<gmd:MD_Keywords>
+  {% for keyword in kwgroup.keywords() %}
+  <gmd:keyword xsi:type="gmd:PT_FreeText_PropertyType">
+    {% with keyword_display = keyword.to_display(default_locale) %}
+    <gco:CharacterString>{{ keyword_display["primary"] }}</gco:CharacterString>
+    {% if keyword_display["secondary"] %}
+    <gmd:PT_FreeText>
+    {% for a2l in locale_mapping %}
+        {% if a2l in keyword_display["secondary"] %}
+      <gmd:textGroup>
+        <gmd:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{keyword_display["secondary"][a2l]}}</gmd:LocalisedCharacterString>
+      </gmd:textGroup>
+        {% endif %}
+    {% endfor %}
+    </gmd:PT_FreeText>
+    {% endif %}
+    {% endwith %}
+  </gmd:keyword>
+  {% endfor %}
+  {% if kwgroup.thesaurus['type'] %}
+  <gmd:type>
+    {% with code_list, code_value, text_value = nap_code_map(kwgroup.thesaurus['type']['short_name'], 'MD_KeywordTypeCode') %}
+    <gmd:MD_KeywordTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_KeywordTypeCode>
+    {% endwith %}
+  </gmd:type>
+  {% endif %}
+  {% if kwgroup.thesaurus['citation'] %}
+  <gmd:thesaurusName>
+    {{ render_citation(kwgroup.thesaurus['citation']) }}
+  </gmd:thesaurusName>
+  {% endif %}
+</gmd:MD_Keywords>
+{% endmacro %}
+
+{% macro render_maintenance_info(code, records) %}
+<gmd:MD_MaintenanceInformation>
+  {% if code %}
+  <gmd:maintenanceAndUpdateFrequency>
+    {% with code_list, code_value, code_name = nap_code_map(code, 'MD_MaintenanceFrequencyCode') %}
+    <gmd:MD_MaintenanceFrequencyCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{code_name}}</gmd:MD_MaintenanceFrequencyCode>
+    {% endwith %}
+  </gmd:maintenanceAndUpdateFrequency>
+  {% endif %}
+  {# <!-- dateOfNextUpdate --> #}
+  {# <!-- userDefinedMaintenanceFrequency --> #}
+  {# <!-- updateScope --> #}
+  {# <!-- updateScopeDescription --> #}
+  {% for record in records %}
+  <gmd:maintenanceNote xsi:type="gmd:PT_FreeText_PropertyType">
+    {{ render_text(record['notes']) }}
+  </gmd:maintenanceNote>
+  {% endfor %}
+  {# <!-- contact --> #}
+</gmd:MD_MaintenanceInformation>
+{% endmacro %}
+
+
+{% macro render_constraint(con) %}
+  {% if con['classification'] %}
+    <gmd:MD_SecurityConstraints>
+      {{ render_constraints_content(con) }}
+      <gmd:classification>
+        {% with code_list, code_value, text_value = nap_code_map(con['classification']['short_name'], 'MD_ClassificationCode') %}
+        <gmd:MD_ClassificationCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_ClassificationCode>
+        {% endwith %}
+      </gmd:classification>
+      {% if con['user_notes'] %}
+      <gmd:userNote xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(con['user_notes']) }}</gmd:userNote>
+      {% endif %}
+      {% if con['classification_system'] %}
+      <gmd:classificationSystem xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(con['classification_system']) }}</gmd:classificationSystem>
+      {% endif %}
+      {% if con['handling_description'] %}
+      <gmd:handlingDescription xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(con['handling_description']) }}</gmd:handlingDescription>
+      {% endif %}
+    </gmd:MD_SecurityConstraints>
+  {% elif con['access_constants'] or con['use_constraints'] or con['other_constraints'] %}
+ <gmd:MD_LegalConstraints>
+      {{ render_constraints_content(con) }}
+      {% if con['access_constraints'] %}
+      <gmd:accessConstraints>
+        {% for c in con['access_constraints'] %}
+          {% with code_list, code_value, text_value = nap_code_map(c['short_name'], 'MD_RestrictionCode') %}
+          <gmd:MD_RestrictionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_RestrictionCode>
+          {% endwith %}
+        {% endfor %}
+      </gmd:accessConstraints>
+      {% endif %}
+      {% if con['use_constraints'] %}
+      <gmd:useConstraints>
+        {% for c in con['use_constraints'] %}
+          {% with code_list, code_value, text_value = nap_code_map(c['short_name'], 'MD_RestrictionCode') %}
+          <gmd:MD_RestrictionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_RestrictionCode>
+          {% endwith %}
+        {% endfor %}
+      </gmd:useConstraints>
+      {% endif %}
+      {% if con['other_constraints'] %}
+      <gmd:otherConstraints xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(con['other_constraints'])}}</gmd:otherConstraints>
+      {% endif %}
+    </gmd:MD_LegalConstraints>
+  {% else %}
+    <gmd:MD_Constraints>
+      {{ render_constraints_content(con) }}
+    </gmd:MD_Constraints>
+  {% endif %}
+{% endmacro %}
+
+  {% macro render_constraints_content(con) %}
+    {% if con['description'] %}
+      <gmd:useLimitation xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(con['description']) }}</gmd:useLimitation>
+    {% endif %}
+  {% endmacro %}
+
+  {% macro render_graphic(graphic) %}
+    <gmd:MD_BrowseGraphic>
+      <gmd:fileName><gco:CharacterString>{{graphic['file_url']}}</gco:CharacterString></gmd:fileName>
+      {% if graphic['description'] %}
+      <gmd:fileDescription xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(graphic['description']) }}</gmd:fileDescription>
+      {% endif %}
+      {% if graphic['file_ext'] %}
+      <gmd:fileType><gco:CharacterString>{{graphic['file_ext']}}</gco:CharacterString></gmd:fileType>
+      {% endif %}
+    </gmd:MD_BrowseGraphic>
+  {% endmacro %}
+
+  {% macro render_contact_content(contact) %}
+  {% if contact['organization_name'] %}
+  <gmd:organisationName xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['organization_name'])}}</gmd:organisationName>
+  {% endif %}
+  {% if contact['individual_name'] %}
+    <gmd:individualName>{{render_text(contact['individual_name'])}}</gmd:individualName>
+  {% endif %}
+  {% if contact['position_name'] %}
+    <gmd:PositionName xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['position_name'])}}</gmd:PositionName>
+    {% endif %}
+  {% if contact['phone'] or contact['web_resource'] or contact['service_hours'] or contact['instructions'] or contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
+  <gmd:contactInfo>
+    <gmd:CI_Contact>
+      {% if contact['phone'] %}
+      <gmd:phone>
+        <gmd:CI_Telephone>
+          <gmd:voice>
+            <gco:CharacterString>{{contact['phone']}}</gco:CharacterString>
+          </gmd:voice>
+        </gmd:CI_Telephone>
+      </gmd:phone>
+      {% endif %}
+      {% if contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
+      <gmd:address>
+        <gmd:CI_Address>
+          {% if contact['delivery_point'] %}
+          <gmd:deliveryPoint>
+          {% for dp in contact['delivery_point'] %}
+            <gco:CharacterString>{{dp}}</gco:CharacterString>
+          {% endfor %}
+          </gmd:deliveryPoint>
+          {% endif %}
+          {% if contact['city'] %}
+          <gmd:city>
+            <gco:CharacterString>{{contact['city']}}</gco:CharacterString>
+          </gmd:city>
+          {% endif %}
+          {% if contact['admin_area'] %}
+          <gmd:administrativeArea>
+            <gco:CharacterString>{{contact['admin_area']}}</gco:CharacterString>
+          </gmd:administrativeArea>
+          {% endif %}
+          {% if contact['postal_code'] %}
+          <gmd:postalCode>
+            <gco:CharacterString>{{contact['postal_code']}}</gco:CharacterString>
+          </gmd:postalCode>
+          {% endif %}
+          {% if contact['country'] %}
+          <gmd:country>
+            <gco:CharacterString>{{contact['country']}}</gco:CharacterString>
+          </gmd:country>
+          {% endif %}
+          {% if contact['email'] %}
+          <gmd:electronicMailAddress>
+            <gco:CharacterString>{{contact['email']}}</gco:CharacterString>
+          </gmd:electronicMailAddress>
+          {% endif %}
+        </gmd:CI_Address>
+      </gmd:address>
+      {% endif %}
+      {% if contact['web_resource'] %}
+        {% for res in contact['web_resource'] %}
+      <gmd:onlineResource>
+        {{render_resource(res)}}
+      </gmd:onlineResource>
+        {% endfor %}
+      {% endif %}
+      {% if contact['service_hours'] %}
+      <gmd:hoursOfService xsi:type="gmd:PT_FreeText_PropertyType">
+        {{render_text(contact['service_hours'])}}
+      </gmd:hoursOfService>
+      {% endif %}
+    </gmd:CI_Contact>
+  </gmd:contactInfo>
+  {% endif %}
+{% endmacro %}
+{% macro render_contact(contact) %}
+  {{ render_contact_content(contact) }}
+{% endmacro %}
+  {% macro render_id(code, desc, system) %}
+  <gmd:MD_Identifier>
+    {% if system['authority'] %}
+    <gmd:authority>
+    {{ render_citation(system['authority']) }}
+    </gmd:authority>
+    {% endif %}
+    <gmd:code><gco:CharacterString>{{code}}</gco:CharacterString></gmd:code>
+  </gmd:MD_Identifier>
+  {% endmacro %}
+</templates>

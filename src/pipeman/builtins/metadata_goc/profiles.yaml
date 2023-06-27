@@ -18,3 +18,10 @@ gociso19115:
     goc_publication_place:
     goc_subject:
     goc_audience:
+  formatters:
+    iso19139_nap:
+      label:
+        en: ISO 19139 NAP XML
+      template: iso19139nap.xml
+      content_type: text/xml
+      preprocess: pipeman.builtins.metadata_goc.util.preprocess_for_nap

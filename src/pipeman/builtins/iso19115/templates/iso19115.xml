@@ -143,7 +143,7 @@
       {% if dataset['spatial_representation_type'] %}
       {% for srt in dataset['spatial_representation_type'] %}
       <mri:spatialRepresentationType>
-        <mcc:MD_SpatialRepresentationTypeCode codeList="https://data.noaa.gov/resources/iso19139/schema/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{srt['short_name']}}" />
+        <mcc:MD_SpatialRepresentationTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{srt['short_name']}}" />
       </mri:spatialRepresentationType>
       {% endfor %}
       {% endif %}

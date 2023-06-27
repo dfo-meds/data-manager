@@ -5,9 +5,11 @@ from pipeman.entity import EntityRegistry
 from pipeman.util import System
 import pathlib
 
+
 @injector.inject
 def init_plugin(system: System = None):
     system.on_setup(setup_plugin)
+    system.register_blueprint("pipeman.builtins.metadata_goc.app", "iso19139nap")
 
 
 @injector.inject

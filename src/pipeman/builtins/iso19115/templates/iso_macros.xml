@@ -296,7 +296,7 @@
   {% endfor %}
   {% if kwgroup.thesaurus['type'] %}
   <mri:type>
-    <mri:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="{{kwgroup.thesaurus['type']['short_name']}}" />
+    <mri:MD_KeywordTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_KeywordTypeCode" codeListValue="{{kwgroup.thesaurus['type']['short_name']}}" />
   </mri:type>
   {% endif %}
   {% if kwgroup.thesaurus['citation'] %}

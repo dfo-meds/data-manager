@@ -30,6 +30,32 @@ body {
     margin-bottom: 6px;
     padding: 2px 6px;
 }
+.bubble-link-list {
+    margin: 0;
+    padding: 0;
+}
+.bubble-link-list li {
+    margin: 0;
+    padding: 0;
+    float: left;
+    list-style: none;
+}
+.bubble-link-list li a {
+    display: inline-block;
+    padding: 2px 6px;
+    background-color: #000000;
+    border: 1px solid #37485B;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+.bubble-link-list li a:hover {
+    background-color: #444444;
+    border-color: #444444;
+    text-decoration: underline;
+}
 ul.profile-list li.direct {
     font-weight: bold;
 }

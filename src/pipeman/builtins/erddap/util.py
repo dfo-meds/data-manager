@@ -37,7 +37,6 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
         })
     if 'iso19115_custom_distribution_channels' in kwargs:
         kwargs['iso19115_custom_distribution_channels'].extend(erddap_distribution_servers)
-        return
     else:
         return {
             'iso19115_custom_distribution_channels': erddap_distribution_servers

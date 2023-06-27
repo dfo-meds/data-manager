@@ -8,3 +8,7 @@ cnodc:
     - cf1_10
   fields:
     internal_notes:
+    file_storage_location:
+    via_meds_request_form:
+  preprocess:
+    - pipeman.plugins.cnodc.util.preprocess_metadata_all

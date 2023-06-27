@@ -75,9 +75,3 @@ iso19115:
       template: iso19115.xml
       content_type: text/xml
       preprocess: pipeman.builtins.iso19115.util.preprocess_metadata
-    iso19139xml:
-      label:
-        en: ISO 19139 XML
-      template: iso19139.xml
-      content_type: text/xml
-      preprocess: pipeman.builtins.iso19115.util.preprocess_metadata
