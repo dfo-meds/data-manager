@@ -11,11 +11,17 @@ goc_publishing_section:
       multilingual: yes
       label:
         en: Section Name
+      description:
+        en: Enter the name of the group within the department which is publishing the data
+      order: 10
     publisher:
       data_type: entity_ref
       label:
         en: Publisher
+      description:
+        en: Select the department or agency which is publishing the data
       entity_type: goc_publishing_org
+    order: 0
 goc_publishing_org:
   display:
     en: GoC Publishers
@@ -29,7 +35,13 @@ goc_publishing_org:
       multilingual: yes
       label:
         en: Publisher Name
+      description:
+        en: Enter the full formal name of the department
+      order: 0
     publisher_code:
       data_type: text
       label:
         en: Publisher Code
+      description:
+        en: Enter the appropriate code for the department
+      order: 10

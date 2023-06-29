@@ -1,7 +1,7 @@
-from pipeman.entity.fields import ChoiceField, HtmlContentField, Keyword
+from pipeman.entity.fields import ChoiceField, HtmlContentField, Keyword, Field
 from pipeman.entity.controller import EntityController
 from pipeman.entity.entity import FieldContainer
-from pipeman.util.flask import EntitySelectField
+from pipeman.util.flask import EntitySelectField, DynamicFormField, TabbedFieldFormWidget
 from autoinject import injector
 from pipeman.i18n import gettext, MultiLanguageLink, MultiLanguageString
 import typing as t
@@ -88,6 +88,69 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)
 
 
+class InlineEntityField(DynamicFormField):
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, entity_type, original_data=None, parent_is_repeatable: bool = False, allow_js_controls: bool = True, **kwargs):
+        self._blank_entity = self.ec.reg.new_entity(entity_type,
+                                                    parent_type='_field' if not parent_is_repeatable else "_field_repeatable",
+                                                    field_values=original_data or {})
+        self.entity_type = entity_type
+        if 'widget' not in kwargs:
+            if allow_js_controls:
+                kwargs['widget'] = TabbedFieldFormWidget()
+        super().__init__(self._blank_entity.controls(), **kwargs)
+
+
+class InlineEntityReferenceField(EntityRefMixin, Field):
+
+    DATA_TYPE = "inline_entity_ref"
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # no bueno
+        #self.field_config['repeatable'] = False
+        self.field_config['multilingual'] = False
+
+    def _control_class(self):
+        return InlineEntityField
+
+    def validators(self):
+        return []
+
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        return False
+
+    def _extra_wtf_arguments(self) -> dict:
+        args = {
+            "entity_type": self.field_config["entity_type"],
+            "original_data": self.value,
+            'parent_is_repeatable': self.is_repeatable(),
+            'allow_js_controls': self.allow_javascript_controls() and not self.is_repeatable()
+        }
+        return args
+
+    def _format_for_ui(self, val):
+        ent = self._process_value(val)
+        code = '<table cellpadding="0" cellspacing="0" border="0" class="inline-entity-info property-list">'
+        for display, value in ent.display_values():
+            code += f'<tr><th>{display}</th><td>{value}</td></th></tr>'
+        code += '</table>'
+        return markupsafe.Markup(code)
+
+    def _process_value(self, val, **kwargs):
+        return self.ec.reg.new_entity(
+            self.field_config["entity_type"],
+            parent_type="_field" if not self.is_repeatable() else "_field_repeatable",
+            field_values=val
+        )
+
+
 class EntityReferenceField(EntityRefMixin, ChoiceField):
 
     DATA_TYPE = "entity_ref"
@@ -118,7 +181,8 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
     def _extra_wtf_arguments(self) -> dict:
         args = {
             "entity_types": self.field_config["entity_type"],
-            "allow_multiple": self.is_repeatable()
+            "allow_multiple": self.is_repeatable(),
+            "allow_select2": self.allow_javascript_controls()
         }
         if "min_chars_to_search" in self.field_config and self.field_config["min_chars_to_search"]:
             args["min_chars_to_search"] = int(self.field_config["min_chars_to_search"])

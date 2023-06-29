@@ -4,6 +4,8 @@ use_constraint:
       data_type: multitext
       label:
         en: Plain text
+      description:
+        en: This text is used where the full ISO record cannot be used (e.g. in NetCDF files)
 variable:
   validation:
     required:
@@ -18,6 +20,16 @@ variable:
       - valid_max
       - missing_value
   fields:
+    encoding:
+      data_type: vocabulary
+      vocabulary_name: core_charsets
+      label:
+        en: Encoding
+      description:
+        en: For string fields, select the character encoding
+      order: 41
+      netcdf:
+        mapping: _Encoding
     source_name:
       data_type: text
       label:

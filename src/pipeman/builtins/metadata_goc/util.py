@@ -13,7 +13,8 @@ ORIGINALS = {
     'MD_RestrictionCode': 'https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_RestrictionCode',
     'CharacterSetCode': 'http://standards.iso.org/iso/19115/resources/Codelist/lan/CharacterSetCode.xml',
     'LanguageCode': 'http://standards.iso.org/iso/19115/resources/Codelist/lan/LanguageCode.xml',
-    'CountryCode': 'http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml',
+    'CountryCode': 'http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CountryCode',
+    'CI_TelephoneTypeCode': 'https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode',
 }
 
 NAP_CODE_LOOKUP = {

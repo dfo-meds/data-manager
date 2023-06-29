@@ -4,62 +4,81 @@ goc_subjects:
   uri: "https://canada.multites.net/cst/default.asp?op=SRCHSCAT&searchString=SC&lang=ENG"
   terms:
     arts_music_literature:
-      en: Arts, Music, Literature
-      fr: Arts, musique, littérature
+      display:
+        en: Arts, Music, Literature
+        fr: Arts, musique, littérature
     agriculture:
-      en: Agriculture
-      fr: Agriculture
+      display:
+        en: Agriculture
+        fr: Agriculture
     economics_and_industry:
-      en: Economics and Industry
-      fr: Économie et industrie
+      display:
+        en: Economics and Industry
+        fr: Économie et industrie
     education_and_training:
-      en: Education and Training
-      fr: Éducation et formation
+      display:
+        en: Education and Training
+        fr: Éducation et formation
     form_descriptors:
-      en: Form descriptors
-      fr: Format
+      display:
+        en: Form descriptors
+        fr: Format
     government_and_politics:
-      en: Government and Politics
-      fr: Gouvernement et vie politique
+      display:
+        en: Government and Politics
+        fr: Gouvernement et vie politique
     health_and_safety:
-      en: Health and Safety
-      fr: Santé et sécurité
+      display:
+        en: Health and Safety
+        fr: Santé et sécurité
     history_and_archaeology:
-      en: History and Archaeology
-      fr: Histoire et archéologie
+      display:
+        en: History and Archaeology
+        fr: Histoire et archéologie
     information_and_communications:
-      en: Information and Communications
-      fr: Information et communication
+      display:
+        en: Information and Communications
+        fr: Information et communication
     labour:
-      en: Labour
-      fr: Travail et emploi
+      display:
+        en: Labour
+        fr: Travail et emploi
     language_and_linguistics:
-      en: Lanuage and Linguistics
-      fr: Langue et linguistique
+      display:
+        en: Lanuage and Linguistics
+        fr: Langue et linguistique
     law:
-      en: Law
-      fr: Droit
+      display:
+        en: Law
+        fr: Droit
     military:
-      en: Military
-      fr: Histoire et science militaire
+      display:
+        en: Military
+        fr: Histoire et science militaire
     nature_and_environment:
-      en: Nature and Environment
-      fr: Nature et environnement
+      display:
+        en: Nature and Environment
+        fr: Nature et environnement
     persons:
-      en: Persons
-      fr: Personnes
+      display:
+        en: Persons
+        fr: Personnes
     processes:
-      en: Processes
-      fr: Liens et fonctions
+      display:
+        en: Processes
+        fr: Liens et fonctions
     society_and_culture:
-      en: Society and Culture
-      fr: Société et culture
+      display:
+        en: Society and Culture
+        fr: Société et culture
     science_and_technology:
-      en: Science and Technology
-      fr: Sciences et technologie
+      display:
+        en: Science and Technology
+        fr: Sciences et technologie
     transport:
-      en: Transport
-      fr: Transport
+      display:
+        en: Transport
+        fr: Transport
 goc_places:
   display:
     en: Government of Canada - Places
@@ -70,91 +89,119 @@ goc_audiences:
   uri:
   terms:
     aboriginal_peoples:
-      en: Aboriginal peoples
-      fr: Peuples autochtones
+      display:
+        en: Aboriginal peoples
+        fr: Peuples autochtones
     business:
-      en: Business
-      fr: Entreprises
+      display:
+        en: Business
+        fr: Entreprises
     children:
-      en: Children
-      fr: Enfants
+      display:
+        en: Children
+        fr: Enfants
     educators:
-      en: Educators
-      fr: Éducateurs
+      display:
+        en: Educators
+        fr: Éducateurs
     employers:
-      en: Employers
-      fr: Employeurs
+      display:
+        en: Employers
+        fr: Employeurs
     funding_applicants:
-      en: Funding applicants
-      fr: Demandeurs de financement
+      display:
+        en: Funding applicants
+        fr: Demandeurs de financement
     general_public:
-      en: General public
-      fr: Grand public
+      display:
+        en: General public
+        fr: Grand public
     government:
-      en: Government
-      fr: Gouvernement
+      display:
+        en: Government
+        fr: Gouvernement
     immigrants:
-      en: Immigrants
-      fr: Immigrants
+      display:
+        en: Immigrants
+        fr: Immigrants
     job_seekers:
-      en: Job Seekers
-      fr: Chercheurs d'emploi
+      display:
+        en: Job Seekers
+        fr: Chercheurs d'emploi
     media:
-      en: Media
-      fr: Médias
+      display:
+        en: Media
+        fr: Médias
     noncanadians:
-      en: Non-Canadians
-      fr: Non-canadiens
+      display:
+        en: Non-Canadians
+        fr: Non-canadiens
     nongovernmental_organizations:
-      en: Non-governmental organizations
-      fr: Organisations non governementales
+      display:
+        en: Non-governmental organizations
+        fr: Organisations non governementales
     parents:
-      en: Parents
-      fr: Parents
+      display:
+        en: Parents
+        fr: Parents
     persons_with_disabilities:
-      en: Persons with disabilities
-      fr: Personnes handicapées
+      display:
+        en: Persons with disabilities
+        fr: Personnes handicapées
     rural_community:
-      en: Rural community
-      fr: Communauté rurale
+      display:
+        en: Rural community
+        fr: Communauté rurale
     seniors:
-      en: Seniors
-      fr: Aînés
+      display:
+        en: Seniors
+        fr: Aînés
     scientists:
-      en: Scientists
-      fr: Scientifiques
+      display:
+        en: Scientists
+        fr: Scientifiques
     students:
-      en: Students
-      fr: Étudiants
+      display:
+        en: Students
+        fr: Étudiants
     travellers:
-      en: Travellers
-      fr: Voyageurs
+      display:
+        en: Travellers
+        fr: Voyageurs
     veterans:
-      en: Veterans
-      fr: Anciens combattants
+      display:
+        en: Veterans
+        fr: Anciens combattants
     visitors_to_canada:
-      en: Visitors to Canada
-      fr: Visiteurs au Canada
+      display:
+        en: Visitors to Canada
+        fr: Visiteurs au Canada
     women:
-      en: Women
-      fr: Femmes
+      display:
+        en: Women
+        fr: Femmes
     youth:
-      en: Youth
-      fr: Jeunesse
+      display:
+        en: Youth
+        fr: Jeunesse
 goc_collection_types:
   display:
     en: Government of Canada - Collection Types
   uri:
   terms:
     primary:
-      en: Non-Spatial
-      fr: Non spatiales
+      display:
+        en: Non-Spatial
+        fr: Non spatiales
     geogratis:
-      en: Geospatial
-      fr: Géospatiales
+      display:
+        en: Geospatial
+        fr: Géospatiales
     fgp:
-      en: Open Maps
-      fr: Cartes ouvertes
+      display:
+        en: Open Maps
+        fr: Cartes ouvertes
     publication:
-      en: Publications
-      fr: Publication
+      display:
+        en: Publications
+        fr: Publication

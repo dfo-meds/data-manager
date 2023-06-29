@@ -6,9 +6,13 @@ iso19115_maintenance_scope:
     dataset:
       display:
         en: Dataset
+      description:
+        en: This record applies to the data itself
     metadata:
       display:
         en: Metadata
+      description:
+        en: This record applies to the metadata
 iso19115_ci_date_type_code:
   display:
     en: ISO-19115 - Date Types
@@ -115,47 +119,68 @@ iso19115_md_topic_category_code:
   uri: https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_TopicCategoryCode
   terms:
     farming:
-      en: Farming
+      display:
+        en: Farming
     biota:
-      en: Biota
+      display:
+        en: Biota
     boundaries:
-      en: Boundaries
+      display:
+        en: Boundaries
     climatologyMeteorologyAtmosphere:
-      en: Climatology, Meteorology, Atmosphere
+      display:
+        en: Climatology, Meteorology, Atmosphere
     economy:
-      en: Economy
+      display:
+        en: Economy
     elevation:
-      en: Elevation
+      display:
+        en: Elevation
     environment:
-      en: Environment
+      display:
+        en: Environment
     geoscientificInformation:
-      en: Geoscientific Information
+      display:
+        en: Geoscientific Information
     health:
-      en: Health
+      display:
+        en: Health
     imageryBaseMapsEarthCover:
-      en: Imagery, Base Maps, Earth Cover
+      display:
+        en: Imagery, Base Maps, Earth Cover
     intelligenceMilitary:
-      en: Intelligence, Military
+      display:
+        en: Intelligence, Military
     inlandWaters:
-      en: Inland Waters
+      display:
+        en: Inland Waters
     location:
-      en: Location
+      display:
+        en: Location
     oceans:
-      en: Oceans
+      display:
+        en: Oceans
     planningCadastre:
-      en: Planning, Cadastre
+      display:
+        en: Planning, Cadastre
     society:
-      en: Society
+      display:
+        en: Society
     structure:
-      en: Structure
+      display:
+        en: Structure
     transportation:
-      en: Transportation
+      display:
+        en: Transportation
     utilitiesCommunication:
-      en: Utilities, Communication
+      display:
+        en: Utilities, Communication
     extraTerrestrial:
-      en: Extra-Terrestrial
+      display:
+        en: Extra-Terrestrial
     disaster:
-      en: Disaster
+      display:
+        en: Disaster
 iso19115_md_topology_level_code:
   display:
     en: ISO-19115 - Topology Levels
@@ -178,28 +203,36 @@ iso19115_units:
   uri:
   terms:
     kg:
-      en: Kilograms
+      display:
+        en: Kilograms
     km:
-      en: Kilometers
+      display:
+        en: Kilometers
 iso19115_distance_units:
   display:
     en: ISO-19115 - Distance Units
   uri:
   terms:
     m:
-      en: Meters
+      display:
+        en: Meters
     km:
-      en: Kilometers
+      display:
+        en: Kilometers
 iso19115_angular_units:
   display:
     en: ISO-19115 - Angular Units
   uri:
   terms:
     radian:
-      en: Radians
+      display:
+        en: Radians
     arc_degree:
-      en: Degrees
+      display:
+        en: Degrees
     arc_minute:
-      en: Minutes
+      display:
+        en: Minutes
     arc_second:
-      en: Seconds
+      display:
+        en: Seconds

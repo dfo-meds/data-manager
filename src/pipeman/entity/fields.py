@@ -45,17 +45,26 @@ def _render_mls(mls: MultiLanguageString):
 
 class Field:
 
-    def __init__(self, field_name, field_config, parent_type=None, parent_id=None):
+    def __init__(self, field_name, field_config, container=None):
+
         self.field_name = field_name
         self.field_config = field_config
         self.display_group = field_config['display_group'] if 'display_group' in field_config else ""
         self.order = field_config['order'] if 'order' in field_config else 0
         self.value = None
         self._use_default_repeatable = True
-        self.parent_id = parent_id
-        self.parent_type = parent_type
+        self.parent = container
+        self.parent_id = self.parent.container_id if self.parent else None
+        self.parent_type = self.parent.container_type if self.parent else None
         self._default_thesaurus = None
         self._log = zrlog.get_logger("pipeman.field")
+
+    def allow_javascript_controls(self):
+        from pipeman.entity import Entity
+        # TODO: Select2 doesn't work well under these conditions, but we could probably fix it later.
+        if isinstance(self.parent, Entity) and self.parent.parent_type == '_field_repeatable':
+            return False
+        return True
 
     def config(self, *keys, default=None):
         working = self.field_config
@@ -136,7 +145,11 @@ class Field:
         return self.config("repeatable", default=False)
 
     def allow_translation_requests(self):
-        return self.config("allow_translation_requests", default=self.is_multilingual())
+        if not self.config("allow_translation_requests", default=self.is_multilingual()):
+            return False
+        if self.parent_type is None or self.parent_id is None:
+            return False
+        return True
 
     def set_from_raw(self, raw_value):
         if self.is_repeatable():
@@ -272,6 +285,7 @@ class Field:
                                   allow_translation_requests=self.allow_translation_requests(),
                                   use_metadata_languages=True,
                                   label="",
+                                  allow_js_widget=self.allow_javascript_controls()
                                   ),
                 min_entries=min_entries,
                 **parent_args
@@ -280,6 +294,7 @@ class Field:
             return TranslatableField(ctl_class,
                                      field_kwargs=field_args,
                                      allow_translation_requests=self.allow_translation_requests(),
+                                     allow_js_widget=self.allow_javascript_controls(),
                                      use_metadata_languages=True,
                                      **parent_args)
         elif use_repeatable:
@@ -767,13 +782,14 @@ class ChoiceField(Field):
         return filts
 
     def _extra_wtf_arguments(self) -> dict:
+        from pipeman.entity import Entity
         args = {
             "choices": self.choices,
             "coerce": str,
             "widget": Select2Widget(
                 allow_multiple=self.is_repeatable(),
                 placeholder=DelayedTranslationString("pipeman.common.placeholder")
-            )
+            ) if self.allow_javascript_controls() else None
         }
         if "coerce" in self.field_config and self.field_config["coerce"] == "int":
             args["coerce"] = int

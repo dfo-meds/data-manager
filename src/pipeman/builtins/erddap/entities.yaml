@@ -8,12 +8,18 @@ erddap_servers:
     responsibles:
       data_type: component_ref
       entity_type: responsibility
+      order: 10
       label:
-        en: Distributor Parties
+        en: Contacts
+      description:
+        en: Enter contact information for who should be contacted if there are questions or feedback regarding this ERDDAP server.
     base_url:
       data_type: text
       label:
         en: Base URL
+      order: 0
+      description:
+        en: "Enter the URL for the ERDDAP to server up to and including '/erddap/' (e.g. 'https://mydomain.com/erddap/')"
 variable:
   validation:
     required:
@@ -25,21 +31,19 @@ variable:
       data_type: text
       label:
         en: Destination Name
+      description:
+        en: Enter the variable name that users who download this dataset from ERDDAP will see, if different from the source name.
       order: 100
-    encoding:
-      data_type: vocabulary
-      vocabulary_name: erddap_encodings
-      label:
-        en: Encoding
-      order: 4000
       netcdf:
-        mapping: _Encoding
+        mapping: destination_name
         processor: vocabulary
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories
       label:
         en: IOOS Category
+      description:
+        en: Select the IOOS category that best describes this variable.
       order: 115
       netcdf:
         mapping: ioos_category
@@ -49,6 +53,8 @@ variable:
       vocabulary_name: erddap_time_precisions
       label:
         en: Time Precision
+      description:
+        en: If this variable represents time, select the appropriate precision.
       order: 3000
       netcdf:
         mapping: time_precision
@@ -59,6 +65,8 @@ variable:
       vocabulary_name: timezones
       label:
         en: Time Zone
+      description:
+        en: If this variable represents time, select the appropriate time zone.
       order: 3010
       netcdf:
         mapping: time_zone
@@ -68,14 +76,20 @@ variable:
       vocabulary_name: erddap_extra_roles
       label:
         en: ERDDAP Role
+      description:
+        en: If the dataset includes multiple profiles, time series or trajectories and this variable describes which profile, time series or trajectory but is not the variable with the CF Role for that purpose, you can specify that fact here.
       order: 3020
     allow_subsets:
       data_type: boolean
       label:
         en: Allow Subsetting?
+      description:
+        en: If set to true, ERDDAP will allow users to create subsets for this variable. Only recommended for variables with a low cardinality.
       order: 5020
     altitude_proxy:
       data_type: boolean
       label:
-        en: Is Altitude Proxy?
+        en: Is Depth Proxy?
+      description:
+        en: If this variable is a suitable proxy for altitude or depth (e.g. pressure), check this box. Only check this for one variable on each dataset.
       order: 5030

@@ -251,14 +251,21 @@
     </mrd:distributor>
       {% endfor %}
     {% endif %}
-    {% if dc['links'] %}
+    {% if dc['links'] or dc['primary_web_link'] %}
       <mrd:transferOptions>
           <mrd:MD_DigitalTransferOptions>
+            {% if dc['primary_web_link'] %}
             <mrd:onLine>
-            {% for link in dc['links'] %}
-              {{ render_resource(link) }}
-            {% endfor %}
+              {{ render_resource(dc['primary_web_link']) }}
             </mrd:onLine>
+            {% endif %}
+            {% if dc['links'] %}
+            {% for link in dc['links'] %}
+            <mrd:onLine>
+              {{ render_resource(link) }}
+            </mrd:onLine>
+            {% endfor %}
+            {% endif %}
           </mrd:MD_DigitalTransferOptions>
       </mrd:transferOptions>
     {% endif %}
@@ -475,13 +482,22 @@
   <cit:contactInfo>
     <cit:CI_Contact>
       {% if contact['phone'] %}
+      {% for phone_no in contact['phone'] %}
+      {% if phone_no['phone_number'] %}
       <cit:phone>
         <cit:CI_Telephone>
           <cit:number>
-            <gco:CharacterString>{{contact['phone']}}</gco:CharacterString>
+            <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
           </cit:number>
+          {% if phone_no['phone_number_type'] %}
+          <cit:numberType>
+            <cit:CI_TelephoneTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode" codeListValue="{{phone_no['phone_number_type']['short_name']" />
+          </cit:numberType>
+          {% endif %}
         </cit:CI_Telephone>
       </cit:phone>
+      {% endif %}
+      {% endfor %}
       {% endif %}
       {% if contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
       <cit:address>
@@ -520,6 +536,11 @@
           {% endif %}
         </cit:CI_Address>
       </cit:address>
+      {% endif %}
+      {% if contact['web_page'] %}
+      <cit:onlineResource>
+        {{ render_resource(contact['web_page']) }}
+      </cit:onlineResource>
       {% endif %}
       {% if contact['web_resource'] %}
         {% for res in contact['web_resource'] %}

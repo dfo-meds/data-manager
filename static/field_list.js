@@ -68,7 +68,7 @@ $(document).ready(function() {
             update_example.find("textarea").text('');
             update_example.find("input").val('');
             let button_id = "form_button_" + current_num;
-            update_example.append("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
+            update_example.prepend("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
             update_list.append(update_example);
             $("#" + button_id).click(function() {
                 remove_item_from_list($(this).parent().parent());
@@ -78,7 +78,7 @@ $(document).ready(function() {
         current_num += 1;
         $(this).find(".form-control li").each(function() {
             let button_id = "form_button_" + current_num;
-            $(this).append("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
+            $(this).prepend("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
             $("#" + button_id).click(function() {
                 remove_item_from_list($(this).parent().parent());
             });

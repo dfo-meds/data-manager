@@ -139,11 +139,9 @@
       {% endfor %}
       {% endif %}
       {% if dataset['spatial_resolution'] %}
-      {% for sr in dataset['spatial_resolution'] %}
       <gmd:spatialResolution>
-        {{ iso.render_spatial_res(sr) }}
+        {{ iso.render_spatial_res(dataset['spatial_resolution']) }}
       </gmd:spatialResolution>
-      {% endfor %}
       {% endif %}
       {% if dataset['dataset_locale'] %}
       {{iso.render_locale(dataset['dataset_locale'])}}

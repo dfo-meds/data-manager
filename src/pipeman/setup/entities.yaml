@@ -6,18 +6,32 @@ thesaurus:
       - citation
   fields:
     citation:
-      data_type: entity_ref
+      data_type: inline_entity_ref
       entity_type: citation
       label:
         en: Citation
+      description:
+        en: Reference information for the thesaurus.
+      order: 0
     type:
       data_type: text
       label:
         en: Keyword Type
+      description:
+        en: Enter the keyword type that best describes the keywords that are part of this thesaurus
+      order: 10
+    prefix:
+      data_type: text
+      label:
+        en: Prefix
+      description:
+        en: This will be used in some metadata files to separate keywords by thesaurus when the whole thesaurus cannot be used.
+      order: 20
 variable:
   display:
     en: Variable
   is_component: yes
+  hidden: yes
 keyword:
   display:
     en: Custom Keyword
@@ -30,13 +44,22 @@ keyword:
       multilingual: yes
       label:
         en: Keyword Value
+      description:
+        en: Enter the text that should be used in the metadata files. If there is an official value from a controlled list, it should go in the "UND" field.
+      order: 0
     description:
       data_type: multitext
       multilingual: yes
       label:
         en: Extended Description
+      description:
+        en: Provide additional descriptive information about this keyword. This is not added to the metadata files.
+      order: 20
     thesaurus:
       data_type: entity_ref
       entity_type: thesaurus
       label:
         en: Thesaurus
+      description:
+        en: Select a thesaurus that this keyword belongs to.
+      order: 10

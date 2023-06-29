@@ -160,6 +160,7 @@ def preprocess_metadata(dataset, **kwargs):
             "id_system": dataset["dataset_id_system"],
             "id_description": dataset["dataset_id_desc"],
             "responsibles": dataset["responsibles"],
+            'resource': dataset['info_link']
         },
         "dataset_maintenance": dataset_maintenance,
         "metadata_maintenance": metadata_maintenance,

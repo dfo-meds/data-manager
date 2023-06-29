@@ -1,4 +1,5 @@
 import markupsafe
+import wtforms
 import wtforms as wtf
 from pipeman.i18n import TranslationManager, DelayedTranslationString, MultiLanguageString
 from pipeman.db import Database
@@ -96,6 +97,65 @@ class NoControlCharacters:
                 raise wtfv.ValidationError(message or self.message)
 
 
+class TabbedFieldFormWidget:
+
+    def __init__(self, no_tab_fields: t.Optional[list] = None, for_txt_input: bool = False):
+        self._no_tab_fields = no_tab_fields or []
+        self._for_txt_input = for_txt_input
+
+    def __call__(self, field, **kwargs):
+        labels = []
+        texts = []
+        others = []
+        for subfield in field:
+            name = subfield.name
+            if subfield.type in ("HiddenField", "CSRFTokenField") or any(name.endswith(x) for x in self._no_tab_fields):
+                others.append(subfield)
+            else:
+                labels.append(subfield.label)
+                sf = str(subfield())
+                if subfield.description:
+                    sf += f'<div class="form-description">{subfield.description}</div>'
+                texts.append(sf)
+        cls = "" if not self._for_txt_input else "tabs-for-multilingual"
+        html = f'<div id="{field.id}" class="{cls}">\n'
+        html += '<ul>\n'
+        for idx, label in enumerate(labels, start=1):
+            label = str(label)
+            if '<a' in label:
+                s1 = label.find("<a")
+                e1 = label.find(">", s1)
+                s2 = label.find("</a>")
+                label = label[0:s1] + label[e1+1:s2] + label[s2+4:]
+                print(label)
+            html += f'<li><a href="#{field.id}-tab-{idx}">{label}</a></li>\n'
+        html += '</ul>\n'
+        for idx, text in enumerate(texts, start=1):
+            html += f'<div id="{field.id}-tab-{idx}">{text}</div>\n'
+        html += '</div>\n'
+        html += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">\n'
+        html += "$(document).ready(function() {"
+        html += f"$('#{field.id}').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');"
+        html += f"$('#{field.id} li').removeClass('ui-corner-top').addClass('ui-corner-left');"
+        html += "});"
+        html += '</script>\n'
+        if others:
+            html += f"<table id='{field.id}-other-fields' class='cb'>\n<tbody>\n"
+            hidden = ""
+            for subfield in others:
+                content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
+                if subfield.type in ("HiddenField", "CSRFTokenField"):
+                    hidden += str(subfield)
+                elif subfield.type in ("BooleanField"):
+                    html += "<tr><td colspan='2'>%s%s%s</td></tr>\n" % (content, str(subfield.label), hidden)
+                else:
+                    html += "<tr><th>%s</th><td>%s%s</td></tr>\n" % (str(subfield.label), hidden, content)
+            html += '</tbody>\n</table>\n'
+            if hidden:
+                html += hidden + "\n"
+        return markupsafe.Markup(html)
+
+
 class BetterTableWidget:
     """
     Renders a list of fields as a set of table rows with th/td pairs.
@@ -115,7 +175,7 @@ class BetterTableWidget:
         html = []
         if self.with_table_tag:
             kwargs.setdefault("id", field.id)
-            html.append("<table %s>" % html_params(**kwargs))
+            html.append("<table %s>\n" % html_params(**kwargs))
         hidden = ""
         for subfield in field:
             content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
@@ -123,19 +183,19 @@ class BetterTableWidget:
                 hidden += str(subfield)
             elif subfield.type in ("BooleanField"):
                 html.append(
-                    "<tr><td colspan='2'>%s%s%s</td></tr>" % (content, str(subfield.label), hidden)
+                    "<tr><td colspan='2'>%s%s%s</td></tr>\n" % (content, str(subfield.label), hidden)
                 )
                 hidden = ""
             else:
                 html.append(
-                    "<tr><th>%s</th><td>%s%s</td></tr>"
+                    "<tr><th>%s</th><td>%s%s</td></tr>\n"
                     % (str(subfield.label), hidden, content)
                 )
                 hidden = ""
         if self.with_table_tag:
-            html.append("</table>")
+            html.append("</table>\n")
         if hidden:
-            html.append(hidden)
+            html.append(hidden + "\n")
         return Markup("".join(html))
 
 
@@ -568,10 +628,10 @@ class Select2Widget:
         markup = f'<select class="form-control-select2" id="{field.id}" name="{field.name}"'
         if self.allow_multiple:
             markup += 'multiple="multiple"'
-        markup += '>'
+        markup += '>\n'
         for val, label, selected in field.iter_choices():
-            markup += self.render_option(val, label, selected)
-        markup += f'</select><script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
+            markup += self.render_option(val, label, selected) + "\n"
+        markup += f'</select>\n<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  $('#{field.id}').select2(" + "{\n"
         if self.ajax_callback:
@@ -587,7 +647,7 @@ class Select2Widget:
         markup += f"    delay: {int(self.query_delay)}\n"
         markup += "  });\n"
         markup += "});\n"
-        markup += '</script>'
+        markup += '</script>\n'
         return markupsafe.Markup(markup)
 
     def render_option(self, val, label, selected, **kwargs):
@@ -604,26 +664,32 @@ class EntitySelectField(wtf.Field):
     db: Database = None
 
     @injector.construct
-    def __init__(self, *args, entity_types, allow_multiple=False, min_chars_to_search=0, by_revision=False, widget=None, **kwargs):
+    def __init__(self, *args, entity_types, allow_multiple=False, min_chars_to_search=0, by_revision=False, widget=None, allow_select2: bool = True, **kwargs):
         self.data = None
         self.entity_types = [entity_types] if isinstance(entity_types, str) else entity_types
         self.allow_multiple = bool(allow_multiple)
         self.include_empty = False
         self.by_revision = bool(by_revision)
         if widget is None:
-            widget = Select2Widget(
-                ajax_callback=flask.url_for(
-                    "core.api_entity_select_field_list",
-                    entity_types="|".join(self.entity_types),
-                    by_revision=(1 if self.by_revision else 0),
-                    _external=True
-                ),
-                allow_multiple=self.allow_multiple,
-                query_delay=250,
-                placeholder=DelayedTranslationString("pipeman.common.placeholder"),
-                min_input=min_chars_to_search
-            )
+            if allow_select2:
+                widget = Select2Widget(
+                    ajax_callback=flask.url_for(
+                        "core.api_entity_select_field_list",
+                        entity_types="|".join(self.entity_types),
+                        by_revision=(1 if self.by_revision else 0),
+                        _external=True
+                    ),
+                    allow_multiple=self.allow_multiple,
+                    query_delay=250,
+                    placeholder=DelayedTranslationString("pipeman.common.placeholder"),
+                    min_input=min_chars_to_search
+                )
+            else:
+                widget = wtforms.widgets.Select(self.allow_multiple)
         super().__init__(*args, widget=widget, **kwargs)
+
+    def has_groups(self):
+        return False
 
     @staticmethod
     @injector.inject
@@ -774,7 +840,7 @@ class TranslatableField(DynamicFormField):
     tm: TranslationManager = None
 
     @injector.construct
-    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, use_metadata_languages: bool = False, **kwargs):
+    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, allow_js_widget: bool = True, use_metadata_languages: bool = False, **kwargs):
         self.template_field = template_field
         self.use_undefined = use_undefined
         self.allow_translation_requests = allow_translation_requests
@@ -782,6 +848,9 @@ class TranslatableField(DynamicFormField):
         self._use_metadata_languages = use_metadata_languages
         if "label" in self.template_args:
             del self.template_args["label"]
+        if "widget" not in kwargs:
+            if allow_js_widget:
+                kwargs['widget'] = TabbedFieldFormWidget(['_translation_request'], for_txt_input=True)
         super().__init__(self._build_field_list(), *args, **kwargs)
 
     def __call__(self, *args, **kwargs):

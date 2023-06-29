@@ -148,18 +148,14 @@
       {% endfor %}
       {% endif %}
       {% if dataset['spatial_resolution'] %}
-      {% for sr in dataset['spatial_resolution'] %}
       <mri:spatialResolution>
-        {{ iso.render_spatial_res(sr) }}
+        {{ iso.render_spatial_res(dataset['spatial_resolution']) }}
       </mri:spatialResolution>
-      {% endfor %}
       {% endif %}
       {% if dataset['temporal_resolution'] %}
-      {% for tr in dataset['temporal_resolution'] %}
       <mri:temporalResolution>
-        {{ iso.render_temporal_res(tr) }}
+        {{ iso.render_temporal_res(dataset['temporal_resolution']) }}
       </mri:temporalResolution>
-      {% endfor %}
       {% endif %}
       {% if dataset['topic_category'] %}
       {% for tc in dataset['topic_category'] %}

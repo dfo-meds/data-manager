@@ -53,14 +53,21 @@
       {% endfor %}
     {% endif %}
 
-    {% if dc['links'] %}
+    {% if dc['links'] or dc['primary_web_link'] %}
       <gmd:transferOptions>
           <gmd:MD_DigitalTransferOptions>
+            {% if dc['primary_web_link'] %}
             <gmd:onLine>
-            {% for link in dc['links'] %}
-              {{ render_resource(link) }}
-            {% endfor %}
+              {{ render_resource(dc['primary_web_link']) }}
             </gmd:onLine>
+            {% endif %}
+            {% if dc['links'] %}
+            {% for link in dc['links'] %}
+            <gmd:onLine>
+              {{ render_resource(link) }}
+            </gmd:onLine>
+            {% endfor %}
+            {% endif %}
           </gmd:MD_DigitalTransferOptions>
       </gmd:transferOptions>
     {% endif %}
@@ -423,13 +430,24 @@
   <gmd:contactInfo>
     <gmd:CI_Contact>
       {% if contact['phone'] %}
+      {% for phone_no in contact['phone'] %}
+      {% if phone_no['phone_number'] %}
       <gmd:phone>
         <gmd:CI_Telephone>
           <gmd:voice>
-            <gco:CharacterString>{{contact['phone']}}</gco:CharacterString>
+            <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
           </gmd:voice>
+          {% if phone_no['phone_number_type'] %}
+          <gmd:numberType>
+            {% with code_list, code_value, text_value = nap_code_map(phone_no['phone_number_type']['short_name'], 'CI_TelephoneTypeCode') %}
+            <gmd:CI_TelephoneTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_TelephoneTypeCode>
+            {% endwith %}
+          </gmd:numberType>
+          {% endif %}
         </gmd:CI_Telephone>
       </gmd:phone>
+      {% endif %}
+      {% endfor %}
       {% endif %}
       {% if contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
       <gmd:address>

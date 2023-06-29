@@ -5,6 +5,9 @@ keywords:
       vocabulary_name: goc_subjects
       label:
         en: GoC Subject
+      description:
+        en: Select the most appropriate GoC Core Subject Thesaurus keyword.
+      order: 15000
       keyword_config:
         is_keyword: yes
         mode: both
@@ -26,6 +29,9 @@ keywords:
       vocabulary_name: goc_places
       label:
         en: GoC Publication Places
+      description:
+        en: Enter the most appropriate location(s) where the data was published.
+      order: 15010
       repeatable: yes
       keyword_config:
         is_keyword: yes
@@ -47,7 +53,10 @@ keywords:
       vocabulary_name: goc_audiences
       label:
         en: GoC Audiences
+      description:
+        en: Select the audience(s) that the dataset is aimed at
       repeatable: yes
+      order: 15020
       keyword_config:
         is_keyword: yes
         mode: both
@@ -65,8 +74,14 @@ publishing:
       vocabulary_name: goc_collection_types
       label:
         en: GoC Collection Type
+      description:
+        en: Select the collection on Open Government where this data should be published
+      order: 15000
     goc_publisher:
       data_type: entity_ref
       entity_type: goc_publishing_section
       label:
         en: GoC Publisher
+      description:
+        en: Select the group that is publishing this data.
+      order: 15010

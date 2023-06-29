@@ -52,7 +52,7 @@ core = MultiLanguageBlueprint("core", __name__)
 def list_entities(reg: EntityRegistry):
     entity_list = []
     show_all = flask_login.current_user.has_permission(f"entities.view.all")
-    for k in reg:
+    for k, _ in reg.list_entity_types(False):
         if show_all or flask_login.current_user.has_permission(f"entities.view.{k}"):
             entity_list.append((
                 k,

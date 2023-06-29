@@ -5,11 +5,15 @@ internal_info:
       label:
         en: Internal Notes
         fr: Notes internes
+      description:
+        en: These notes are not published, they are for internal reference only.
       multilingual: yes
     file_storage_location:
       data_type: multitext
       label:
         en: Storage Location
+      description:
+        en: Describe where the data is located. This field is for interal reference only.
       multilingual: yes
   display:
     en: Internal
@@ -21,4 +25,6 @@ publishing:
       data_type: boolean
       label:
         en: Request via MEDS Request Form
+      description:
+        en: Check this box if the dataset can be obtained via the MEDS request form. This will add a transfer option in the distribution methods list.
 

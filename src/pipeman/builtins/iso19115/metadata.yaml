@@ -6,6 +6,8 @@ metadata_info:
       label:
         en: Owner
         fr: Propriétaire
+      description:
+        en: Select the contact who owns this record
       order: 10
     point_of_contact:
       data_type: entity_ref
@@ -14,6 +16,8 @@ metadata_info:
         en: Point of Contact
         fr: Point de contact
       order: 20
+      description:
+        en: Select the contact who can best respond to requests about this record
       netcdf:
         mapping: publisher
         processor: contact
@@ -24,6 +28,8 @@ metadata_info:
       label:
         en: Canonical Metadata URLs
         fr: URLs des métadonnées canoniques
+      description:
+        en: If the metadata is published under one or more permanent URLs, select them here.
       repeatable: yes
       min_chars_to_search: 2
     parent_metadata:
@@ -32,6 +38,8 @@ metadata_info:
       label:
         en: Parent Metadata
         fr: Métadonnées parentes
+      description:
+        en: If the metadata belongs to a parent metadata record, select it here.
       order: 1000
     alt_metadata:
       data_type: entity_ref
@@ -41,6 +49,8 @@ metadata_info:
       label:
         en: Alternative Metadata References
         fr: Autres références de métadonnées
+      description:
+        en: If the metadata is published in alternative forms, select them here.
     metadata_standards:
       data_type: entity_ref
       repeatable: yes
@@ -49,6 +59,8 @@ metadata_info:
       label:
         en: Metadata Standards
         fr: Normes relatives aux métadonnées
+      description:
+        en: If the metadata conforms to any metadata standards, select them here.
     metadata_profiles:
       data_type: entity_ref
       repeatable: yes
@@ -57,6 +69,8 @@ metadata_info:
       label:
         en: Metadata Profiles
         fr: Profils de métadonnées
+      description:
+        en: If the metadata conforms to any metadata profiles, select them here.
     default_locale:
       data_type: entity_ref
       order: 100
@@ -75,6 +89,8 @@ metadata_info:
       label:
         en: Other Locales (Metadata)
         fr: Autre paramètres régionaux (métadonnées)
+      description:
+        en: If you want to publish metadata files in multiple languages, select all other langauges except the Default Language here.
     metadata_maintenance_frequency:
       data_type: vocabulary
       order: 500
@@ -82,12 +98,16 @@ metadata_info:
       label:
         en: Maintenance Frequency (Metadata)
         fr: Fréquence de maintenance (métadonnées)
+      description:
+        en: Enter how often the metadata will be updated
     meta_licenses:
       data_type: entity_ref
       entity_type: use_constraint
       label:
         en: Usage Constaints (metadata)
         fr: Contraintes d'utilisation (métadonnées)
+      description:
+        en: Select any use constraints that apply to the metadata record itself
       order: 30
       repeatable: yes
 data_info:
@@ -97,6 +117,8 @@ data_info:
       label:
         en: Title
         fr: Titre
+      description:
+        en: Enter a unique and descritive title for the dataset
       order: 10
       multilingual: yes
       netcdf:
@@ -106,12 +128,16 @@ data_info:
       label:
         en: Dataset ID
         fr: Code d'identification
+      description:
+        en: If the dataset is published under a unique identifier (such as a DOI), enter the ID itself here
       order: 500
     dataset_id_desc:
       data_type: text
       label:
         en: Dataset ID Description
         fr: Description de l'identificateur
+      description:
+        en: If you wish to provide additional information about the unique identifier, enter it here
       multilingual: yes
       order: 510
     dataset_id_system:
@@ -119,6 +145,8 @@ data_info:
       label:
         en: Dataset ID System
         fr: Système d'identification
+      description:
+        en: If you entered a unique ID for the dataset above, select the system of identifiers (e.g. DOI) here
       entity_type: id_system
       order: 520
       netcdf:
@@ -128,7 +156,9 @@ data_info:
       label:
         en: Publication Date
         fr: Date de publication
-      order: 20
+      description:
+        en: Enter the date that the dataset was first made available to the public.
+      order: 30
       netcdf:
         mapping: date_issued
         processor: datetime
@@ -137,7 +167,9 @@ data_info:
       label:
         en: Revision Date
         fr: Date de révision
-      order: 30
+      description:
+        en: Enter the date that the dataset was last revised.
+      order: 40
       netcdf:
         mapping: date_modified
         processor: datetime
@@ -146,7 +178,9 @@ data_info:
       label:
         en: Creation Date
         fr: Date de création
-      order: 40
+      description:
+        en: Enter the date that the dataset was originally created
+      order: 20
       netcdf:
         mapping: date_created
         processor: datetime
@@ -155,16 +189,20 @@ data_info:
       label:
         en: Abstract
         fr: Abstrait
+      description:
+        en: Provide a summary of the dataset
       order: 10
       multilingual: yes
       netcdf:
         mapping: summary
     responsibles:
-      data_type: component_ref
+      data_type: inline_entity_ref
       entity_type: responsibility
       label:
         en: Data Contacts
         fr: Contacts pour les données
+      description:
+        en: Select any contacts who should be associated with the dataset itself.
       repeatable: yes
       order: 10000000
       netcdf:
@@ -179,6 +217,8 @@ data_info:
       label:
         en: Usage Constraints (Data)
         fr: Contraintes d'utilisation (données)
+      description:
+        en: Select any usage constraints that apply to the dataset
       order: 50
       repeatable: yes
       netcdf:
@@ -191,6 +231,8 @@ data_more_info:
       label:
         en: Purpose
         fr: But
+      description:
+        en: Describe the purpose in creating the dataset and making it available
       order: 20
       multilingual: yes
     credit:
@@ -198,23 +240,28 @@ data_more_info:
       label:
         en: Acknowledgements
         fr: Remerciements
+      description:
+        en: Provide any acknowledgements (e.g. funding sources, contributions, etc).
       order: 30
       multilingual: yes
       netcdf:
         mapping: acknowledgement
     info_link:
-      data_type: entity_ref
-      entity_type: resource
+      data_type: inline_entity_ref
+      entity_type: quick_web_page
       label:
         en: Primary Link
         fr: Lien principal
+      description:
+        en: If the dataset has a web page with more information, enter it here
       order: 40
-      repeatable: yes
     processing_code:
       data_type: text
       label:
         en: Processing Level Code
         fr: Code de niveau de traitement
+      description:
+        en: If the dataset has a processing level that should be recorded, enter it here
       order: 1000
       netcdf:
         mapping: processing_level
@@ -223,6 +270,8 @@ data_more_info:
       label:
         en: Processing Level Description
         fr: Description du niveau de traitement
+      description:
+        en: If you would like to add more details on the processing level, enter them here.
       multilingual: yes
       order: 1010
     processing_system:
@@ -231,12 +280,16 @@ data_more_info:
       label:
         en: Processing Level System
         fr: Système du niveau de traitement
+      description:
+        en: If the processing level follows a system of identifiers, select it here
       order: 1020
     environment_desc:
       data_type: multitext
       label:
         en: Environment Description
         fr: Description de l'environnement
+      description:
+        en: Provide more information about the processing environment
       multilingual: yes
       order: 2000
     supplemental:
@@ -244,6 +297,8 @@ data_more_info:
       label:
         en: Supplemental Information
         fr: Renseignements supplémentaires
+      description:
+        en: Provide additional information for the public here
       multilingual: yes
       order: 2010
       netcdf:
@@ -257,6 +312,8 @@ keywords:
       label:
         en: Topic Category
         fr: Catégorie de sujet
+      description:
+        en: Select one or more topic categories which best describe this dataset
       order: 10
 extent:
   fields:
@@ -266,6 +323,8 @@ extent:
       label:
         en: West
         fr: Ouest
+      description:
+        en: Enter the west-most longitude of the dataset
       min: -180
       max: 180
       netcdf:
@@ -277,6 +336,8 @@ extent:
       label:
         en: East
         fr: Est
+      description:
+        en: Enter the east-most longitude of the dataset
       min: -180
       max: 180
       netcdf:
@@ -288,6 +349,8 @@ extent:
       label:
         en: North
         fr: Nord
+      description:
+        en: Enter the north-most latitude of the dataset
       min: -90
       max: 90
       netcdf:
@@ -299,6 +362,8 @@ extent:
       label:
         en: South
         fr: Sud
+      description:
+        en: Enter the south-most latitude of the dataset
       min: -90
       max: 90
       netcdf:
@@ -310,6 +375,8 @@ extent:
       label:
         en: Polygon Boundary (WKT)
         fr: Limite polygonale (WKT)
+      description:
+        en: If available, enter the boundary of the data using a well-known text (WKT) polygon.
       netcdf:
         mapping: geospatial_bounds
     vertical_min:
@@ -318,6 +385,8 @@ extent:
       label:
         en: Vertical Minimum
         fr: Minimum vertical
+      description:
+        en: Enter the smallest value on the vertical axis
       netcdf:
         mapping: geospatial_vertical_min
         processor: numeric
@@ -327,6 +396,8 @@ extent:
       label:
         en: Vertical Maximum
         fr: Maximum vertical
+      description:
+        en: Enter the largest value on the vertical axis
       netcdf:
         mapping: geospatial_vertical_max
         processor: numeric
@@ -336,6 +407,8 @@ extent:
       label:
         en: Vertical Reference System
         fr: Système de référence vertical
+      description:
+        en: Enter the vertical coordinate system that is used for the dataset
       order: 170
       netcdf:
         mapping: geospatial_bounds_vertical_crs
@@ -346,6 +419,8 @@ extent:
       label:
         en: Start Time
         fr: Début
+      description:
+        en: Enter the earliest time in the dataset
       netcdf:
         mapping: time_coverage_start
         processor: datetime
@@ -355,6 +430,8 @@ extent:
       label:
         en: End Time
         fr: Fin
+      description:
+        en: Enter the latest time in the dataset or leave it empty if the dataset is not yet completed
       netcdf:
         mapping: time_coverage_end
         processor: datetime
@@ -364,22 +441,26 @@ extent:
       label:
         en: Is On-Going
         fr: En cours
+      description:
+        en: Check this box if the dataset is still being updated on a regular basis
     spatial_resolution:
-      data_type: entity_ref
+      data_type: inline_entity_ref
       order: 70
       entity_type: spatial_res
       label:
         en: Spatial Resolution
         fr: Résolution spatiale
-      repeatable: yes
+      description:
+        en: Describe the spatial resolution of the dataset
     temporal_resolution:
-      data_type: entity_ref
+      data_type: inline_entity_ref
       order: 240
       entity_type: time_res
       label:
         en: Temporal Resolution
         fr: Résolution temporelle
-      repeatable: yes
+      description:
+        en: Describe the temporal resolution of the dataset
     horizontal_ref_system:
       data_type: entity_ref
       order: 60
@@ -387,6 +468,8 @@ extent:
       label:
         en: Horizontal Reference System
         fr: Système de référence horizontal
+      description:
+        en: Specify the horizontal coordinate system used
       netcdf:
         mapping: geospatial_bounds_crs
         processor: ref_system
@@ -397,6 +480,8 @@ extent:
       label:
         en: Temporal Reference System
         fr: Système de référence temporelle
+      description:
+        en: Specify the temporal coordinate system used
 references:
   fields:
     additional_docs:
@@ -407,6 +492,8 @@ references:
       label:
         en: Additional Documentation
         fr: Documentation supplémentaire
+      description:
+        en: Select any additional citations that are relevant to this dataset
     graphics:
       data_type: entity_ref
       repeatable: yes
@@ -415,6 +502,8 @@ references:
       label:
         en: Graphic Overviews
         fr: Vues d'ensemble graphique
+      description:
+        en: Select any graphics that are relevant to this dataset
 technical:
   fields:
     dataset_locale:
@@ -424,6 +513,8 @@ technical:
       label:
         en: Primary Locale (Dataset)
         fr: Paramètres régionaux par défaut (données)
+      description:
+        en: Select the locale that applies to most of the data in the dataset, or leave it empty if there is no data in the dataset
     dataset_other_locales:
       data_type: entity_ref
       order: 26
@@ -431,6 +522,8 @@ technical:
       label:
         en: Other Locales (Dataset)
         fr: Autre paramètres régionaux (données)
+      description:
+        en: Select any additional locales that are present within the dataset
       repeatable: yes
     status:
       data_type: vocabulary
@@ -438,6 +531,8 @@ technical:
       vocabulary_name: iso19115_md_progress_code
       label:
         en: Status
+      description:
+        en: Select the most appropriate option(s) that describe the status of this dataset
       repeatable: yes
     spatial_representation_type:
       data_type: vocabulary
@@ -445,6 +540,8 @@ technical:
       vocabulary_name: iso19115_md_spatial_representation_type_code
       label:
         en: Spatial Representation Type
+      description:
+        en: Select the most appropriate option(s) that describe this dataset
       repeatable: yes
     resource_maintenance_frequency:
       data_type: vocabulary
@@ -452,26 +549,23 @@ technical:
       vocabulary_name: iso19115_md_maintenance_frequency_code
       label:
         en: Resource Maintenance Frequency
-    content_coverage_type:
-      data_type: vocabulary
-      order: 70
-      vocabulary_name: iso19115_md_coverage_content_type_code
-      label:
-        en: Content Coverage Type
-      netcdf:
-        mapping: content_coverage_type
-        processor: vocabulary
+      description:
+        en: Select the most appropriate option that describes how often the dataset is updated
     iso_maintenance:
       data_type: component_ref
       entity_type: maintenance
       label:
         en: Maintenance Records
+      description:
+        en: These records describe work done on the dataset after it was published so that users can be aware of the modifications.
 publishing:
   fields:
     distributors:
       data_type: component_ref
       entity_type: dist_channel
       label:
-        en: Distribution Channels
+        en: Distribution Methods
+      description:
+        en: Add one entry for each method of distributing the data via online methods.
       repeatable: yes
 

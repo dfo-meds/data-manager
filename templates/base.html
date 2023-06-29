@@ -51,6 +51,30 @@
             </div>
             <br class="cb" />
         </div>
+    {% elif control.__class__.__name__ == "FieldList" %}
+        <div class="form-field form-field-field-list">
+            <div class="form-label">
+                {{control.label}}
+            </div>
+            <div class="form-control">
+                <ul>
+                    {% for entry in control.entries %}
+                    <li>
+                        <div class="form-control-field-list-entry-controls">
+                            {% if entry.label.text %}
+                            {{entry.label}}
+                            {% endif %}
+                            {{entry}}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% if control.description %}
+            <div class="form-description">{{control.description}}</div>
+            {% endif %}
+            </div>
+            <br class="cb" />
+        </div>
     {% else %}
         <div class="form-field form-field-{{control.__class__.__name__ | caps_to_snake('-')}}">
             <div class="form-label">
@@ -89,6 +113,7 @@
             {{ csp_allow('script-src', 'https://cdn.datatables.net') }}
             <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js" integrity="sha512-2FAQqknslN8pS8aF3mK9Iiene7xFUawTM2h/aloIG4tkbXbzTlUimIfZvt6gLNTJbknJ4jwBKGWIQ4uq0DIPeA==" crossorigin="anonymous"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
+            <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='jqueryui/jquery-ui.min.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
         {% endblock %}
         {% block customScripts %}
@@ -185,6 +210,8 @@
             <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" integrity="sha512-aD9ophpFQ61nFZP6hXYu4Q/b/USW7rpLCQLX6Bi0WJHXNO7Js/fUENpBQf/+P4NtpzNX0jSgR5zVvPOJp+W2Kg==" crossorigin="anonymous" />
             <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" integrity="sha512-MQXduO8IQnJVq1qmySpN87QQkiR1bZHtorbJBD0tzy7/0U9+YIC93QWHeGTEoojMVHWWNkoCp8V6OzVSYrX0oQ==" crossorigin="anonymous" />
             <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='dfo.css')}}" />
+            <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='jqueryui/jquery-ui.min.css')}}" />
+            <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='jqueryui/jquery-ui.theme.min.css')}}" />
         {% endblock %}
         <meta charset="utf-8" />
         <meta name="Referrer-Policy" content="strict-origin-when-cross-origin" />

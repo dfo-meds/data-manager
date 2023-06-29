@@ -4,11 +4,20 @@ erddap_dataset_types:
   uri:
   terms:
     EDDTableFromNcFiles:
-      en: Table from NetCDF
+      display:
+        en: Table from NetCDF
+      description:
+        en: Appropriate for most NetCDF files
     EDDTableFromAsciiFiles:
-      en: Table from ASCII
+      display:
+        en: Table from ASCII
+      description:
+        en: Appropriate for most ASCII files (e.g. CSV, TSV)
     EDDGridFromNcFiles:
-      en: Grid from NetCDF
+      display:
+        en: Grid from NetCDF
+      description:
+        en: Appropriate for NetCDF files that have 2-4 temporal or spatial dimensions and all variables are related to those dimensions.
 erddap_extra_roles:
   display:
     en: ERDDAP - Variable Roles
@@ -17,153 +26,229 @@ erddap_extra_roles:
     profile_extra:
       display:
         en: Profile Information
+      description:
+        en: This variable provides extra description of the profile
     timeseries_extra:
       display:
         en: Timeseries Information
+      description:
+        en: This variable provides extra description of the time series
     trajectory_extra:
       display:
         en: Trajectory Information
-erddap_encodings:
-  display:
-    en: ERDDAP - Encodings
-  uri:
-  terms:
-    none:
-      en: Numeric or Binary
-    UTF-8:
-      und: UTF-8
-    ISO-8859-1:
-      und: ISO-8859-1
-    UCS-2:
-      und: UCS-2
+      description:
+        en: This variable provides extra description of the trajectory
 ioos_categories:
   display:
     en: IOOS - Categories
   uri:
   terms:
+    Acidity:
+      display:
+        en: Activity
     Bathymetry:
-      en: Bathymetry
+      display:
+        en: Bathymetry
     Biology:
-      en: Biology
+      display:
+        en: Biology
     Bottom Character:
-      en: Bottom Character
+      display:
+        en: Bottom Character
     CO2:
-      en: Carbon Dioxide
+      display:
+        en: Carbon Dioxide
     Colored Dissolved Organic Matter:
-      en: Colored Dissolved Organic Matter
+      display:
+        en: Colored Dissolved Organic Matter
     Contaminants:
-      en: Contaminants
+      display:
+        en: Contaminants
     Currents:
-      en: Currents
+      display:
+        en: Currents
     Dissolved Nutrients:
-      en: Dissolved Nutrients
+      display:
+        en: Dissolved Nutrients
     Dissolved O2:
-      en: Dissolved Oxygen
+      display:
+        en: Dissolved Oxygen
     Ecology:
-      en: Ecology
+      display:
+        en: Ecology
     Fish Abundance:
-      en: Fish Abundance
+      display:
+        en: Fish Abundance
     Fish Species:
-      en: Fish Species
+      display:
+        en: Fish Species
     Heat Flux:
-      en: Heat Flux
+      display:
+        en: Heat Flux
     Hydrology:
-      en: Hydrology
+      display:
+        en: Hydrology
     Ice Distribution:
-      en: Ice Distribution
+      display:
+        en: Ice Distribution
     Identifier:
-      en: Identifier
+      display:
+        en: Identifier
     Location:
-      en: Location
+      display:
+        en: Location
     Meteorology:
-      en: Meteorology
+      display:
+        en: Meteorology
     Ocean Color:
-      en: Ocean Color
+      display:
+        en: Ocean Color
     Optical Properties:
-      en: Optical Properties
+      display:
+        en: Optical Properties
     Other:
-      en: Other
+      display:
+        en: Other
     Pathogens:
-      en: Pathogens
+      display:
+        en: Pathogens
     Phytoplankton Species:
-      en: Phytoplankton Species
+      display:
+        en: Phytoplankton Species
     Pressure:
-      en: Pressure
+      display:
+        en: Pressure
     Productivity:
-      en: Productivity
+      display:
+        en: Productivity
     Quality:
-      en: Quality
+      display:
+        en: Quality
     Salinity:
-      en: Salinity
+      display:
+        en: Salinity
     Sea Level:
-      en: Sea Level
+      display:
+        en: Sea Level
     Statistics:
-      en: Statistics
+      display:
+        en: Statistics
     Stream Flow:
-      en: Stream Flow
+      display:
+        en: Stream Flow
     Surface Waves:
-      en: Surface Waves
+      display:
+        en: Surface Waves
     Taxonomy:
-      en: Taxonomy
+      display:
+        en: Taxonomy
     Temperature:
-      en: Temperature
+      display:
+        en: Temperature
     Time:
-      en: Time
+      display:
+        en: Time
     Total Suspended Matter:
-      en: Total Suspended Matter
+      display:
+        en: Total Suspended Matter
     Unknown:
-      en: Unknown
+      display:
+        en: Unknown
     Wind:
-      en: Wind
+      display:
+        en: Wind
     Zooplankton Species:
-      en: Zooplankton Species
+      display:
+        en: Zooplankton Species
     Zooplankton Abundance:
-      en: Zooplankton Abundance
+      display:
+        en: Zooplankton Abundance
 erddap_time_precisions:
   display:
     en: ERDDAP - Time Precisions
   uri:
   terms:
     month:
-      en: Month
+      display:
+        en: Month
     day:
-      en: Day
+      display:
+        en: Day
     hour:
-      en: Hour
+      display:
+        en: Hour
     minute:
-      en: Minute
+      display:
+        en: Minute
     second:
-      en: Second
+      display:
+        en: Second
     tenth_second:
-      en: 1/10 Second
+      display:
+        en: 1/10 Second
     hundredth_second:
-      en: 1/100 Second
+      display:
+        en: 1/100 Second
     millisecond:
-      en: Millisecond
+      display:
+        en: Millisecond
 cdm_data_types:
   display:
     en: CDM - Data Types
   uri:
   terms:
     Point:
-      en: Point
+      display:
+        en: Point
+      description:
+        en: Point datasets are a series of unrelated observations each taken at a specific latitude, longitude and time (and optionally depth).
     Profile:
-      en: Profile
+      display:
+        en: Profile
+      description:
+        en: Profile datasets have one or more profiles, each of which are taken at a specific latitude, longitude and time. Each profile consists of one or more observations taken at different depths or altitudes. Profiles within the dataset are unrelated.
     TimeSeries:
-      en: Time Series
+      display:
+        en: Time Series
+      description:
+        en: Time series datasets have one or more "stations" which exist at a fixed latitude, longitude, and depth or altitude. Each station has one or more set of observations taken at different times.
     TimeSeriesProfile:
-      en: Time Series of Profiles
+      display:
+        en: Time Series of Profiles
+      description:
+        en: Like a time series dataset, but the depth is not fixed by station. Instead, each station reports a profile of observations at different depths at each given time step.
     Trajectory:
-      en: Trajectory
+      display:
+        en: Trajectory
+      description:
+        en: Trajectory datasets have one or more "stations" which move through space and time (e.g. a ship on a mission). Each station has a sequence of observations taken at a single level and a specific latitude, longitude, and time.
     TrajectoryProfile:
-      en: Trajectory of Profiles
+      display:
+        en: Trajectory of Profiles
+      description:
+        en: Like a trajectory dataset, but each observation is actually a profile of observations.
     Grid:
-      en: Grid (gridded data only)
+      display:
+        en: Grid (gridded data only)
+      description:
+        en: A basic grid includes observations in 2, 3, or 4 dimensions using latitude, longitude, altitude/depth, and/or time coordinates as appropriate. The non-time dimensions are fixed over time.
     MovingGrid:
-      en: Moving Grid (gridded data only)
+      display:
+        en: Moving Grid (gridded data only)
+      description:
+        en: A moving grid includes observations in 2-4 dimensions, but the non-time dimensions can vary over time (e.g. for hurricane forecasts).
     RadialSweep:
-      en: Radial Sweep (gridded data only)
+      display:
+        en: Radial Sweep (gridded data only)
+      description:
+        en: A radial sweep uses polar coordinates (e.g. radial and gate) for their data and to calculate elevation, azimuth, and distance.
     Swath:
-      en: Swath (gridded data only)
+      display:
+        en: Swath (gridded data only)
+      description:
+        en: A swath describes data from polar satellites, which typically have two scan coordinates used for all variables and to calculate the latitude and longitude.
     Other:
-      en: Other
+      display:
+        en: Other
+      description:
+        en: No requirements. Use if (a) your data does not have latitude, longitude, and time or does not fit the geometries available, and (b) is not gridded

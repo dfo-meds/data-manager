@@ -13,24 +13,32 @@ data_more_info:
       data_type: text
       label:
         en: Institution (Short)
+      description:
+        en: Enter a short name of the institution which is ultimately responsible for the dataset.
       netcdf:
         mapping: institution
     project:
       data_type: text
       label:
         en: Project
+      description:
+        en: If this dataset is a part of a project, enter the name here
       netcdf:
         mapping: project
     program:
       data_type: text
       label:
         en: Program
+      description:
+        en: If this dataset is part of a program, enter the name here
       netcdf:
         mapping: program
     standard_name_vocab:
       data_type: text
       label:
         en: Standard Name Vocabulary
+      description:
+        en: Enter the name of the standard name vocabulary used for variable names (e.g. CF 1.10)
       netcdf:
         mapping: standard_name_vocab
 technical:
@@ -39,21 +47,23 @@ technical:
       data_type: vocabulary
       label:
         en: CDM Data Type
+      description:
+        en: Select the most appropriate CDM data type for the data
       vocabulary_name: cdm_data_types
       netcdf:
         mapping: cdm_data_type
         processor: vocabulary
     conventions:
-      data_type: vocabulary
-      repeatable: yes
+      data_type: text
       label:
         en: Conventions
-      vocabulary_name: netcdf_conventions
+      description:
+        en: Enter a comma-separated list of conventions used in this dataset
       netcdf:
         mapping: Conventions
-        processor: vocabulary
-        separator: ","
+        processor: text
         allow_many: yes
+
 references:
   fields:
     source:
@@ -61,6 +71,8 @@ references:
       multilingual: yes
       label:
         en: Source Information
+      description:
+        en: Enter information about the source of the data in this dataset in plain-text format
       netcdf:
         mapping: source
     references:
@@ -68,6 +80,8 @@ references:
       multilingual: yes
       label:
         en: Reference Information
+      description:
+        en: Enter any appropriate reference information about this dataset
       netcdf:
         mapping: references
 custom:
@@ -79,7 +93,9 @@ custom:
       repeatable: yes
       order: 0
       label:
-        en: Custom Metadata
+        en: Custom NetCDF Metadata
+      description:
+        en: Enter additional information for NetCDF output here.
       netcdf:
         mapping:
         processor: key_value_pairs
@@ -91,6 +107,8 @@ keywords:
       repeatable: yes
       label:
         en: CF Standard Variables
+      description:
+        en: Standard variables that are used in the dataset.
       keyword_config:
         is_keyword: yes
         mode: value
