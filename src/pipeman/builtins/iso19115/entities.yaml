@@ -1085,7 +1085,7 @@ spatial_res:
       data_type: vocabulary
       vocabulary_name: iso19115_angular_units
       label:
-        en: Angular Resolution Units
+        en: Angular Units
       description:
         en: If you specified an angular resolution, select the units.
       order: 60

@@ -207,7 +207,7 @@ class Field:
         if self.is_repeatable() and not isinstance(val, list):
             return [self._unserialize(val)]
         elif (not self.is_repeatable()) and isinstance(val, list):
-            return self._unserialize(val[0])
+            return self._unserialize(val[0]) if val else None
         else:
             return self._unserialize(val)
 
