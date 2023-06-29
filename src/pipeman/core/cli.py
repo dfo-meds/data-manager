@@ -1,4 +1,7 @@
+import pathlib
+
 import click
+import yaml
 from autoinject import injector
 from pipeman.org import OrganizationController
 from pipeman.workflow import WorkflowController
@@ -243,3 +246,157 @@ def steps(output_file, wreg: WorkflowRegistry):
                 steps[sn]["label"]["en"] if "en" in steps[sn]["label"] else "",
                 steps[sn]["label"]["fr"] if "fr" in steps[sn]["label"] else "",
             ])
+
+
+@report.command
+@click.argument("output_file")
+@injector.inject
+def translations(output_file, wreg: WorkflowRegistry, vreg: VocabularyRegistry, vtc: VocabularyTermController, mreg: MetadataRegistry, ereg: EntityRegistry):
+    skip_complete: bool = True
+    with open(output_file, "w", newline="\n", encoding="utf-8") as h:
+        writer = csv.writer(h)
+        writer.writerow([
+            "category",
+            "element",
+            "sub-element",
+            "sub-element2"
+            "name_und",
+            "name_en",
+            "name_fr"
+        ])
+        workflows = dict(wreg.list_all_workflows())
+        for wf in workflows:
+            if _check_output(workflows[wf]["label"], skip_complete):
+                writer.writerow([
+                    "workflow_workflows",
+                    wf,
+                    "label",
+                    "",
+                    *_extract_text_parts(workflows[wf]["label"])
+                ])
+        steps = dict(wreg.list_all_steps())
+        for sn in steps:
+            if _check_output(steps[sn]["label"], skip_complete):
+                writer.writerow([
+                    "workflow_steps",
+                    sn,
+                    "label",
+                    "",
+                    *_extract_text_parts(steps[sn]["label"])
+                ])
+        for name, display, uri in vreg.list_vocabularies():
+            for tname, tdisp, tdesc in vtc.list_terms(name):
+                if _check_output(tdisp, skip_complete):
+                    writer.writerow([
+                        "vocabulary_terms",
+                        name,
+                        tname,
+                        'label',
+                        *_extract_text_parts(tdisp)
+                    ])
+                if _check_output(tdesc, skip_complete):
+                    writer.writerow([
+                        "vocabulary_terms",
+                        name,
+                        tname,
+                        'description',
+                        * _extract_text_parts(tdesc)
+                    ])
+        ets = dict(ereg.list_entity_types(True))
+        for en in ets:
+            if _check_output(ereg.display(en), skip_complete):
+                writer.writerow([
+                    "entity_types",
+                    en,
+                    "label",
+                    "",
+                    *_extract_text_parts(ereg.display(en))
+                ])
+            if not ('fields' in ets[en] and ets[en]['fields']):
+                continue
+            fields = ets[en]['fields']
+            for fn in fields:
+                if _check_output(fields[fn]["label"], skip_complete):
+                    writer.writerow([
+                        "entity_types",
+                        en,
+                        fn,
+                        "label",
+                        *_extract_text_parts(fields[fn]['label'])
+                    ])
+                if 'description' not in fields[fn] or _check_output(fields[fn]['description'], skip_complete):
+                    writer.writerow([
+                        "entity_types",
+                        en,
+                        fn,
+                        "description",
+                        *_extract_text_parts(fields[fn]['description'] if 'description' in fields[fn] else {})
+                    ])
+        profiles = dict(mreg.profiles_for_select())
+        for pname in profiles:
+            if _check_output(mreg.profile_label(pname), skip_complete):
+                writer.writerow([
+                    "profile",
+                    pname,
+                    "label",
+                    "",
+                    *_extract_text_parts(mreg.profile_label(pname))
+                ])
+        fields = dict(mreg.field_list())
+        for fn in fields:
+            if _check_output(fields[fn]['label'], skip_complete):
+                writer.writerow([
+                    "field",
+                    fn,
+                    "label",
+                    "",
+                    *_extract_text_parts(fields[fn]['label'])
+                ])
+            if 'description' not in fields[fn] or _check_output(fields[fn]['description'], skip_complete):
+                writer.writerow([
+                    "field",
+                    fn,
+                    "description",
+                    "",
+                    *_extract_text_parts(fields[fn]['description'] if 'description' in fields[fn] else {})
+                ])
+        root = pathlib.Path(__file__).absolute().parent.parent.parent.parent / "config" / "locales"
+        if root.exists():
+            en_file = root / "en.yaml"
+            fr_file = root / "fr.yaml"
+            en_list = {}
+            fr_list = {}
+            if en_file.exists():
+                with open(en_file, "r", encoding="utf-8") as h:
+                    en_list = yaml.safe_load(h.read()) or {}
+            if fr_file.exists():
+                with open(fr_file, "r", encoding="utf-8") as h:
+                    fr_list = yaml.safe_load(h.read()) or {}
+            keys = set(x for x in en_list)
+            keys.update(x for x in fr_list)
+            for k in sorted(keys):
+                if skip_complete and k in en_list and k in fr_list and en_list[k] and fr_list[k]:
+                    continue
+                writer.writerow([
+                    "i18n",
+                    k,
+                    "",
+                    "",
+                    "",
+                    en_list[k] if k in en_list else "",
+                    fr_list[k] if k in fr_list else ""
+                ])
+
+
+def _check_output(txt, skip_complete: bool):
+    if not skip_complete:
+        return True
+    if ('en' in txt and 'fr' in txt and txt['en'] and txt['fr']) or ('und' in txt and txt['und']):
+        return False
+    return True
+
+def _extract_text_parts(txt):
+    return [
+        txt[x] if x in txt else ''
+        for x in ('und', 'en', 'fr')
+    ]

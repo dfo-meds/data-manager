@@ -21,7 +21,7 @@ goc_publishing_section:
       description:
         en: Select the department or agency which is publishing the data
       entity_type: goc_publishing_org
-    order: 0
+      order: 0
 goc_publishing_org:
   display:
     en: GoC Publishers

@@ -6,7 +6,8 @@ cioos.validation.metadata_owner_ind_no_orcid: ORCID is required
 cioos.validation.metadata_owner_no_email: Email address is empty
 cioos.validation.metadata_owner_no_id_code: Identifier code is empty
 cioos.validation.metadata_owner_no_id_code_or_name: Identifier code or name is required
-cioos.validation.metadata_owner_no_id_code_space: Identifier system is missing a code space
+cioos.validation.metadata_owner_no_id_code_space: Identifier system is missing a code
+  space
 cioos.validation.metadata_owner_no_id_system: Identifier system is empty
 cioos.validation.metadata_owner_org_no_ror: ROR is required
 cnodc.page.help.link: User Manual
@@ -102,7 +103,7 @@ pipeman.common.display_name: Display Name
 pipeman.common.empty_list: No Items
 pipeman.common.na: N/A
 pipeman.common.no: 'No'
-pipeman.common.open_translation_request: 'Request Translation'
+pipeman.common.open_translation_request: Request Translation
 pipeman.common.pages: Pages
 pipeman.common.placeholder: None
 pipeman.common.submit: Submit
@@ -128,6 +129,9 @@ pipeman.dataset.page.add_attachment.instructions: ''
 pipeman.dataset.page.add_attachment.link: Upload Attachment
 pipeman.dataset.page.add_attachment.success: File uploaded successfully
 pipeman.dataset.page.add_attachment.title: File Upload
+pipeman.dataset.page.copy_dataset.link: Copy
+pipeman.dataset.page.copy_dataset.success: ''
+pipeman.dataset.page.copy_dataset.title: Copy Dataset
 pipeman.dataset.page.create_dataset.link: Create Dataset
 pipeman.dataset.page.create_dataset.success: Dataset created
 pipeman.dataset.page.create_dataset.title: Create Dataset
@@ -216,10 +220,11 @@ pipeman.error.range_between: Value must be between {min} and {max}
 pipeman.error.range_greater_than_max: Value must be at most {max}
 pipeman.error.range_less_than_min: Value must be at least {min}
 pipeman.error.required_field: This field is required
-pipeman.field.error.translation_already_in_progress: 'Translation already in progress'
-pipeman.field.error.translation_nothing_to_do: 'All language fields already populated'
-pipeman.field.error.translation_nothing_to_work_with: 'At least one original language must be present'
-pipeman.field.messages.translation_requested: 'Translation request opened'
+pipeman.field.error.translation_already_in_progress: Translation already in progress
+pipeman.field.error.translation_nothing_to_do: All language fields already populated
+pipeman.field.error.translation_nothing_to_work_with: At least one original language
+  must be present
+pipeman.field.messages.translation_requested: Translation request opened
 pipeman.formats.date: '%Y-%m-%d'
 pipeman.formats.datetime: '%Y-%m-%d %H:%M:%S'
 pipeman.home: Home
@@ -254,7 +259,7 @@ pipeman.label.entity.organization_name: Organization
 pipeman.label.entity.status: Status
 pipeman.label.org.global_name: Global
 pipeman.label.org.short_name: Short Name
-pipeman.label.translation.upload: 'Translation CSV'
+pipeman.label.translation.upload: Translation CSV
 pipeman.label.user.display_name: Display Name
 pipeman.label.user.email: Email
 pipeman.label.user.groups: Groups
@@ -274,9 +279,9 @@ pipeman.label.witem.name: Name
 pipeman.label.witem.object_link: Object Link
 pipeman.label.witem.properties: Properties
 pipeman.label.witem.status: Status
-pipeman.label.witem.status.async_delay: 'Delayed (Async)'
+pipeman.label.witem.status.async_delay: Delayed (Async)
 pipeman.label.witem.status.async_execute: Executing (Async)
-pipeman.label.witem.status.batch_delay: 'Delayed (Batch)'
+pipeman.label.witem.status.batch_delay: Delayed (Batch)
 pipeman.label.witem.status.batch_execute: Executing (Batch)
 pipeman.label.witem.status.cancelled: Cancelled
 pipeman.label.witem.status.complete: Completed
@@ -307,21 +312,23 @@ pipeman.label.witem.type.dataset_activation: Dataset Activation
 pipeman.label.witem.type.dataset_publication: Dataset Publication
 pipeman.label.witem.type.receive_send_item: Receive New File
 pipeman.label.witem.type.send_file: Send File
-pipeman.label.witem.workflow_name: 'Workflow Name'
-pipeman.label.witem.workflow_type: 'Workflow Type'
-pipeman.labels.kv_field.data_type: 'Data Type'
-pipeman.labels.kv_field.data_type.numeric: 'Numeric'
-pipeman.labels.kv_field.data_type.numeric_list: 'Numeric (comma-separated list)'
-pipeman.labels.kv_field.data_type.str: 'Text'
-pipeman.labels.kv_field.key: 'Key'
-pipeman.labels.kv_field.value: 'Value'
+pipeman.label.witem.type.text_translation: Text Translation
+pipeman.label.witem.workflow_name: Workflow Name
+pipeman.label.witem.workflow_type: Workflow Type
+pipeman.labels.kv_field.data_type: Data Type
+pipeman.labels.kv_field.data_type.numeric: Numeric
+pipeman.labels.kv_field.data_type.numeric_list: Numeric (comma-separated list)
+pipeman.labels.kv_field.data_type.str: Text
+pipeman.labels.kv_field.key: Key
+pipeman.labels.kv_field.value: Value
 pipeman.login.database: Local Account
 pipeman.login.msal: Microsoft Account
 pipeman.menu.download_translations: Download Translations
 pipeman.menu.login: Login
 pipeman.menu.logout: Logout
 pipeman.menu.upload_translations: Upload Translations
-pipeman.mtrans.error.line_processing_error: 'There was an error while processing the translation on row {lineno}: {original}'
+pipeman.mtrans.error.line_processing_error: 'There was an error while processing the
+  translation on row {lineno}: {original}'
 pipeman.mtrans.error.missing_guid: The uploaded CSV file is missing a GUID value in
   row {lineno}
 pipeman.mtrans.error.missing_translation: The uploaded CSV file is missing a translation
@@ -338,12 +345,13 @@ pipeman.mtrans.error.other_error: There was an unknown error while processing th
   translation on row {lineno}
 pipeman.mtrans.error.request_already_completed: Already completed
 pipeman.mtrans.page.upload.instructions: ''
-pipeman.mtrans.page.upload.title: 'Upload Translation File'
+pipeman.mtrans.page.upload.title: Upload Translation File
 pipeman.mtrans.page.upload_translations.success: Translation import complete
 pipeman.netcdf.page.populate_from_netcdf.dataset: Dataset
 pipeman.netcdf.page.populate_from_netcdf.error: An error occurred while populated
   the metadata from the NetCDF file
 pipeman.netcdf.page.populate_from_netcdf.instructions: ''
+pipeman.netcdf.page.populate_from_netcdf.link: Upload NetCDF Metadata
 pipeman.netcdf.page.populate_from_netcdf.netcdf_file: File
 pipeman.netcdf.page.populate_from_netcdf.success: Metadata populated from NetCDF file
 pipeman.netcdf.page.populate_from_netcdf.title: Import Metadata From NetCDF
@@ -370,11 +378,8 @@ pipeman.validation.level.success: Success
 pipeman.validation.level.warning: Warning
 pipeman.vocab.page.list_vocabularies.title: Vocabularies
 pipeman.vocabularies: Vocabularies
-pipeman.workflow.error.file_upload_error: 'Error uploading file'
+pipeman.workflow.error.file_upload_error: Error uploading file
 pipeman.workflow.page.cancel.instructions: ''
-pipeman.dataset.page.copy_dataset.link: 'Copy'
-pipeman.dataset.page.copy_dataset.title: 'Copy Dataset'
-pipeman.netcdf.page.populate_from_netcdf.link: 'Upload NetCDF Metadata'
 pipeman.workflow.page.cancel.link: Cancel
 pipeman.workflow.page.cancel.success: Action item cancelled
 pipeman.workflow.page.cancel.title: Cancel Action
@@ -385,4 +390,3 @@ pipeman.workflow.page.continue.title: Approve Action
 pipeman.workflow.page.list_items.title: List Action Items
 pipeman.workflow.page.view_item.link: View
 pipeman.workflow.page.view_item.title: View Item
-pipeman.label.witem.type.text_translation: Text Translation
