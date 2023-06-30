@@ -158,8 +158,8 @@ class VocabularyTermController:
             desc = json.loads(term.descriptions)
             if display:
                 dn.update(display)
+                term.display_names = json.dumps(dn)
             if description:
                 desc.update(description)
-            term.display_names = json.dumps(dn)
-            term.descriptions = json.dumps(desc)
+                term.descriptions = json.dumps(desc)
         session.commit()

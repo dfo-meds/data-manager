@@ -27,97 +27,97 @@ iso19115_ci_date_type_code:
     adopted:
       description:
         fr: la date identifie le moment où la ressource a été adoptée
-      label:
+      display:
         fr: Date d'adoption
         en: Date Adopted
     creation:
       description:
         fr: la date identifie le moment où la ressource a vu le jour
-      label:
+      display:
         fr: Date créée
         en: Date Created
     deprecated:
       description:
         fr: la date identifie le moment où la ressource a été obsolète
-      label:
+      display:
         fr: Date d'obsolescence
         en: Date Deprecated
     distribution:
       description:
         fr: la date identifie quand une instance de la ressource a été distribuée
-      label:
+      display:
         fr: Date de diffusion
         en: Distribution Date
     expiry:
       description:
         fr: la date identifie l'expiration de la ressource
-      label:
+      display:
         fr: Date d'expiration
         en: Expiry Date
     inForce:
       description:
         fr: la date indique quand la ressource est entrée en vigueur
-      label:
+      display:
         fr: Date d'entrée en vigueur
         en: In-Force Date
     lastRevision:
       description:
         fr: la date identifie le moment où la ressource a été révisée pour la dernière fois
-      label:
+      display:
         fr: Date de la dernière révision
         en: Date Last Revised
     lastUpdate:
       description:
         fr: la date identifie la dernière mise à jour de la ressource
-      label:
+      display:
         fr: Date de la dernière mise à jour
         en: Last Update Date
     nextUpdate:
       description:
         fr: la date identifie la prochaine mise à jour de la ressource
-      label:
+      display:
         fr: Date de la prochaine mise à jour
         en: Next Update Date
     publication:
       description:
         fr: la date identifie le moment où la ressource a été émise
-      label:
+      display:
         fr: Date de publication
         en: Publication Date
     released:
       description:
         fr: la date à laquelle la ressource doit être mise à la disposition du public
-      label:
+      display:
         fr: Date de parution
         en: Released Date
     revision:
       description:
         fr: la date indique quand la ressource a été examinée ou réexaminée et améliorée ou modifiée
-      label:
+      display:
         fr: Date de révision
         en: Revision Date
     superseded:
       description:
         fr: la date identifie le moment où la ressource a été remplacée ou remplacée par une autre ressource
-      label:
+      display:
         fr: Date de remplacement
         en: Date Superseded
     unavailable:
       description:
         fr: la date identifie le moment où la ressource est devenue indisponible ou impossible à obtenir
-      label:
+      display:
         fr: Date indisponible
         en: Date Unavailable
     validityBegins:
       description:
         fr: "moment auquel les données sont considérées comme devenues valides. REMARQUE : Il peut y avoir un certain délai entre la création et le début de la validité"
-      label:
+      display:
         fr: Date de début de validité
         en: Validity Start Date
     validityExpires:
       description:
         fr: moment auquel les données ne sont plus considérées comme valides
-      label:
+      display:
         fr: Date d'expiration de la validité
         en: Validity Expires Date
 iso19115_ci_on_line_function_code:
@@ -129,67 +129,67 @@ iso19115_ci_on_line_function_code:
     browseGraphic:
       description:
         fr: parcourir le graphique fourni
-      label:
+      display:
         fr: Navigation, Graphisme
         en: Browing, Graphics
     browsing:
       description:
         fr: navigation en ligne fournie
-      label:
+      display:
         fr: Navigation, Texte
         en: Browsing, Text
     completeMetadata:
       description:
         fr: métadonnées complètes fournies
-      label:
+      display:
         fr: Métadonnées
         en: Metadata
     download:
       description:
         fr: instructions en ligne pour transférer des données d'un périphérique ou d'un système de stockage à un autre
-      label:
+      display:
         fr: Télécharger
         en: Download
     emailService:
       description:
         fr: service de messagerie en ligne fourni
-      label:
+      display:
         fr: Service de demande par e-mail
         en: Email Request Service
     fileAccess:
       description:
         fr: accès au dossier en ligne fourni
-      label:
+      display:
         fr: Service d'accès aux fichiers
         en: File Access Service
     information:
       description:
         fr: informations en ligne sur la ressource
-      label:
+      display:
         fr: Information
         en: Information
     offlineAccess:
       description:
         fr: instructions en ligne pour demander la ressource au fournisseur
-      label:
+      display:
         fr: Accès hors ligne
         en: Offline Access
     order:
       description:
         fr: processus de commande en ligne pour obtenir la ressource
-      label:
+      display:
         fr: Commande
         en: Order
     search:
       description:
         fr: interface de recherche en ligne pour rechercher des informations sur la ressource
-      label:
+      display:
         fr: Recherche
         en: Search
     upload:
       description:
         fr: capacité de téléchargement de ressources en ligne fournie
-      label:
+      display:
         fr: Télécharger
         en: Upload
 iso19115_ci_presentation_form_code:
@@ -201,127 +201,127 @@ iso19115_ci_presentation_form_code:
     audioDigital:
       description:
         fr: enregistrement audio numérique
-      label:
+      display:
         fr: Audio - Numérique
         en: Audio - Digital
     audioHardcopy:
       description:
         fr: enregistrement audio délivré par un support analogique, tel qu'une bande magnétique
-      label:
+      display:
         fr: Audio - Copie papier
         en: Audio - Hardcopy
     diagramDigital:
       description:
         fr: informations représentées graphiquement par des graphiques tels que camembert, graphique à barres et autres types de diagrammes et enregistrées au format numérique
-      label:
+      display:
         fr: Diagramme - Numérique
         en: Diagram - Digital
     diagramHardcopy:
       description:
         fr: informations représentées graphiquement par des graphiques tels que camembert, graphique à barres et autres types de diagrammes et imprimées sur papier, matériel photographique ou autre support
-      label:
+      display:
         fr: Diagramme - Copie papier
         en: Diagram - Hardcopy
     documentDigital:
       description:
         fr: représentation numérique d'un élément principalement textuel (peut également contenir des illustrations)
-      label:
+      display:
         fr: Document - Numérique
         en: Document - Digital
     documentHardcopy:
       description:
         fr: représentation d'un élément principalement textuel (peut également contenir des illustrations) sur papier, matériel photographique ou autre support
-      label:
+      display:
         fr: Document - Copie papier
         en: Document - Hardcopy
     imageDigital:
       description:
         fr: ressemblance de caractéristiques, d'objets et d'activités naturels ou créés par l'homme acquis par la détection d'éléments visuels ou de tout autre segment du spectre électromagnétique par des capteurs, tels que l'infrarouge thermique et un radar à haute résolution et stockés au format numérique
-      label:
+      display:
         fr: Image - Numérique
         en: Image - Digital
     imageHardcopy:
       description:
         fr: ressemblance de caractéristiques, d'objets et d'activités naturels ou créés par l'homme acquis par la détection d'éléments visuels ou de tout autre segment du spectre électromagnétique par des capteurs, tels que l'infrarouge thermique et un radar à haute résolution et reproduits sur papier, matériel photographique ou autre support pour une utilisation directe par l'utilisateur humain
-      label:
+      display:
         fr: Image - Copie papier
         en: Image - Hardcopy
     mapDigital:
       description:
         fr: carte représentée sous forme raster ou vectorielle
-      label:
+      display:
         fr: Carte - Numérique
         en: Map - Digital
     mapHardcopy:
       description:
         fr: carte imprimée sur du papier, du matériel photographique ou d'autres supports destinés à être utilisés directement par l'utilisateur humain
-      label:
+      display:
         fr: Carte - Copie papier
         en: Map - Hardcopy
     modelDigital:
       description:
         fr: représentation numérique multidimensionnelle d'une caractéristique, d'un processus, etc.
-      label:
+      display:
         fr: Modèle - Numérique
         en: Model - Digital
     modelHardcopy:
       description:
         fr: Modèle physique tridimensionnel
-      label:
+      display:
         fr: Modèle - Copie papier
         en: Model - Hardcopy
     multimediaDigital:
       description:
         fr: représentation d'informations utilisant simultanément différents modes numériques pour le texte, le son, l'image
-      label:
+      display:
         fr: Multimédia - Numérique
         en: Multimedia - Digital
     multimediaHardcopy:
       description:
         fr: représentation d'informations utilisant simultanément divers modes analogiques pour le texte, le son, l'image
-      label:
+      display:
         fr: Multimédia - Copie papier
         en: Multimedia - Hardcopy
     physicalSample:
       description:
         fr: un objet physique, par exemple un échantillon de roche ou de minéral, une lame de microscope
-      label:
+      display:
         fr: Échantillon physique
         en: Physical Sample
     profileDigital:
       description:
         fr: coupe verticale sous forme numérique
-      label:
+      display:
         fr: Profil - Numérique
         en: Profile - Digital
     profileHardcopy:
       description:
         fr: coupe verticale imprimée sur papier, etc.
-      label:
+      display:
         fr: Profil - Copie papier
         en: Profile - Hardcopy
     tableDigital:
       description:
         fr: représentation numérique de faits ou de chiffres affichés systématiquement, notamment en colonnes
-      label:
+      display:
         fr: Tableau - Numérique
         en: Table - Digital
     tableHardcopy:
       description:
         fr: représentation de faits ou de chiffres affichés systématiquement, notamment en colonnes, imprimés sur papier, matériel photographique ou autres supports
-      label:
+      display:
         fr: Tableau - Copie papier
         en: Table - Hardcopy
     videoDigital:
       description:
         fr: enregistrement vidéo numérique
-      label:
+      display:
         fr: Vidéo - Numérique
         en: Video - Digital
     videoHardcopy:
       description:
         fr: enregistrement vidéo sur pellicule
-      label:
+      display:
         fr: Vidéo - Copie papier
         en: Video - Hardcopy
 iso19115_ci_role_code:
@@ -333,85 +333,85 @@ iso19115_ci_role_code:
     author:
       description:
         fr: partie qui a créé la ressource
-      label:
+      display:
         fr: Auteur
         en: Author
     coAuthor:
       description:
         fr: partie coauteur de la ressource
-      label:
+      display:
         fr: Coauteur
         en: Co-Author
     collaborator:
       description:
         fr: partie qui aide à la génération de la ressource autre que le chercheur principal
-      label:
+      display:
         fr: Collaborateur
         en: Collaborator
     contributor:
       description:
         fr: partie contribuant à la ressource
-      label:
+      display:
         fr: Donateur
         en: Contributor
     custodian:
       description:
         fr: partie qui accepte l'imputabilité et la responsabilité de la ressource et assure l'entretien et la maintenance appropriés de la ressource
-      label:
+      display:
         fr: Gardien
         en: Custodian
     distributor:
       description:
         fr: partie qui distribue la ressource
-      label:
+      display:
         fr: Distributeur
         en: Distributor
     editor:
       description:
         fr: partie qui a révisé ou modifié la ressource pour améliorer le contenu
-      label:
+      display:
         fr: Éditeur
         en: Editor
     funder:
       description:
         fr: partie fournissant un soutien financier pour la ressource
-      label:
+      display:
         fr: Bailleur de fonds
         en: Funder
     mediator:
       description:
         fr: une classe d'entités qui négocie l'accès à la ressource et pour qui la ressource est destinée ou utile
-      label:
+      display:
         fr: Médiateur
         en: Mediator
     originator:
       description:
         fr: partie qui a créé la ressource
-      label:
+      display:
         fr: Auteur
         en: Originator
     owner:
       description:
         fr: partie propriétaire de la ressource
-      label:
+      display:
         fr: Propriétaire
         en: Owner
     pointOfContact:
       description:
         fr: partie qui peut être contactée pour acquérir des connaissances ou acquérir la ressource
-      label:
+      display:
         fr: Point de contact
         en: Point of Contact
     principalInvestigator:
       description:
         fr: partie clé chargée de recueillir des informations et de mener des recherches
-      label:
+      display:
         fr: Chercheur principal
         en: Principal Investigator
     processor:
       description:
         fr: partie qui a traité les données d'une manière telle que la ressource a été modifiée
-      label:
+      display:
         fr: Processeur
         en: Processor
     publisher:
@@ -420,31 +420,31 @@ iso19115_ci_role_code:
     resourceProvider:
       description:
         fr: partie qui fournit la ressource
-      label:
+      display:
         fr: Fournisseur de ressources
         en: Resource Provider
     rightsHolder:
       description:
         fr: partie détenant ou gérant les droits sur la ressource
-      label:
+      display:
         fr: Titulaire des droits
         en: Rights Holder
     sponsor:
       description:
         fr: partie qui parle au nom de la ressource
-      label:
+      display:
         fr: Parrainer
         en: Sponsor
     stakeholder:
       description:
         fr: partie qui a un intérêt dans la ressource ou l'utilisation de la ressource
-      label:
+      display:
         fr: Partie prenante
         en: Stakeholder
     user:
       description:
         fr: partie qui utilise la ressource
-      label:
+      display:
         fr: Utilisateur
         en: User
 iso19115_ci_telephone_type_code:
@@ -456,19 +456,19 @@ iso19115_ci_telephone_type_code:
     fax:
       description:
         fr: le téléphone fournit un service de télécopie
-      label:
+      display:
         fr: Fax
         en: Fax
     sms:
       description:
         fr: le téléphone fournit un service SMS
-      label:
+      display:
         fr: SMS
         en: SMS
     voice:
       description:
         fr: le téléphone fournit un service vocal
-      label:
+      display:
         fr: Voix
         en: Voice
 iso19115_ds_association_type_code:
@@ -480,55 +480,55 @@ iso19115_ds_association_type_code:
     collectiveTitle:
       description:
         fr: "titre commun pour une collection de ressources. REMARQUE: le titre identifie les éléments d'une série collectivement, combinés avec des informations sur les volumes disponibles à la source citée"
-      label:
+      display:
         fr: Titre collectif
         en: Collective Title
     crossReference:
       description:
         fr: référence d'une ressource à une autre
-      label:
+      display:
         fr: Références croisées
         en: Cross-Reference
     dependency:
       description:
         fr: associé par une dépendance
-      label:
+      display:
         fr: Dépendance
         en: Dependency
     isComposedOf:
       description:
         fr: référence aux ressources qui font partie de cette ressource
-      label:
+      display:
         fr: Est composé de
         en: Is Composed Of
     largerWorkCitation:
       description:
         fr: référence à une ressource maîtresse dont celle-ci fait partie
-      label:
+      display:
         fr: Citation de travail plus grande
         en: Larger Work Citation
     partOfSeamlessDatabase:
       description:
         fr: partie du même ensemble structuré de données conservées dans un ordinateur
-      label:
+      display:
         fr: Fait partie de la base de données transparente
         en: Part of Seamless Database
     revisionOf:
       description:
         fr: la ressource est une révision de la ressource associée
-      label:
+      display:
         fr: Révision de
         en: Revision Of
     series:
       description:
         fr: associés par le biais d'un patrimoine commun tel que produit selon un cahier des charges commun
-      label:
+      display:
         fr: Série
         en: Series
     stereoMate:
       description:
         fr: partie d'un ensemble d'images qui, lorsqu'elles sont utilisées ensemble, fournissent des images tridimensionnelles
-      label:
+      display:
         fr: Compagnon stéréo
         en: Stereo Mate
 iso19115_dcplist:
@@ -540,53 +540,53 @@ iso19115_dcplist:
     COM:
       description:
         fr: Modèle d'objet composant
-      label:
+      display:
         fr: COM
     CORBA:
       description:
         fr: Architecture commune d'agent de demande d'objet
-      label:
+      display:
         fr: CORBE
     FTP:
       description:
         fr: Protocole de transfer de fichier
-      label:
+      display:
         fr: FTP
     HTTP:
       description:
         fr: Protocole de transfert hypertexte
-      label:
+      display:
         fr: HTTP
     JAVA:
       description:
         fr: Langage de programmation orienté objet
-      label:
+      display:
         fr: JAVA
     SOAP:
       description:
         fr: Protocole d'accès aux objets simple
-      label:
+      display:
         fr: SAVON
     SQL:
       description:
         fr: Langage de requêtes structurées
-      label:
+      display:
         fr: SQL
     WebServices:
       description:
         fr: service Web
-      label:
+      display:
         fr: Services Web
         en: Web Services
     XML:
       description:
         fr: Langage de balisage extensible
-      label:
+      display:
         fr: XML
     Z3950:
       description:
         fr: ISO 23950
-      label:
+      display:
         fr: Z3950
 iso19115_ds_initiative_type_code:
   display:
@@ -597,55 +597,55 @@ iso19115_ds_initiative_type_code:
     campaign:
       description:
         fr: série d'actions planifiées organisées
-      label:
+      display:
         fr: Campagne
         en: Campaign
     collection:
       description:
         fr: accumulation de ressources rassemblées dans un but précis
-      label:
+      display:
         fr: Collection
         en: Collection
     exercise:
       description:
         fr: exécution spécifique d'une fonction ou d'un groupe de fonctions
-      label:
+      display:
         fr: Exercer
         en: Exercise
     experiment:
       description:
         fr: processus conçu pour déterminer si quelque chose est efficace ou valide
-      label:
+      display:
         fr: Expérience
         en: Experiment
     investigation:
       description:
         fr: recherche ou enquête systématique
-      label:
+      display:
         fr: Enquête
         en: Investigation
     mission:
       description:
         fr: fonctionnement spécifique d'un système de collecte de données
-      label:
+      display:
         fr: Mission
         en: Mission
     operation:
       description:
         fr: action qui fait partie d'une série d'actions
-      label:
+      display:
         fr: Opération
         en: Operation
     platform:
       description:
         fr: véhicule ou autre base de support qui contient un capteur
-      label:
+      display:
         fr: Plateforme
         en: Platform
     process:
       description:
         fr: méthode de faire quelque chose impliquant un certain nombre d'étapes
-      label:
+      display:
         fr: Processus
         en: Process
     program:
@@ -657,25 +657,25 @@ iso19115_ds_initiative_type_code:
     sensor:
       description:
         fr: dispositif ou pièce d'équipement qui détecte ou enregistre
-      label:
+      display:
         fr: Capteur
         en: Sensor
     study:
       description:
         fr: examen ou enquête
-      label:
+      display:
         fr: Étude
         en: Study
     task:
       description:
         fr: oeuvre
-      label:
+      display:
         fr: Tâche
         en: Task
     trial:
       description:
         fr: processus de test pour découvrir ou démontrer quelque chose
-      label:
+      display:
         fr: Procès
         en: Trial
 iso19115_md_cell_geometry_code:
@@ -687,25 +687,25 @@ iso19115_md_cell_geometry_code:
     area:
       description:
         fr: chaque cellule représente une zone
-      label:
+      display:
         fr: Zone
         en: Area
     point:
       description:
         fr: chaque cellule représente un point
-      label:
+      display:
         fr: Indiquer
         en: Point
     stratum:
       description:
         fr: plage de hauteur pour un profil vertical à point unique
-      label:
+      display:
         fr: Strate
         en: Stratum
     voxel:
       description:
         fr: chaque cellule représente une mesure volumétrique sur une grille régulière dans un espace tridimensionnel
-      label:
+      display:
         fr: Voxelle
         en: Voxel
 iso19115_md_classification_code:
@@ -717,55 +717,55 @@ iso19115_md_classification_code:
     confidential:
       description:
         fr: disponible pour quelqu'un à qui l'on peut confier des informations
-      label:
+      display:
         fr: Confidentiel
         en: Confidential
     forOfficialUseOnly:
       description:
         fr: informations non classifiées qui doivent être utilisées uniquement à des fins officielles déterminées par l'organisme de désignation
-      label:
+      display:
         fr: Pour usage interne seulement
         en: For Official Use Only
     limitedDistribution:
       description:
         fr: sélection limitée par l'organisme de désignation
-      label:
+      display:
         fr: Diffusion limitée
         en: Limited Distribution
     protected:
       description:
         fr: la compromission des informations pourrait causer des dommages
-      label:
+      display:
         fr: Protégé
         en: Protected
     restricted:
       description:
         fr: pas pour la divulgation générale
-      label:
+      display:
         fr: Limité
         en: Restricted
     SBU:
       description:
         fr: bien que non classé, nécessite des contrôles stricts sur sa distribution
-      label:
+      display:
         fr: Sensible, mais non classifié
         en: Sensitive, But Unclassified
     secret:
       description:
         fr: gardé ou destiné à être gardé privé, inconnu ou caché de tous sauf d'un groupe restreint de personnes
-      label:
+      display:
         fr: Secret
         en: Secret
     topSecret:
       description:
         fr: du plus grand secret
-      label:
+      display:
         fr: Top secret
         en: Top Secret
     unclassified:
       description:
         fr: disponible pour divulgation générale
-      label:
+      display:
         fr: Non classé
         en: Unclassified
 iso19115_md_coverage_content_type_code:
@@ -777,49 +777,49 @@ iso19115_md_coverage_content_type_code:
     auxillaryInformation:
       description:
         fr: données, généralement une mesure physique, utilisées pour prendre en charge le calcul des principales couvertures de mesures physiques dans l'ensemble de données (par exemple, grille d'épaisseur optique d'aérosol utilisée dans le calcul d'un produit de température de surface de la mer).
-      label:
+      display:
         fr: Informations auxiliaires
         en: Auxillary Information
     coordinate:
       description:
         fr: données utilisées pour fournir des valeurs d'axe de coordonnées
-      label:
+      display:
         fr: Coordonner
         en: Coordinate
     image:
       description:
         fr: représentation numérique significative d'un paramètre physique qui n'est pas la valeur réelle du paramètre physique
-      label:
+      display:
         fr: Image
         en: Image
     modelResult:
       description:
         fr: ressources dont les valeurs sont calculées à l'aide d'un modèle plutôt que d'être observées ou calculées à partir d'observations.
-      label:
+      display:
         fr: Résultat du modèle
         en: Model Result
     physicalMeasurement:
       description:
         fr: valeur en unités physiques de la grandeur mesurée
-      label:
+      display:
         fr: Mesure physique
         en: Physical Measurement
     qualityInformation:
       description:
         fr: données utilisées pour caractériser la qualité des couvertures de mesures physiques dans l'ensemble de données. Généralement inclus dans un gmi:QE_CoverageResult.
-      label:
+      display:
         fr: Informations sur la qualité
         en: Quality Information
     referenceInformation:
       description:
         fr: informations de référence utilisées pour soutenir le calcul ou l'utilisation des couvertures de mesures physiques dans l'ensemble de données (par exemple, les grilles de latitude/longitude utilisées pour géolocaliser les mesures physiques).
-      label:
+      display:
         fr: Informations de référence
         en: Reference Information
     thematicClassification:
       description:
         fr: valeur de code sans signification quantitative, utilisée pour représenter une grandeur physique
-      label:
+      display:
         fr: Classement thématique
         en: Thematic Classification
 iso19115_md_datatype_code:
@@ -831,91 +831,91 @@ iso19115_md_datatype_code:
     abstractClass:
       description:
         fr: classe qui ne peut pas être directement instanciée
-      label:
+      display:
         fr: Classe abstraite
         en: Abstract Class
     aggregateClass:
       description:
         fr: classe composée de classes auxquelles elle est reliée par une relation agrégée
-      label:
+      display:
         fr: Classe globale
         en: Aggregate Class
     association:
       description:
         fr: relation sémantique entre deux classes qui implique des connexions entre leurs instances
-      label:
+      display:
         fr: Association
         en: Association
     characterString:
       description:
         fr: informations textuelles
-      label:
+      display:
         fr: Chaîne de caractères
         en: Character String
     class:
       description:
         fr: descripteur d'un ensemble d'objets partageant les mêmes attributs, opérations, méthodes, relations et comportements
-      label:
+      display:
         fr: Classe
         en: Class
     codelist:
       description:
         fr: énumération flexible utile pour exprimer une longue liste de valeurs, peut être étendue
-      label:
+      display:
         fr: Liste de codes
         en: Codelist
     codelistElement:
       description:
         fr: valeur autorisée pour une liste de codes ou une énumération
-      label:
+      display:
         fr: Élément de liste de codes
         en: Codelist Element
     datatypeClass:
       description:
         fr: classe avec peu ou pas d'opérations dont le but principal est de conserver l'état abstrait d'une autre classe pour la transmission, le stockage, le codage ou le stockage persistant
-      label:
+      display:
         fr: Classe de type de données
         en: Datatype Class
     enumeration:
       description:
         fr: type de données dont les instances forment une liste de valeurs littérales nommées, non extensible
-      label:
+      display:
         fr: Énumération
         en: Enumeration
     integer:
       description:
         fr: champ numérique
-      label:
+      display:
         fr: Entier
         en: Integer
     interfaceClass:
       description:
         fr: ensemble nommé d'opérations qui caractérisent le comportement d'un élément
-      label:
+      display:
         fr: Classe d'interface
         en: Interface Class
     metaClass:
       description:
         fr: classe dont les instances sont des classes
-      label:
+      display:
         fr: Méta classe
         en: Meta Class
     specifiedClass:
       description:
         fr: sous-classe qui peut être substituée à sa super-classe
-      label:
+      display:
         fr: Classe spécifiée
         en: Specified Class
     typeClass:
       description:
         fr: classe utilisée pour la spécification d'un domaine d'instances (objets), ainsi que les opérations applicables aux objets. Un type peut avoir des attributs et des associations
-      label:
+      display:
         fr: Type Classe
         en: Type Class
     unionClass:
       description:
         fr: classe décrivant une sélection de l'un des types spécifiés
-      label:
+      display:
         fr: Classe syndicale
         en: Union Class
 iso19115_md_dimension_name_type_code:
@@ -927,49 +927,49 @@ iso19115_md_dimension_name_type_code:
     column:
       description:
         fr: axe des abscisses (x)
-      label:
+      display:
         fr: Colonne
         en: Column
     crossTrack:
       description:
         fr: perpendiculaire à la direction du mouvement du point de balayage
-      label:
+      display:
         fr: Traverser la voie
         en: Cross Track
     line:
       description:
         fr: ligne de balayage d'un capteur
-      label:
+      display:
         fr: linéaire
         en: linear
     row:
       description:
         fr: axe des ordonnées (y)
-      label:
+      display:
         fr: Ligne
         en: Row
     sample:
       description:
         fr: élément le long d'une ligne de balayage
-      label:
+      display:
         fr: Goûter
         en: Sample
     time:
       description:
         fr: durée
-      label:
+      display:
         fr: Temps
         en: Time
     track:
       description:
         fr: le long de la direction de déplacement du point de balayage
-      label:
+      display:
         fr: Piste
         en: Track
     vertical:
       description:
         fr: axe vertical (z)
-      label:
+      display:
         fr: Vertical
         en: Vertical
 iso19115_md_geometric_object_type_code:
@@ -981,37 +981,37 @@ iso19115_md_geometric_object_type_code:
     complex:
       description:
         fr: ensemble de primitives géométriques telles que leurs frontières peuvent être représentées comme une union d'autres primitives
-      label:
+      display:
         fr: Complexe
         en: Complex
     composite:
       description:
         fr: ensemble connexe de courbes, de solides ou de surfaces
-      label:
+      display:
         fr: Composite
         en: Composite
     curve:
       description:
         fr: primitive géométrique unidimensionnelle délimitée, représentant l'image continue d'une ligne
-      label:
+      display:
         fr: Courbe
         en: Curve
     point:
       description:
         fr: primitive géométrique à zéro dimension, représentant une position mais n'ayant pas d'étendue
-      label:
+      display:
         fr: Indiquer
         en: Point
     solid:
       description:
         fr: primitive géométrique tridimensionnelle liée et connectée, représentant l'image continue d'une région de l'espace
-      label:
+      display:
         fr: Solide
         en: Solid
     surface:
       description:
         fr: primitive géométrique bidimensionnelle liée et connectée, représentant l'image continue d'une région d'un plan
-      label:
+      display:
         fr: Surface
         en: Surface
 iso19115_md_imaging_condition_code:
@@ -1023,67 +1023,67 @@ iso19115_md_imaging_condition_code:
     blurredImage:
       description:
         fr: une partie de l'image est floue
-      label:
+      display:
         fr: Image floue
         en: Blurred Image
     cloud:
       description:
         fr: une partie de l'image est partiellement masquée par la couverture nuageuse
-      label:
+      display:
         fr: Nuage
         en: Cloud
     degradingObliquity:
       description:
         fr: angle aigu entre le plan de l'écliptique (le plan de l'orbite terrestre) et le plan de l'équateur céleste
-      label:
+      display:
         fr: Obliquité dégradante
         en: Degrading Obliquity
     fog:
       description:
         fr: une partie de l'image est partiellement masquée par le brouillard
-      label:
+      display:
         fr: Brouillard
         en: Fog
     heavySmokeOrDust:
       description:
         fr: une partie de l'image est partiellement masquée par une épaisse fumée ou de la poussière
-      label:
+      display:
         fr: Forte fumée ou poussière
         en: Heavy Smoke or Dust
     night:
       description:
         fr: l'image a été prise la nuit
-      label:
+      display:
         fr: Nuit
         en: Night
     rain:
       description:
         fr: l'image a été prise pendant la pluie
-      label:
+      display:
         fr: Pluie
         en: Rain
     semiDarkness:
       description:
         fr: l'image a été prise dans des conditions de semi-obscurité ; conditions crépusculaires
-      label:
+      display:
         fr: Semi-obscurité
         en: Semi-Darkness
     shadow:
       description:
         fr: une partie de l'image est masquée par l'ombre
-      label:
+      display:
         fr: Ombre
         en: Shadow
     snow:
       description:
         fr: une partie de l'image est masquée par la neige
-      label:
+      display:
         fr: Neige
         en: Snow
     terrainMasking:
       description:
         fr: l'absence de données de collecte d'un point ou d'une zone donnée causée par l'emplacement relatif des caractéristiques topographiques qui obstruent le chemin de collecte entre le(s) collecteur(s) et le(s) sujet(s) d'intérêt
-      label:
+      display:
         fr: Masquage du terrain
         en: Terrain Masking
 iso19115_md_keyword_type_code:
@@ -1095,49 +1095,49 @@ iso19115_md_keyword_type_code:
     dataCentre:
       description:
         fr: mot-clé identifie un référentiel ou une archive qui gère et distribue des données
-      label:
+      display:
         fr: Centre de données
         en: Data Centre
     discipline:
       description:
         fr: le mot-clé identifie une branche d'enseignement ou un apprentissage spécialisé
-      label:
+      display:
         fr: Discipline
         en: Discipline
     featureType:
       description:
         fr: mot-clé identifie une ressource contenant ou concernant une collection d'instances de fonctionnalités avec des caractéristiques communes
-      label:
+      display:
         fr: Type de fonctionnalité
         en: Feature Type
     instrument:
       description:
         fr: mot-clé identifie un appareil utilisé pour mesurer ou comparer des propriétés physiques
-      label:
+      display:
         fr: Instrument
         en: Instrument
     place:
       description:
         fr: mot-clé identifie un emplacement
-      label:
+      display:
         fr: Lieu
         en: Place
     platform:
       description:
         fr: mot-clé identifie une structure sur laquelle un instrument est monté
-      label:
+      display:
         fr: Plateforme
         en: Platform
     process:
       description:
         fr: mot-clé identifie une série d'actions ou d'événements naturels
-      label:
+      display:
         fr: Processus
         en: Process
     product:
       description:
         fr: mot-clé identifie un type de produit
-      label:
+      display:
         fr: Produit
         en: Product
     project:
@@ -1146,37 +1146,37 @@ iso19115_md_keyword_type_code:
     service:
       description:
         fr: mot-clé identifie une activité exercée par une partie au profit d'une autre
-      label:
+      display:
         fr: Service
         en: Service
     stratum:
       description:
         fr: mot-clé identifiant la ou les couches de toute substance déposée ou niveaux dans un système ordonné
-      label:
+      display:
         fr: Strate
         en: Stratum
     subTopicCategory:
       description:
         fr: raffinement d'une catégorie de sujet aux fins de la classification des données géographiques
-      label:
+      display:
         fr: Catégorie de sous-sujet
         en: Sub-Topic Category
     taxon:
       description:
         fr: le mot-clé identifie une taxonomie de la ressource
-      label:
+      display:
         fr: Taxon
         en: Taxon
     temporal:
       description:
         fr: le mot-clé identifie une période liée à la ressource
-      label:
+      display:
         fr: Temporel
         en: Temporal
     theme:
       description:
         fr: mot-clé identifie un sujet ou un sujet particulier
-      label:
+      display:
         fr: Thème
         en: Theme
 iso19115_md_maintenance_frequency_code:
@@ -1188,91 +1188,91 @@ iso19115_md_maintenance_frequency_code:
     annually:
       description:
         fr: la ressource est mise à jour chaque année
-      label:
+      display:
         fr: Annuellement
         en: Annually
     asNeeded:
       description:
         fr: la ressource est mise à jour si nécessaire
-      label:
+      display:
         fr: Comme requis
         en: As Needed
     biannually:
       description:
         fr: la ressource est mise à jour deux fois par an
-      label:
+      display:
         fr: Semestrielle
         en: Biannually
     biennially:
       description:
         fr: la ressource est mise à jour tous les 2 ans
-      label:
+      display:
         fr: Tous les deux ans
         en: Biennially
     continual:
       description:
         fr: la ressource est mise à jour de manière répétée et fréquente
-      label:
+      display:
         fr: Continuellement
         en: Continually
     daily:
       description:
         fr: la ressource est mise à jour chaque jour
-      label:
+      display:
         fr: Quotidien
         en: Daily
     fortnightly:
       description:
         fr: la ressource est mise à jour toutes les deux semaines
-      label:
+      display:
         fr: Tous les quinze jours (toutes les deux semaines)
         en: Fortnightly (every two weeks)
     irregular:
       description:
         fr: la ressource est mise à jour à des intervalles de durée inégale
-      label:
+      display:
         fr: Irrégulier
         en: Irregular
     monthly:
       description:
         fr: la ressource est mise à jour chaque mois
-      label:
+      display:
         fr: Mensuel
         en: Monthly
     notPlanned:
       description:
         fr: il n'est pas prévu de mettre à jour les données
-      label:
+      display:
         fr: Pas prévu
         en: Not Planned
     periodic:
       description:
         fr: la ressource est mise à jour à intervalles réguliers
-      label:
+      display:
         fr: Périodique
         en: Periodic
     quarterly:
       description:
         fr: la ressource est mise à jour tous les trois mois
-      label:
+      display:
         fr: Trimestrielle
         en: Quaterly
     semimonthly:
       description:
         fr: ressource mise à jour deux fois par mois
-      label:
+      display:
         fr: Semi-mensuelle
         en: Semi-Monthly
     unknown:
       description:
         fr: la fréquence de maintenance des données n'est pas connue
-      label:
+      display:
         fr: Inconnu
         en: Unknown
     weekly:
       description:
         fr: la ressource est mise à jour sur une base hebdomadaire
-      label:
+      display:
         fr: Hebdomadaire
         en: Weekly
 iso19115_md_medium_format_code:
@@ -1284,37 +1284,37 @@ iso19115_md_medium_format_code:
     cpio:
       description:
         fr: Copy In / Out (format de fichier et commande UNIX)
-      label:
+      display:
         fr: cpio
     highSierra:
       description:
         fr: système de fichiers high sierra
-      label:
+      display:
         fr: hauteSierra
     iso9660:
       description:
         fr: volume de traitement de l'information et structure de fichier du CD-ROM
-      label:
+      display:
         fr: iso9660
     iso9660AppleHFS:
       description:
         fr: système de fichiers hiérarchique (Macintosh)
-      label:
+      display:
         fr: iso9660AppleHFS
     iso9660RockRidge:
       description:
         fr: protocole d'échange de crête rocheuse (UNIX)
-      label:
+      display:
         fr: iso9660RockRidge
     tar:
       description:
         fr: Archive sur bande
-      label:
+      display:
         fr: le goudron
     udf:
       description:
         fr: format de disque universel
-      label:
+      display:
         fr: UDF
 iso19115_md_obligation_code:
   display:
@@ -1325,19 +1325,19 @@ iso19115_md_obligation_code:
     conditional:
       description:
         fr: l'élément est requis lorsqu'une condition spécifique est remplie
-      label:
+      display:
         fr: Conditionnel
         en: Conditional
     mandatory:
       description:
         fr: l'élément est toujours requis
-      label:
+      display:
         fr: Obligatoire
         en: Mandatory
     optional:
       description:
         fr: l'élément n'est pas obligatoire
-      label:
+      display:
         fr: Facultatif
         en: Optional
 iso19115_md_pixel_orientation_code:
@@ -1349,31 +1349,31 @@ iso19115_md_pixel_orientation_code:
     center:
       description:
         fr: point à mi-chemin entre le coin inférieur gauche et le coin supérieur droit du pixel
-      label:
+      display:
         fr: Centre
         en: Center
     lowerLeft:
       description:
         fr: le coin du pixel le plus proche de l'origine du SRS ; si deux sont à la même distance de l'origine, celui avec la plus petite valeur de x
-      label:
+      display:
         fr: En bas à gauche
         en: Lower Left
     lowerRight:
       description:
         fr: coin suivant dans le sens inverse des aiguilles d'une montre à partir du coin inférieur gauche
-      label:
+      display:
         fr: En bas à droite
         en: Lower Right
     upperLeft:
       description:
         fr: coin suivant dans le sens inverse des aiguilles d'une montre à partir du coin supérieur droit
-      label:
+      display:
         fr: En haut à gauche
         en: Upper Left
     upperRight:
       description:
         fr: coin suivant dans le sens inverse des aiguilles d'une montre à partir du coin inférieur droit
-      label:
+      display:
         fr: En haut à droite
         en: Upper Right
 iso19115_md_progress_code:
@@ -1385,109 +1385,109 @@ iso19115_md_progress_code:
     accepted:
       description:
         fr: accepté par le parrain
-      label:
+      display:
         fr: Accepté
         en: Accepted
     completed:
       description:
         fr: a été complété
-      label:
+      display:
         fr: Complété
         en: Completed
     deprecated:
       description:
         fr: ressource remplacée et deviendra obsolète, à utiliser uniquement à des fins historiques
-      label:
+      display:
         fr: Obsolète
         en: Deprecated
     final:
       description:
         fr: les progrès sont terminés et aucune modification ne sera acceptée
-      label:
+      display:
         fr: Final
         en: Final
     historicalArchive:
       description:
         fr: stocké dans une installation de stockage hors ligne
-      label:
+      display:
         fr: Archives historiques
         en: Historical Archive
     notAccepted:
       description:
         fr: rejeté par le parrain
-      label:
+      display:
         fr: Pas accepté
         en: Not Accepted
     obsolete:
       description:
         fr: n'est plus pertinent
-      label:
+      display:
         fr: Obsolète
         en: Obsolete
     onGoing:
       description:
         fr: continuellement mis à jour
-      label:
+      display:
         fr: En cours
         en: On-Going
     pending:
       description:
         fr: engagé, mais pas encore traité
-      label:
+      display:
         fr: En attente
         en: Pending
     planned:
       description:
         fr: une date fixe a été établie à laquelle ou par laquelle la ressource sera créée ou mise à jour
-      label:
+      display:
         fr: Prévu
         en: Planned
     proposed:
       description:
         fr: suggéré que le développement doit être entrepris
-      label:
+      display:
         fr: Proposé
         en: Proposed
     required:
       description:
         fr: doit être généré ou mis à jour
-      label:
+      display:
         fr: Requis
         en: Required
     retired:
       description:
         fr: l'article n'est plus recommandé. Il n'a pas été remplacé par un autre article
-      label:
+      display:
         fr: À la retraite
         en: Retired
     superseded:
       description:
         fr: remplacé par du neuf
-      label:
+      display:
         fr: Remplacé
         en: Superseded
     tentative:
       description:
         fr: changements provisoires probables avant que la ressource ne devienne définitive ou complète
-      label:
+      display:
         fr: Provisoire
         en: Tentative
     underDevelopment:
       description:
         fr: actuellement en cours de création
-      label:
+      display:
         fr: En cours de développement
         en: Under Development
     valid:
       description:
         fr: acceptable sous certaines conditions
-      label:
+      display:
         fr: Valide
         en: Valid
     withdrawn:
       description:
         fr: retiré de l'examen
-      label:
+      display:
         fr: Retiré
         en: Withdrawn
 iso19115_md_reference_system_type_code:
@@ -1499,169 +1499,169 @@ iso19115_md_reference_system_type_code:
     compoundEngineeringParametric:
       description:
         fr: système de référence de coordonnées statio-paramétrique composé contenant un système de référence de coordonnées d'ingénierie et un système de référence paramétrique. par exemple [local] x, y, pression
-      label:
+      display:
         fr: Ingénierie composée - Paramétrique
         en: Compound Engineering - Parametric
     compoundEngineeringParametricTemporal:
       description:
         fr: système de référence de coordonnées composé statio-paramétrique-temporel contenant un système de référence de coordonnées d'ingénierie, paramétrique et temporelle. par exemple [local] x, y, pression, temps
-      label:
+      display:
         fr: Ingénierie composée - paramétrique et temporelle
         en: Compound Engineering - Parametric and Temporal
     compoundEngineeringTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporel composé contenant un système de référence de coordonnées d'ingénierie et un système de référence de coordonnées temporelles. par exemple [local] x, y, temps
-      label:
+      display:
         fr: Ingénierie composée - Temporelle
         en: Compound Engineering - Temporal
     compoundEngineeringVertical:
       description:
         fr: système de référence spatiale composé contenant un système de référence de coordonnées horizontales d'ingénierie et un système de référence de coordonnées verticales. par exemple [local] x, y, hauteur
-      label:
+      display:
         fr: Ingénierie composée - verticale
         en: Compound Engineering - Vertical
     compoundEngineeringVerticalTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporelles composé contenant un système de référence de coordonnées techniques, vertical et temporel. par exemple [local] x, y, hauteur, temps
-      label:
+      display:
         fr: Ingénierie composée - verticale et temporelle
         en: Compound Engineering - Vertical and Temporal
     compoundGeodeticParametric:
       description:
         fr: système de référence de coordonnées statio-paramétrique composé contenant un système de référence de coordonnées horizontales géographiques bidimensionnel et un système de référence paramétrique. ex. latitude, longitude, pression
-      label:
+      display:
         fr: Géodésie composée - Paramétrique
         en: Compound Geodetic - Parametric
     compoundGeodeticParametricTemporal:
       description:
         fr: système de référence composé de coordonnées statio-paramétriques-temporelles contenant un horizontal géographique bidimensionnel, un système de référence de coordonnées paramétriques et temporels. ex. latitude, longitude, pression, heure
-      label:
+      display:
         fr: Géodésique composée - paramétrique et temporelle
         en: Compound Geodetic - Parametric and Temporal
     compoundGeographic2DTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporelles composé contenant un système de référence de coordonnées horizontales géographiques bidimensionnel et un système de référence temporel. ex. latitude, longitude, heure
-      label:
+      display:
         fr: Composé Géographique - 2D Temporel
         en: Compound Geographic - 2D Temporal
     compoundGeographic2DVertical:
       description:
         fr: système de référence de coordonnées composé dans lequel un système de référence de coordonnées constitutif est un système de référence de coordonnées géodésiques horizontales et un autre est un système de référence de coordonnées verticales. par exemple latitude, longitude, hauteur ou profondeur [liée à la gravité]
-      label:
+      display:
         fr: Composé Géographique - 2D Vertical
         en: Compound Geographic - 2D Vertical
     compoundGeographic3DTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporelles composé contenant un système de référence de coordonnées géographique tridimensionnel et un système de référence de coordonnées temporelles. ex. latitude, longitude, hauteur ellipsoïdale, heure
-      label:
+      display:
         fr: Composé Géographique - 3D Temporel
         en: Compound Geographic - 3D Temporal
     compoundGeographicVerticalTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporel composé contenant un système de référence de coordonnées géographique bidimensionnel horizontal, vertical et temporel. ex. latitude, longitude, hauteur, heure
-      label:
+      display:
         fr: Composé Géographique - Vertical et Temporel
         en: Compound Geographic - Vertical and Temporal
     compoundProjected2DParametric:
       description:
         fr: système de référence de coordonnées statio-paramétrique composé contenant un système de référence de coordonnées horizontales projetées et un système de référence paramétrique. par exemple l'abscisse, l'ordonnée, la densité
-      label:
+      display:
         fr: Composé projeté - paramétrique 2D
         en: Compound Projected - 2D Parameteric
     compoundProjected2DParametricTemporal:
       description:
         fr: système de référence de coordonnées composé statio-paramétrique-temporel contenant un système de référence de coordonnées horizontal projeté, paramétrique et temporel. par exemple l'abscisse, l'ordonnée, la densité, le temps
-      label:
+      display:
         fr: Composé projeté - 2D paramétrique et temporel
         en: Compound Projected - 2D Parametric and Temporal
     compoundProjectedTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporelles composé contenant un système de référence de coordonnées horizontal projeté et un système de référence de coordonnées temporelles. par exemple l'abscisse, l'ordonnée, le temps
-      label:
+      display:
         fr: Composé Projeté - Temporel
         en: Compound Projected - Temporal
     compoundProjectedVertical:
       description:
         fr: système de référence spatiale composé contenant un système de référence de coordonnées horizontales projetées et un système de référence de coordonnées verticales. par exemple l'abscisse, l'ordonnée, la hauteur ou la profondeur [liée à la gravité]
-      label:
+      display:
         fr: Composé projeté - vertical
         en: Compound Projected - Vertical
     compoundProjectedVerticalTemporal:
       description:
         fr: système de référence de coordonnées spatio-temporelles composé contenant un système de référence de coordonnées horizontal, vertical et temporel projeté. par exemple l'abscisse, l'ordonnée, la hauteur, le temps
-      label:
+      display:
         fr: Projection composée - verticale et temporelle
         en: Compound Projected - Vertical and Temporal
     engineering:
       description:
         fr: système de référence de coordonnées basé sur une référence d'ingénierie (donnée décrivant la relation d'un système de coordonnées à une référence locale). par exemple [local] x,y
-      label:
+      display:
         fr: Ingénierie
         en: Engineering
     engineeringDesign:
       description:
         fr: système de référence de coordonnées d'ingénierie dans lequel la représentation de base d'un objet en mouvement est spécifiée. par exemple [local] x,y
-      label:
+      display:
         fr: Conception technique
         en: Engineering - Design
     engineeringImage:
       description:
         fr: système de référence de coordonnées basé sur une donnée d'image (donnée d'ingénierie qui définit la relation d'un système de coordonnées à une image). par exemple ligne, colonne
-      label:
+      display:
         fr: Ingénierie - Image
         en: Engineering - Image
     geodeticGeocentric:
       description:
         fr: SCR géodésique ayant un système de coordonnées 3D cartésiennes. par exemple [géocentrique] X,Y,Z
-      label:
+      display:
         fr: Géodésique Géocentrique
         en: Geodetic Geocentric
     geodeticGeographic2D:
       description:
         fr: CRS géodésique ayant un système de coordonnées 2D ellipsoïdal. ex. latitude, longitude
-      label:
+      display:
         fr: Géodésique Géographique - 2D
         en: Geodetic Geographic - 2D
     geodeticGeographic3D:
       description:
         fr: CRS géodésique ayant un système de coordonnées 3D ellipsoïdal. ex. latitude, longitude, hauteur ellipsoïdale
-      label:
+      display:
         fr: Géodésique Géographique - 3D
         en: Geodetic Geographic - 3D
     geographicIdentifier:
       description:
         fr: référence spatiale sous la forme d'une étiquette ou d'un code qui identifie un emplacement. par exemple code postal
-      label:
+      display:
         fr: Identifiant géographique
         en: Geographic Identifier
     linear:
       description:
         fr: ensemble de méthodes de référencement linéaire et les politiques, enregistrements et procédures pour les mettre en œuvre. système de référence qui identifie un emplacement par référence à un segment d'une entité géographique linéaire et à la distance le long de ce segment à partir d'un point donné. par exemple x km le long de la route
-      label:
+      display:
         fr: Linéaire
         en: Linear
     parametric:
       description:
         fr: système de référence de coordonnées basé sur une donnée paramétrique (donnée décrivant la relation d'un système de coordonnées paramétriques à un objet). par exemple la pression
-      label:
+      display:
         fr: Paramétrique
         en: Parametric
     projected:
       description:
         fr: système de référence de coordonnées dérivé d'un système de référence de coordonnées géodésiques bidimensionnel en appliquant une projection cartographique. par exemple abscisse, nord
-      label:
+      display:
         fr: Projeté
         en: Projected
     temporal:
       description:
         fr: système de référence par rapport auquel le temps est mesuré. par exemple le temps
-      label:
+      display:
         fr: Temporel
         en: Temporal
     vertical:
       description:
         fr: système de référence de coordonnées unidimensionnel basé sur une référence verticale (référence décrivant la relation entre les hauteurs ou les profondeurs liées à la gravité et la Terre). par exemple hauteur ou profondeur [liée à la gravité]
-      label:
+      display:
         fr: Vertical
         en: Vertical
 iso19115_md_restriction_code:
@@ -1673,103 +1673,103 @@ iso19115_md_restriction_code:
     confidential:
       description:
         fr: non accessible au public contient des informations qui pourraient être préjudiciables à un intérêt commercial, industriel ou national
-      label:
+      display:
         fr: Confidentiel
         en: Confidental
     copyright:
       description:
         fr: droit exclusif à la publication, à la production ou à la vente des droits sur une œuvre littéraire, dramatique, musicale ou artistique, ou à l'utilisation d'une impression ou d'un label commercial, accordé par la loi pour une durée déterminée à un auteur, compositeur , artiste, distributeur
-      label:
+      display:
         fr: droits d'auteur
         en: Copyright
     in-confidence:
       description:
         fr: avec confiance
-      label:
+      display:
         fr: En confiance
         en: In-Confidence
     intellectualPropertyRights:
       description:
         fr: droits à un avantage financier et au contrôle de la distribution de biens immatériels résultant de la créativité
-      label:
+      display:
         fr: Droits de propriété intellectuelle
         en: Intellectual Property Rights
     licence:
       description:
         fr: autorisation formelle de faire quelque chose
-      label:
+      display:
         fr: Licence
         en: License
     licenceDistributor:
       description:
         fr: autorisation formelle requise pour qu'une personne ou une entité commercialise ou distribue la ressource
-      label:
+      display:
         fr: Licence - Distributeurs
         en: License - Distributors
     licenceEndUser:
       description:
         fr: autorisation formelle requise pour qu'une personne ou une entité utilise la ressource et qui peut différer de la personne qui la commande ou l'achète
-      label:
+      display:
         fr: Licence - Utilisateurs finaux
         en: License - End Users
     licenceUnrestricted:
       description:
         fr: autorisation formelle non requise pour utiliser la ressource
-      label:
+      display:
         fr: Licence - Illimitée
         en: License - Unrestricted
     otherRestrictions:
       description:
         fr: limitation non répertoriée
-      label:
+      display:
         fr: Autres restrictions
         en: Other Restrictions
     patent:
       description:
         fr: le gouvernement a accordé le droit exclusif de fabriquer, de vendre, d'utiliser ou de concéder sous licence une invention ou une découverte
-      label:
+      display:
         fr: Brevet
         en: Patent
     patentPending:
       description:
         fr: produit ou vendu des informations en attente de brevet
-      label:
+      display:
         fr: Brevet en instance
         en: Patent Pending
     private:
       description:
         fr: protège les droits des individus ou des organisations contre l'observation, l'intrusion ou l'attention d'autrui
-      label:
+      display:
         fr: Privé
         en: Private
     restricted:
       description:
         fr: retenu de la circulation générale ou de la divulgation
-      label:
+      display:
         fr: Limité
         en: Restricted
     SBU:
       description:
         fr: bien que non classifié, nécessite des contrôles stricts sur sa distribution.
-      label:
+      display:
         fr: Sensible, mais non classifié
         en: Sensitive, But Unclassified
     statutory:
       description:
         fr: prescrit par la loi
-      label:
+      display:
         fr: Statutaire
         en: Statutory
     trademark:
       description:
         fr: un nom, un symbole ou un autre dispositif identifiant un produit, officiellement enregistré et légalement réservé à l'usage du propriétaire ou du fabricant
-      label:
+      display:
         fr: Marque déposée
         en: Trademark
     unrestricted:
       description:
         fr: aucune contrainte n'existe
-      label:
+      display:
         fr: Libre
         en: Unrestricted
 iso19115_md_scope_code:
@@ -1781,49 +1781,49 @@ iso19115_md_scope_code:
     aggregate:
       description:
         fr: l'information s'applique à une ressource agrégée
-      label:
+      display:
         fr: Agrégat
         en: Aggregate
     application:
       description:
         fr: ressource d'information hébergée sur un ensemble spécifique de matériel et accessible sur un réseau
-      label:
+      display:
         fr: Application
         en: Application
     attribute:
       description:
         fr: l'information s'applique à la valeur de l'attribut
-      label:
+      display:
         fr: Attribut
         en: Attribute
     attributeType:
       description:
         fr: l'information s'applique à la caractéristique d'un élément
-      label:
+      display:
         fr: Type d'attribut
         en: Attribute Type
     collection:
       description:
         fr: l'information s'applique à un ensemble non structuré
-      label:
+      display:
         fr: Collection
         en: Collection
     collectionHardware:
       description:
         fr: les informations s'appliquent à la classe de matériel de collection
-      label:
+      display:
         fr: Quincaillerie de collecte
         en: Collection Hardware
     collectionSession:
       description:
         fr: les informations s'appliquent à la session de collecte
-      label:
+      display:
         fr: Séance de collecte
         en: Collection Session
     coverage:
       description:
         fr: l'information s'applique à une couverture
-      label:
+      display:
         fr: Couverture
         en: Coverage
     dataset:
@@ -1832,103 +1832,103 @@ iso19115_md_scope_code:
     dimensionGroup:
       description:
         fr: les informations s'appliquent à un groupe de dimensions
-      label:
+      display:
         fr: Groupe de dimensions
         en: Dimension Group
     document:
       description:
         fr: l'information s'applique à un document
-      label:
+      display:
         fr: Document
         en: Document
     feature:
       description:
         fr: les informations s'appliquent à une fonctionnalité
-      label:
+      display:
         fr: Fonctionnalité
         en: Feature
     featureType:
       description:
         fr: les informations s'appliquent à un type d'entité
-      label:
+      display:
         fr: Type de fonctionnalité
         en: Feature Type
     fieldSession:
       description:
         fr: l'information s'applique à une session sur le terrain
-      label:
+      display:
         fr: Séance sur le terrain
         en: Field Session
     initiative:
       description:
         fr: l'information s'applique à une initiative
-      label:
+      display:
         fr: Initiative
         en: Initiative
     metadata:
       description:
         fr: l'information s'applique aux métadonnées
-      label:
+      display:
         fr: Métadonnées
         en: Metadata
     model:
       description:
         fr: l'information s'applique à une copie ou à une imitation d'un objet existant ou hypothétique
-      label:
+      display:
         fr: Modèle
         en: Model
     nonGeographicDataset:
       description:
         fr: l'information s'applique aux données non géographiques
-      label:
+      display:
         fr: Ensemble de données non géographiques
         en: Non-Geographic Dataset
     product:
       description:
         fr: métadonnées décrivant une spécification de produit de données ISO 19131
-      label:
+      display:
         fr: Produit
         en: Product
     propertyType:
       description:
         fr: les informations s'appliquent à un type de propriété
-      label:
+      display:
         fr: Type de propriété
         en: Property Type
     repository:
       description:
         fr: les informations s'appliquent à un référentiel
-      label:
+      display:
         fr: Dépôt
         en: Repository
     sample:
       description:
         fr: l'information s'applique à un échantillon
-      label:
+      display:
         fr: Goûter
         en: Sample
     series:
       description:
         fr: l'information s'applique à la série
-      label:
+      display:
         fr: Série
         en: Series
     service:
       description:
         fr: les informations s'appliquent à une capacité qu'une entité fournisseur de services met à la disposition d'une entité utilisatrice de services par l'intermédiaire d'un ensemble d'interfaces qui définissent un comportement, tel qu'un cas d'utilisation
-      label:
+      display:
         fr: Service
         en: Service
     software:
       description:
         fr: l'information s'applique à un programme informatique ou à une routine
-      label:
+      display:
         fr: Logiciel
         en: Software
     tile:
       description:
         fr: l'information s'applique à une tuile, un sous-ensemble spatial de données géographiques
-      label:
+      display:
         fr: Tuile
         en: Tile
 iso19115_md_spatial_representation_type_code:
@@ -1940,37 +1940,37 @@ iso19115_md_spatial_representation_type_code:
     grid:
       description:
         fr: les données de grille sont utilisées pour représenter les données géographiques
-      label:
+      display:
         fr: Grille
         en: Grid
     stereoModel:
       description:
         fr: vue tridimensionnelle formée par l'intersection des rayons homologues d'une paire d'images se chevauchant
-      label:
+      display:
         fr: Modèle stéréo
         en: Stereo Model
     textTable:
       description:
         fr: des données textuelles ou tabulaires sont utilisées pour représenter des données géographiques
-      label:
+      display:
         fr: Tableau de texte
         en: Text Table
     tin:
       description:
         fr: réseau triangulé irrégulier
-      label:
+      display:
         fr: TIN
         en: TIN
     vector:
       description:
         fr: les données vectorielles sont utilisées pour représenter les données géographiques
-      label:
+      display:
         fr: Vecteur
         en: Vector
     video:
       description:
         fr: scène d'un enregistrement vidéo
-      label:
+      display:
         fr: Vidéo
         en: Video
 iso19115_md_topic_category_code:
@@ -2114,55 +2114,55 @@ iso19115_md_topology_level_code:
     abstract:
       description:
         fr: complexe topologique sans aucune réalisation géométrique spécifiée
-      label:
+      display:
         fr: Abstrait
         en: Abstract
     fullPlanarGraph:
       description:
         fr: Complexe topologique bidimensionnel qui est plan. (Un complexe topologique bidimensionnel est communément appelé « topologie complète » dans un environnement cartographique 2D.)
-      label:
+      display:
         fr: Graphique planaire complet
         en: Full Planar Graph
     fullSurfaceGraph:
       description:
         fr: Complexe topologique bidimensionnel isomorphe à un sous-ensemble d'une surface
-      label:
+      display:
         fr: Graphique de surface complète
         en: Full Surface Graph
     fullTopology3D:
       description:
         fr: couverture complète d'un espace de coordonnées euclidiennes 3D
-      label:
+      display:
         fr: Topologie complète 3D
         en: Full Topology 3D
     geometryOnly:
       description:
         fr: objets géométriques sans aucune structure supplémentaire qui décrit la topologie
-      label:
+      display:
         fr: Géométrie uniquement
         en: Geometry Only
     planarGraph:
       description:
         fr: Complexe topologique unidimensionnel qui est plan. (Un graphe planaire est un graphe qui peut être tracé dans un plan de telle sorte qu'aucune arête ne se croise sauf en un sommet.)
-      label:
+      display:
         fr: Graphique planaire
         en: Planar Graph
     surfaceGraph:
       description:
         fr: Complexe topologique unidimensionnel isomorphe à un sous-ensemble d'une surface. (Un complexe géométrique est isomorphe à un complexe topologique si leurs éléments sont dans une correspondance un à un, dimensionnelle et préservant les limites les uns des autres.)
-      label:
+      display:
         fr: Graphique de surface
         en: Surface Graph
     topology1D:
       description:
         fr: Complexe topologique unidimensionnel ; topologie communément appelée "chaîne-nœud"
-      label:
+      display:
         fr: Topologie 1D
         en: Topology 1D
     topology3D:
       description:
         fr: Complexe topologique tridimensionnel. (Un complexe topologique est une collection de primitives topologiques qui sont fermées sous les opérations de frontière.)
-      label:
+      display:
         fr: Topologie 3D
         en: Topology 3D
 iso19115_sv_coupling_type:
@@ -2174,19 +2174,19 @@ iso19115_sv_coupling_type:
     loose:
       description:
         fr: l'instance de service est faiblement couplée à une instance de données, c'est-à-dire qu'aucune classe MD_DataIdentification ne doit être décrite
-      label:
+      display:
         fr: Lâche
         en: Loose
     mixed:
       description:
         fr: l'instance de service est associée à une instance de données, c'est-à-dire que MD_DataIdentification décrit l'instance de données associée et, en outre, l'instance de service peut fonctionner avec d'autres instances de données externes
-      label:
+      display:
         fr: Mixte
         en: Mixed
     tight:
       description:
         fr: l'instance de service est étroitement couplée à une instance de données, c'est-à-dire que la classe MD_DataIdentification DOIT être décrite
-      label:
+      display:
         fr: Serré
         en: Tight
 iso19115_sv_parameter_direction:
@@ -2198,19 +2198,19 @@ iso19115_sv_parameter_direction:
     in:
       description:
         fr: le paramètre est un paramètre d'entrée de l'instance de service
-      label:
+      display:
         fr: Dans
         en: In
     in/out:
       description:
         fr: le paramètre est à la fois un paramètre d'entrée et de sortie pour l'instance de service
-      label:
+      display:
         fr: Entrée / Sortie
         en: In / Out
     out:
       description:
         fr: le paramètre est un paramètre de sortie vers l'instance de service
-      label:
+      display:
         fr: Dehors
         en: Out
 iso19115_link_protocols:
@@ -2220,289 +2220,289 @@ iso19115_link_protocols:
   uri: https://github.com/OSGeo/Cat-Interop/blob/master/LinkPropertyLookupTable.csv
   terms:
     Amazon:AWS:S3:
-      label:
+      display:
         fr: Solution de stockage simple d'Amazon
     boundless:geogig:
-      label:
+      display:
         fr: GeoGig illimité
     DB:POSTGIS:
-      label:
+      display:
         fr: Table PostGIS
     download:
-      label:
+      display:
         fr: Lien de téléchargement
         en: Download Link
     ERDDAP:griddap:
-      label:
+      display:
         fr: Service de données ERDDAP pour les ensembles de données maillées
     ERDDAP:tabledap:
-      label:
+      display:
         fr: Service de données ERDDAP pour les ensembles de données tabulaires
     esip:CollectionCast:
-      label:
+      display:
         fr: Casting de la collection ESIP
     ESRI:ArcGIS:
-      label:
+      display:
         fr: Service ArcGIS ESRI
     ESRI:ArcIMS:
-      label:
+      display:
         fr: Service ESRI ArcIMS
     ESRI:MPK:
-      label:
+      display:
         fr: Forfait de carte ArcGIS
     file:
-      label:
+      display:
         fr: Déposer
         en: File
     FILE:GEO:
-      label:
+      display:
         fr: Fichier vectoriel sur le réseau
     FILE:RASTER:
-      label:
+      display:
         fr: Fichier raster sur le réseau
     ftp:
-      label:
+      display:
         fr: Protocole de transfert de fichiers (FTP)
         en: File Transfer Protocol (FTP)
     geoserver:rest:
-      label:
+      display:
         fr: API de configuration GeoServer REST
     GIT:
-      label:
+      display:
         fr: GIT
     google:fusion-tables:
-      label:
+      display:
         fr: Tableaux Google Fusion
     Google:GCP:BigQuery:
-      label:
+      display:
         fr: Grande requête Google
     Google:GCP:GCS:
-      label:
+      display:
         fr: Stockage en nuage Google
     google:protocol-buffers:
-      label:
+      display:
         fr: Tampons de protocole Google
     http:
-      label:
+      display:
         fr: HTTP
         en: HTTP
     https:
-      label:
+      display:
         fr: HTTP sur TLS
     IETF:GeoJSON:
-      label:
+      display:
         fr: GéoJSON
     IIIF:Image:
-      label:
+      display:
         fr: API d'image IIIF
     information:
-      label:
+      display:
         fr: Lien vers des informations complémentaires
         en: Link to additional information
     iris:fdsnws-event:
-      label:
+      display:
         fr: IRIS Service événementiel sismique
     ISO 19115:2003/19139:
-      label:
+      display:
         fr: Métadonnées ISO 19115 en encodage ISO19139
     ISO-USGIN:
-      label:
+      display:
         fr: Métadonnées ISO 19115 du profil USGIN
     ISO-USGIN-1.3:
-      label:
+      display:
         fr: Profil USGIN v.1.3 Métadonnées ISO 19115
     maxogden:dat:
-      label:
+      display:
         fr: données API REST
     NOAA:LAS:
-      label:
+      display:
         fr: Serveur d'accès en direct
     OASIS:AMQP:
-      label:
+      display:
         fr: Protocole avancé de file d'attente de messages
     OASIS:MQTT:
-      label:
+      display:
         fr: MQTT
     OASIS:OData:4.0:
-      label:
+      display:
         fr: OData v4.0
     OGC:CSW:
-      label:
+      display:
         fr: Service de catalogue OGC pour le Web
     OGC:CT:
-      label:
+      display:
         fr: Service de transformation de coordonnées OGC
     OGC:GML:
-      label:
+      display:
         fr: Langage de balisage géographique OGC
     OGC:GPKG:
-      label:
+      display:
         fr: Géopackage OGC
     OGC:IoT:
-      label:
+      display:
         fr: API SensorThings de l'OGC
     OGC:ODS:
-      label:
+      display:
         fr: Service d'annuaire OGC OpenLS
     OGC:OGS:
-      label:
+      display:
         fr: Service de passerelle OGC OpenLS
     OGC:OPS:
-      label:
+      display:
         fr: Service de présentation OGC OpenLS
     OGC:ORS:
-      label:
+      display:
         fr: Service de routage OGC OpenLS
     OGC:OUS:
-      label:
+      display:
         fr: Service utilitaire OGC OpenLS
     OGC:OWC:
-      label:
+      display:
         fr: Contexte OGC OWS
     OGC:SAS:
-      label:
+      display:
         fr: Service d'alerte de capteur OGC
     OGC:SOS:
-      label:
+      display:
         fr: Service d'observation des capteurs OGC
     OGC:SPS:
-      label:
+      display:
         fr: Service de planification de capteurs OGC
     OGC:WCS:
-      label:
+      display:
         fr: Service de couverture Web OGC
     OGC:WFS:
-      label:
+      display:
         fr: Service de fonctionnalités Web de l'OGC
     OGC:WFS-G:
-      label:
+      display:
         fr: Profil de service de répertoire géographique de la spécification de mise en œuvre du service de fonctionnalités Web
     OGC:WMS:
-      label:
+      display:
         fr: Service de cartographie Web de l'OGC
     OGC:WMS-C:
-      label:
+      display:
         fr: Service de carte Web OGC - En cache
     OGC:WMTS:
-      label:
+      display:
         fr: Service de tuiles de carte Web OGC
     OGC:WNS:
-      label:
+      display:
         fr: Service de notification Web de l'OGC
     OGC:WPS:
-      label:
+      display:
         fr: Service de traitement Web OGC
     OGCAPI:3DGeoVolumes:
-      label:
+      display:
         fr: API OGC - GéoVolumes 3D
     OGCAPI:Joins:
-      label:
+      display:
         fr: API OGC - Jointures
     OGCAPI:MovingFeatures:
-      label:
+      display:
         fr: API OGC - Fonctionnalités mobiles
     OGCCov:
-      label:
+      display:
         fr: API OGC - Couvertures
     OGCDGGS:
-      label:
+      display:
         fr: API OGC - DGGS
     OGCEDR:
-      label:
+      display:
         fr: API OGC-EDR
     OGCFeat:
-      label:
+      display:
         fr: API OGC - Fonctionnalités
     OGCMaps:
-      label:
+      display:
         fr: API OGC - Cartes
     OGCProc:
-      label:
+      display:
         fr: API OGC - Processus
     OGCRec:
-      label:
+      display:
         fr: API OGC - Enregistrements
     OGCRout:
-      label:
+      display:
         fr: API OGC - Itinéraires
     OGCStyl:
-      label:
+      display:
         fr: API OGC - Styles
     OGCTile:
-      label:
+      display:
         fr: API OGC - Tuiles
     OKFN:datapackage:
-      label:
+      display:
         fr: Paquet de données OKFN
     OPeNDAP:Hyrax:
-      label:
+      display:
         fr: Serveur OPeNDAP Hyrax
     OPeNDAP:OPeNDAP:
-      label:
+      display:
         fr: URL racine d'OPeNDAP
     OpenSearch1.1:
-      label:
+      display:
         fr: Modèle OpenSearch
     OpenSearch1.1:Description:
-      label:
+      display:
         fr: Document descriptif d'OpenSearch
     order:
-      label:
+      display:
         fr: Lien vers le bon de commande
         en: Link to order form
     OSGEO:TMS:
-      label:
+      display:
         fr: Spécification du service de carte de tuiles OSGeo
     OSM:
-      label:
+      display:
         fr: Ouvrir l'API Street Map
     OSM:XYZ:
-      label:
+      display:
         fr: XYZ
     QuakeML1.2:
-      label:
+      display:
         fr: Langage de balisage Earthquake
     radiantearth:stac:
-      label:
+      display:
         fr: Catalogue d'actifs spatio-temporels
     search:
-      label:
+      display:
         fr: Lien vers la recherche de données
         en: Link to data search
     service:
-      label:
+      display:
         fr: Lien vers le point de terminaison de service
         en: Link to service endpoint
     template:
-      label:
+      display:
         fr: Lien vers le modèle pour accéder à la ressource
         en: Link to template to access ersource
     tilejson:2.0.0:
-      label:
+      display:
         fr: description du service de carte de l'usine de tuiles
     UNIDATA:CDM:
-      label:
+      display:
         fr: Service Web distant de modèle de données commun
     UNIDATA:CdmRemote:
-      label:
+      display:
         fr: Sous-ensemble d'index Common Data Model
     UNIDATA:CdmrFeature:
-      label:
+      display:
         fr: Sous-ensemble de coordonnées Common Data Model
     UNIDATA:NCSS:
-      label:
+      display:
         fr: Service de sous-ensemble NetCDF
     UNIDATA:THREDDS:
-      label:
+      display:
         fr: Catalogue THREDDS
     WWW:LINK:
-      label:
+      display:
         fr: Adresse Web (URL)
     WWW:SPARQL:1.1:
-      label:
+      display:
         fr: Protocole SPARQL pour HTTP
     WWW:WSDL:
-      label:
+      display:
         fr: Web Service Description Language Document XML décrivant le fonctionnement du service
 iso19115_units:
   display:
