@@ -1,7 +1,9 @@
 responsibility:
   display:
     en: Responsibility
+    fr: Responsabilité
   is_component: yes
+  hidden: yes
   validation:
     required:
       - role
@@ -12,41 +14,52 @@ responsibility:
       vocabulary_name: iso19115_ci_role_code
       label:
         en: Role
+        fr: Rôle
       description:
-        en: Select the role most appropriate for this contact
+        en: Select the role most appropriate for this contact.
+        fr: Sélectionnez le rôle le plus approprié pour ce contact.
       order: 10
     contact:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Contact
+        fr: Contact
       order: 5
 maintenance:
   display:
     en: Maintenance
+    fr: Entretien
   is_component: yes
+  hidden: yes
   fields:
     scope:
       data_type: vocabulary
       vocabulary_name: iso19115_maintenance_scope
       label:
         en: Scope
+        fr: Portée
       description:
-        en: Select dataset or metadata depending what change you are describing
+        en: Select "dataset" or "metadata" depending what change you are describing
+        fr: Sélectionnez "ensemble de données" ou "métadonnées" en fonction du changement que vous décrivez
       order: 0
     date:
       data_type: datetime
       label:
         en: Date
+        fr: Date
       description:
         en: Enter the date the change was made
+        fr: Entrez la date à laquelle le changement a été effectué
       order: 10
     notes:
       data_type: multitext
       label:
         en: Notes
+        fr: Remarques
       description:
         en: Describe the change made
+        fr: Décrivez le changement effectué
       multilingual: yes
       order: 20
 thesaurus:
@@ -57,35 +70,44 @@ thesaurus:
 locale:
   display:
     en: Locale
+    fr: Paramètres régionaux
   fields:
     language:
       data_type: text
       label:
-        en: ISO 639 Language Code (Alpha-3)
+        en: Language Code (3)
+        fr: Code de langue (3)
       description:
         en: Enter the 3-letter language code from ISO 639 (e.g. 'eng', 'fra')
+        fr: Entrez le code de langue à 3 lettres de la norme ISO 639 (par exemple, "eng", "fra")
       order: 10
     a2_language:
       data_type: text
       label:
-        en: ISO 639 Language code (Alpha-2)
+        en: Language Code (2)
+        fr: Code de langue (2)
       description:
         en: Enter the 2-letter language code from ISO 639 (e.g. 'en', 'fr')
+        fr: Entrez le code de langue à 2 lettres de la norme ISO 639 (par exemple 'en', 'fr')
       order: 20
     country:
       data_type: text
       label:
-        en: ISO 3166-1-A3 Country Code
+        en: Country Code (3)
+        fr: Code pays (3)
       description:
-        en: Enter the most appropriate country code, if applicable
+        en: Enter the most appropriate ISO 3166-1-A3 country code, if applicable
+        fr: Entrez le code de pays le plus approprié de la norme ISO 3166-1-A3, le cas échéant
       order: 30
     encoding:
       data_type: vocabulary
       vocabulary_name: core_charsets
       label:
         en: Character Encoding
+        fr: Encodage de caractère
       description:
         en: Select a character encoding that will be used to encode text data (UTF-8 is a good default).
+        fr: Sélectionnez un encodage de caractères qui sera utilisé pour encoder les données textuelles (UTF-8 est une bonne valeur par défaut).
       order: 40
   validation:
     required:
@@ -95,58 +117,73 @@ locale:
 citation:
   display:
     en: Citation
+    fr: Citation
   fields:
     alt_title:
       data_type: text
       label:
         en: Alternative Title
+        fr: Titre alternatif
       order: 20
       description:
         en: Enter any alternative title of the work being cited
+        fr: Entrez tout autre titre de l'œuvre citée
       multilingual: yes
     publication_date:
       data_type: date
       label:
         en: Publication Date
+        fr: Date de publication
       description:
         en: Enter the date the work was first made available to the public
+        fr: Entrez la date à laquelle l'œuvre a été mise à la disposition du public pour la première fois
       order: 30
     revision_date:
       data_type: date
       label:
         en: Revision Date
+        fr: Date de révision
       description:
         en: Enter the date the work was last updated
+        fr: Entrez la date à laquelle le travail a été mis à jour pour la dernière fois
       order: 40
     creation_date:
       data_type: date
       label:
         en: Creation Date
+        fr: Date de création
       description:
         en: Enter the date the work was created
+        fr: Entrez la date de création de l'œuvre
       order: 50
     edition:
       data_type: text
       label:
         en: Edition
+        fr: Édition
       description:
         en: If there are multiple editions for the work and they have a non-date identifier, enter the relevant one here
+        fr: S'il existe plusieurs éditions pour l'œuvre et qu'elles n'ont pas d'identifiant de date, entrez celle qui convient ici
       multilingual: yes
       order: 60
     edition_date:
       data_type: date
       label:
         en: Edition Date
+        fr: Date d'édition
       description:
         en: If there multiple editions for the work and they have a date identifier, enter the relevant one here
+        fr: S'il existe plusieurs éditions pour l'œuvre et qu'elles ont un identifiant de date, entrez celle qui convient ici
       order: 70
     responsibles:
       data_type: inline_entity_ref
       entity_type: responsibility
       label:
-        en: Parties
+        en: Contacts
+        fr: Contacts
       description:
         en: Add authors, contributors, or other relevant contacts here
+        fr: Ajoutez ici des auteurs, des contributeurs ou d'autres contacts pertinents
       repeatable: yes
       order: 80
     presentation_form:
@@ -154,8 +191,10 @@ citation:
       vocabulary_name: iso19115_ci_presentation_form_code
       label:
         en: Presentation Form
+        fr: Formulaire de présentation
       description:
         en: Select the most appropriate description of the cited work
+        fr: Sélectionnez la description la plus appropriée de l'œuvre citée
       order: 90
     #series:
     #  data_type: entity_ref
@@ -166,45 +205,55 @@ citation:
       data_type: multitext
       label:
         en: Other Details
+        fr: Autres détails
       description:
         en: If there are additional details you would like to include, enter them here.
+        fr: S'il y a des détails supplémentaires que vous souhaitez inclure, entrez-les ici.
       multilingual: yes
       order: 100
     isbn:
       data_type: text
       label:
-        en: ISBN
+        und: ISBN
       description:
         en: If the work has an ISBN number, enter it here
+        fr: Si l'œuvre a un numéro ISBN, saisissez-le ici
       order: 110
     issn:
       data_type: text
       label:
-        en: ISSN
+        und: ISSN
       description:
         en: If the work has an ISSN number, enter it here
+        fr: Si l'œuvre a un numéro ISSN, saisissez-le ici
       order: 120
     resource:
       data_type: inline_entity_ref
       entity_type: resource
       label:
         en: Link
+        fr: Lien
       description:
         en: If there is a link to the work online, select it here
+        fr: S'il existe un lien vers l'œuvre en ligne, sélectionnez-le ici
       order: 130
     id_code:
       data_type: text
       label:
         en: Identifier Code
+        fr: Code d'identification
       description:
         en: If the work has a DOI or other unique identifier that uses a code system, enter it here and select the appropriate system below.
+        fr: Si l'œuvre a un DOI ou un autre identifiant unique qui utilise un système de code, entrez-le ici et sélectionnez le système approprié ci-dessous.
       order: 140
     id_description:
       data_type: text
       label:
         en: Identifier Description
+        fr: Identifiant Description
       description:
         en: If you want to provide more information about the DOI or other unique identifier, enter it here.
+        fr: Si vous souhaitez fournir plus d'informations sur le DOI ou un autre identifiant unique, saisissez-le ici.
       multilingual: yes
       order: 150
     id_system:
@@ -212,8 +261,10 @@ citation:
       entity_type: id_system
       label:
         en: Identifier System
+        fr: Système d'identification
       description:
         en: If you have provided a unique identifier, select the appropriate code system here.
+        fr: Si vous avez fourni un identifiant unique, sélectionnez ici le système de code approprié.
       order: 160
   validation:
     required:
@@ -223,6 +274,7 @@ citation:
 graphic:
   display:
     en: Graphic
+    fr: Graphique
   validation:
     required:
       - file_url
@@ -231,40 +283,49 @@ graphic:
       data_type: url
       label:
         en: File URL
+        fr: URL du fichier
       description:
         en: Enter the URL to the file
+        fr: Entrez l'URL du fichier
       order: 10
     description:
       data_type: multitext
       label:
         en: Description
+        fr: Description
       description:
         en: Enter a description of the file
+        fr: Entrez une description du fichier
       multilingual: yes
       order: 20
     file_ext:
       data_type: text
       label:
         en: File Extension
+        fr: Extension de fichier
       description:
         en: Enter the file extension here
+        fr: Entrez l'extension de fichier ici
       order: 30
     reference_link:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Reference Link
+        fr: Lien de référence
       description:
         en: If there are additional references or other information about the graphic, select them here
+        fr: S'il existe des références supplémentaires ou d'autres informations sur le graphique, sélectionnez-les ici
       repeatable: yes
       order: 40
     use_constraint:
       data_type: entity_ref
       entity_type: use_constraint
       label:
-        en: Use Constraint
+        en: Contrainte d'utilisation
       description:
         en: If the graphic has use constraints, select them here.
+        fr: Si le graphique a des contraintes d'utilisation, sélectionnez-les ici.
       repeatable: yes
       order: 50
 #resource_scope:
@@ -370,14 +431,17 @@ graphic:
 #      label:
 #        en: Description
 scope:
+  hidden: yes
   display:
     en: Scope
+    fr: Portée
   fields:
     scope_code:
       data_type: vocabulary
       vocabulary_name: iso19115_md_scope_code
       label:
         en: Scope Code
+        fr: Code de portée
       order: 10
 #    extent:
 #      data_type: entity_ref
@@ -505,6 +569,7 @@ scope:
 ref_system:
   display:
     en: Reference System
+    fr: Système de reference
   validation:
     required:
       - code
@@ -514,30 +579,38 @@ ref_system:
       vocabulary_name: iso19115_md_reference_system_type_code
       label:
         en: Reference System Type
+        fr: Type de système de référence
       description:
         en: Enter the type of reference system. Most map projections are 2-D Geodetic Geographic coordinate systems.
+        fr: Entrez le type de système de référence. La plupart des projections cartographiques sont des systèmes de coordonnées géographiques géodésiques 2D.
       order: 10
     code:
       data_type: text
       label:
         en: Code
+        fr: Code
       description:
         en: If the reference system has a unique identifier (e.g. an EPSG code), enter it here
+        fr: Si le référentiel possède un identifiant unique (par exemple un code EPSG), saisissez-le ici
       order: 20
     description:
       data_type: text
       label:
         en: Description
+        fr: Description
       description:
         en: Enter a human-readable short description of the reference system
+        fr: Entrez une courte description lisible par l'homme du système de référence
       order: 30
     id_system:
       data_type: entity_ref
       entity_type: id_system
       label:
         en: Code System
+        fr: Système de codes
       description:
         en: If you provided a unique identifier, select the appropriate code system
+        fr: Si vous avez fourni un identifiant unique, sélectionnez le système de code approprié
       order: 40
 #location:
 #  display:
@@ -574,6 +647,7 @@ ref_system:
 use_constraint:
   display:
     en: Usage Constraint
+    fr: Contrainte d'utilisation
   validation:
     custom:
       - pipeman.builtins.iso19115.util.validate_use_constraint
@@ -582,8 +656,10 @@ use_constraint:
       data_type: multitext
       label:
         en: Limitation Description
+        fr: Description des limitation
       description:
-        en: Enter a description of any limitations on using the content
+        en: Enter a description of any limitations on using the content.
+        fr: Entrez une description de toutes les limitations d'utilisation du contenu.
       multilingual: yes
       order: 10
     graphic:
@@ -591,8 +667,10 @@ use_constraint:
       entity_type: graphic
       label:
         en: Graphic
+        fr: Graphique
       description:
         en: Provide any appropriate graphics related to this use constraint.
+        fr: Fournissez tout graphique approprié lié à cette contrainte d'utilisation.
       repeatable: yes
       order: 20
     reference:
@@ -600,17 +678,21 @@ use_constraint:
       entity_type: citation
       description:
         en: Enter any relevant online resources relevant to this constraint.
+        fr: Entrez toutes les ressources en ligne pertinentes concernant cette contrainte.
       label:
         en: Reference Links
+        fr: Liens de référence
       repeatable: yes
       order: 30
     responsibles:
       data_type: component_ref
       entity_type: responsibility
       label:
-        en: Responsible Parties
+        en: Contacts
+        fr: Contacts
       description:
         en: Enter any relevant contacts who are responsible for this constraint.
+        fr: Entrez tous les contacts pertinents qui sont responsables de cette contrainte.
       repeatable: yes
       order: 40
     #app_scope:
@@ -631,56 +713,70 @@ use_constraint:
       vocabulary_name: iso19115_md_restriction_code
       label:
         en: Access Constraints
+        fr: Contraintes d'accès
       description:
         en: Select any relevant legal constraints for accessing this content.
+        fr: Sélectionnez les contraintes légales pertinentes pour accéder à ce contenu.
       order: 70
     use_constraints:
       repeatable: yes
       data_type: vocabulary
       vocabulary_name: iso19115_md_restriction_code
       label:
-        en: Use Constraints
+        en: Usage Constraints
+        fr: Contraintes d'utilisation
       description:
         en: Select any relevant legal constraints for using this content.
+        fr: Sélectionnez les contraintes légales pertinentes pour l'utilisation de ce contenu.
       order: 80
     other_constraints:
       data_type: multitext
       label:
-        en: Other Constraint Details
+        en: Other Details
+        fr: Autres détails
       description:
         en: Enter any additional legal details not specified above.
+        fr: Entrez tous les détails juridiques supplémentaires non spécifiés ci-dessus.
       multilingual: yes
       order: 90
     classification:
       data_type: vocabulary
       label:
         en: Classification
+        fr: Classification
       description:
         en: Select the security classification of this content.
+        fr: Décrivez le système de classification utilisé pour les informations de classification de sécurité ci-dessus.
       vocabulary_name: iso19115_md_classification_code
       order: 100
     user_notes:
       data_type: multitext
       label:
         en: User Notes
+        fr: Remarques de l'utilisateur
       description:
         en: Enter any additional details on the security classification of this content.
+        fr: Entrez tout détail supplémentaire sur la classification de sécurité de ce contenu.
       multilingual: yes
       order: 110
     handling_description:
       data_type: multitext
       label:
         en: Handling Description
+        fr: Description de la manipulation
       description:
         en: Enter any details on the appropriate handling of this content.
+        fr: Entrez tous les détails sur le traitement approprié de ce contenu.
       multilingual: yes
       order: 120
     classification_system:
       data_type: multitext
       label:
         en: Classification System
+        fr: Système de classification
       description:
         en: Describe the classification system used for the above security classification information.
+        fr: Décrivez le système de classification utilisé pour les informations de classification de sécurité ci-dessus.
       multilingual: yes
       order: 130
 #releasability:
@@ -727,6 +823,7 @@ use_constraint:
 resource:
   display:
     en: Resource
+    fr: Ressource
   validation:
     required:
       - url
@@ -736,80 +833,101 @@ resource:
       multilingual: yes
       label:
         en: URL
+        fr: URL
       description:
         en: Enter the URL for the resource including the "HTTP" or "HTTPS" prefix.
+        fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
     protocol:
       data_type: vocabulary
       vocabulary_name: iso19115_link_protocols
       label:
         en: Protocol
+        fr: Protocole
       description:
-        en: Select the appropriate protocol for this resource
+        en: Select the appropriate protocol for this resource.
+        fr: Sélectionnez le protocole approprié pour cette ressource.
       order: 20
     protocol_request:
       data_type: text
       label:
         en: Protocol Request
+        fr: Demande de protocole
       description:
         en: If additional information is needed on how to use the resource, enter it here (e.g. how to format POST requests to a URL).
-      order: 30
+        fr: Si des informations supplémentaires sont nécessaires sur la façon d'utiliser la ressource, entrez-les ici (par exemple, comment formater les requêtes POST en une URL).
+      order: 50
     app_profile:
       data_type: text
       label:
         en: Application Profile
+        fr: Profil d'application
       description:
-        en: If a specific application is needed to use the resource, enter it here
-      order: 40
+        en: If a specific application is needed to use the resource, enter it here.
+        fr: Si une application spécifique est nécessaire pour utiliser la ressource, saisissez-la ici.
+      order: 60
     name:
       data_type: text
       multilingual: yes
       label:
         en: Name
+        fr: Nom
       description:
-        en: Enter a descriptive name for the resource
-      order: 50
+        en: Enter a descriptive name for the resource.
+        fr: Entrez un nom descriptif pour la ressource.
+      order: 30
     description:
       data_type: multitext
       multilingual: yes
       label:
         en: Description
+        fr: Description
       description:
-        en: Enter additional information about the resource
-      order: 60
+        en: Enter additional information about the resource.
+        fr: Entrez des informations supplémentaires sur la ressource.
+      order: 40
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
       label:
         en: Function
+        fr: Fonction
       description:
-        en: Select the most appropriate entry that describes what the resource provides to the user
+        en: Select the most appropriate entry that describes what the resource provides to the user.
+        fr: Sélectionnez l'entrée la plus appropriée qui décrit ce que la ressource fournit à l'utilisateur.
       order: 70
 id_system:
   display:
     en: Identifying System
+    fr: Système d'identification
   fields:
     authority:
       data_type: inline_entity_ref
       entity_type: citation
       label:
         en: Authority
+        fr: Autorité
       description:
-        en: Enter reference information about the identifying system (e.g. title, link, contact info)
+        en: Enter reference information about the identifying system (e.g. title, link, contact info).
+        fr: Entrez les informations de référence sur le système d'identification (par exemple, titre, lien, coordonnées).
       order: 10
     code_space:
       data_type: text
       label:
         en: Code Space
+        fr: Espace codé
       description:
         en: This text should be able to be prepended to all code values and form a unique identifier. An HTTP or HTTPS prefix is recommended to form a navigable URL if possible.
+        fr: Ce texte doit pouvoir être ajouté à toutes les valeurs de code et former un identifiant unique. Un préfixe HTTP ou HTTPS est recommandé pour former une URL navigable si possible.
       order: 20
     version:
       data_type: text
       label:
         en: Code Space Version
+        fr: Version de l'espace de code
       description:
         en: If there are multiple versions of the code space, enter the version number here.
+        fr: S'il existe plusieurs versions de l'espace de code, entrez le numéro de version ici.
       order: 30
 quick_web_page:
   display:
@@ -821,51 +939,64 @@ quick_web_page:
       multilingual: yes
       label:
         en: URL
+        fr: URL
       description:
         en: Enter the URL for the resource including the "HTTP" or "HTTPS" prefix.
+        fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
     name:
       data_type: text
       multilingual: yes
       label:
         en: Name
+        fr: Nom
       description:
-        en: Enter a descriptive name for the resource
+        en: Enter a descriptive name for the resource.
+        fr: Entrez un nom descriptif pour la ressource.
       order: 50
     description:
       data_type: multitext
       multilingual: yes
       label:
         en: Description
+        fr: Description
       description:
-        en: Enter additional information about the resource
+        en: Enter additional information about the resource.
+        fr: Entrez des informations supplémentaires sur la ressource.
       order: 60
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
       label:
         en: Function
+        fr: Fonction
       description:
-        en: Select the most appropriate entry that describes what the resource provides to the user
+        en: Select the most appropriate entry that describes what the resource provides to the user.
+        fr: Sélectionnez l'entrée la plus appropriée qui décrit ce que la ressource fournit à l'utilisateur.
       order: 70
 telephone_info:
   display:
     en: Telephone Info
+    fr: Informations téléphoniques
   hidden: yes
   fields:
     phone_number:
       data_type: telephone
       label:
         en: Number
+        fr: Numéro
       description:
-        en: Enter the complete telephone number, including area code
+        en: Enter the complete telephone number, including area code.
+        fr: Entrez le numéro de téléphone complet, y compris l'indicatif régional.
     phone_number_type:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_telephone_type_code
       label:
         en: Telephone Type
+        fr: Type de téléphone
       description:
-        en: Select the most appropriate type of telephone number
+        en: Select the most appropriate type of telephone number.
+        fr: Sélectionnez le type de numéro de téléphone le plus approprié.
 contact:
   display:
     en: Contact
@@ -878,23 +1009,29 @@ contact:
       data_type: text
       label:
         en: Individual Name
+        fr: Nom individuel
       description:
         en: If this contact is for a single individual, enter their name.
+        fr: Si ce contact est pour une seule personne, entrez son nom.
       order: 10
     organization_name:
       data_type: text
       label:
         en: Organization Name
+        fr: Nom de l'organisation
       description:
         en: If this contact is for an organization, enter its name, or enter the organization the individual works for.
+        fr: Si ce contact est pour une organisation, entrez son nom ou entrez l'organisation pour laquelle la personne travaille.
       multilingual: yes
       order: 20
     position_name:
       data_type: text
       label:
-        en: Position Name (Individuals Only)
+        en: Position Name
+        fr: Nom du poste
       description:
         en: If this contact is for an individual or a position in the organization, enter the name of the position.
+        fr: Si ce contact est pour une personne ou un poste dans l'organisation, entrez le nom du poste.
       multilingual: yes
       order: 30
     phone:
@@ -902,68 +1039,86 @@ contact:
       entity_type: telephone_info
       label:
         en: Contact Numbers
+        fr: Numéro de contact
       description:
-        en: Enter the number(s) where the individual can be contacted
+        en: Enter the number(s) where the individual can be contacted.
+        fr: Entrez le(s) numéro(s) où la personne peut être contactée.
       order: 40
       repeatable: yes
     delivery_point:
       data_type: text
       label:
         en: Delivery Point
+        fr: Point de livraison
       multilingual: yes
       order: 50
       description:
-        en: Enter the address lines for the contact's mailing address except those specified below.
+        en: Enter the address line(s) for the contact's mailing address except those specified below.
+        fr: Entrez le(s) ligne(s) d'adresse pour l'adresse postale du contact, à l'exception de celles spécifiées ci-dessous.
     city:
       data_type: text
       label:
         en: City
+        fr: Ville
       description:
-        en: Enter the city for the contact's mailing address
+        en: Enter the city for the contact's mailing address.
+        fr: Entrez la ville pour l'adresse postale du contact.
       order: 60
     admin_area:
       data_type: text
       label:
         en: Administrative Area
+        fr: Zone administrative
       description:
-        en: Enter the administrative area (e.g. province or state) for the contact's mailing address
+        en: Enter the administrative area (e.g. province or state) for the contact's mailing address.
+        fr: Entrez la zone administrative (par exemple, la province ou l'état) pour l'adresse postale du contact.
       order: 70
     postal_code:
       data_type: text
       label:
         en: Postal Code
+        fr: Code Postal
       description:
-        en: Enter the postal or zip code for the contact's mailing address
+        en: Enter the postal or zip code for the contact's mailing address.
+        fr: Entrez le code postal ou zip de l'adresse postale du contact.
       order: 80
     country:
       data_type: text
       label:
         en: Country
+        fr: Pays
       order: 90
       description:
-        en: Enter the country for the contact's mailing address
+        en: Enter the country for the contact's mailing address.
+        fr: Entrez le pays pour l'adresse postale du contact.
     email:
       data_type: email
       label:
         en: E-Mail
+        fr: E-mail
       order: 100
       description:
-        en: Enter the primary email address where the contact can be reached
+        en: Enter the primary email address where the contact can be reached.
+        fr: Entrez l'adresse e-mail principale où le contact peut être joint.
     web_page:
       data_type: inline_entity_ref
       entity_type: quick_web_page
       label:
         en: Primary Web Site
+        fr: Site Web principal
       description:
-        en: Enter the contact's primary website, if available
+        en: Enter the contact's primary website, if available.
+        fr: Entrez le site Web principal du contact, s'il est disponible.
       order: 105
     web_resource:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Additional Web Resources
+        fr: Ressources Web supplémentaires
       description:
         en: If there are additional web resources relevant to the contact, select them here.
+        fr: S'il existe d'autres ressources Web pertinentes pour le contact, sélectionnez-les ici.
       repeatable: yes
       order: 110
     service_hours:
@@ -971,30 +1126,38 @@ contact:
       multilingual: yes
       label:
         en: Service Hours
+        fr: Si le contact n'est joignable qu'à certaines heures, saisissez-le ici.
       description:
         en: If the contact can only be reached during certain hours, enter them here.
+        fr: Si le contact n'est joignable qu'à certaines heures, saisissez-le ici.
       order: 120
     instructions:
       data_type: multitext
       multilingual: yes
       label:
         en: Additional Instructions
+        fr: Instructions additionnelles
       description:
         en: If there are additional instructions for connecting with the contact, enter them here.
+        fr: S'il existe des instructions supplémentaires pour se connecter avec le contact, entrez-les ici.
       order: 130
     id_code:
       data_type: text
       label:
         en: Identifier Code
+        fr: Code d'identification
       order: 140
       description:
-        en: If the contact has a unique identifier (e.g. a ROR, ORCID, or other identifier), enter it here
+        en: If the contact has a unique identifier (e.g. a ROR, ORCID, or other identifier), enter it here.
+        fr: Si le contact a un identifiant unique (par exemple un ROR, ORCID ou un autre identifiant), entrez-le ici.
     id_description:
       data_type: text
       label:
         en: Identifier Description
+        fr: Identifiant Description
       description:
-        en: If you wish to provide additional information about the unique identifier, enter it here
+        en: If you wish to provide additional information about the unique identifier, enter it here.
+        fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
       order: 150
       multilingual: yes
     id_system:
@@ -1002,29 +1165,37 @@ contact:
       entity_type: id_system
       label:
         en: Identifier System
+        fr: Système d'identification
       order: 160
       description:
-        en: If the contact has a unique identifier, select the relevant ID system
+        en: If the contact has a unique identifier, select the relevant ID system.
+        fr: Si le contact a un identifiant unique, sélectionnez le système d'identification approprié.
     individuals:
       data_type: entity_ref
       entity_type: contact
       label:
         en: Individuals (Orgs Only)
-      repeatable: yes
-      order: 170
+        fr: Individus (organisations uniquement)
       description:
         en: If the contact is an organization and has multiple individuals who can be contacted, select them here.
+        fr: Si le contact est une organisation et que plusieurs personnes peuvent être contactées, sélectionnez-les ici.
+      repeatable: yes
+      order: 170
     logo:
       data_type: entity_ref
       entity_type: graphic
       label:
         en: Logo (Orgs Only)
+        fr: Logo (organisations uniquement)
       order: 180
       description:
-        en: If the logo of the organization is available, select it here
+        en: If the logo of the organization is available, select it here.
+        fr: Si le logo de l'organisation est disponible, sélectionnez-le ici.
 spatial_res:
+  hidden: yes
   display:
     en: Spatial Resolution
+    fr: Résolution spatiale
   validation:
     custom:
       - pipeman.builtins.iso19115.util.validate_spatial_res
@@ -1033,66 +1204,84 @@ spatial_res:
       data_type: integer
       label:
         en: Scale Factor
+        fr: Facteur d'échelle
       description:
-        en: "Enter the scale factor as a whole integer (e.g. the X in \"1:X\")"
+        en: "Enter the scale factor as a whole integer (e.g. the X in \"1:X\")."
+        fr: "Entrez le facteur d'échelle sous la forme d'un entier entier (par exemple, le X dans \"1:X\")."
       order: 0
     distance:
       data_type: decimal
       label:
         en: Horizontal Resolution
+        fr: Résolution horizontale
       description:
         en: Enter the horizontal resolution in distance units. Specify the units below.
+        fr: Entrez la résolution horizontale en unités de distance. Spécifiez les unités ci-dessous.
       order: 10
     distance_units:
       data_type: vocabulary
       vocabulary_name: iso19115_distance_units
       label:
         en: Horizontal Units
+        fr: Unités horizontales
       description:
         en: If you specified a horizontal resolution, select the units.
+        fr: Si vous avez spécifié une résolution horizontale, sélectionnez les unités.
       order: 20
     vertical:
       data_type: decimal
       label:
         en: Vertical Resolution
+        fr: Résolution verticale
       description:
         en: Enter the vertical resolution in distance units. Specify the units below.
+        fr: Entrez la résolution verticale en unités de distance. Spécifiez les unités ci-dessous.
       order: 30
     vertical_units:
       data_type: vocabulary
       vocabulary_name: iso19115_distance_units
       label:
         en: Vertical Units
+        fr: Unités verticales
       description:
         en: If you specified a vertical resolution, select the units.
+        fr: Si vous avez spécifié une résolution verticale, sélectionnez les unités.
       order: 40
     angular:
       data_type: decimal
       label:
         en: Angular Resolution
+        fr: Résolution angulaire
       description:
         en: Enter the angular resolution in angular units. Specify the units below.
+        fr: Entrez la résolution angulaire en unités angulaires. Spécifiez les unités ci-dessous.
       order: 50
     angular_units:
       data_type: vocabulary
       vocabulary_name: iso19115_angular_units
       label:
         en: Angular Units
+        fr: Unités angulaires
       description:
         en: If you specified an angular resolution, select the units.
+        fr: Si vous avez spécifié une résolution angulaire, sélectionnez les unités.
       order: 60
     level_of_detail:
       data_type: multitext
       label:
         en: Level of Detail
+        fr: Niveau de détail
       description:
         en: If there are additional details on the resolution, enter them here.
+        fr: S'il y a des détails supplémentaires sur la résolution, entrez-les ici.
       multilingual: yes
       order: 70
 
 time_res:
+  hidden: yes
   display:
     en: Time Resolution
+    fr: Résolution temporelle
   validation:
     custom:
       - pipeman.builtins.iso19115.util.validate_time_res
@@ -1101,48 +1290,62 @@ time_res:
       data_type: integer
       label:
         en: Years
+        fr: Années
       description:
-        en: Enter the number of years for the resolution or leave it empty if the resolution is less than one year
+        en: Enter the number of years for the resolution or leave it empty if the resolution is less than one year.
+        fr: Entrez le nombre d'années pour la résolution ou laissez-le vide si la résolution est inférieure à un an.
       order: 0
     months:
       data_type: integer
       label:
         en: Months
+        fr: Mois
       description:
-        en: Enter the number of months for the resolution or leave it empty if the resolution is less than one month or an exact number of years
+        en: Enter the number of months for the resolution or leave it empty if the resolution is less than one month or an exact number of years.
+        fr: Entrez le nombre de mois pour la résolution ou laissez-le vide si la résolution est inférieure à un mois ou un nombre exact d'années.
       order: 1
     days:
       data_type: integer
       label:
         en: Days
+        fr: Jours
       description:
-        en: Enter the number of days for the resolution or leave it empty if the resolution is less than one day or an exact number of years/months
+        en: Enter the number of days for the resolution or leave it empty if the resolution is less than one day or an exact number of years/months.
+        fr: Entrez le nombre de jours pour la résolution ou laissez-le vide si la résolution est inférieure à un jour ou un nombre exact d'années/mois.
       order: 2
     hours:
       data_type: integer
       label:
         en: Hours
+        fr: Heures
       description:
-        en: Enter the number of hours for the resolution or leave it empty if the resolution is less than one hour or an exact number of years/months/days
+        en: Enter the number of hours for the resolution or leave it empty if the resolution is less than one hour or an exact number of years/months/days.
+        fr: Entrez le nombre d'heures pour la résolution ou laissez-le vide si la résolution est inférieure à une heure ou un nombre exact d'années/mois/jours.
       order: 3
     minutes:
       data_type: integer
       label:
         en: Minutes
+        fr: Minutes
       description:
-        en: Enter the number of minutes for the resolution or leave it empty if the resolution is less than one minute or an exact number of years/months/days/hours
+        en: Enter the number of minutes for the resolution or leave it empty if the resolution is less than one minute or an exact number of years/months/days/hours.
+        fr: Entrez le nombre de minutes pour la résolution ou laissez-le vide si la résolution est inférieure à une minute ou un nombre exact d'années/mois/jours/heures.
       order: 4
     seconds:
       data_type: decimal
       label:
         en: Seconds
+        fr: Secondes
       description:
         en: Enter the number of seconds for the resolution or leave it empty if the resolution is an exact number of years, months, days, hours, and/or minutes. This is the only field that allows fractional parts.
+        fr: Entrez le nombre de secondes pour la résolution ou laissez-le vide si la résolution est un nombre exact d'années, de mois, de jours, d'heures et/ou de minutes. C'est le seul champ qui autorise les parties fractionnaires.
       order: 5
 dist_channel:
   is_component: yes
+  hidden: yes
   display:
-    en: Distribution Option
+    en: Distribution Method
+    fr: Methode de distribution
   validation:
     required:
       - responsibles
@@ -1153,8 +1356,10 @@ dist_channel:
       data_type: multitext
       label:
         en: Description
+        fr: Description
       description:
         en: Describe the option for distribution.
+        fr: Décrivez l'option de distribution.
       order: 0
       multilingual: yes
     responsibles:
@@ -1163,23 +1368,29 @@ dist_channel:
       entity_type: responsibility
       label:
         en: Contacts
+        fr: Contacts
       description:
         en: Enter the information about the contacts responsible for distribution.
+        fr: Entrez les informations sur les contacts responsables de la distribution.
       order: 10
     primary_web_link:
       data_type: inline_entity_ref
       entity_type: resource
       label:
         en: Primary Web Link
+        fr: Lien Web principal
       description:
         en: Enter the information about the primary web link for distribution.
+        fr: Entrez les informations sur le lien Web principal pour la distribution.
       order: 20
     links:
       data_type: entity_ref
       entity_type: resource
       label:
         en: Resources
+        fr: Ressources
       description:
         en: If there are additional relevant web resources for this distribution method, add them here.
+        fr: S'il existe d'autres ressources Web pertinentes pour cette méthode de distribution, ajoutez-les ici.
       order: 30
       repeatable: yes

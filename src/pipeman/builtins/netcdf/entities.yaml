@@ -4,8 +4,10 @@ use_constraint:
       data_type: multitext
       label:
         en: Plain text
+        fr: Texte brut
       description:
         en: This text is used where the full ISO record cannot be used (e.g. in NetCDF files)
+        fr: Ce texte est utilisé lorsque l'enregistrement ISO complet ne peut pas être utilisé (par exemple dans les fichiers NetCDF)
 variable:
   validation:
     required:
@@ -25,8 +27,10 @@ variable:
       vocabulary_name: core_charsets
       label:
         en: Encoding
+        fr: Codage
       description:
-        en: For string fields, select the character encoding
+        en: For string fields, select the character encoding.
+        fr: Pour les champs de chaîne, sélectionnez l'encodage des caractères.
       order: 41
       netcdf:
         mapping: _Encoding
@@ -34,30 +38,38 @@ variable:
       data_type: text
       label:
         en: Variable Name
+        fr: Nom de variable
       description:
-        en: Enter the variable name as it appears in the NetCDF file
+        en: Enter the variable name as it appears in the NetCDF file.
+        fr: Entrez le nom de la variable tel qu'il apparaît dans le fichier NetCDF.
       order: 0
     source_data_type:
       data_type: vocabulary
       vocabulary_name: netcdf_data_types
       label:
         en: Packed Data Type
+        fr: Type de données compactées
       description:
-        en: Select the data type of the variable when packed
+        en: Select the data type of the variable when packed.
+        fr: Sélectionnez le type de données de la variable lorsqu'elle est compressée.
       order: 10
     dimensions:
       data_type: text
       label:
         en: Dimensions
+        fr: Dimensions
       description:
-        en: A comma-separated list of dimensions in appropriate order (least to most rapidly changing)
+        en: A comma-separated list of dimensions in appropriate order (least to most rapidly changing).
+        fr: Une liste de dimensions séparées par des virgules dans l'ordre approprié (variant du moins au plus rapidement).
       order: 11
     long_name:
       data_type: text
       label:
         en: Long Name
+        fr: Nom long
       description:
-        en: Enter a longer description of the variable
+        en: Enter a longer description of the variable.
+        fr: Entrez une description plus longue de la variable.
       multilingual: yes
       order: 20
       netcdf:
@@ -68,8 +80,10 @@ variable:
       vocabulary_name: cf_standard_names
       label:
         en: CF Standard Name
+        fr: Nom de la norme CF
       description:
-        en: Select the standard name of the variable
+        en: Select the standard name of the variable.
+        fr: Sélectionnez le nom standard de la variable.
       order: 30
       netcdf:
         mapping: standard_name
@@ -78,8 +92,10 @@ variable:
       data_type: text
       label:
         en: Units
+        fr: Unités
       description:
-        en: Specify the units of the variable when unpacked using UDUnit-compatible symbols
+        en: Specify the units of the variable when unpacked using UDUnit-compatible symbols.
+        fr: Spécifiez les unités de la variable lorsqu'elle est décompressée à l'aide de symboles compatibles UDUnit.
       order: 40
       netcdf:
         mapping: units
@@ -89,8 +105,10 @@ variable:
       vocabulary_name: cf_calendars
       label:
         en: Calendar
+        fr: Calendrier
       description:
-        en: If the variable contains date/time values, select the calendar used
+        en: If the variable contains date/time values, select the calendar used.
+        fr: Si la variable contient des valeurs de date/heure, sélectionnez le calendrier utilisé.
       order: 50
       netcdf:
         mapping: calendar
@@ -100,8 +118,10 @@ variable:
       vocabulary_name: cf_directions
       label:
         en: Positive Direction
+        fr: Sens positif
       description:
-        en: If the variable describes a vertical coordinate system, specify the direction of positive values
+        en: If the variable describes a vertical coordinate system, specify the direction of positive values.
+        fr: Si la variable décrit un système de coordonnées verticales, spécifiez la direction des valeurs positives.
       order: 60
       netcdf:
         mapping: positive
@@ -110,8 +130,10 @@ variable:
       data_type: text
       label:
         en: Missing Value
+        fr: Valeur manquante
       description:
         en: Specify a value that indicates a missing value (defaults to the maximum value for the data type). If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Spécifiez une valeur qui indique une valeur manquante (par défaut, la valeur maximale pour le type de données). Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
       order: 70
       netcdf:
         mapping: missing_value
@@ -120,8 +142,10 @@ variable:
       data_type: float
       label:
         en: Scale Factor
+        fr: Facteur d'échelle
       description:
-        en: Specify a scale factor to apply when unpacking values
+        en: Specify a scale factor to apply when unpacking values.
+        fr: Spécifiez un facteur d'échelle à appliquer lors de la décompression des valeurs.
       order: 80
       netcdf:
         mapping: scale_factor
@@ -130,6 +154,7 @@ variable:
       data_type: float
       label:
         en: Add Offset
+        fr: Ajouter un décalage
       description:
         en: Enter an offset value to add when unpacking values
       order: 90
@@ -141,15 +166,19 @@ variable:
       vocabulary_name: netcdf_data_types
       label:
         en: Unpacked Data Type
+        fr: Type de données décompressé
       description:
         en: If the variable specifies a scale factor, specify the unpacked data type
+        fr: Si la variable spécifie un facteur d'échelle, spécifiez le type de données décompressé
       order: 100
     actual_min:
       data_type: decimal
       label:
         en: Minimum Value
+        fr: Valeur minimum
       description:
         en: Enter the actual minimum value for this variable within the dataset
+        fr: Entrez la valeur minimale réelle pour cette variable dans l'ensemble de données
       order: 110
       netcdf:
         mapping: actual_min
@@ -158,8 +187,10 @@ variable:
       data_type: decimal
       label:
         en: Maximum Value
+        fr: Valeur maximum
       description:
         en: Enter the actual maximum value for this variable within the dataset. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur maximale réelle pour cette variable dans l'ensemble de données. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
       order: 120
       netcdf:
         mapping: actual_max
@@ -168,8 +199,10 @@ variable:
       data_type: decimal
       label:
         en: Minimum Valid Value
+        fr: Valeur valide minimale
       description:
         en: Enter the theoretical minimum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur minimale théorique pour cette variable, le cas échéant. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
       order: 130
       netcdf:
         mapping: valid_min
@@ -178,8 +211,10 @@ variable:
       data_type: decimal
       label:
         en: Maximum Valid Value
+        fr: Valeur valide maximale
       description:
         en: Enter the theoretical maximum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur maximale théorique pour cette variable, le cas échéant. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
       order: 140
       netcdf:
         mapping: valid_max
@@ -189,8 +224,10 @@ variable:
       vocabulary_name: cf_roles
       label:
         en: CF Role
+        fr: Rôle de CF
       description:
-        en: If this variable uniquely identifies a timeseries, a profile, or a trajectory, select the appropriate option
+        en: If this variable uniquely identifies a timeseries, a profile, or a trajectory, select the appropriate option.
+        fr: Si cette variable identifie de manière unique une série chronologique, un profil ou une trajectoire, sélectionnez l'option appropriée.
       order: 150
       netcdf:
         mapping: cf_role
@@ -199,8 +236,10 @@ variable:
       data_type: multitext
       label:
         en: Comment
+        fr: Commentaire
       description:
-        en: Enter comments about this variable to share with data users
+        en: Enter comments about this variable to share with data users.
+        fr: Entrez des commentaires sur cette variable à partager avec les utilisateurs de données.
       order: 160
       netcdf:
         mapping: comment
@@ -208,17 +247,21 @@ variable:
       data_type: multitext
       label:
         en: References
+        fr: Références
       description:
-        en: Describe relevant references for this variable
+        en: Describe relevant references for this variable.
+        fr: Décrivez les références pertinentes pour cette variable.
       order: 170
       netcdf:
         mapping: references
     source:
       data_type: multitext
       label:
-        en: Comment
+        en: Source
+        fr: Source
       description:
-        en: Describe relevant source information for this variable
+        en: Describe relevant source information for this variable.
+        fr: Décrivez les informations sources pertinentes pour cette variable.
       order: 180
       netcdf:
         mapping: source
@@ -227,30 +270,22 @@ variable:
       vocabulary_name: iso19115_md_coverage_content_type_code
       label:
         en: Coverage Content Type
+        fr: Type de contenu de la couverture
       description:
-        en: Coverage content type for the variable
+        en: Coverage content type for the variable.
+        fr: Type de contenu de couverture pour la variable.
       netcdf:
         mapping: coverage_content_type
         processor: vocabulary
-    variable_order:
-      data_type: integer
-      label:
-        en: Variable Order
-      description:
-        en: Axis variables must be in the same order as the original NetCDF files (if used)
-      order: 5005
     custom_metadata:
       data_type: key_value
       repeatable: true
       label:
-        en: Custom Metadata
+        en: Extra Metadata
+        fr: Métadonnées extra
       description:
         en: Add other attributes to this variable
+        fr: Ajouter d'autres attributs à cette variable
       order: 500
       netcdf:
         processor: key_value_pairs
-    is_axis:
-      data_type: boolean
-      label:
-        en: Is Dimension?
-      order: 5010

@@ -1,7 +1,7 @@
 goc_subjects:
   display:
     en: GoC - Subjects
-    fr: GoC - Sujets
+    fr: GdC - Sujets
   uri: "https://canada.multites.net/cst/default.asp?op=SRCHSCAT&searchString=SC&lang=ENG"
   terms:
     arts_music_literature:
@@ -83,12 +83,12 @@ goc_subjects:
 goc_places:
   display:
     en: GoC - Places
-    fr: GoC - Places
+    fr: GdC - Places
   uri:
 goc_audiences:
   display:
     en: GoC - Audiences
-    fr: GoC - Audiences
+    fr: GdC - Audiences
   uri:
   terms:
     aboriginal_peoples:
@@ -190,7 +190,7 @@ goc_audiences:
 goc_collection_types:
   display:
     en: GoC - Collection Types
-    fr: GoC - Types de collections
+    fr: GdC - Types de collections
   uri:
   terms:
     primary:
