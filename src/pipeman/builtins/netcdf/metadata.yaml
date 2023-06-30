@@ -13,32 +13,40 @@ data_more_info:
       data_type: text
       label:
         en: Institution (Short)
+        fr: Établissement (court)
       description:
         en: Enter a short name of the institution which is ultimately responsible for the dataset.
+        fr: Entrez un nom abrégé de l'institution qui est ultimement responsable de l'ensemble de données.
       netcdf:
         mapping: institution
     project:
       data_type: text
       label:
         en: Project
+        fr: Projet
       description:
         en: If this dataset is a part of a project, enter the name here
+        fr: Si cet ensemble de données fait partie d'un projet, entrez le nom ici
       netcdf:
         mapping: project
     program:
       data_type: text
       label:
         en: Program
+        fr: Programme
       description:
-        en: If this dataset is part of a program, enter the name here
+        en: If this dataset is part of a program, enter the name here.
+        fr: Si cet ensemble de données fait partie d'un programme, entrez le nom ici.
       netcdf:
         mapping: program
     standard_name_vocab:
       data_type: text
       label:
         en: Standard Name Vocabulary
+        fr: Vocabulaire des noms standard
       description:
-        en: Enter the name of the standard name vocabulary used for variable names (e.g. CF 1.10)
+        en: Enter the name of the standard name vocabulary used for variable names (e.g. CF 1.10).
+        fr: Entrez le nom du vocabulaire de nom standard utilisé pour les noms de variables (par exemple CF 1.10).
       netcdf:
         mapping: standard_name_vocab
 technical:
@@ -47,8 +55,10 @@ technical:
       data_type: vocabulary
       label:
         en: CDM Data Type
+        fr: Type de données CDM
       description:
-        en: Select the most appropriate CDM data type for the data
+        en: Select the most appropriate CDM data type for the data.
+        fr: Sélectionnez le type de données CDM le plus approprié pour les données.
       vocabulary_name: cdm_data_types
       netcdf:
         mapping: cdm_data_type
@@ -57,8 +67,10 @@ technical:
       data_type: text
       label:
         en: Conventions
+        fr: Conventions
       description:
-        en: Enter a comma-separated list of conventions used in this dataset
+        en: Enter a comma-separated list of conventions used in this dataset.
+        fr: Entrez une liste séparée par des virgules des conventions utilisées dans cet ensemble de données.
       netcdf:
         mapping: Conventions
         processor: text
@@ -71,8 +83,10 @@ references:
       multilingual: yes
       label:
         en: Source Information
+        fr: Informations sur les sources
       description:
-        en: Enter information about the source of the data in this dataset in plain-text format
+        en: Enter information about the source of the data in this dataset in plain-text format.
+        fr: Entrez les informations sur la source des données dans cet ensemble de données au format texte brut
       netcdf:
         mapping: source
     references:
@@ -80,13 +94,13 @@ references:
       multilingual: yes
       label:
         en: Reference Information
+        fr: Informations de référence
       description:
-        en: Enter any appropriate reference information about this dataset
+        en: Enter any appropriate reference information about this dataset.
+        fr: Entrez toute information de référence appropriée sur cet ensemble de données
       netcdf:
         mapping: references
 custom:
-  display:
-    en: Custom Fields
   fields:
     custom_metadata:
       data_type: key_value
@@ -94,8 +108,10 @@ custom:
       order: 0
       label:
         en: Custom NetCDF Metadata
+        fr: Métadonnées NetCDF personnalisées
       description:
         en: Enter additional information for NetCDF output here.
+        fr: Entrez ici des informations supplémentaires pour la sortie NetCDF.
       netcdf:
         mapping:
         processor: key_value_pairs
@@ -107,8 +123,10 @@ keywords:
       repeatable: yes
       label:
         en: CF Standard Variables
+        fr: Variables standard CF
       description:
         en: Standard variables that are used in the dataset.
+        fr: Variables standard utilisées dans l'ensemble de données.
       keyword_config:
         is_keyword: yes
         mode: value

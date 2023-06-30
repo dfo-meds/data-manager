@@ -5,8 +5,10 @@ keywords:
       vocabulary_name: cioos_eovs
       label:
         en: Essential Ocean Variables
+        fr: Variables océaniques essentielles
       description:
         en: Select all the EOVs that are present this dataset
+        fr: Sélectionnez tous les VOEs qui sont présents dans cet ensemble de données
       order: 2000
       repeatable: yes
       keyword_config:

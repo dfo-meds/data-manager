@@ -13,7 +13,7 @@ data_info:
 data_more_info:
   display:
     en: Additional Info
-    fr:
+    fr: Information additionnelle
   order: 20
 
 keywords:
@@ -58,7 +58,8 @@ publishing:
 
 custom:
   display:
-    en: Custom Fields
+    en: Custom Metadata
+    fr: Métadonnées personnalisées
   order: 120
 
 variables:

@@ -284,8 +284,8 @@ variable:
         en: Extra Metadata
         fr: Métadonnées extra
       description:
-        en: Add other attributes to this variable
-        fr: Ajouter d'autres attributs à cette variable
+        en: Add other attributes to this variable.
+        fr: Ajouter d'autres attributs à cette variable.
       order: 500
       netcdf:
         processor: key_value_pairs

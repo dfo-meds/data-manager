@@ -1,6 +1,7 @@
 core_charsets:
   display:
     en: Character Sets
+    fr: Codage
   uri:
   terms:
     utf8:

@@ -38,7 +38,7 @@ maintenance:
       vocabulary_name: iso19115_maintenance_scope
       label:
         en: Scope
-        fr: Portée
+        fr: Étendue
       description:
         en: Select "dataset" or "metadata" depending what change you are describing
         fr: Sélectionnez "ensemble de données" ou "métadonnées" en fonction du changement que vous décrivez
@@ -434,14 +434,14 @@ scope:
   hidden: yes
   display:
     en: Scope
-    fr: Portée
+    fr: Étendue
   fields:
     scope_code:
       data_type: vocabulary
       vocabulary_name: iso19115_md_scope_code
       label:
         en: Scope Code
-        fr: Code de portée
+        fr: Code d'étendue
       order: 10
 #    extent:
 #      data_type: entity_ref

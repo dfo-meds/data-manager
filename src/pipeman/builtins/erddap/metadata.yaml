@@ -4,8 +4,10 @@ technical:
       data_type: text
       label:
         en: ERDDAP Dataset ID
+        fr: ID de l'ensemble de données ERDDAP
       description:
         en: Enter the dataset ID that ERDDAP will use for this dataset. Recommended under 30 characters.
+        fr: Entrez l'ID de l'ensemble de données qu'ERDDAP utilisera pour cet ensemble de données. Recommandé moins de 30 caractères.
       order: 200
     erddap_dataset_type:
       data_type: vocabulary
@@ -15,20 +17,25 @@ technical:
         fr: Type de données ERDDAP
       description:
         en: Select the type of dataset for the ERDDAP XML file.
+        fr: Sélectionnez le type de jeu de données pour le fichier XML ERDDAP.
       order: 210
     erddap_data_file_path:
       data_type: text
       label:
         en: ERDDAP Data File Path
+        fr: Chemin du fichier de données ERDDAP
       description:
         en: Enter the path on the server to a directory where the data files for this dataset will live.
+        fr: Entrez le chemin d'accès sur le serveur vers un répertoire dans lequel les fichiers de données de ce jeu de données vivront.
       order: 220
     erddap_data_file_pattern:
       data_type: text
       label:
         en: ERDDAP Data File Pattern
+        fr: Modèle de fichier de données ERDDAP
       description:
         en: Enter a regular expression pattern that will match all of the data files in the given directory.
+        fr: Entrez un modèle d'expression régulière qui correspondra à tous les fichiers de données dans le répertoire donné.
       order: 230
 publishing:
   fields:
@@ -36,7 +43,9 @@ publishing:
       data_type: entity_ref
       label:
         en: ERDDAP Servers
+        fr: Serveurs ERDDAP
       description:
         en: Select which ERDDAP server this dataset will be published on. The server will be added to the distribution methods list in the metadata.
+        fr: Sélectionnez sur quel serveur ERDDAP cet ensemble de données sera publié. Le serveur sera ajouté à la liste des méthodes de distribution dans les métadonnées.
       entity_type: erddap_servers
       repeatable: yes

@@ -7,13 +7,16 @@ internal_info:
         fr: Notes internes
       description:
         en: These notes are not published, they are for internal reference only.
+        fr: Ces notes ne sont pas publiées, elles sont à usage interne uniquement.
       multilingual: yes
     file_storage_location:
       data_type: multitext
       label:
         en: Storage Location
+        fr: Emplacement de stockage
       description:
         en: Describe where the data is located. This field is for interal reference only.
+        fr: Décrivez où se trouvent les données. Ce champ est pour référence interne seulement.
       multilingual: yes
   display:
     en: Internal
@@ -25,6 +28,8 @@ publishing:
       data_type: boolean
       label:
         en: Request via MEDS Request Form
+        fr: Demande via le formulaire de demande MEDS
       description:
         en: Check this box if the dataset can be obtained via the MEDS request form. This will add a transfer option in the distribution methods list.
+        fr: Cochez cette case si l'ensemble de données peut être obtenu via le formulaire de demande MEDS. Cela ajoutera une option de transfert dans la liste des méthodes de distribution.
 
