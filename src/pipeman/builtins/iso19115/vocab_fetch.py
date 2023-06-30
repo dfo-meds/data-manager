@@ -39,7 +39,7 @@ class ISO19115VocabularyManager:
                 desc = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}description")[0].text.strip()
                 vocab_terms[name] = {
                     "display": {
-                        "en": name,
+                        "und": name,
                     },
                     "description": {
                         "en": desc,
