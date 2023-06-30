@@ -1,6 +1,22 @@
+citation:
+  display:
+    en: Citation
+    fr: Citation
+  fields:
+    title:
+      data_type: text
+      label:
+        en: Title
+        fr: Titre
+      description:
+        en: Enter the title of the work being cited.
+        fr: Entrez le titre de l'ouvrage cité.
+      order: 10
+      multilingual: yes
 thesaurus:
   display:
     en: Thesaurus
+    fr: Thésaurus
   validation:
     required:
       - citation
@@ -10,31 +26,39 @@ thesaurus:
       entity_type: citation
       label:
         en: Citation
+        fr: Citation
       description:
         en: Reference information for the thesaurus.
+        fr: Informations de référence pour le thésaurus.
       order: 0
     type:
       data_type: text
       label:
         en: Keyword Type
+        fr: Type de mot-clé
       description:
-        en: Enter the keyword type that best describes the keywords that are part of this thesaurus
+        en: Enter the keyword type that best describes the keywords that are part of this thesaurus.
+        fr: Entrez le type de mot-clé qui décrit le mieux les mots-clés qui font partie de ce thésaurus.
       order: 10
     prefix:
       data_type: text
       label:
         en: Prefix
+        fr: Préfixe
       description:
         en: This will be used in some metadata files to separate keywords by thesaurus when the whole thesaurus cannot be used.
+        fr: Cela sera utilisé dans certains fichiers de métadonnées pour séparer les mots-clés par thésaurus lorsque l'ensemble du thésaurus ne peut pas être utilisé.
       order: 20
 variable:
   display:
     en: Variable
+    fr: Variable
   is_component: yes
   hidden: yes
 keyword:
   display:
-    en: Custom Keyword
+    en: Keyword
+    fr: Mot-clé
   validation:
     required:
       - keyword
@@ -43,7 +67,8 @@ keyword:
       data_type: multitext
       multilingual: yes
       label:
-        en: Keyword Value
+        en: Keyword
+        fr: Mot-clé
       description:
         en: Enter the text that should be used in the metadata files. If there is an official value from a controlled list, it should go in the "UND" field.
       order: 0
@@ -52,14 +77,18 @@ keyword:
       multilingual: yes
       label:
         en: Extended Description
+        fr: Description détaillée
       description:
         en: Provide additional descriptive information about this keyword. This is not added to the metadata files.
+        fr: Fournissez des informations descriptives supplémentaires sur ce mot clé. Ceci n'est pas ajouté aux fichiers de métadonnées.
       order: 20
     thesaurus:
       data_type: entity_ref
       entity_type: thesaurus
       label:
         en: Thesaurus
+        fr: Thésaurus
       description:
         en: Select a thesaurus that this keyword belongs to.
+        fr: Sélectionnez un thésaurus auquel ce mot-clé appartient.
       order: 10

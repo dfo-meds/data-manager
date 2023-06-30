@@ -59,7 +59,6 @@ pipeman.auth.error.user_does_not_exist: User does not exist
 pipeman.auth.error.username_already_exists: User already exists
 pipeman.auth.message.no_recent_failed_logins: No recent failed logins
 pipeman.auth.message.no_recent_logins: No recent logins
-pipeman.auth.page.change_password.error_no_password_for_account: ''
 pipeman.auth.page.change_password.instructions: ''
 pipeman.auth.page.change_password.success: Your password has been changed
 pipeman.auth.page.change_password.title: Change Password
@@ -117,7 +116,6 @@ pipeman.dataset.error.during_activation: Error during activation
 pipeman.dataset.error.during_publication: Error during plication
 pipeman.dataset.message.activated: Dataset activated
 pipeman.dataset.message.activation_in_progress: Dataset activation in progress
-pipeman.dataset.message.no_fields: ''
 pipeman.dataset.message.publication_in_progress: Dataset publication in progress
 pipeman.dataset.message.published: Dataset published
 pipeman.dataset.message.revision_warning: You are viewing a specific revision
@@ -130,7 +128,6 @@ pipeman.dataset.page.add_attachment.link: Upload Attachment
 pipeman.dataset.page.add_attachment.success: File uploaded successfully
 pipeman.dataset.page.add_attachment.title: File Upload
 pipeman.dataset.page.copy_dataset.link: Copy
-pipeman.dataset.page.copy_dataset.success: ''
 pipeman.dataset.page.copy_dataset.title: Copy Dataset
 pipeman.dataset.page.create_dataset.link: Create Dataset
 pipeman.dataset.page.create_dataset.success: Dataset created
@@ -390,3 +387,6 @@ pipeman.workflow.page.continue.title: Approve Action
 pipeman.workflow.page.list_items.title: List Action Items
 pipeman.workflow.page.view_item.link: View
 pipeman.workflow.page.view_item.title: View Item
+pipeman.auth.page.change_password.error_no_password_for_account: "You must enter a password"
+pipeman.dataset.message.no_fields: "No metadata fields are available, please add some metadata profiles to this dataset."
+pipeman.dataset.page.copy_dataset.success: "The dataset has been copied"

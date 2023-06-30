@@ -607,7 +607,7 @@ class CFVocabularyManager:
 
                 terms[symbol] = {
                     "display": {
-                        "en": name,
+                        "und": f"{name} [{symbol}]" if symbol != name else name,
                     },
                     "description": {
                         "en": desc,

@@ -1,6 +1,6 @@
 netcdf:
   display:
-    en: NetCDF Core
+    und: NetCDF
   fields:
     custom_metadata:
     custom_keywords:
@@ -8,9 +8,22 @@ netcdf:
   mappers:
     netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf
   action_callback: pipeman.builtins.netcdf.util.netcdf_dataset_actions
-acdd:
+  formatters:
+    ncml:
+      label:
+        en: NcML
+      template: ncml.xml
+      content_type: text/xml
+      preprocess: pipeman.builtins.netcdf.util.preprocess_for_ncml
+    cdl:
+      label:
+        en: CDL
+      template: cdl.txt
+      content_type: text/plain
+      preprocess: pipeman.builtins.netcdf.util.preprocess_for_cdl
+acdd13:
   display:
-    en: ACDD 1.3
+    und: ACDD 1.3
   extends: netcdf
   validation:
     required:
@@ -85,20 +98,7 @@ acdd:
     dataset_id_desc:
     dataset_id_system:
     cf_standard_names:
-  formatters:
-    ncml:
-      label:
-        en: NcML
-      template: ncml.xml
-      content_type: text/xml
-      preprocess: pipeman.builtins.netcdf.util.preprocess_for_ncml
-    cdl:
-      label:
-        en: CDL
-      template: cdl.txt
-      content_type: text/plain
-      preprocess: pipeman.builtins.netcdf.util.preprocess_for_cdl
 cf1_10:
   display:
-    en: CF 1.10
-  extends: acdd
+    und: CF 1.10
+  extends: acdd13

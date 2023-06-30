@@ -1,6 +1,7 @@
 goc_subjects:
   display:
-    en: Government of Canada - Subjects
+    en: GoC - Subjects
+    fr: GoC - Sujets
   uri: "https://canada.multites.net/cst/default.asp?op=SRCHSCAT&searchString=SC&lang=ENG"
   terms:
     arts_music_literature:
@@ -81,11 +82,13 @@ goc_subjects:
         fr: Transport
 goc_places:
   display:
-    en: Government of Canada - Places
+    en: GoC - Places
+    fr: GoC - Places
   uri:
 goc_audiences:
   display:
-    en: Government of Canada - Audiences
+    en: GoC - Audiences
+    fr: GoC - Audiences
   uri:
   terms:
     aboriginal_peoples:
@@ -186,7 +189,8 @@ goc_audiences:
         fr: Jeunesse
 goc_collection_types:
   display:
-    en: Government of Canada - Collection Types
+    en: GoC - Collection Types
+    fr: GoC - Types de collections
   uri:
   terms:
     primary:

@@ -1,6 +1,6 @@
 iso19115:
   display:
-    en: Core ISO-19115
+    und: ISO-19115
   validation:
     required:
       - title

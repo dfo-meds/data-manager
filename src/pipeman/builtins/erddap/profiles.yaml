@@ -1,6 +1,6 @@
 erddap:
   display:
-    en: ERDDAP
+    und: ERDDAP
   extends: cf1_10
   validation:
     required:

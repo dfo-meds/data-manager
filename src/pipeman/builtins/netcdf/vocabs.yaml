@@ -1,208 +1,439 @@
 netcdf_data_types:
   display:
-    en: NetCDF Data Types
+    en: NetCDF - Data Types
+    fr: NetCDF - Types de données
   uri:
   terms:
     byte:
       display:
         en: Byte, signed
+        fr: Entier octet, signé
       description:
         en: Integer values in [-128, 127]
+        fr: Valeurs entières en [-128, 127]
     ubyte:
       display:
         en: Byte, unsigned
+        fr: Entier octet, non-signé
       description:
         en: Integer values in [0, 255]
+        fr: Valeurs entières en [0, 255]
     short:
       display:
         en: Short, signed
+        fr: Entier minimum, signé
       description:
         en: Integer values in [-32768, 32767]
+        fr: Valeurs entières en [-32768, 32767]
     ushort:
       display:
         en: Short, unsigned
+        fr: Entier minimum, non-signé
       description:
         en: Integer values in [0, 65535]
+        fr: Valeurs entières en [0, 65535]
     int:
       display:
         en: Integer, signed
+        fr: Entier standard, signé
       description:
         en: Integer values in [-2147483648, 2147483647]
+        fr: Valeurs entières en [-2147483648, 2147483647]
     uint:
       display:
         en: Integer, unsigned
+        fr: Entier standard, non-signé
       description:
         en: Integer values in [0, 4294967295]
+        fr: Valeurs entières en [0, 4294967295]
     long:
       display:
         en: "Long (64-bit Integer), signed"
+        fr: Entier long, signé
       description:
         en: Integer values in [-9223372036854775808, 9223372036854775807]
+        fr: Valeurs entières en [-9223372036854775808, 9223372036854775807]
     ulong:
       display:
         en: "Long (64-bit Integer), unsigned"
+        fr: Entier long, non-signé
       description:
         en: Integer values in [0, 18446744073709551615]
+        fr: Valeurs entières en [0, 18446744073709551615]
     float:
       display:
-        en: Float
+        en: Float (single precision)
+        fr: Flottant (précision simple)
       description:
         en: Decimal values in [-3.4028235e38, +3.4028235e38], to a precision of at least 6 and at most 9 significant digits.
+        fr: Valeurs décimales en [-3.4028235e38, +3.4028235e38], avec une précision d'au moins 6 et d'au plus 9 chiffres significatifs.
     double:
       display:
         en: Double
+        fr: Flottant (précision double)
       description:
         en: Decimal values in [-1.79769e308, +1.79769e308], to a precision of at least 15 and at most 17 significant digits.
+        fr: Valeurs décimales en [-1.79769e308, +1.79769e308], avec une précision d'au moins 15 et d'au plus 17 chiffres significatifs.
     char:
       display:
         en: Character
+        fr: Caractère
       description:
-        en: A single character, encoded using an 8-bit encoding (typically ASCII or one-character of UTF-8, but the encoding can be specified)
+        en: A single character
+        fr: Un caractère unique
     String:
       display:
-        en: String, atomic
+        en: String
       description:
-        en: An atomic string in NetCDF4 files
+        en: A string of characters
+        fr: Plusieurs caractères
 cf_standard_names:
   display:
-    en: CF Standard Names
+    en: CF - Standard Names
+    fr: CF - Noms standards
   uri: http://cfconventions.org/Data/netcdf-standard-names/current/build/netcdf-standard-name-table.html
 cf_axes:
   display:
-    en: CF Axes
+    en: CF - Axes
+    fr: CF - Axes
   uri:
   terms:
     X:
       display:
         en: X (Longitude)
+        fr: X (longitude)
     Y:
       display:
         en: Y (Latitude)
+        fr: Y (latitude)
     Z:
       display:
         en: Z (Vertical)
+        fr: Z (vertical)
     T:
       display:
         en: T (Time)
+        fr: T (temps)
 udunit_prefixes:
   display:
-    en: UDUnit Prefixes
+    en: UDUnit - Prefixes
+    fr: UDUnit - Préfixes
   uri: https://docs.unidata.ucar.edu/udunits/current/udunits2-prefixes.xml
 udunit_units:
   display:
-    en: UDUnit Units (with CF extensions)
+    en: UDUnit - Units
+    fr: UDUnit - Unités
   uri: https://docs.unidata.ucar.edu/udunits/current/#Database
   terms:
     degrees_north:
       display:
-        en: Degrees (North)
+        en: Degrees North [°]
+        fr: Degrés nord [°]
       description:
         en: Latitude given in degrees where positive indicates north of the equator and negative indicates south
+        fr: Latitude donnée en degrés où le positif indique le nord de l'équateur et le négatif indique le sud
     degrees_east:
       display:
-        en: Degrees (East)
+        en: Degrees East [°]
+        fr: Degrés est [°]
       description:
         en: Longitude given in degrees where positive indictes east of the prime meridian and negative indicates west
+        fr: Longitude exprimée en degrés où le positif indique l'est du premier méridien et le négatif indique l'ouest
     1:
       display:
         en: ratio
       description:
         en: Value between 0 and 1 representing parts per whole.
+        fr: Valeur comprise entre 0 et 1 représentant les parties par tout.
     1e-2:
       display:
-        en: percent
+        und: %
       description:
         en: Value between 0 and 100 representing parts per hundred.
+        fr: Valeur comprise entre 0 et 100 représentant les parties pour cent.
     1e-3:
       display:
-        en: ppt
+        und: ppt
       description:
         en: Value between 0 and 1,000 representing parts per thousand.
+        fr: Valeur comprise entre 0 et 1 000 représentant des parties pour mille.
     1e-6:
       display:
-        en: ppm
+        und: ppm
       description:
         en: Value between 0 and 1,000,000 representing parts per million.
+        fr: Valeur comprise entre 0 et 1 000 000 représentant des parties par million.
     1e-9:
       display:
-        en: ppb
+        und: ppb
       description:
         en: Value between 0 and 1,000,000,000 representing parts per billion.
+        fr: Valeur comprise entre 0 et 1 000 000 000 représentant des parties par milliard.
+    "'":
+      description:
+        fr: "mesure d'un angle plan égal à 1/60 degré d'arc"
+    "\"":
+      description:
+        fr: "mesure d'un angle plan égal à 1/60 minute d'arc"
+    "°":
+      description:
+        fr: "mesure d'un angle plan représentant 1/360 d'une rotation complète"
+    "°C":
+      description:
+        fr: "unité (et échelle) de température, avec la même amplitude que le kelvin et un décalage du point zéro de 273,15"
+    "A":
+      description:
+        fr: "L'ampère est ce courant constant qui, s'il était maintenu dans deux conducteurs rectilignes parallèles de longueur infinie, de section circulaire négligeable, et placés à 1 mètre l'un de l'autre dans le vide, produirait entre ces conducteurs une force égale à 2e-7 newton par mètre de longueur."
+    "a":
+      description:
+        fr: "unité de surface égale à 100 mètres carrés"
+    "Å":
+      description:
+        fr: "unité de longueur égale à un cent millionième de centimètre (1 mètre/10**10)"
+    "au":
+      description:
+        fr: "Définition exacte selon la résolution de 2012 de l'Union astronomique internationale (UAI). Apparemment égale à la distance moyenne du centre de la terre au centre du soleil."
+    "b":
+      description:
+        fr: "unité de surface, approximativement la surface de la section transversale d'un noyau d'uranium (10e-28 mètres carrés)"
+    "bar":
+      description:
+        fr: "unité de pression égale à 100000 Pascals, soit environ 0,987 atmosphères de pression"
+    "Bq":
+      description:
+        fr: "unité de radioactivité; l'activité d'une quantité de matière dans laquelle un noyau se désintègre par seconde (donc équivalent à une unité par seconde)"
+    "C":
+      description:
+        fr: "unité standard de charge électrique, quantité d'électricité transportée en une seconde par un courant d'un ampère"
+    "cd":
+      description:
+        fr: "La candela est l'intensité lumineuse, dans une direction donnée, d'une source qui émet un rayonnement monochromatique de fréquence 540e12 hertz et qui a une intensité radiante dans cette direction de 1/683 watt par stéradian."
+    "Ci":
+      description:
+        fr: "unité de radioactivité correspondant à 3,7 * 10e10 désintégrations par seconde"
+    "d":
+      description:
+        fr: "période de temps égale à 24 heures"
+    "eV":
+      description:
+        fr: "unité d'énergie égale au travail accélérant un électron par une différence de potentiel d'un volt"
+    "F":
+      description:
+        fr: "unité standard de capacité ; la quantité qui, lorsqu'un condensateur est chargé à une différence de potentiel d'un volt, porte une charge d'un coulomb"
+    "g":
+      description:
+        fr: "unité de masse égale à un millième de kilogramme"
+    "gal":
+      description:
+        fr: "unité d'accélération égale à 1 cm par seconde au carré"
+    "Gy":
+      description:
+        fr: "unité de rayonnement ionisant, mesure de la dose de rayonnement absorbée ; absorption d'un joule d'énergie de rayonnement par un kilogramme de matière"
+    "H":
+      description:
+        fr: "unité d'inductance ; où le courant d'un circuit change à un taux constant de 1 ampère par seconde, entraîne une génération de 1 V de différence de potentiel"
+    "h":
+      description:
+        fr: "durée égale à 60 minutes"
+    "hectare":
+      description:
+        fr: "unité de surface égale à 100 ares (\"hectoare\"), soit 10000 mètres carrés"
+    "Hz":
+      description:
+        fr: "unité de fréquence signifiant un cycle par seconde"
+    "international_knot":
+      description:
+        fr: "unité dérivée de la vitesse en mer"
+    "J":
+      description:
+        fr: "unité standard de travail ou d'énergie, égale au travail effectué par une force d'un newton agissant sur une distance d'un mètre"
+    "K":
+      description:
+        fr: "Le kelvin, unité de température thermodynamique, est la fraction 1/273,16 de la température thermodynamique du point triple de l'eau."
+    "kat":
+      description:
+        fr: "unité d'activité catalytique (propriété d'un catalyseur, tel qu'une enzyme) ; exprime la capacité de rompre 1 mole de liaisons par seconde dans des conditions spécifiées"
+    "kg":
+      description:
+        fr: " Le kilogramme est l'unité de masse; elle est égale à la masse du prototype international du kilogramme."
+    "L":
+      description:
+        fr: "unité de capacité égale à 1000 centimètres cubes"
+    "lm":
+      description:
+        fr: "unité de flux lumineux, une mesure de la \"quantité\" totale de lumière visible émise par une source ; une candela-stéradian"
+    "lx":
+      description:
+        fr: "unité d'éclairement et d'émittance lumineuse, mesurant le flux lumineux par unité de surface et utilisée comme mesure de l'intensité de la lumière ; égal à un lumen par mètre carré"
+    "m":
+      description:
+        fr: "Le mètre est la longueur du trajet parcouru par la lumière dans le vide pendant un intervalle de temps de 1/299 792 458 de seconde."
+    "min":
+      description:
+        fr: "période de temps égale à 60 secondes"
+    "mol":
+      description:
+        fr: "La mole est la quantité de matière d'un système qui contient autant d'entités élémentaires qu'il y a d'atomes dans 0,012 kilogramme de carbone 12. Lorsque la mole est utilisée, les entités élémentaires doivent être précisées et peuvent être des atomes, des molécules, des ions, des électrons, d'autres particules ou des groupes spécifiés de telles particules."
+    "N":
+      description:
+        fr: "unité de force; la quantité nécessaire pour accélérer 1 kilogramme de masse à raison de 1 mètre par seconde au carré"
+    "nautical_mile":
+      description:
+        fr: "unité de distance en mer, fixée à 1852 mètres (environ une minute d'arc mesurée le long de n'importe quel méridien)"
+    "Pa":
+      description:
+        fr: "unité de pression (force par unité de surface) égale à un newton par mètre carré"
+    "R":
+      description:
+        fr: "unité de rayonnement ionisant, la quantité produisant une unité électrostatique de charge ionique positive ou négative dans un centimètre cube d'air dans des conditions standard ; rarement utilisé"
+    "rad":
+      description:
+        fr: "unité standard de mesure angulaire, un angle qui crée un arc dans un cercle de longueur égale au rayon de ce cercle (environ 57,3 degrés); comme rapport de deux longueurs, il n'a pas de dimension"
+    "rem":
+      description:
+        fr: "unité de dose de rayonnement appliquée aux humains ; égal à un centième de sievert"
+    "s":
+      description:
+        fr: "La seconde est la durée de 9 192 631 770 périodes du rayonnement correspondant à la transition entre les deux niveaux hyperfins de l'état fondamental de l'atome de césium 133."
+    "S":
+      description:
+        fr: "unité de conductance électrique ; l'inverse d'un ohm"
+    "sr":
+      description:
+        fr: "unité standard de mesure d'angle solide, c'est l'angle solide qui découpe une surface sur une sphère qui est le carré du rayon de la sphère ; en tant que rapport de deux aires, il n'a pas de dimension"
+    "Sv":
+      description:
+        fr: "unité de dose de rayonnement ionisant, mesurant l'effet sur la santé de faibles niveaux de rayonnement ionisant sur le corps humain"
+    "T":
+      description:
+        fr: "unité de densité de flux, égale à un weber par mètre carré"
+    "t":
+      description:
+        fr: "unité de poids égale à 1000 kilogrammes"
+    "u":
+      description:
+        fr: "unité standard pour indiquer la masse à l'échelle atomique ou moléculaire; est approximativement la masse d'un nucléon (soit un seul proton, soit un neutron), et équivaut à 1 g/mol"
+    "ua":
+      description:
+        fr: "unité de mesure égale à 149,6 millions de kilomètres, la distance moyenne du centre de la terre au centre du soleil selon le Bureau international des poids et mesures (BIPM) en 2006"
+    "V":
+      description:
+        fr: "unité standard de différence de potentiel électrique (et force électromotrice); la différence de potentiel entre deux points d'un conducteur transportant un courant constant d'un ampère et dissipant un watt de puissance"
+    "W":
+      description:
+        fr: "unité standard de puissance, équivalente à un joule par seconde et égale à un ampère traversant une différence de potentiel d'un volt"
+    "Wb":
+      description:
+        fr: "unité de flux magnétique (produit du champ magnétique moyen par la surface perpendiculaire dans laquelle il pénètre), exprimée en volts-secondes"
+    "π":
+      description:
+        fr: "constante mathématique égale au rapport de la circonférence d'un cercle à son diamètre"
+    "Ω":
+      description:
+        fr: "unité standard de résistance électrique ; la résistance entre deux points d'un conducteur lorsqu'une différence de potentiel constante de 1,0 volt, appliquée à ces points, produit dans le conducteur un courant de 1,0 ampère"
 cf_calendars:
   display:
-    en: CF Calendars
+    en: CF - Calendars
+    fr: CF - Calendriers
   uri:
   terms:
     standard:
       display:
         en: Standard (Mixed Gregorian/Julian)
+        fr: Standard (Grégorien/Julien mixte)
       description:
         en: In this calendar, date/times after (and including) 1582-10-15 0:0:0 are in the Gregorian calendar, in which a year is a leap year if either (i) it is divisible by 4 but not by 100 or (ii) it is divisible by 400. Date/times before (and excluding) 1582-10-5 0:0:0 are in the Julian calendar. Year 1 AD or CE in the standard calendar is also year 1 of the julian calendar. In the standard calendar, 1582-10-15 0:0:0 is exactly 1 day later than 1582-10-4 0:0:0 and the intervening dates are undefined.
+        fr: Dans ce calendrier, les dates/heures après (et y compris) 1582-10-15 0:0:0 sont dans le calendrier grégorien, dans lequel une année est une année bissextile si (i) elle est divisible par 4 mais pas par 100 ou (ii) il est divisible par 400. Les dates/heures avant (et excluant) 1582-10-5 0:0:0 sont dans le calendrier julien. L'année 1 AD ou CE dans le calendrier standard est également l'année 1 du calendrier julien. Dans le calendrier standard, 1582-10-15 0:0:0 est exactement 1 jour plus tard que 1582-10-4 0:0:0 et les dates intermédiaires ne sont pas définies.
     proleptic_gregorian:
       display:
         en: Proleptic Gregorian
+        fr: Grégorien proleptique
       description:
         en: A calendar with the Gregorian rules for leap-years extended to dates before 1582-10-15. All dates consistent with these rules are allowed, both before and after 1582-10-15 0:0:0.
+        fr: Un calendrier avec les règles grégoriennes pour les années bissextiles étendues aux dates antérieures au 15/10/1582. Toutes les dates conformes à ces règles sont autorisées, avant et après 1582-10-15 0:0:0.
     julian:
       display:
         en: Julian
+        fr: Julien
       description:
         en: Julian calendar, in which a year is a leap year if it is divisible by 4, even if it is also divisible by 100.
+        fr: Calendrier julien, dans lequel une année est une année bissextile si elle est divisible par 4, même si elle est également divisible par 100.
     noleap:
       display:
         en: No Leap Years (365 days)
+        fr: Aucun années bissextiles (365 jours)
       description:
         en: A calendar with no leap years, i.e., all years are 365 days long.
+        fr: Un calendrier sans années bissextiles, c'est-à-dire que toutes les années durent 365 jours.
     all_leap:
       display:
         en: All Leap Years (366 days)
+        fr: Tous annéers bissextile (366 jours)
       description:
         en: A calendar in which every year is a leap year, i.e., all years are 366 days long.
+        fr: Un calendrier dans lequel chaque année est une année bissextile, c'est-à-dire que toutes les années durent 366 jours.
     360_day:
       display:
         en: 360 Days
+        fr: 360 jours
       description:
         en: A calendar in which all years are 360 days, and divided into 30 day months.
+        fr: Un calendrier dans lequel toutes les années sont de 360 jours et divisées en mois de 30 jours.
     nonstandard:
       display:
         en: Non-Standard
+        fr: Non standard
       description:
         en: Used for when a non-standard calendar is being used (specify month_lengths, leap_year, and leap_month as needed).
+        fr: Utilisé lorsqu'un calendrier non standard est utilisé (spécifiez month_lengths, leap_year et leap_month selon les besoins).
     none:
       display:
-        en: No Calendar
+        en: None
+        fr: Aucun
 cf_directions:
   display:
-    en: CF Directions
+    en: CF - Directions
+    fr: CF - Directions
   uri:
   terms:
     up:
       display:
         en: Up
+        fr: Haut
       description:
         en: Positive values correspond to the "up" direction.
+        fr: les valeurs positives correspondent au sens "haut"
     down:
       display:
         en: Down
+        fr: Bas
       description:
-        en: Positive values correspond to the "down" direction.
+        en: Positive values correspond to the "bas" direction.
+        fr: les valeurs positives correspondent au sens "bas"
 cf_roles:
   display:
-    en: CF Variable Roles
+    en: CF - Variable Roles
+    fr: CF - Rôles des variables
   uri:
   terms:
     profile_id:
       display:
         en: Profile ID
+        fr: Identifiant profil
       description:
         en: This variable uniquely identifies a profile.
+        fr: Cette variable identifie de manière unique un profil.
     timeseries_id:
       display:
         en: Timeseries ID
+        fr: Identifiant série chronologique
       description:
         en: This variable uniquely identifies a timeseries.
+        fr: Cette variable identifie de manière unique une série chronologique.
     trajectory_id:
       display:
         en: Trajectory ID
+        fr: Identifiant trajectoire
       description:
         en: This variable uniquely identifies a trajectory.
+        fr: Cette variable identifie de manière unique une trajectoire.

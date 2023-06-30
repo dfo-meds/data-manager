@@ -1,14 +1,16 @@
 receive_send_item:
   default:
     label:
-      en: Default Send Item
+      en: Send Item (default)
+      fr: Élément d'envoi (défaut)
     steps:
       - split_send_files
     enabled: yes
 send_file:
   basic:
     label:
-      en: Default Upload File
+      en: Upload File (default)
+      fr: Fichier de téléchargement (défaut)
     steps:
       - handle_file_upload
     enabled: yes
@@ -16,12 +18,14 @@ dataset_publication:
     direct_publish:
         label:
           en: Direct Publish
+          fr: Publication directe
         steps:
           - publish_dataset
         enabled: yes
     super_user_publish:
       label:
-        en: Superuser Publish
+        en: Superuser Approval
+        fr: Approbation du superutilisateur
       steps:
         - superuser_approval
         - publish_dataset
@@ -29,12 +33,14 @@ dataset_activation:
     direct_activation:
         label:
           en: Direct Activation
+          fr: Activation directe
         steps:
           - activate_dataset
         enabled: yes
     super_user_activation:
       label:
         en: Superuser Approval
+        fr: Approbation du superutilisateur
       steps:
         - flag_dataset_for_review
         - superuser_approval
@@ -44,7 +50,8 @@ dataset_activation:
 text_translation:
     default:
       label:
-        en: Default Text Translation
+        en: Text Translation (default)
+        fr: Traduction de texte (défaut)
       steps:
         - fetch_translation
         - set_translation

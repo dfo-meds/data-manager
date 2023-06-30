@@ -96,14 +96,6 @@ citation:
   display:
     en: Citation
   fields:
-    title:
-      data_type: text
-      label:
-        en: Title
-      description:
-        en: Enter the title of the work being cited
-      order: 10
-      multilingual: yes
     alt_title:
       data_type: text
       label:

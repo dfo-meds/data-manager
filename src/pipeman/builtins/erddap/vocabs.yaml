@@ -1,46 +1,61 @@
 erddap_dataset_types:
   display:
     en: ERDDAP - Dataset Types
+    fr: ERDDAP - Types de données
   uri:
   terms:
     EDDTableFromNcFiles:
       display:
         en: Table from NetCDF
+        fr: Tableau en NetCDF
       description:
         en: Appropriate for most NetCDF files
+        fr: Convient à la plupart des fichiers NetCDF
     EDDTableFromAsciiFiles:
       display:
         en: Table from ASCII
+        fr: Tableau en ASCII
       description:
         en: Appropriate for most ASCII files (e.g. CSV, TSV)
+        fr: Convient à la plupart des fichiers ASCII (par exemple CSV, TSV)
     EDDGridFromNcFiles:
       display:
         en: Grid from NetCDF
+        fr: Grille en NetCDF
       description:
         en: Appropriate for NetCDF files that have 2-4 temporal or spatial dimensions and all variables are related to those dimensions.
+        fr: Convient aux fichiers NetCDF qui ont 2 à 4 dimensions temporelles ou spatiales et toutes les variables sont liées à ces dimensions.
 erddap_extra_roles:
   display:
     en: ERDDAP - Variable Roles
+    fr: ERDDAP - Rôles de variables
   uri:
   terms:
     profile_extra:
       display:
         en: Profile Information
+        fr: Informations sur le profil
       description:
         en: This variable provides extra description of the profile
+        fr: Cette variable fournit une description supplémentaire du profil
     timeseries_extra:
       display:
         en: Timeseries Information
+        fr: Informations sur les séries chronologiques
       description:
         en: This variable provides extra description of the time series
+        fr: Cette variable fournit une description supplémentaire de la série chronologique=
     trajectory_extra:
       display:
         en: Trajectory Information
+        fr: Informations sur la trajectoire
       description:
         en: This variable provides extra description of the trajectory
+        fr: Cette variable fournit une description supplémentaire de la trajectoire
 ioos_categories:
   display:
     en: IOOS - Categories
+    fr: SIOO - Catégories
   uri:
   terms:
     Acidity:
@@ -49,206 +64,277 @@ ioos_categories:
     Bathymetry:
       display:
         en: Bathymetry
+        fr: Bathymétrie
     Biology:
       display:
         en: Biology
+        fr: Biologie
     Bottom Character:
       display:
         en: Bottom Character
+        fr: Caractère du bas
     CO2:
       display:
         en: Carbon Dioxide
+        fr: Gaz carbonique
     Colored Dissolved Organic Matter:
       display:
         en: Colored Dissolved Organic Matter
+        fr: Matière organique dissoute colorée
     Contaminants:
       display:
         en: Contaminants
+        fr: Contaminants
     Currents:
       display:
         en: Currents
+        fr: Courants
     Dissolved Nutrients:
       display:
         en: Dissolved Nutrients
+        fr: Nutriments dissous
     Dissolved O2:
       display:
         en: Dissolved Oxygen
+        fr: Oxygène dissous
     Ecology:
       display:
         en: Ecology
+        fr: Écologie
     Fish Abundance:
       display:
         en: Fish Abundance
+        fr: Abondance de poisson
     Fish Species:
       display:
         en: Fish Species
+        fr: Espèces de poissons
     Heat Flux:
       display:
         en: Heat Flux
+        fr: Flux de chaleur
     Hydrology:
       display:
         en: Hydrology
+        fr: Hydrologie
     Ice Distribution:
       display:
         en: Ice Distribution
+        fr: Distribution de glace
     Identifier:
       display:
         en: Identifier
+        fr: Identifiant
     Location:
       display:
         en: Location
+        fr: Emplacement
     Meteorology:
       display:
         en: Meteorology
+        fr: Météorologie
     Ocean Color:
       display:
         en: Ocean Color
+        fr: Couleur de l'océan
     Optical Properties:
       display:
         en: Optical Properties
+        fr: Propriétés optiques
     Other:
       display:
         en: Other
+        fr: Autre
     Pathogens:
       display:
         en: Pathogens
+        fr: Agents pathogènes
     Phytoplankton Species:
       display:
         en: Phytoplankton Species
+        fr: Espèces de phytoplancton
     Pressure:
       display:
         en: Pressure
+        fr: Pression
     Productivity:
       display:
         en: Productivity
+        fr: Productivité
     Quality:
       display:
         en: Quality
+        fr: Qualité
     Salinity:
       display:
         en: Salinity
+        fr: Salinité
     Sea Level:
       display:
         en: Sea Level
+        fr: Niveau de la mer
     Statistics:
       display:
         en: Statistics
+        fr: Statistiques
     Stream Flow:
       display:
         en: Stream Flow
+        fr: Flux de courant
     Surface Waves:
       display:
         en: Surface Waves
+        fr: Ondes de surface
     Taxonomy:
       display:
         en: Taxonomy
+        fr: Taxonomie
     Temperature:
       display:
         en: Temperature
+        fr: Température
     Time:
       display:
         en: Time
+        fr: Temps
     Total Suspended Matter:
       display:
         en: Total Suspended Matter
+        fr: Matières en suspension totales
     Unknown:
       display:
         en: Unknown
+        fr: Inconnu
     Wind:
       display:
         en: Wind
+        fr: Vent
     Zooplankton Species:
       display:
         en: Zooplankton Species
+        fr: Espèces de zooplancton
     Zooplankton Abundance:
       display:
         en: Zooplankton Abundance
+        fr: Abondance de zooplancton
 erddap_time_precisions:
   display:
     en: ERDDAP - Time Precisions
+    fr: ERDDAP - Précisions temporelles
   uri:
   terms:
     month:
       display:
         en: Month
+        fr: Mois
     day:
       display:
         en: Day
+        fr: Jour
     hour:
       display:
         en: Hour
+        fr: Heure
     minute:
       display:
         en: Minute
+        fr: Minute
     second:
       display:
         en: Second
+        fr: Seconde
     tenth_second:
       display:
         en: 1/10 Second
+        fr: 1/0 seconde
     hundredth_second:
       display:
         en: 1/100 Second
+        fr: 1/100 seconde
     millisecond:
       display:
         en: Millisecond
+        fr: Milliseconde
 cdm_data_types:
   display:
-    en: CDM - Data Types
+    en: Common Data Model - Data Types
+    fr: Modèle de données commun - Types de données
   uri:
   terms:
     Point:
       display:
         en: Point
+        fr: Point
       description:
         en: Point datasets are a series of unrelated observations each taken at a specific latitude, longitude and time (and optionally depth).
+        fr: Les ensembles de données points sont une série d'observations indépendantes prises chacune à une latitude, une longitude et une heure (et éventuellement une profondeur) spécifiques.
     Profile:
       display:
         en: Profile
+        fr: Profil
       description:
         en: Profile datasets have one or more profiles, each of which are taken at a specific latitude, longitude and time. Each profile consists of one or more observations taken at different depths or altitudes. Profiles within the dataset are unrelated.
+        fr: Les ensembles de données de profil ont un ou plusieurs profils, chacun étant pris à une latitude, une longitude et une heure spécifiques. Chaque profil consiste en une ou plusieurs observations prises à différentes profondeurs ou altitudes. Les profils au sein de l'ensemble de données ne sont pas liés.
     TimeSeries:
       display:
         en: Time Series
+        fr: Séries chronologiques
       description:
         en: Time series datasets have one or more "stations" which exist at a fixed latitude, longitude, and depth or altitude. Each station has one or more set of observations taken at different times.
+        fr: Les ensembles de données de séries chronologiques ont une ou plusieurs « stations » qui existent à une latitude, une longitude et une profondeur ou une altitude fixes. Chaque station a un ou plusieurs ensembles d'observations prises à des moments différents.
     TimeSeriesProfile:
       display:
         en: Time Series of Profiles
+        fr: Séries chronologiques de profils
       description:
         en: Like a time series dataset, but the depth is not fixed by station. Instead, each station reports a profile of observations at different depths at each given time step.
+        fr: Comme un ensemble de données de séries chronologiques, mais la profondeur n'est pas fixée par station. Au lieu de cela, chaque station rapporte un profil d'observations à différentes profondeurs à chaque pas de temps donné.
     Trajectory:
       display:
         en: Trajectory
+        fr: Trajectoire
       description:
         en: Trajectory datasets have one or more "stations" which move through space and time (e.g. a ship on a mission). Each station has a sequence of observations taken at a single level and a specific latitude, longitude, and time.
+        fr: Les ensembles de données de trajectoire ont une ou plusieurs « stations » qui se déplacent dans l'espace et dans le temps (par exemple, un navire en mission). Chaque station a une séquence d'observations prises à un seul niveau et à une latitude, une longitude et une heure spécifiques.
     TrajectoryProfile:
       display:
         en: Trajectory of Profiles
+        fr: Trajectoire de profils
       description:
         en: Like a trajectory dataset, but each observation is actually a profile of observations.
+        fr: Comme un ensemble de données de trajectoire, mais chaque observation est en fait un profil d'observations.
     Grid:
       display:
-        en: Grid (gridded data only)
+        en: Grid
+        fr: Grille
       description:
         en: A basic grid includes observations in 2, 3, or 4 dimensions using latitude, longitude, altitude/depth, and/or time coordinates as appropriate. The non-time dimensions are fixed over time.
+        fr: Une grille de base comprend des observations en 2, 3 ou 4 dimensions en utilisant la latitude, la longitude, l'altitude/profondeur et/ou les coordonnées temporelles, selon le cas. Les dimensions non temporelles sont fixées dans le temps.
     MovingGrid:
       display:
-        en: Moving Grid (gridded data only)
+        en: Moving Grid
+        fr: Grille mobile
       description:
         en: A moving grid includes observations in 2-4 dimensions, but the non-time dimensions can vary over time (e.g. for hurricane forecasts).
+        fr: Une grille mobile comprend des observations en 2 à 4 dimensions, mais les dimensions non temporelles peuvent varier dans le temps (par exemple pour les prévisions d'ouragans).
     RadialSweep:
       display:
-        en: Radial Sweep (gridded data only)
+        en: Radial Sweep (grid)
+        fr: Balayage radial (grille)
       description:
         en: A radial sweep uses polar coordinates (e.g. radial and gate) for their data and to calculate elevation, azimuth, and distance.
+        fr: Un balayage radial utilise des coordonnées polaires (par exemple, radiale et porte) pour leurs données et pour calculer l'élévation, l'azimut et la distance.
     Swath:
       display:
-        en: Swath (gridded data only)
+        en: Swath (grid)
+        fr: Bande (grille)
       description:
         en: A swath describes data from polar satellites, which typically have two scan coordinates used for all variables and to calculate the latitude and longitude.
+        fr: Une bande décrit les données des satellites polaires, qui ont généralement deux coordonnées de balayage utilisées pour toutes les variables et pour calculer la latitude et la longitude.
     Other:
       display:
         en: Other
+        fr: Autre
       description:
         en: No requirements. Use if (a) your data does not have latitude, longitude, and time or does not fit the geometries available, and (b) is not gridded
+        fr: Aucune exigence. À utiliser si (a) vos données n'ont pas de latitude, de longitude et d'heure ou ne correspondent pas aux géométries disponibles, et (b) ne sont pas maillées

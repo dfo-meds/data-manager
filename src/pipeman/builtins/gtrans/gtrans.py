@@ -4,6 +4,7 @@ import pipeman.db.orm as orm
 from pipeman.i18n.workflow import TranslationEngine
 from pipeman.util.errors import RecoverableError
 import json
+from html import unescape
 
 
 class GoogleTranslationEngine(TranslationEngine):
@@ -41,7 +42,7 @@ class GoogleTranslationEngine(TranslationEngine):
                 )
             if response.translations and response.translations[0].translated_text:
                 self.log.debug(f"Translation for {tr.id} set to {response.translations[0].translated_text} by Google Translate")
-                tr.set_translation(response.translations[0].translated_text, self.allow_reuse)
+                tr.set_translation(unescape(response.translations[0].translated_text), self.allow_reuse)
                 session.commit()
             else:
                 self.log.warning(f"Missing translation in response to {tr.id}: {response}")

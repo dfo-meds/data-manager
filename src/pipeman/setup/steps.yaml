@@ -1,55 +1,66 @@
 publish_dataset:
   label:
     en: Publish Dataset
+    fr: Publier l'ensemble de données
   step_type: action
   action: pipeman.dataset.workflow.publish_dataset
 activate_dataset:
   label:
     en: Activate Dataset
+    fr: Activer l'ensemble de données
   step_type: action
   action: pipeman.dataset.workflow.activate_dataset
 flag_dataset_for_review:
   label:
     en: Block Dataset Edits
+    fr: Bloquer les modifications de l'ensemble de données
   step_type: action
   action: pipeman.dataset.workflow.flag_dataset_for_review
 return_to_draft:
   label:
     en: Return to Draft
+    fr: Revenir au brouillon
   step_type: action
   action: pipeman.dataset.workflow.return_to_draft
 upload_metadata:
   label:
     en: Upload Metadata
+    fr: Télécharger les métadonnées
   step_type: action
   action: pipeman.dataset.workflow.upload_metadata
 superuser_approval:
   label:
-    en: General Approval
+    en: Superuser Approval
+    fr: Approbation superutilisateur
   step_type: gate
   require_permission: superuser
 split_send_files:
   label:
     en: Split Send Files
+    fr: Diviser les fichiers d'envoi
   step_type: async
   coro: pipeman.files.workflow.split_send_files
 handle_file_upload:
   label:
     en: Upload File
+    fr: Téléverser un fichier
   step_type: async
   coro: pipeman.files.workflow.upload_file
 remove_in_translation_flag:
   label:
-    en: Remove Flag
+    en: Allow Edits
+    fr: Autoriser les modifications
   step_type: action
   action: pipeman.i18n.workflow.remove_in_translation_flag
 set_translation:
   label:
-    en: Set Translation
+    en: Block Edits
+    fr: Empêcher les modifications
   step_type: action
   action: pipeman.i18n.workflow.set_translation
 fetch_translation:
   label:
-    en: Fetch Translation
+    en: Get Translation
+    fr: Obtenir la traduction
   step_type: batch
   action: pipeman.i18n.workflow.fetch_translation

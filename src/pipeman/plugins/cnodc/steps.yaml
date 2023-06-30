@@ -1,30 +1,35 @@
 lead_approval:
   label:
     en: Program Lead Approval
+    fr: Approbation du responsable du programme
   step_type: gate
   require_permission: approvals.program_lead
   access_check: "pipeman.dataset.dataset_gate_step_access"
 coordinator_approval:
   label:
     en: Regional Coordinator Approval
+    fr: Approbation du coordonnateur régional
   step_type: gate
   require_permssion: approvals.coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
 pub_coord_approval:
   label:
     en: Publishing Coordinator Approval
+    fr: Approbation du coordinateur de publication
   step_type: gate
   require_permission: approvals.publishing_coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
 sysadmin_approval:
   label:
     en: System Administrator Approval
+    fr: Approbation de l'administrateur système
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
 iso19115_metadata_upload_live:
   label:
     en: Upload ISO-19115 Metadata File (Live)
+    fr: Télécharger le fichier de métadonnées ISO-19115 (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -35,6 +40,7 @@ iso19115_metadata_upload_live:
 erddap_metadata_upload_live:
   label:
     en: Upload ERDDAP Config File (Live)
+    fr: Télécharger le fichier de configuration ERDDAP (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
@@ -45,6 +51,7 @@ erddap_metadata_upload_live:
 iso19115_metadata_upload_staging:
   label:
     en: Upload ISO-19115 Metadata File (Staging)
+    fr: Télécharger le fichier de métadonnées ISO-19115 (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -55,6 +62,7 @@ iso19115_metadata_upload_staging:
 erddap_metadata_upload_staging:
   label:
     en: Upload ERDDAP Config File (Staging)
+    fr: Télécharger le fichier de configuration ERDDAP (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
@@ -65,12 +73,14 @@ erddap_metadata_upload_staging:
 erddap_notify_staging:
   label:
     en: Notify ERDDAPUtil (Staging)
+    fr: Notifier ERDDAPUtil (en direct)
   step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: staging
 erddap_notify_live:
   label:
     en: Notify ERDDAPUtil (Live)
+    fr: Notifier ERDDAPUtil (mise en scène)
   step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: live

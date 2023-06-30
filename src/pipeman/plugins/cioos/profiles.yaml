@@ -1,6 +1,6 @@
 cioosv2:
   display:
-    en: CIOOS v2
+    en: SIOOC v2
   extends: iso19115
   validation:
     required:

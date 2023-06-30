@@ -163,7 +163,7 @@ class EntityController:
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity.page.restore_entity.confirmation"),
+            instructions=gettext("pipeman.entity.page.restore_entity.instructions"),
             title=gettext("pipeman.entity.page.restore_entity.title")
         )
 

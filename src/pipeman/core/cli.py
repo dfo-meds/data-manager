@@ -252,14 +252,14 @@ def steps(output_file, wreg: WorkflowRegistry):
 @click.argument("output_file")
 @injector.inject
 def translations(output_file, wreg: WorkflowRegistry, vreg: VocabularyRegistry, vtc: VocabularyTermController, mreg: MetadataRegistry, ereg: EntityRegistry):
-    skip_complete: bool = True
+    skip_complete: int = 1
     with open(output_file, "w", newline="\n", encoding="utf-8") as h:
         writer = csv.writer(h)
         writer.writerow([
             "category",
             "element",
             "sub-element",
-            "sub-element2"
+            "sub-element2",
             "name_und",
             "name_en",
             "name_fr"
@@ -388,10 +388,10 @@ def translations(output_file, wreg: WorkflowRegistry, vreg: VocabularyRegistry, 
                 ])
 
 
-def _check_output(txt, skip_complete: bool):
-    if not skip_complete:
-        return True
-    if ('en' in txt and 'fr' in txt and txt['en'] and txt['fr']) or ('und' in txt and txt['und']):
+def _check_output(txt, skip_complete: int):
+    if skip_complete in (1,2) and ('en' in txt and 'fr' in txt and txt['en'] and txt['fr']):
+        return False
+    if skip_complete == 2 and 'und' in txt and txt['und']:
         return False
     return True
 
