@@ -424,30 +424,30 @@
     <gmd:individualName>{{render_text(contact['individual_name'])}}</gmd:individualName>
   {% endif %}
   {% if contact['position_name'] %}
-    <gmd:PositionName xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['position_name'])}}</gmd:PositionName>
+    <gmd:positionName xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['position_name'])}}</gmd:positionName>
     {% endif %}
   {% if contact['phone'] or contact['web_resource'] or contact['service_hours'] or contact['instructions'] or contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
   <gmd:contactInfo>
     <gmd:CI_Contact>
       {% if contact['phone'] %}
-      {% for phone_no in contact['phone'] %}
-      {% if phone_no['phone_number'] %}
       <gmd:phone>
         <gmd:CI_Telephone>
+          {% for phone_no in contact['phone'] %}
+          {% if (not phone_no['phone_number_type']) or phone_no['phone_number_type']['short_name'] != 'fax' %}
           <gmd:voice>
             <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
           </gmd:voice>
-          {% if phone_no['phone_number_type'] %}
-          <gmd:numberType>
-            {% with code_list, code_value, text_value = nap_code_map(phone_no['phone_number_type']['short_name'], 'CI_TelephoneTypeCode') %}
-            <gmd:CI_TelephoneTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_TelephoneTypeCode>
-            {% endwith %}
-          </gmd:numberType>
           {% endif %}
+          {% endfor %}
+          {% for phone_no in contact['phone'] %}
+          {% if phone_no['phone_number_type'] and phone_no['phone_number_type']['short_name'] == 'fax' %}
+          <gmd:facsimile>
+            <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
+          </gmd:facsimile>
+          {% endif %}
+          {% endfor %}
         </gmd:CI_Telephone>
       </gmd:phone>
-      {% endif %}
-      {% endfor %}
       {% endif %}
       {% if contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
       <gmd:address>
@@ -513,7 +513,7 @@
     {{ render_citation(system['authority']) }}
     </gmd:authority>
     {% endif %}
-    <gmd:code><gco:CharacterString>{{code}}</gco:CharacterString></gmd:code>
+    <gmd:code><gco:CharacterString>{% if system['code_space'] %}{{system['code_space']}}{% endif %}{{code}}</gco:CharacterString></gmd:code>
   </gmd:MD_Identifier>
   {% endmacro %}
 </templates>

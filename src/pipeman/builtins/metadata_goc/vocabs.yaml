@@ -209,3 +209,171 @@ goc_collection_types:
       display:
         en: Publications
         fr: Publication
+goc_content_types:
+  display:
+    en: GC - Content Types
+    # TODO: fr
+  uri:
+  terms:
+    dataset:
+      display:
+        en: Dataset
+        fr: Données
+      web_service:
+        en: Web Service
+        fr: Service Web
+      api:
+        en: API
+        fr: API
+      support_doc:
+        en: Supporting Document
+        fr: Document de soutien
+      application:
+        en: Application
+        fr: Application
+goc_content_formats:
+  display:
+    en: GC - Formats
+    # TODO: fr
+  uri: http://www.gcpedia.gc.ca/wiki/Federal_Geospatial_Platform/Policies_and_Standards/Catalogue/Release/Appendix_B_Guidelines_and_Best_Practices/Guide_to_Harmonized_ISO_19115:2003_NAP/Format
+  terms:
+    AAC:
+    AIFF:
+    APK:
+    ASCII:
+    "ASCII Grid":
+    AVI:
+    BAG:
+    BMP:
+    BWF:
+    CCT:
+    CDF:
+    CDR:
+    COD:
+    CSV:
+    DBD:
+    DBF:
+    DICOM:
+    DNG:
+    DOC:
+    DOCX:
+    DXF:
+    E00:
+    ECW:
+    EDI:
+    EMF:
+    EPS:
+    EPUB2:
+    EPUB3:
+    "ESRI REST":
+    EXE:
+    "FGDB/GDB":
+    "Flat raster binary":
+    GeoJSON:
+    GPKG:
+    GeoPDF:
+    GeoRSS:
+    GDB:
+    GRD:
+    GeoTIF:
+    GIF:
+    GML:
+    GRIB1:
+    GRIB2:
+    HDF:
+    HTML:
+    IATI:
+    IPA:
+    JAR:
+    JFIF:
+    JP2:
+    JPG:
+    JSON:
+    JSONL:
+    JSON-LD:
+    KML:
+    KMZ:
+    LAS:
+    LYR:
+    MXF:
+    MOV:
+    MP3:
+    MPEG:
+    MPEG-1:
+    MXD:
+    NetCDF:
+    ODP:
+    ODS:
+    ODT:
+    PDF:
+    PDF/A-1:
+    PDF/A-2:
+    PDF/UA:
+    PNG:
+    PPT:
+    PPTX:
+    RDF:
+    NT:
+    TTL:
+    RDFa:
+    RSS:
+    RTF:
+    SAR:
+    SAV:
+    SEGY:
+    SHP:
+    SQL:
+    SQLITE:
+    SQLITE3:
+    SVG:
+    TAB:
+    TIFF:
+    TFW:
+    TRiG:
+    TRiX:
+    TXT:
+    VPF:
+    WAV:
+    "Web App":
+    WCG:
+    WFS:
+    WMS:
+    WMTS:
+    WMV:
+    WPS:
+    XLS:
+    XLSX:
+    XLSM:
+    XML:
+    ZIP:
+    TAR:
+    GZIP:
+    "TAR.GZ":
+    "SHP.ZIP":
+    "SHZ":
+    "DBF3":
+    "GRIB":
+    "WMS Layer":
+    "WFS Layer":
+    "WMTS Layer":
+    "ESRI Map Tile":
+    "ESRI Feature Layer":
+    "ESRI Dynamic Layer":
+    "ESRI Table":
+    "ESRI KML":
+    "ESRI JSON":
+    "ESRI Raster Catalog":
+    "ESRI Raster Image":
+    "ESRI Network Layer":
+    "Annotation Layer":
+    "MODFLOW":
+    "PDF 3D":
+    "Leapfrog Hydro":
+    "Leapfrog Mining":
+    "FEFLOW":
+    "Leapfrog Viewer":
+    "MapInfo Grid":
+    "GOCAD Model":
+    "GOCAD Object":
+    "WATFLOAT":
+

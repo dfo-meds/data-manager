@@ -68,7 +68,7 @@
   </cit:function>
   {% endif %}
   {% if resource['protocol_request'] %}
-  <cit:protocolRequest>{{ render_text(resource['protocol_request']) }}</cit:protocolRequest>
+  <cit:protocolRequest xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(resource['protocol_request']) }}</cit:protocolRequest>
   {% endif %}
 </cit:CI_OnlineResource>
 {% endmacro %}
@@ -473,10 +473,10 @@
   {% endmacro %}
 
   {% macro render_contact_content(contact) %}
-  {% if contact['organization_name'] %}
-  <cit:name xsi:type="lan:PT_FreeText_PropertyType">{{render_text(contact['organization_name'])}}</cit:name>
-  {% elif contact['individual_name'] %}
+  {% if contact['individual_name'] %}
     <cit:name>{{render_text(contact['individual_name'])}}</cit:name>
+  {% elif contact['organization_name'] %}
+  <cit:name xsi:type="lan:PT_FreeText_PropertyType">{{render_text(contact['organization_name'])}}</cit:name>
   {% endif %}
   {% if contact['phone'] or contact['web_resource'] or contact['service_hours'] or contact['instructions'] or contact['delivery_point'] or contact['city'] or contact['admin_area'] or contact['postal_code'] or contact['country'] or contact['email'] %}
   <cit:contactInfo>
@@ -570,7 +570,7 @@
   {% if contact['logo'] %}
   <cit:logo>{{ render_graphic(contact['logo']) }}</cit:logo>
   {% endif %}
-  {% if contact['position_name'] and not contact['organization_name'] %}
+  {% if contact['position_name'] %}
     <cit:positionName xsi:type="lan:PT_FreeText_PropertyType">{{render_text(contact['position_name'])}}</cit:positionName>
     {% endif %}
   {% if contact['individuals'] %}
@@ -580,14 +580,14 @@
   {% endif %}
 {% endmacro %}
 {% macro render_contact(contact) %}
-  {% if contact['organization_name'] or contact['logo'] %}
-    <cit:CI_Organisation>
-      {{ render_contact_content(contact) }}
-    </cit:CI_Organisation>
-  {% else %}
+  {% if contact['individual_name'] %}
     <cit:CI_Individual>
       {{ render_contact_content(contact) }}
     </cit:CI_Individual>
+  {% else %}
+    <cit:CI_Organisation>
+      {{ render_contact_content(contact) }}
+    </cit:CI_Organisation>
   {% endif %}
 {% endmacro %}
   {% macro render_id(code, desc, system) %}

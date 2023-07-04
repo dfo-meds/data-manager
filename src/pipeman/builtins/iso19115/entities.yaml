@@ -300,12 +300,10 @@ graphic:
       order: 20
     file_ext:
       data_type: text
+      multilingual: yes
       label:
-        en: File Extension
-        fr: Extension de fichier
-      description:
-        en: Enter the file extension here
-        fr: Entrez l'extension de fichier ici
+        en: File Extension Description
+        fr: Description d'extension de fichier
       order: 30
     reference_link:
       data_type: entity_ref
@@ -857,6 +855,7 @@ resource:
         en: If additional information is needed on how to use the resource, enter it here (e.g. how to format POST requests to a URL).
         fr: Si des informations supplémentaires sont nécessaires sur la façon d'utiliser la ressource, entrez-les ici (par exemple, comment formater les requêtes POST en une URL).
       order: 50
+      multilingual: yes
     app_profile:
       data_type: text
       label:
@@ -1280,7 +1279,7 @@ spatial_res:
 time_res:
   hidden: yes
   display:
-    en: Time Resolution
+    en: Temporal Resolution
     fr: Résolution temporelle
   validation:
     custom:
@@ -1387,8 +1386,8 @@ dist_channel:
       data_type: entity_ref
       entity_type: resource
       label:
-        en: Resources
-        fr: Ressources
+        en: Web Resources
+        fr: Ressources Web
       description:
         en: If there are additional relevant web resources for this distribution method, add them here.
         fr: S'il existe d'autres ressources Web pertinentes pour cette méthode de distribution, ajoutez-les ici.

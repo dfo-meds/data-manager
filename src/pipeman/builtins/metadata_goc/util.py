@@ -1,3 +1,5 @@
+import functools
+
 from pipeman.builtins.iso19115.util import preprocess_metadata
 
 ORIGINALS = {

@@ -14,8 +14,8 @@ goc_publishing_section:
         en: Section Name
         fr: Nom de la section
       description:
-        en: Enter the name of the group within the department which is publishing the data
-        fr: Entrez le nom du groupe au sein du service qui publie les données
+        en: Enter the name of the group within the department which is publishing the data.
+        fr: Entrez le nom du groupe au sein du service qui publie les données.
       order: 10
     publisher:
       data_type: entity_ref
@@ -23,10 +23,40 @@ goc_publishing_section:
         en: Publisher
         fr: Éditeur
       description:
-        en: Select the department or agency which is publishing the data
-        fr: Sélectionnez le ministère ou l'agence qui publie les données
+        en: Select the department or agency which is publishing the data.
+        fr: Sélectionnez le ministère ou l'agence qui publie les données.
       entity_type: goc_publishing_org
       order: 0
+resource:
+  fields:
+    goc_content_type:
+      data_type: vocabulary
+      vocabulary_name: goc_content_types
+      label:
+        en: GC Content Type
+        fr: # todo
+      description:
+        en: Select the content type that best describes this resource.
+        fr: # todo
+    goc_formats:
+      data_type: vocabulary
+      vocabulary_name: goc_content_Formats
+      repeatable: yes
+      label:
+        en: GC Content Format
+        fr: # todo
+      description:
+        en: Select the format(s) that best describe this resource.
+        fr: # todo
+    goc_languages:
+      data_type: text
+      repeatable: yes
+      label:
+        en: Content Language
+        fr: # todo
+      description:
+        en: Enter the language(s) that this resource supports, using the ISO 639-2/T 3-letter language codes, or leave blank if there are no supported languages.
+        fr: # todo
 goc_publishing_org:
   display:
     en: GoC Publishers

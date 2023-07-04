@@ -145,8 +145,8 @@ def preprocess_metadata(dataset, **kwargs):
                 "date": dataset.created_date()
             },
             {
-                "type": {"short_name": "modified"},
-                "date": dataset.modified_date()
+                "type": {"short_name": "revision"},
+                "date": dataset.metadata_modified_date()
             },
         ],
         "default_locale": default_locale,

@@ -22,12 +22,14 @@ import datetime
 
 UTC = datetime.timezone(datetime.timedelta(seconds=0), "UTC")
 
+
 def netcdf_dataset_actions(items: ActionList, dataset, short_list: bool = True, for_revision: bool = False):
     if not (short_list or for_revision):
         items.add_action("pipeman.netcdf.page.populate_from_netcdf.link",
                          "netcdf.populate_from_netcdf_dsid",
                          30,
                          dataset_id=dataset.dataset_id if hasattr(dataset, "dataset_id") else dataset.id)
+
 
 def preprocess_for_ncml(dataset, **kwargs):
     extras = _preprocess_for_both(dataset, **kwargs)
@@ -79,7 +81,7 @@ def _autodetect_mapping(field: Field):
 def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **kwargs):
     attrs = _extract_netcdf_attributes(dataset)
     attrs['id'] = dataset.guid()
-    attrs['naming_authority'] = config.as_str(("pipeman", "metadata", "naming_authority"), default="pipeman")
+    attrs['naming_authority'] = dataset.naming_authority()
     return attrs
 
 

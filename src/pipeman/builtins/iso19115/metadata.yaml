@@ -134,6 +134,10 @@ data_info:
       multilingual: yes
       netcdf:
         mapping: title
+      iso_yaml:
+        mapping:
+          - identification
+          - title
     dataset_id_code:
       data_type: text
       label:
@@ -177,6 +181,11 @@ data_info:
       netcdf:
         mapping: date_issued
         processor: datetime
+      iso_yaml:
+        mapping:
+          - identification
+          - dates
+          - publication
     revision_date:
       data_type: date
       label:
@@ -189,6 +198,11 @@ data_info:
       netcdf:
         mapping: date_modified
         processor: datetime
+      iso_yaml:
+        mapping:
+          - identification
+          - dates
+          - revision
     creation_date:
       data_type: date
       label:
@@ -201,6 +215,11 @@ data_info:
       netcdf:
         mapping: date_created
         processor: datetime
+      iso_yaml:
+        mapping:
+          - identification
+          - dates
+          - creation
     abstract:
       data_type: multitext
       label:
@@ -213,6 +232,10 @@ data_info:
       multilingual: yes
       netcdf:
         mapping: summary
+      iso_yaml:
+        mapping:
+          - identification
+          - abstract
     responsibles:
       data_type: inline_entity_ref
       entity_type: responsibility
@@ -268,6 +291,9 @@ data_more_info:
       multilingual: yes
       netcdf:
         mapping: acknowledgement
+      iso_yaml:
+        mapping:
+          - acknowledgement
     info_link:
       data_type: inline_entity_ref
       entity_type: quick_web_page
@@ -344,6 +370,10 @@ keywords:
         en: Select one or more topic categories which best describe this dataset.
         fr: Sélectionnez une ou plusieurs catégories de sujets qui décrivent le mieux cet ensemble de données.
       order: 10
+      iso_yaml:
+        mapping:
+          - identification
+          - topic_category
 extent:
   fields:
     bbox_west:
@@ -584,6 +614,10 @@ technical:
         en: Select the most appropriate option(s) that describe the status of this dataset.
         fr: Sélectionnez la ou les options les plus appropriées décrivant l'état de cet ensemble de données.
       repeatable: yes
+      iso_yaml:
+        mapping:
+          - identification
+          - status
     spatial_representation_type:
       data_type: vocabulary
       order: 40
@@ -595,6 +629,9 @@ technical:
         en: Select the most appropriate option(s) that describe this dataset.
         fr: Sélectionnez la ou les options les plus appropriées décrivant cet ensemble de données.
       repeatable: yes
+      iso_yaml:
+        mapping:
+          - spatial
     resource_maintenance_frequency:
       data_type: vocabulary
       order: 50
@@ -605,6 +642,10 @@ technical:
       description:
         en: Select the most appropriate option that describes how often the dataset is updated.
         fr: Sélectionnez l'option la plus appropriée qui décrit la fréquence de mise à jour de l'ensemble de données.
+      iso_yaml:
+        mapping:
+          - identification
+          - maintenancefrequency
     iso_maintenance:
       data_type: component_ref
       entity_type: maintenance

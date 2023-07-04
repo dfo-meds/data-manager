@@ -29,7 +29,7 @@
   {% endfor %}
   {% if dataset['created_date'] %}
   <gmd:dateStamp>
-    {{ iso.render_date(dataset['created_date']) }}
+    {{ iso.render_date(dataset['created_date']) }} {# <!-- todo: should be metadata revision date, check iso 19115 template too --> #}
   </gmd:dateStamp>
   {% endif %}
   <gmd:metadataStandardName xsi:type="gmd:PT_FreeText_PropertyType">

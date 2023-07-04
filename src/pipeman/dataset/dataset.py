@@ -1,3 +1,7 @@
+from datetime import datetime
+
+import zirconium as zr
+
 import markupsafe
 from autoinject import injector
 from pipeman.util import deep_update, load_object
@@ -296,11 +300,18 @@ class Dataset(FieldContainer):
     def guid(self):
         return self.extras['guid'] if 'guid' in self.extras else ""
 
+    @injector.inject
+    def naming_authority(self, config: zr.ApplicationConfig):
+        return config.as_str(("pipeman", "metadata", "naming_authority"), default="pipeman")
+
     def created_date(self):
         return self.extras['created_date']
 
     def modified_date(self):
         return self.extras['modified_date']
+
+    def metadata_modified_date(self) -> datetime:
+        return self.extras['metadata_modified_date']
 
     def keywords(self):
         keywords = []

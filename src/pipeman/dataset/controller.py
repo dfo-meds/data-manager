@@ -25,6 +25,7 @@ import re
 import flask_wtf.file as fwf
 import uuid
 from pipeman.util.metrics import BlockTimer, time_function
+import zirconium as zr
 
 
 @injector.injectable
@@ -34,6 +35,7 @@ class DatasetController:
     reg: MetadataRegistry = None
     workflow: WorkflowController = None
     acontroller: AttachmentController = None
+    config: zr.ApplicationConfig = None
 
     @injector.construct
     def __init__(self, view_template="view_dataset.html", edit_template="form.html", meta_edit_template="metadata_form.html"):
@@ -448,7 +450,8 @@ class DatasetController:
     def generate_metadata_content(self, dataset, profile_name, format_name, environment="live"):
         args = {
             "dataset": dataset,
-            "environment": environment
+            "environment": environment,
+            "authority": self.config.as_str(("pipeman", "authority"))
         }
         for processor in self.reg.metadata_processors(dataset.profiles, profile_name, format_name):
             updates = processor(**args)
@@ -521,6 +524,7 @@ class DatasetController:
                         "modified_date": ds.modified_date,
                         "guid": ds.guid,
                         "pub_date": ds_data.published_date if ds_data else None,
+                        "metadata_modified_date": ds_data.modified_date if ds_data else ds.created_date,
                         "activated_item_id": ds.activated_item_id,
                         "approval_item_id": ds_data.approval_item_id if ds_data else None
                     },

@@ -2250,6 +2250,18 @@ iso19115_link_protocols:
     ESRI:MPK:
       display:
         fr: Forfait de carte ArcGIS
+    "ESRI REST: Map Service":
+      display:
+        en: ESRI Map Service (FGP Compliant)
+    "ESRI REST: Feature Service":
+      display:
+        en: ESRI Feature Service (FGP Compliant)
+    "ESRI REST: Image Service":
+      display:
+        en: ESRI Image Service (FGP Compliant)
+    "ESRI REST: Tiled Map Service":
+      display:
+        en: ESRI Tiled Map Service (FGP Compliant)
     file:
       display:
         fr: Déposer

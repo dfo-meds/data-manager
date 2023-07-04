@@ -28,7 +28,7 @@
       <mcc:authority>
         <cit:CI_Citation>
           <cit:title>
-            <gco:CharacterString>ca.gc.dfo-mpo.cnodc-cndoc</gco:CharacterString>
+            <gco:CharacterString>{{ authority_uri }}</gco:CharacterString>
           </cit:title>
         </cit:CI_Citation>
       </mcc:authority>

@@ -98,6 +98,8 @@ class VocabularyTermController:
     def save_terms_from_dict(self, vocab_name, terms: dict):
         with self.db as session:
             for tsname in terms:
+                if terms[tsname] is None:
+                    terms[tsname] = {}
                 self.upsert_term(
                     vocab_name,
                     tsname,

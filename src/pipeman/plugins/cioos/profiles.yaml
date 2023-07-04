@@ -19,3 +19,12 @@ cioosv2:
       - pipeman.plugins.cioos.util.cioos_dataset_validation
   fields:
     cioos_eovs:
+# WIP
+#  formatters:
+#    cioos_yaml:
+#      label:
+#        en: CIOOS YAML
+#        fr: SIOOS YAML
+#      template: cioos.yaml
+#      content_type: application/yaml
+#      preprocess: pipeman.plugins.cioos.util.preprocess_yaml_format
