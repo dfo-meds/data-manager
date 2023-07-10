@@ -102,7 +102,7 @@ class VocabularyTermController:
                     terms[tsname] = {}
                 self.upsert_term(
                     vocab_name,
-                    tsname,
+                    str(tsname),
                     terms[tsname]["display"] if "display" in terms[tsname] else {},
                     terms[tsname]["description"] if "description" in terms[tsname] else {},
                     session
