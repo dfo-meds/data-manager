@@ -7,12 +7,12 @@ export PYTHONUNBUFFERED
 cd /srv/metadb/app || exit
 
 # Run the daemon
-if [ "$1" == "cron"] ; then
+if [ "$1" -eq "cron" ] ; then
 
   python cli.py core cron
 
 # Upgrade or install
-elif [ "$1" == "upgrade" ] ; then
+elif [ "$1" -eq "upgrade" ] ; then
 
   python -m alembic upgrade head
 
@@ -21,7 +21,7 @@ elif [ "$1" == "upgrade" ] ; then
 else
 
   # Check for the default name and remove it
-  if [ "$1" == "webserver" ] ; then
+  if [ "$1" -eq "webserver" ] ; then
     shift 1
   fi
 
