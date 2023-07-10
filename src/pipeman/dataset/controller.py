@@ -558,7 +558,7 @@ class DatasetController:
                         display_names=json.dumps(dataset.display_names()),
                         profiles="\n".join(dataset.profiles),
                         guid=str(uuid.uuid4()),
-                        created_by=flask_login.current_user.get_id()
+                        created_by=flask_login.current_user.user_id
                     )
                     session.add(ds)
                 for keyword in dataset.extras:
@@ -581,7 +581,7 @@ class DatasetController:
                         revision_no=1,
                         data=json.dumps(dataset.values()),
                         created_date=datetime.datetime.now(),
-                        created_by=flask_login.current_user.get_id()
+                        created_by=flask_login.current_user.user_id
                     )
                     session.add(ds_data)
                 session.commit()
@@ -603,7 +603,7 @@ class DatasetController:
                         revision_no=next_rev,
                         data=json.dumps(dataset.values()),
                         created_date=datetime.datetime.now(),
-                        created_by=flask_login.current_user.get_id()
+                        created_by=flask_login.current_user.user_id
                     )
                     session.add(ds_data)
                     session.commit()

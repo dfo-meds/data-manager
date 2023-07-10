@@ -303,7 +303,8 @@ class EntityController:
                     display_names=json.dumps(entity.display_names()),
                     organization_id=int(entity.organization_id) if entity.organization_id else None,
                     parent_id=entity.parent_id,
-                    parent_type=entity.parent_type
+                    parent_type=entity.parent_type,
+                    created_by=flask_login.current_user.user_id
                 )
                 session.add(e)
             session.commit()
@@ -317,7 +318,8 @@ class EntityController:
                     ed = orm.EntityData(
                         entity_id=e.id,
                         revision_no=next_rev,
-                        data=json.dumps(entity.values())
+                        data=json.dumps(entity.values()),
+                        created_by=flask_login.current_user.user_id
                     )
                     session.add(ed)
                     session.commit()
