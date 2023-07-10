@@ -20,3 +20,6 @@ azure-identity
 msal
 prometheus-client
 prometheus-flask-exporter
+netCDF4
+google-cloud-translate
+google-auth
