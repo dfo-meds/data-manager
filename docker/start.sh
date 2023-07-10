@@ -25,6 +25,9 @@ else
     shift 1
   fi
 
+  # Set the Prometheus directory
+  export PROMETHEUS_MULTIPROC_DIR=/srv/metadb/_prometheus
+
   # Handle prometheus directory
   if [ -e "/srv/metadb/_prometheus" ] ; then
     rm -r /srv/metadb/_prometheus/*
