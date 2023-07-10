@@ -491,7 +491,7 @@
           </cit:number>
           {% if phone_no['phone_number_type'] %}
           <cit:numberType>
-            <cit:CI_TelephoneTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode" codeListValue="{{phone_no['phone_number_type']['short_name']" />
+            <cit:CI_TelephoneTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode" codeListValue="{{phone_no['phone_number_type']['short_name']}}" />
           </cit:numberType>
           {% endif %}
         </cit:CI_Telephone>
