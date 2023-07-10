@@ -277,6 +277,7 @@ class Field:
         use_repeatable = self.is_repeatable() and self._use_default_repeatable
         if use_repeatable and self.value is None:
             self.value = []
+        # TODO: If multilingual, detect and limit values to those identified in metadata languages
         if use_multilingual and use_repeatable:
             min_entries = max(len(self.value) if self.value else 0, 1)
             return wtf.FieldList(

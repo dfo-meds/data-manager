@@ -127,7 +127,6 @@ class TabbedFieldFormWidget:
                 e1 = label.find(">", s1)
                 s2 = label.find("</a>")
                 label = label[0:s1] + label[e1+1:s2] + label[s2+4:]
-                print(label)
             html += f'<li><a href="#{field.id}-tab-{idx}">{label}</a></li>\n'
         html += '</ul>\n'
         for idx, text in enumerate(texts, start=1):
