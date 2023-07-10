@@ -19,3 +19,4 @@ zrlog>=0.3.0
 azure-identity
 msal
 prometheus-client
+prometheus-flask-exporter
