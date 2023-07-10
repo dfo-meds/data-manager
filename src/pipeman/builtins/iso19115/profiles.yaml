@@ -62,7 +62,6 @@ iso19115:
     variables:
     iso_maintenance:
     custom_keywords:
-    content_coverage_type:
     licenses:
     dataset_locale:
     dataset_other_locales:

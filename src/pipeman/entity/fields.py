@@ -889,8 +889,10 @@ class KeyValueField(Field):
         return val["key"], self._process_input_value(val["value"], val["data_type"])
 
     def _format_for_ui(self, val):
-        key, val = self._process_value(val)
-        return f"{key} = {val}"
+        kv = self._process_value(val)
+        if kv is None or kv == "":
+            return None
+        return f"{kv[0]} = {kv[1]}"
 
     def _process_input_value(self, val, dtype):
         try:
