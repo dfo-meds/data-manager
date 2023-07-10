@@ -130,7 +130,7 @@ data_info:
       description:
         en: Enter a unique and descritive title for the dataset.
         fr: Entrez un titre unique et descriptif pour le jeu de données.
-      order: 10
+      order: 0
       multilingual: yes
       netcdf:
         mapping: title
