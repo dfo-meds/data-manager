@@ -18,3 +18,4 @@ zirconium>=1.1.0
 zrlog>=0.3.0
 azure-identity
 msal
+prometheus-client
