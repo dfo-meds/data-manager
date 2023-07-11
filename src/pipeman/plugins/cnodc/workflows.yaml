@@ -11,11 +11,15 @@ dataset_publication:
       - lead_approval
       - pub_coord_approval
       - iso19115_metadata_upload_staging
+      - iso19139_metadata_upload_staging
+      - erddap_iso19115_metadata_upload_staging
       - erddap_metadata_upload_staging
       - erddap_notify_staging
       - sysadmin_approval
       - publish_dataset
       - iso19115_metadata_upload_live
+      - iso19139_metadata_upload_live
+      - erddap_iso19115_metadata_upload_live
       - erddap_metadata_upload_live
       - erddap_notify_live
 dataset_activation:

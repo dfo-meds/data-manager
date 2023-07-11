@@ -26,17 +26,17 @@ sysadmin_approval:
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
-iso19115_metadata_upload_live:
+erddap_iso19115_metadata_upload_live:
   label:
-    en: Upload ISO-19115 Metadata File (Live)
-    fr: Télécharger le fichier de métadonnées ISO-19115 (en direct)
+    en: Upload ISO-19115 Metadata File for ERDDAP (Live)
+    fr: Télécharger le fichier de métadonnées ISO-19115 pour ERDDAP (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: erddap_config
   environment: live
-  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115_erddap"
 erddap_metadata_upload_live:
   label:
     en: Upload ERDDAP Config File (Live)
@@ -48,17 +48,39 @@ erddap_metadata_upload_live:
   storage_name: erddap_config
   environment: live
   file_path_pattern_key: "cnodc.metadata.patterns.live_erddap"
-iso19115_metadata_upload_staging:
+iso19139_metadata_upload_live:
   label:
-    en: Upload ISO-19115 Metadata File (Staging)
-    fr: Télécharger le fichier de métadonnées ISO-19115 (mise en scène)
+    en: Upload ISO-19139 NAP Metadata File (Live)
+    fr: Télécharger le fichier de métadonnées ISO-19139 NAP (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: gociso19115
+  format_name: iso19139_nap
+  storage_name: html_live
+  environment: live
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19139"
+iso19115_metadata_upload_live:
+  label:
+    en: Upload ISO-19115 NAP Metadata File (Live)
+    fr: Télécharger le fichier de métadonnées ISO-19115 NAP (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: html_live
+  environment: live
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
+erddap_iso19115_metadata_upload_staging:
+  label:
+    en: Upload ISO-19115 Metadata File for ERDDAP (Staging)
+    fr: Télécharger le fichier de métadonnées ISO-19115 pour ERDDAP (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: erddap_staging_config
   environment: staging
-  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115_erddap"
 erddap_metadata_upload_staging:
   label:
     en: Upload ERDDAP Config File (Staging)
@@ -70,6 +92,28 @@ erddap_metadata_upload_staging:
   storage_name: erddap_staging_config
   environment: staging
   file_path_pattern_key: "cnodc.metadata.patterns.staging_erddap"
+iso19139_metadata_upload_staging:
+  label:
+    en: Upload ISO-19139 NAP Metadata File (Staging)
+    fr: Télécharger le fichier de métadonnées ISO-19139 NAP (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: gociso19115
+  format_name: iso19139_nap
+  storage_name: html_staging
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19139"
+iso19115_metadata_upload_staging:
+  label:
+    en: Upload ISO-19115 NAP Metadata File (Staging)
+    fr: Télécharger le fichier de métadonnées ISO-19115 NAP (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: html_staging
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
 erddap_notify_staging:
   label:
     en: Notify ERDDAPUtil (Staging)

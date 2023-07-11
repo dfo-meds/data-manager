@@ -1,7 +1,7 @@
 gociso19115:
   display:
-    en: GoC ISO-19115
-    fr: ISO-19115 du GoC
+    en: GC ISO-19115
+    fr: ISO-19115 du GC
   extends: iso19115
   validation:
     required:
