@@ -643,7 +643,7 @@ def require_permission(perm_names: t.Union[t.AnyStr, t.Iterable], **perm_args):
             if result == RequestSecurity.ALLOWED:
                 return flask.current_app.ensure_sync(func)(*args, **kwargs)
             else:
-                return auth_man.unauthorized_handler(result)
+                return auth_man.unauthorized(result)
         return _decorated
 
     return _decorator
