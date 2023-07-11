@@ -50,6 +50,7 @@ class System:
         self.log = None
         self._nci = None
         self._lock = threading.RLock()
+        self.main_app = None
 
     def on(self, event_name: str, cb: CallableOrStr):
         """Register an event callback function"""
@@ -205,6 +206,8 @@ class System:
     def init_app(self, app):
         """Initialize a Flask application."""
         from pipeman.util.setup import core_init_app
+
+        self.main_app = app
 
         self.fire("init.app.before")
 

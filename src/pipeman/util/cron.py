@@ -1,6 +1,7 @@
 import datetime
 import signal
 from pipeman.util import System
+import flask
 import threading
 import zirconium as zr
 import zrlog
@@ -74,14 +75,24 @@ class TaskThread(threading.Thread):
 
 class CronThread(threading.Thread):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.halt = threading.Event()
+        self.app = app
 
     def terminate(self):
         self.halt.set()
 
     def startup(self):
+        pass
+
+    def run(self):
+        print(self.app)
+        print(type(self.app))
+        with self.app.app_context():
+            self._run()
+
+    def _run(self):
         pass
 
     def cleanup(self):
@@ -125,6 +136,7 @@ class CronDaemon:
 
     @injector.construct
     def __init__(self):
+        self._app = self.system.main_app
         self.halt = threading.Event()
         self._cron_threads: dict[str, CronThread] = {}
         self._task_threads: dict[str, ScheduledTask] = {}
@@ -211,7 +223,7 @@ class CronDaemon:
         return True
 
     def _start_thread(self, k):
-        self._cron_threads[k] = self._cron_thread_classes[k]()
+        self._cron_threads[k] = self._cron_thread_classes[k](self._app)
         if not hasattr(self._cron_threads[k], "halt"):
             raise ValueError(f"Cron threads must declare a halt() method to wrap them up")
         if not hasattr(self._cron_threads[k], "join"):

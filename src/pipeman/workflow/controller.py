@@ -558,8 +558,8 @@ class WorkflowCronThread(CronThread):
     cfg: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self):
-        super().__init__()
+    def __init__(self, app):
+        super().__init__(app)
         self._sleep_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_sleep_seconds"), default=5)
         self._reset_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_reset_sleep_seconds"), default=300)
         self._max_threads = self.cfg.as_int(("pipeman", "workflow", "max_sub_threads"), default=5)
@@ -568,7 +568,7 @@ class WorkflowCronThread(CronThread):
         self._last_reset = None
         self._tasks = UniqueTaskThreadManager(self.halt, self._max_threads)
 
-    def run(self):
+    def _run(self):
         while not self.halt.is_set():
             if self._last_reset is None or (time.monotonic() - self._last_reset) > self._reset_interval:
                 self._reset_delayed_jobs()
