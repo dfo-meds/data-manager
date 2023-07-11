@@ -29,14 +29,14 @@
 netcdf {
 
 {% for name in global_attributes %}
-{{render_multilingual_attr(name, global_attributes[name], '    :'}}
+{{render_multilingual_attr(name, global_attributes[name], '    :')}}
 {% endfor -%}
 
 variables:
 {% for var_name, var_type, var_dims, var_attrs, var in variables %}
     {{var_type}}   {{var_name}}({{var_dims}});
     {% for attr_name in var_attrs %}
-{{render_multilingual_attr(attr_name, var_attrs[attr_name], '        ' + var_name + ':'}}
+{{render_multilingual_attr(attr_name, var_attrs[attr_name], '        ' + var_name + ':')}}
     {% endfor %}
 {% endfor -%}
 }
