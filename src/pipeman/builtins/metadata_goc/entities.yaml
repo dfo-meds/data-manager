@@ -38,6 +38,7 @@ resource:
       description:
         en: Select the content type that best describes this resource.
         fr: # todo
+      order: 80
     goc_formats:
       data_type: vocabulary
       vocabulary_name: goc_content_Formats
@@ -48,6 +49,7 @@ resource:
       description:
         en: Select the format(s) that best describe this resource.
         fr: # todo
+      order: 90
     goc_languages:
       data_type: text
       repeatable: yes
@@ -57,6 +59,7 @@ resource:
       description:
         en: Enter the language(s) that this resource supports, using the ISO 639-2/T 3-letter language codes, or leave blank if there are no supported languages.
         fr: # todo
+      order: 100
 goc_publishing_org:
   display:
     en: GoC Publishers
