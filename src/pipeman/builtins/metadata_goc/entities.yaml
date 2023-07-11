@@ -34,10 +34,10 @@ resource:
       vocabulary_name: goc_content_types
       label:
         en: GC Content Type
-        fr: # todo
+        fr: GC Type de contenu
       description:
         en: Select the content type that best describes this resource.
-        fr: # todo
+        fr: Sélectionnez le type de contenu qui décrit le mieux cette ressource.
       order: 80
     goc_formats:
       data_type: vocabulary
@@ -45,20 +45,20 @@ resource:
       repeatable: yes
       label:
         en: GC Content Format
-        fr: # todo
+        fr: GC Format de contenu
       description:
         en: Select the format(s) that best describe this resource.
-        fr: # todo
+        fr: Sélectionnez le format de contenu qui décrit le mieux cette ressource.
       order: 90
     goc_languages:
       data_type: text
       repeatable: yes
       label:
         en: Content Language
-        fr: # todo
+        fr: Langue du contenu
       description:
         en: Enter the language(s) that this resource supports, using the ISO 639-2/T 3-letter language codes, or leave blank if there are no supported languages.
-        fr: # todo
+        fr: Entrez la ou les langues prises en charge par cette ressource, en utilisant les codes de langue à 3 lettres ISO 639-2/T, ou laissez vide si aucune langue n'est prise en charge.
       order: 100
 goc_publishing_org:
   display:

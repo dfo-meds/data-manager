@@ -8,7 +8,7 @@ function remove_item_from_list(list_item) {
         window.alert("Cannot remove an item when there is only one item.");
     }
     else {
-        let id = list_item.find("label").attr("for");
+        /*let id = list_item.find("label").attr("for");
         let last_pos = id.lastIndexOf("-");
         let id_num = parseInt(id.slice(last_pos + 1));
         if (id_num < (children - 1)) {
@@ -19,13 +19,12 @@ function remove_item_from_list(list_item) {
                 let local_id_num = parseInt(local_id.slice(local_last_pos + 1));
                 if (local_id_num > id_num) {
                     new_id = front_part + "-" + (local_id_num - 1)
-                    // TODO: This needs to be updated to work with the add code below.
                     $(this).find("label").attr("for", new_id);
                     $(this).find("input").attr("id", new_id);
                     $(this).find("input").attr("name", new_id);
                 }
             });
-        }
+        }*/
         list_item.remove();
     }
 }

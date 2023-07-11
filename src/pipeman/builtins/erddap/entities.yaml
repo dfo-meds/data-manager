@@ -84,7 +84,6 @@ variable:
       netcdf:
         mapping: time_zone
         processor: vocabulary
-    # TODO: There are no time zones?
     erddap_role:
       data_type: vocabulary
       vocabulary_name: erddap_extra_roles

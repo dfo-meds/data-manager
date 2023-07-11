@@ -279,7 +279,7 @@ class Field:
             self.value = []
         # TODO: If multilingual, detect and limit values to those identified in metadata languages
         if use_multilingual and use_repeatable:
-            min_entries = max(len(self.value) if self.value else 0, 1)
+            min_entries = 1
             return wtf.FieldList(
                 TranslatableField(ctl_class,
                                   field_kwargs=field_args,
@@ -299,7 +299,7 @@ class Field:
                                      use_metadata_languages=True,
                                      **parent_args)
         elif use_repeatable:
-            min_entries = max(len(self.value) if self.value else 0, 1)
+            min_entries = 1
             return wtf.FieldList(ctl_class(label="", **field_args), **parent_args, min_entries=min_entries)
         else:
             return ctl_class(**parent_args, **field_args)

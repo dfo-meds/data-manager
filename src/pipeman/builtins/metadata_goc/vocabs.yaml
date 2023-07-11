@@ -212,7 +212,7 @@ goc_collection_types:
 goc_content_types:
   display:
     en: GC - Content Types
-    # TODO: fr
+    fr: GC - Types de contenu
   uri:
   terms:
     dataset:
@@ -238,7 +238,7 @@ goc_content_types:
 goc_content_formats:
   display:
     en: GC - Formats
-    # TODO: fr
+    fr: GC - Formats de contenu
   uri: http://www.gcpedia.gc.ca/wiki/Federal_Geospatial_Platform/Policies_and_Standards/Catalogue/Release/Appendix_B_Guidelines_and_Best_Practices/Guide_to_Harmonized_ISO_19115:2003_NAP/Format
   terms:
     AAC:
