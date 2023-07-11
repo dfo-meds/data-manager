@@ -13,4 +13,33 @@ core_charsets:
     utf16:
       display:
         und: UTF-16
+timezones:
+  display:
+    en: Time Zones
+    fr: Fuseaux horaires
+  uri: https://www.iana.org/time-zones
+  terms:
+    "Etc/UTC":
+      display:
+        und: UTC
+    "America/Toronto":
+      display:
+        und: "America/Toronto (Eastern)"
+    "America/Edmonton":
+      display:
+        und: "America/Edmonton (Mountain)"
+    "America/Halifax":
+      display:
+        und: "America/Halifax (Atlantic)"
+    "America/Regina":
+      display:
+        und: "America/Winnepeg (Central)"
+    "America/St_Johns":
+      display:
+        und: "America/St_Johns (Newfoundland; Labrador)"
+    "America/Winnipeg":
+      display:
+        und: "America/Winnipeg (Pacific)"
+    # TODO: add more, but these are most common government offices
+
 

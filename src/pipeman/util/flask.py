@@ -666,6 +666,7 @@ class EntitySelectField(wtf.Field):
     def __init__(self, *args, entity_types, allow_multiple=False, min_chars_to_search=0, by_revision=False, widget=None, allow_select2: bool = True, **kwargs):
         self.data = None
         self.entity_types = [entity_types] if isinstance(entity_types, str) else entity_types
+        self._full_list = False
         self.allow_multiple = bool(allow_multiple)
         self.include_empty = False
         self.by_revision = bool(by_revision)
@@ -685,17 +686,22 @@ class EntitySelectField(wtf.Field):
                 )
             else:
                 widget = wtforms.widgets.Select(self.allow_multiple)
+                self._full_list = True
         super().__init__(*args, widget=widget, **kwargs)
 
     def has_groups(self):
         return False
 
     @staticmethod
-    @injector.inject
-    def results_list(entity_types, text, by_revision, db: Database = None, ec: "pipeman.entity.controller.EntityController" = None):
+    def results_list(entity_types, text, by_revision):
         results = {
-            "results": [],
+            "results": [x for x in EntitySelectField.results_list_full(entity_types, text, by_revision)],
         }
+        return safe_json(results)
+
+    @staticmethod
+    @injector.inject
+    def results_list_full(entity_types, text, by_revision, db: Database = None, ec: "pipeman.entity.controller.EntityController" = None):
         with db as session:
             q = session.query(orm.Entity)
             if isinstance(entity_types, str):
@@ -711,8 +717,7 @@ class EntitySelectField(wtf.Field):
                 q = q.filter(orm.Entity.display_names.ilike(text))
             q = q.order_by(orm.Entity.id)
             for ent in q:
-                results['results'].append(EntitySelectField._build_entry(ent, by_revision))
-        return safe_json(results)
+                yield EntitySelectField._build_entry(ent, by_revision)
 
     @staticmethod
     def _build_entry(entity, by_revision, revision_no = None):
@@ -732,6 +737,19 @@ class EntitySelectField(wtf.Field):
         return []
 
     def iter_choices(self):
+        if self._full_list:
+            yield from self._iter_choices_for_select()
+        else:
+            yield from self._iter_choices_for_select2()
+
+    def _iter_choices_for_select(self):
+        if self.include_empty:
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data
+        with self.db as session:
+            for row in EntitySelectField.results_list_full(self.entity_types, None, self.by_revision):
+                yield row['id'], row['text'], row['id'] == self.data
+
+    def _iter_choices_for_select2(self):
         if self.include_empty:
             yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data
         if self.data:
