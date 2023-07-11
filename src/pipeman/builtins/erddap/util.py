@@ -132,14 +132,16 @@ def preprocess_dataset(dataset, **kwargs):
                 cdm_timeseries_vars.append(var['destination_name'])
             if var['erddap_role']['short_name'] == 'trajectory_extra':
                 cdm_trajectory_vars.append(var['destination_name'])
-    vars["global_attributes"].update({
-        "cdm_profile_vars": ",".join(cdm_profile_vars),
-        "cdm_trajectory_vars": ",".join(cdm_trajectory_vars),
-        "cdm_timeseries_vars": ",".join(cdm_timeseries_vars),
-        "subsetVariables": ",".join(subset_vars),
-        "cdm_altitude_proxy": altitude_proxy,
-        # spatial_representation_type?
-    })
+    if cdm_profile_vars:
+        vars['global_attributes']['cdm_profile_vars'] = ','.join(cdm_profile_vars)
+    if cdm_trajectory_vars:
+        vars['global_attributes']['cdm_trajectory_vars'] = ','.join(cdm_trajectory_vars)
+    if cdm_timeseries_vars:
+        vars['global_attributes']['cdm_timeseries_vars'] = ','.join(cdm_timeseries_vars)
+    if subset_vars:
+        vars['global_attributes']['subsetVariables'] = ','.join(subset_vars)
+    if altitude_proxy:
+        vars['global_attributes']['cdm_altitude_proxy'] = altitude_proxy
     if dataset['info_link'] and dataset['info_link']['url']:
         vars['global_attributes']['infoUrl'] = dataset['info_link']['url']
     return vars
