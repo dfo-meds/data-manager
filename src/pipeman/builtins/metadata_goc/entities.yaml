@@ -41,7 +41,7 @@ resource:
       order: 80
     goc_formats:
       data_type: vocabulary
-      vocabulary_name: goc_content_Formats
+      vocabulary_name: goc_content_formats
       repeatable: yes
       label:
         en: GC Content Format

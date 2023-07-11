@@ -219,16 +219,20 @@ goc_content_types:
       display:
         en: Dataset
         fr: Données
-      web_service:
+    web_service:
+      display:
         en: Web Service
         fr: Service Web
-      api:
+    api:
+      display:
         en: API
         fr: API
-      support_doc:
+    support_doc:
+      display:
         en: Supporting Document
         fr: Document de soutien
-      application:
+    application:
+      display:
         en: Application
         fr: Application
 goc_content_formats:
