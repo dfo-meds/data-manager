@@ -413,14 +413,29 @@ def _text_processor(attrs: dict, target_name: str, field: Field, config: dict, f
 
 
 def _datetime_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
-    attrs[target_name] = field.data().isoformat()
+    if not field.is_empty():
+        attrs[target_name] = field.data().isoformat()
 
 
 def _vocab_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
+    values = []
     if 'allow_many' in config and config['allow_many']:
-        return ",".join(x['short_name'] for x in field.data())
+        for x in field.data():
+            if x is not None:
+                if not isinstance(x, dict):
+                    zrlog.get_logger("pipeman.netcdf").error(f"Field {target_name} is supposed to be a list of dicts, but is actually a list of {type(x)}")
+                    continue
+                else:
+                    values.append(x['short_name'])
     else:
-        attrs[target_name] = field.data()['short_name']
+        val = field.data()
+        if val is not None:
+            if not isinstance(val, dict):
+                zrlog.get_logger("pipeman.netcdf").error(f"Field {target_name} is supposed to be a list of dicts, but is actually a list of {type(val)}")
+            else:
+                values.append(val['short_name'])
+    if values:
+        attrs[target_name] = ",".join(values)
 
 
 def _numeric_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
