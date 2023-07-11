@@ -25,3 +25,16 @@ def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, v
     mreg.register_profiles_from_yaml(root / "profiles.yaml")
     mreg.register_metadata_from_yaml(root / "metadata.yaml")
     vreg.register_from_yaml(root / "vocabs.yaml")
+
+
+# TODO: Create basic entities as follows
+"""
+    - ERDDAP Servers (CNODC primary)
+    - GOC Publishers (DFO)
+    - GOC Publishing Sections (MEDS/CNODC)
+    - Reference Systems (WGS84, MSL Depths, MSL Heights)
+    - Locales (EN, FR)
+    - ID Systems (EPSG, DOI, ROR, ORCID)
+    - Contacts (CNODC and DFO)
+    
+"""
