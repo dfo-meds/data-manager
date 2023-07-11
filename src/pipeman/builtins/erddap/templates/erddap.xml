@@ -22,7 +22,7 @@
 {%- macro render_variable_attributes(var_attrs) -%}
     <addAttributes>
         {% for name in var_attrs %}
-        {{ render_bilingual_attr(name, var_attrs[name]) }}
+        {{ render_multilingual_attr(name, var_attrs[name]) }}
         {% endfor %}
     </addAttributes>
 {%- endmacro -%}
@@ -34,7 +34,7 @@
     <iso19115File>/cloud_data/config/{{environment}}/metadata/{{dataset.guid()}}.xml</iso19115File>
     <addAttributes>
         {% for name in global_attributes %}
-        {{ render_bilingual_attr(name, global_attributes[name]) }}
+        {{ render_multilingual_attr(name, global_attributes[name]) }}
         {% endfor %}
     </addAttributes>
     {% for var_name, var_type, var_dims, var_attrs, var in variables %}
