@@ -19,6 +19,7 @@ import logging
 import bs4
 import zrlog
 import datetime
+import functools
 
 UTC = datetime.timezone(datetime.timedelta(seconds=0), "UTC")
 
@@ -41,6 +42,16 @@ def preprocess_for_cdl(dataset, **kwargs):
     return extras
 
 
+def _has_other_languages(language_dict, default_locale, supported_locales):
+    for key in language_dict:
+        if key == "und" or key == default_locale:
+            continue
+        if key not in supported_locales:
+            continue
+        return True
+    return False
+
+
 def _preprocess_for_both(dataset, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
@@ -49,7 +60,7 @@ def _preprocess_for_both(dataset, **kwargs):
     default_charset = def_loc['encoding']['short_name'] if def_loc and def_loc['encoding'] else "utf8"
     locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
     olocales = dataset.data("other_locales") or []
-    other_locales_list = []
+    supported_keys = []
     supported = []
     for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
@@ -60,11 +71,13 @@ def _preprocess_for_both(dataset, **kwargs):
         if other_loc['encoding']:
             name += f';{other_loc["encoding"]["short_name"]}'
         supported.append(f"{other_loc['a2_language']}:{name}")
+        supported_keys.append(other_loc['a2_language'])
     extras = {
         'global_attributes': _global_attributes(dataset),
         'variables': _variables(dataset),
         'locale_mapping': locale_mapping,
         'default_locale': default_locale,
+        'check_alt_langs': functools.partial(_has_other_languages, supported_locales=supported_keys),
     }
     extras['global_attributes']['locale_default'] = f"{default_locale}-{default_country};{default_charset}"
     extras['global_attributes']['locale_others'] = ",".join(supported)
