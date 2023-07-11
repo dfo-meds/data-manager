@@ -185,20 +185,20 @@ class Field:
         return raw_value
 
     def is_empty(self):
-        if self.value is None or self.value == "" or self.value == []:
-            return True
         if self.is_repeatable():
             for val in self.value:
                 if self.is_multilingual():
-                    if any(bool(val[x]) for x in val if x != '_translation_request'):
-                        return False
-                elif bool(val):
+                    return all(self._is_empty(val[x]) for x in val if x != '_translation_request')
+                elif not self._is_empty(val):
                     return False
             return True
         elif self.is_multilingual():
-            return not any(bool(self.value[x]) for x in self.value if x != '_translation_request')
+            return all(self._is_empty(self.value[x]) for x in self.value if x != '_translation_request')
         else:
-            return not bool(self.value)
+            return self._is_empty(self.value)
+
+    def _is_empty(self, val):
+        return val is None or val == "" or val == [] or val == {}
 
     def serialize(self, val):
         return self._unserialize(val)
