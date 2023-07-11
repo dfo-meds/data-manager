@@ -185,6 +185,8 @@ class Field:
         return raw_value
 
     def is_empty(self):
+        if self.value is None or self.value == [] or self.value == "":
+            return True
         if self.is_repeatable():
             for val in self.value:
                 if self.is_multilingual():
