@@ -53,7 +53,7 @@ variable:
       description:
         en: Select the IOOS category that best describes this variable.
         fr: Sélectionnez la catégorie IOOS qui décrit le mieux cette variable.
-      order: 115
+      order: 105
       netcdf:
         mapping: ioos_category
         processor: vocabulary
