@@ -64,7 +64,6 @@ def _preprocess_for_both(dataset, **kwargs):
     supported = []
     for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
-        supported.append(other_loc['a2_language'])
         name = other_loc['a2_language']
         if other_loc['country']:
             name += f'-{other_loc["country"]}'
