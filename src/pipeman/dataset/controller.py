@@ -50,30 +50,31 @@ class DatasetController:
 
     def has_access(self, dataset, operation, is_attempt: bool = False):
         status = dataset.status if dataset.status is None or isinstance(dataset.status, str) else dataset.status()
+        ds_id = dataset.id if hasattr(dataset, "id") else dataset.dataset_id
         if operation == "activate" and not status == "DRAFT":
             if is_attempt:
-                self.log.warning(f"Access denied to activate non-draft dataset [{dataset.id}]")
+                self.log.warning(f"Access denied to activate non-draft dataset [{ds_id}]")
             return False
         if operation == "publish" and not status == "ACTIVE":
             if is_attempt:
-                self.log.warning(f"Access denied to publish non-active dataset [{dataset.id}]")
+                self.log.warning(f"Access denied to publish non-active dataset [{ds_id}]")
             return False
         if operation == "edit" and status == "UNDER_REVIEW":
             if is_attempt:
-                self.log.warning(f"Access denied to edit dataset under review [{dataset.id}]")
+                self.log.warning(f"Access denied to edit dataset under review [{ds_id}]")
             return False
         if dataset.is_deprecated:
             if operation not in ("restore", "view"):
                 if is_attempt:
-                    self.log.warning(f"Access denied to {operation} deprecated dataset [{dataset.id}], invalid operation")
+                    self.log.warning(f"Access denied to {operation} deprecated dataset [{ds_id}], invalid operation")
                 return False
             if not flask_login.current_user.has_permission(f"datasets.view.deprecated"):
                 if is_attempt:
-                    self.log.warning(f"Access denied to {operation} deprecated dataset [{dataset.id}], missing permissions")
+                    self.log.warning(f"Access denied to {operation} deprecated dataset [{ds_id}], missing permissions")
                 return False
         elif operation == "restore":
             if is_attempt:
-                self.log.warning(f"Access denied to restore non-deprecated dataset [{dataset.id}]")
+                self.log.warning(f"Access denied to restore non-deprecated dataset [{ds_id}]")
             return False
         if flask_login.current_user.has_permission(f"datasets.{operation}.all"):
             return True
@@ -81,10 +82,10 @@ class DatasetController:
             if self._has_organization_access(dataset, operation):
                 return True
         if flask_login.current_user.has_permission(f"datasets.{operation}.assigned"):
-            if flask_login.current_user.works_on(dataset.id):
+            if flask_login.current_user.works_on(ds_id):
                 return True
         if is_attempt:
-            self.log.warning(f"Access denied  to {operation} dataset [{dataset.id}], user missing access")
+            self.log.warning(f"Access denied  to {operation} dataset [{ds_id}], user missing access")
         return False
 
     def _has_organization_access(self, dataset, operation):
@@ -413,7 +414,7 @@ class DatasetController:
                                      back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
     def activate_dataset(self, dataset):
-        self.log.info(f"Activating dataset {dataset.id}")
+        self.log.info(f"Activating dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_activation",
             dataset.extras['act_workflow'],
@@ -430,7 +431,7 @@ class DatasetController:
             flasht("pipeman.dataset.message.activation_in_progress", "success")
 
     def publish_dataset(self, dataset):
-        self.log.info(f"Publishing dataset {dataset.id}")
+        self.log.info(f"Publishing dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_publication",
             dataset.extras['pub_workflow'],
@@ -480,14 +481,14 @@ class DatasetController:
         return response
 
     def remove_dataset(self, dataset):
-        self.log.info(f"Removing dataset {dataset.id}")
+        self.log.info(f"Removing dataset {dataset.dataset_id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = True
             session.commit()
 
     def restore_dataset(self, dataset):
-        self.log.info(f"Restoring dataset {dataset.id}")
+        self.log.info(f"Restoring dataset {dataset.dataset_id}")
         with self.db as session:
             ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
             ds.is_deprecated = False

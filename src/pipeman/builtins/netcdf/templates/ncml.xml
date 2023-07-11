@@ -24,13 +24,13 @@
     {%- endif %}
 {%- endmacro -%}
 
-    {%- for name in global_attributes -%}
+    {%- for name in stable_dict_key_list(global_attributes) -%}
     {{ format_attribute(name, global_attributes[name])}}
     {%- endfor %}
 
     {%- for var_name, var_type, var_dims, var_attrs, var in variables -%}
     <variable name="{{xml_quote(var_name)}}" shape="{{xml_quote(var_dims)}}" type="{{xml_quote(var_type)}}">
-      {%- for name in var_attrs -%}
+      {%- for name in stable_dict_key_list(var_attrs) -%}
       {{ format_attribute(name, var_attrs[name]) }}
       {%- endfor -%}
     </variable>
