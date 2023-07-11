@@ -42,10 +42,32 @@ def preprocess_for_cdl(dataset, **kwargs):
 
 
 def _preprocess_for_both(dataset, **kwargs):
+    locale_mapping = {}
+    def_loc = dataset.data("default_locale")
+    default_locale = def_loc['a2_language'] if def_loc else "en"
+    default_country = def_loc['country'] if def_loc and def_loc['country'] else "CAN"
+    default_charset = def_loc['encoding']['short_name'] if def_loc and def_loc['encoding'] else "utf8"
+    locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
+    olocales = dataset.data("other_locales") or []
+    other_locales_list = []
+    supported = []
+    for other_loc in olocales:
+        locale_mapping[other_loc['a2_language']] = other_loc['language']
+        supported.append(other_loc['a2_language'])
+        name = other_loc['a2_language']
+        if other_loc['country']:
+            name += f'-{other_loc["country"]}'
+        if other_loc['encoding']:
+            name += f';{other_loc["encoding"]["short_name"]}'
+        supported.append(f"{other_loc['a2_language']}:{name}")
     extras = {
         'global_attributes': _global_attributes(dataset),
-        'variables': _variables(dataset)
+        'variables': _variables(dataset),
+        'locale_mapping': locale_mapping,
+        'default_locale': default_locale,
     }
+    extras['global_attributes']['locale_default'] = f"{default_locale}-{default_country};{default_charset}"
+    extras['global_attributes']['locale_others'] = ",".join(supported)
     keywords = set()
     vocabularies = set()
     for x in dataset.keywords():

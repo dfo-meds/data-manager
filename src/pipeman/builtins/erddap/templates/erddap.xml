@@ -1,53 +1,22 @@
 <dataset type="{{dataset['erddap_dataset_type']['short_name']}}" datasetID="{{dataset['erddap_dataset_id']}}" active="true">
-{%- macro render_text(text) -%}
-    {%- if text is string -%}
-        {{text}}
-    {%- elif "und" in text and text['und'] -%}
-        {{text['und']}}
-    {%- elif "en" in text and "fr" in text and text['en'] and text['fr'] -%}
-        {{text["en"]}}  |  {{text['fr']}}
-    {%- elif "en" in text and text['en'] -%}
-        {{text['en']}}
-    {%- elif "fr" in text and text['fr'] -%}
-        {{text['fr']}}
-    {%- endif -%}
-{%- endmacro -%}
-
-{%- macro render_text_once(text) -%}
-    {%- if text is string -%}
-        {{text}}
-    {%- elif "und" in text and text['und'] -%}
-        {{text['und']}}
-    {%- elif "en" in text and text['en'] -%}
-        {{text['en']}}
-    {%- elif "fr" in text and text['fr'] -%}
-        {{text['fr']}}
-    {%- endif -%}
-{%- endmacro -%}
-
-{%- macro render_bilingual_attr(attr_name_en, text, attr_name_fr="") -%}
+{%- macro render_multilingual_attr(attr_name, text) -%}
 
     {%- if not is_multilingual_map(text) -%}
-    <att name="{{attr_name_en}}">{{text}}</att>
-
-    {%- elif "und" in text -%}
-    <att name="{{attr_name_en}}">{{text['und']}}</att>
-
-    {%- elif "en" in text and "fr" in text -%}
-    <att name="{{attr_name_en}}">{{text["en"]}}  |  {{text['fr']}}</att>
-    <att name="{{attr_name_en}}_en">{{text['en']}}</att>
-
-    {%- if attr_name_fr -%}
-    <att name="{{attr_name_fr}}_fr">{{text['fr']}}</att>
+    <att name="{{attr_name}}">{{text}}</att>
     {%- else -%}
-    <att name="{{attr_name_en}}_fr">{{text['fr']}}</att>
-    {%- endif -%}
-
-    {%- elif "en" in text -%}
-    <att name="{{attr_name_en}}">{{text['en']}}</att>
-    {%- elif "fr" in text -%}
-    <att name="{{attr_name_en}}">{{text['fr']}}</att>
-    {%- endif -%}
+        {%- if default_locale in text -%}
+    <att name="{{attr_name}}">{{text['und']}}</att>
+        {%- elif "und" in text -%}
+    <att name="{{attr_name}}">{{text['und']}}</att>
+        {%- endif -%}
+        {% if check_alt_langs(text, default_locale) %}
+            {% for a2l in locale_mapping %}
+                {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
+    <att name="{{attr_name}}_{{a2l}}">{{text[a2l]}}</att>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {%- endif %}
 {%- endmacro -%}
 
 {%- macro render_variable_attributes(var_attrs) -%}

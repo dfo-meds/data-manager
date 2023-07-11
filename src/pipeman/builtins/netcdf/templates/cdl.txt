@@ -1,31 +1,42 @@
-{%- macro format_value(val) -%}
-  {%- if val is string -%}
-  "{{val}}"
-  {%- elif is_multilingual_map(val) -%}
-    {%- if 'und' in val -%}
-    "{{val['und']}}"
-    {%- elif "en" in val and "fr" in val -%}
-    "{{val['en']}} | {{val['fr']}}"
-    {%- else -%}
-    "{{val}}"
-    {%- endif -%}
-  {%- else -%}
-  {{val}}
-  {%- endif -%}
+{%- macro render_attribute(prefix, attr_name, text) -%}
+{%- if text is string -%}
+{{prefix}}{{attr_name}} = "{{text}}";
+{%- else -%}
+{{prefix}}{{attr_name}} = {{text}};
+{%- endif -%}
+{%- endmacro -%}
 
+{%- macro render_multilingual_attr(attr_name, text, prefix) -%}
+
+    {%- if not is_multilingual_map(text) -%}
+{{render_attribute(prefix, attr_name, text)}}
+    {%- else -%}
+        {%- if default_locale in text -%}
+{{render_attribute(prefix, attr_name, text[default_locale])}}
+        {%- elif "und" in text -%}
+{{render_attribute(prefix, attr_name, text["und"])}}
+        {%- endif -%}
+        {% if check_alt_langs(text, default_locale) %}
+            {% for a2l in locale_mapping %}
+                {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
+{{render_attribute(prefix, attr_name + "_" + a2l, text[a2l])}}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {%- endif %}
 {%- endmacro -%}
 
 netcdf {
 
 {% for name in global_attributes %}
-    :{{name}} = {{format_value(global_attributes[name])}};
+{{render_multilingual_attr(name, global_attributes[name], '    :'}}
 {% endfor -%}
 
 variables:
 {% for var_name, var_type, var_dims, var_attrs, var in variables %}
     {{var_type}}   {{var_name}}({{var_dims}});
     {% for attr_name in var_attrs %}
-        {{var_name}}:{{attr_name}} = {{format_value(var_attrs[attr_name])}};
+{{render_multilingual_attr(attr_name, var_attrs[attr_name], '        ' + var_name + ':'}}
     {% endfor %}
 {% endfor -%}
 }
