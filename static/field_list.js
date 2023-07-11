@@ -19,6 +19,7 @@ function remove_item_from_list(list_item) {
                 let local_id_num = parseInt(local_id.slice(local_last_pos + 1));
                 if (local_id_num > id_num) {
                     new_id = front_part + "-" + (local_id_num - 1)
+                    // TODO: This needs to be updated to work with the add code below.
                     $(this).find("label").attr("for", new_id);
                     $(this).find("input").attr("id", new_id);
                     $(this).find("input").attr("name", new_id);
@@ -65,7 +66,7 @@ $(document).ready(function() {
                 }
             })
             update_example.find(".remove-button").remove();
-            update_example.find("textarea").text('');
+            update_example.find("textarea").val('');
             update_example.find("input").val('');
             let button_id = "form_button_" + current_num;
             update_example.prepend("<div class='remove-button'><a id='" + button_id + "'>-</a><br class='cb' /></div>");
