@@ -120,7 +120,7 @@ class Database:
             else:
                 self._log.info(f"Database session not set during __exit__")
         if self._is_closed and not self._transaction_stack:
-            self.log.info(f"Database object used after cleanup called")
+            self._log.info(f"Database object used after cleanup called")
             self._close()
 
     def __cleanup__(self):
