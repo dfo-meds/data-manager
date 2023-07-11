@@ -30,6 +30,46 @@ import shutil
 import yaml
 import secrets
 import datetime
+from xml.sax.saxutils import escape as sax_escape, quoteattr as sax_quote
+
+
+C_REPLACEMENTS = {
+    "\r": "\\r",
+    "\n": "\\n",
+    "\t": "\\t",
+    "\b": "\\b",
+    "\f": "\\f",
+}
+
+
+def xml_escape(v):
+    if v is None:
+        return ""
+    return sax_escape(str(v))
+
+
+def xml_quote_attr(v):
+    return xml_escape(v).replace('"', '&quot;')
+
+
+def c_escape(v, quote_char='"'):
+    if v is None:
+        v = ""
+    if isinstance(v, str):
+        v = v.replace('\\', '\\\\').replace(quote_char, f"\\{quote_char}")
+        for x in C_REPLACEMENTS:
+            v = v.replace(x, C_REPLACEMENTS[x])
+        buffer_v = ""
+        for k in range(0, len(v)):
+            if ord(v[k]) < 32 or ord(v[k]) >= 128:
+                new_c = hex(ord(v[k]))[2:]
+                if len(new_c) < 2:
+                    new_c = f"0{new_c}"
+                buffer_v += f"\\x{new_c}"
+            else:
+                buffer_v += v[k]
+        return f"{quote_char}{buffer_v}{quote_char}"
+    return v
 
 
 def flasht(dts_str, message_type='info', default=None, *args, **kwargs):
@@ -1244,6 +1284,7 @@ class DataTable:
         """Generate the AJAX JSON response for searches and paginating."""
         total_records = self._query.count_all(self)
         total_filtered = self._query.count_filtered(self)
+        print(self._columns)
         data = [
             {
                 cname: escape(self._columns[cname].value(row))

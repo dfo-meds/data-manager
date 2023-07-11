@@ -14,19 +14,19 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   {% macro render_text(text) %}
   {% if text is string %}
-  <gmd:CharacterString>{{text}}</gmd:CharacterString>
+  <gmd:CharacterString>{{xml_escape(text)}}</gmd:CharacterString>
   {% else %}
   {% if default_locale in text %}
-  <gmd:CharacterString>{{text[default_locale]}}</gmd:CharacterString>
+  <gmd:CharacterString>{{xml_escape(text[default_locale])}}</gmd:CharacterString>
   {% elif "und" in text %}
-  <gmd:CharacterString>{{text['und']}}</gmd:CharacterString>
+  <gmd:CharacterString>{{xml_escape(text['und'])}}</gmd:CharacterString>
   {% endif %}
   {% if check_alt_langs(text, default_locale) %}
   <gmd:PT_FreeText>
   {% for a2l in locale_mapping %}
       {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
     <gmd:textGroup>
-      <gmd:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{text[a2l]}}</gmd:LocalisedCharacterString>
+      <gmd:LocalisedCharacterString locale="#{{xml_quote(locale_mapping[a2l])}}">{{xml_escape(text[a2l])}}</gmd:LocalisedCharacterString>
     </gmd:textGroup>
       {% endif %}
   {% endfor %}
@@ -96,7 +96,7 @@
   {% if resource['function'] %}
   <gmd:function>
     {% with code_list, code_value, text_value = nap_code_map(resource['function']['short_name'], 'CI_OnLineFunctionCode') %}
-    <gmd:CI_OnLineFunctionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_OnLineFunctionCode>
+    <gmd:CI_OnLineFunctionCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CI_OnLineFunctionCode>
     {% endwith %}
   </gmd:function>
   {% endif %}
@@ -104,7 +104,7 @@
 {% endmacro %}
 
   {% macro render_distance(value, unit) %}
-  <gco:Distance uom="{{unit}}">{{value}}</gco:Distance>
+  <gco:Distance uom="{{xml_quote(unit)}}">{{xml_escape(value)}}</gco:Distance>
   {% endmacro %}
 
   {% macro render_spatial_res(res) %}
@@ -112,7 +112,7 @@
     <gmd:MD_Resolution>
       <gmd:equivalentScale>
         <gmd:MD_RepresentativeFraction>
-          <gmd:denominator><gco:Integer>{{res['scale']}}</gco:Integer></gmd:denominator>
+          <gmd:denominator><gco:Integer>{{xml_escape(res['scale'])}}</gco:Integer></gmd:denominator>
         </gmd:MD_RepresentativeFraction>
       </gmd:equivalentScale>
     </gmd:MD_Resolution>
@@ -128,11 +128,11 @@
 
   {% macro render_time_period(start, end, is_ongoing) %}
   <gml:TimePeriod gml:id="time_period">
-    <gml:beginPosition>{{start.isoformat(timespec='milliseconds')}}</gml:beginPosition>
+    <gml:beginPosition>{{xml_escape(start.isoformat(timespec='milliseconds'))}}</gml:beginPosition>
     {% if is_ongoing %}
     <gml:endPosition indeterminatePosition="now" />
     {% else %}
-    <gml:endPosition>{{end.isoformat(timespec='milliseconds')}}</gml:endPosition>
+    <gml:endPosition>{{xml_escape(end.isoformat(timespec='milliseconds'))}}</gml:endPosition>
     {% endif %}
   </gml:TimePeriod>
   {% endmacro %}
@@ -146,24 +146,26 @@
   {{ render_contact(contact) }}
   <gmd:role>
     {% with code_list, code_value, text_value = nap_code_map(code, 'CI_RoleCode') %}
-    <gmd:CI_RoleCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_RoleCode>
+    <gmd:CI_RoleCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CI_RoleCode>
     {% endwith %}
   </gmd:role>
 </gmd:CI_ResponsibleParty>
 {% endmacro %}
 
 {% macro render_short_date(date) %}
-  <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
+  <gco:Date>{{xml_escape(date.strftime("%Y-%m-%d"))}}</gco:Date>
 {% endmacro %}
 
 {% macro render_date(code, date) %}
 <gmd:CI_Date>
+  {% if date %}
   <gmd:date>
     <gco:Date>{{date.strftime("%Y-%m-%d")}}</gco:Date>
   </gmd:date>
+  {% endif %}
   <gmd:dateType>
     {% with code_list, code_value, text_value = nap_code_map(code, 'CI_DateTypeCode') %}
-    <gmd:CI_DateTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_DateTypeCode>
+    <gmd:CI_DateTypeCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CI_DateTypeCode>
     {% endwith %}
   </gmd:dateType>
 </gmd:CI_Date>
@@ -190,7 +192,7 @@
   <gmd:edition xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</gmd:edition>
   {% endif %}
   {% if citation['edition_date'] %}
-  <gmd:editionDate><gco:DateTime>{{citation['edition_date'].isoformat(timespec='milliseconds')}}</gco:DateTime></gmd:editionDate>
+  <gmd:editionDate><gco:DateTime>{{xml_escape(citation['edition_date'].isoformat(timespec='milliseconds'))}}</gco:DateTime></gmd:editionDate>
   {% endif %}
   {% if citation["id_code"] %}
   <gmd:identifier>
@@ -205,7 +207,7 @@
   {% if citation['presentation_form'] %}
   <gmd:presentationForm>
     {% with code_list, code_value, text_value = nap_code_map(citation['presentation_form']['short_name'], 'CI_PresentationFormCode') %}
-    <gmd:CI_PresentationFormCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CI_PresentationFormCode>
+    <gmd:CI_PresentationFormCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CI_PresentationFormCode>
     {% endwith %}
   </gmd:presentationForm>
   {% endif %}
@@ -229,13 +231,13 @@
 {% macro render_locale_details(locale) %}
   {% with a, lang_code_value, b = nap_code_map(locale['language'], 'LanguageCode') %}
     {% with b, country_code_value, b = nap_code_map(locale['country'], 'CountryCode') %}
-  <gmd:language>{{lang_code_value}}{% if country_code_value %}; {{country_code_value}}{% endif %}</gmd:language>
+  <gmd:language>{{xml_escape(lang_code_value)}}{% if country_code_value %}; {{xml_escape(country_code_value)}}{% endif %}</gmd:language>
     {% endwith %}
     {% endwith %}
   {% if locale['encoding'] %}
   <gmd:characterSet>
     {% with code_list, code_value, text_value = nap_code_map(locale['encoding']['short_name'], 'CharacterSetCode') %}
-    <gmd:MD_CharacterSetCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_CharacterSetCode>
+    <gmd:MD_CharacterSetCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_CharacterSetCode>
     {% endwith %}
   </gmd:characterSet>
   {% endif %}
@@ -246,20 +248,20 @@
 <gmd:PT_Locale id="{{locale['a3_language']}}">
   <gmd:languageCode>
     {% with code_list, code_value, text_value = nap_code_map(locale['language'], 'LanguageCode') %}
-    <gmd:LanguageCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:LanguageCode>
+    <gmd:LanguageCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:LanguageCode>
     {% endwith %}
   </gmd:languageCode>
   {% if locale['country'] %}
   <gmd:country>
     {% with code_list, code_value, text_value = nap_code_map(locale['country'], 'CountryCode') %}
-    <gmd:CountryCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:CountryCode>
+    <gmd:CountryCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CountryCode>
     {% endwith %}
   </gmd:country>
   {% endif %}
   {% if locale['encoding'] %}
   <gmd:characterEncoding>
     {% with code_list, code_value, text_value = nap_code_map(locale['encoding']['short_name'], 'CharacterSetCode') %}
-    <gmd:MD_CharacterSetCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_CharacterSetCode>
+    <gmd:MD_CharacterSetCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_CharacterSetCode>
     {% endwith %}
   </gmd:characterEncoding>
   {% endif %}
@@ -272,17 +274,17 @@
     <gmd:RS_Identifier>
       {% if ref_system['code'] %}
       <gmd:code>
-        <gco:CharacterString>{{ref_system['code']}}</gco:CharacterString>
+        <gco:CharacterString>{{xml_escape(ref_system['code'])}}</gco:CharacterString>
       </gmd:code>
       {% endif %}
       {% if ref_system['system'] and ref_system['system']['code_space'] %}
       <gmd:codeSpace>
-        <gco:CharacterString>{{ref_system['system']['code_space']}}</gco:CharacterString>
+        <gco:CharacterString>{{xml_escape(ref_system['system']['code_space'])}}</gco:CharacterString>
       </gmd:codeSpace>
       {% endif %}
       {% if ref_system['system'] and ref_system['system']['version'] %}
       <gmd:version>
-        <gco:CharacterString>{{ref_system['system']['version']}}</gco:CharacterString>
+        <gco:CharacterString>{{xml_escape(ref_system['system']['version'])}}</gco:CharacterString>
       </gmd:version>
       {% endif %}
     </gmd:RS_Identifier>
@@ -294,13 +296,13 @@
   {% for keyword in kwgroup.keywords() %}
   <gmd:keyword xsi:type="gmd:PT_FreeText_PropertyType">
     {% with keyword_display = keyword.to_display(default_locale) %}
-    <gco:CharacterString>{{ keyword_display["primary"] }}</gco:CharacterString>
+    <gco:CharacterString>{{ xml_escape(keyword_display["primary"]) }}</gco:CharacterString>
     {% if keyword_display["secondary"] %}
     <gmd:PT_FreeText>
     {% for a2l in locale_mapping %}
         {% if a2l in keyword_display["secondary"] %}
       <gmd:textGroup>
-        <gmd:LocalisedCharacterString locale="#{{locale_mapping[a2l]}}">{{keyword_display["secondary"][a2l]}}</gmd:LocalisedCharacterString>
+        <gmd:LocalisedCharacterString locale="#{{xml_quote(locale_mapping[a2l])}}">{{xml_escape(keyword_display["secondary"][a2l])}}</gmd:LocalisedCharacterString>
       </gmd:textGroup>
         {% endif %}
     {% endfor %}
@@ -312,7 +314,7 @@
   {% if kwgroup.thesaurus['type'] %}
   <gmd:type>
     {% with code_list, code_value, text_value = nap_code_map(kwgroup.thesaurus['type']['short_name'], 'MD_KeywordTypeCode') %}
-    <gmd:MD_KeywordTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_KeywordTypeCode>
+    <gmd:MD_KeywordTypeCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_KeywordTypeCode>
     {% endwith %}
   </gmd:type>
   {% endif %}
@@ -329,7 +331,7 @@
   {% if code %}
   <gmd:maintenanceAndUpdateFrequency>
     {% with code_list, code_value, code_name = nap_code_map(code, 'MD_MaintenanceFrequencyCode') %}
-    <gmd:MD_MaintenanceFrequencyCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{code_name}}</gmd:MD_MaintenanceFrequencyCode>
+    <gmd:MD_MaintenanceFrequencyCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(code_name)}}</gmd:MD_MaintenanceFrequencyCode>
     {% endwith %}
   </gmd:maintenanceAndUpdateFrequency>
   {% endif %}
@@ -353,7 +355,7 @@
       {{ render_constraints_content(con) }}
       <gmd:classification>
         {% with code_list, code_value, text_value = nap_code_map(con['classification']['short_name'], 'MD_ClassificationCode') %}
-        <gmd:MD_ClassificationCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_ClassificationCode>
+        <gmd:MD_ClassificationCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_ClassificationCode>
         {% endwith %}
       </gmd:classification>
       {% if con['user_notes'] %}
@@ -373,7 +375,7 @@
       <gmd:accessConstraints>
         {% for c in con['access_constraints'] %}
           {% with code_list, code_value, text_value = nap_code_map(c['short_name'], 'MD_RestrictionCode') %}
-          <gmd:MD_RestrictionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_RestrictionCode>
+          <gmd:MD_RestrictionCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{text_value}}</gmd:MD_RestrictionCode>
           {% endwith %}
         {% endfor %}
       </gmd:accessConstraints>
@@ -382,7 +384,7 @@
       <gmd:useConstraints>
         {% for c in con['use_constraints'] %}
           {% with code_list, code_value, text_value = nap_code_map(c['short_name'], 'MD_RestrictionCode') %}
-          <gmd:MD_RestrictionCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_RestrictionCode>
+          <gmd:MD_RestrictionCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{text_value}}</gmd:MD_RestrictionCode>
           {% endwith %}
         {% endfor %}
       </gmd:useConstraints>
@@ -406,12 +408,12 @@
 
   {% macro render_graphic(graphic) %}
     <gmd:MD_BrowseGraphic>
-      <gmd:fileName><gco:CharacterString>{{graphic['file_url']}}</gco:CharacterString></gmd:fileName>
+      <gmd:fileName>{{ render_text(graphic['file_url']) }}</gmd:fileName>
       {% if graphic['description'] %}
       <gmd:fileDescription xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(graphic['description']) }}</gmd:fileDescription>
       {% endif %}
       {% if graphic['file_ext'] %}
-      <gmd:fileType><gco:CharacterString>{{graphic['file_ext']}}</gco:CharacterString></gmd:fileType>
+      <gmd:fileType>{{ render_text(graphic['file_ext']) }}</gmd:fileType>
       {% endif %}
     </gmd:MD_BrowseGraphic>
   {% endmacro %}
@@ -435,14 +437,14 @@
           {% for phone_no in contact['phone'] %}
           {% if (not phone_no['phone_number_type']) or phone_no['phone_number_type']['short_name'] != 'fax' %}
           <gmd:voice>
-            <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(phone_no['phone_number'])}}</gco:CharacterString>
           </gmd:voice>
           {% endif %}
           {% endfor %}
           {% for phone_no in contact['phone'] %}
           {% if phone_no['phone_number_type'] and phone_no['phone_number_type']['short_name'] == 'fax' %}
           <gmd:facsimile>
-            <gco:CharacterString>{{phone_no['phone_number']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(phone_no['phone_number'])}}</gco:CharacterString>
           </gmd:facsimile>
           {% endif %}
           {% endfor %}
@@ -455,33 +457,33 @@
           {% if contact['delivery_point'] %}
           <gmd:deliveryPoint>
           {% for dp in contact['delivery_point'] %}
-            <gco:CharacterString>{{dp}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(dp)}}</gco:CharacterString>
           {% endfor %}
           </gmd:deliveryPoint>
           {% endif %}
           {% if contact['city'] %}
           <gmd:city>
-            <gco:CharacterString>{{contact['city']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(contact['city'])}}</gco:CharacterString>
           </gmd:city>
           {% endif %}
           {% if contact['admin_area'] %}
           <gmd:administrativeArea>
-            <gco:CharacterString>{{contact['admin_area']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(contact['admin_area'])}}</gco:CharacterString>
           </gmd:administrativeArea>
           {% endif %}
           {% if contact['postal_code'] %}
           <gmd:postalCode>
-            <gco:CharacterString>{{contact['postal_code']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(contact['postal_code'])}}</gco:CharacterString>
           </gmd:postalCode>
           {% endif %}
           {% if contact['country'] %}
           <gmd:country>
-            <gco:CharacterString>{{contact['country']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(contact['country'])}}</gco:CharacterString>
           </gmd:country>
           {% endif %}
           {% if contact['email'] %}
           <gmd:electronicMailAddress>
-            <gco:CharacterString>{{contact['email']}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(contact['email'])}}</gco:CharacterString>
           </gmd:electronicMailAddress>
           {% endif %}
         </gmd:CI_Address>
@@ -513,7 +515,7 @@
     {{ render_citation(system['authority']) }}
     </gmd:authority>
     {% endif %}
-    <gmd:code><gco:CharacterString>{% if system['code_space'] %}{{system['code_space']}}{% endif %}{{code}}</gco:CharacterString></gmd:code>
+    <gmd:code><gco:CharacterString>{% if system['code_space'] %}{{xml_escape(system['code_space'])}}{% endif %}{{xml_escape(code)}}</gco:CharacterString></gmd:code>
   </gmd:MD_Identifier>
   {% endmacro %}
 </templates>

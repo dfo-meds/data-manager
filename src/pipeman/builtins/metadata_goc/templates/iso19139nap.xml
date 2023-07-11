@@ -15,7 +15,7 @@
                  xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/gmd/gmd.xsd http://www.isotc211.org/2005/srv http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/srv/srv.xsd http://www.geconnections.org/nap/napMetadataTools/napXsd/napm http://nap.geogratis.gc.ca/metadata/tools/schemas/metadata/can-cgsb-171.100-2009-a/napm/napm.xsd">
   {% import 'iso19139nap_macros.xml' as iso with context %}
   <gmd:fileIdentifier>
-    <gco:CharacterString>{{ dataset.guid() }}</gco:CharacterString>
+    <gco:CharacterString>{{ xml_escape(dataset.guid()) }}</gco:CharacterString>
   </gmd:fileIdentifier>
   {{iso.render_locale(dataset['default_locale'], True)}}
   {# <!-- gmd:parentIdentifier (gco:charStr with fileIdentifier in it) --> #}
@@ -42,7 +42,7 @@
       <gco:CharacterString>CAN/CGSB-171.100-2009</gco:CharacterString>
   </gmd:metadataStandardVersion>
   <gmd:dataSetURI>
-    <gco:CharacterString>ca.gc.dfo-mpo.cnodc-cndoc/{{dataset.guid()}}</gco:CharacterString>
+    <gco:CharacterString>ca.gc.dfo-mpo.cnodc-cndoc/{{xml_escape(dataset.guid())}}</gco:CharacterString>
   </gmd:dataSetURI>
   {% if dataset['other_locales'] %}
   {% for locale in dataset['other_locales'] %}
@@ -86,7 +86,7 @@
       {% for stat in dataset['status'] %}
       <gmd:status>
         {% with code_list, code_value, text_value = nap_code_map(stat['short_name'], 'MD_ProgressCode') %}
-        <gmd:MD_ProgressCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_ProgressCode>
+        <gmd:MD_ProgressCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_ProgressCode>
         {% endwith %}
       </gmd:status>
       {% endfor %}
@@ -131,7 +131,7 @@
       {% for srt in dataset['spatial_representation_type'] %}
       <gmd:spatialRepresentationType>
         {% with code_list, code_value, text_value = nap_code_map(srt['short_name'], 'MD_SpatialRepresentationTypeCode') %}
-        <gmd:MD_SpatialRepresentationTypeCode codeList="{{code_list}}" codeListValue="{{code_value}}">{{text_value}}</gmd:MD_SpatialRepresentationTypeCode>
+        <gmd:MD_SpatialRepresentationTypeCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:MD_SpatialRepresentationTypeCode>
         {% endwith %}
       </gmd:spatialRepresentationType>
       {% endfor %}
@@ -147,7 +147,7 @@
       {% if dataset['topic_category'] %}
       {% for tc in dataset['topic_category'] %}
       <gmd:topicCategory>
-        <gmd:MD_TopicCategoryCode>{{tc['short_name']}}</gmd:MD_TopicCategoryCode>
+        <gmd:MD_TopicCategoryCode>{{xml_escape(tc['short_name'])}}</gmd:MD_TopicCategoryCode>
       </gmd:topicCategory>
       {% endfor %}
       {% endif %}
@@ -156,28 +156,28 @@
       {% endif %}
       <gmd:extent>
         <gmd:EX_Extent>
-          {% if dataset['bbox_north'] %}
+          {% if dataset['bbox_north'] is not none %}
           <gmd:geographicElement>
             <gmd:EX_GeographicBoundingBox>
               <gmd:extentTypeCode>
                 <gco:Boolean>true</gco:Boolean>
               </gmd:extentTypeCode>
               <gmd:westBoundLongitude>
-                <gco:Decimal>{{dataset['bbox_west']}}</gco:Decimal>
+                <gco:Decimal>{{xml_escape(dataset['bbox_west'])}}</gco:Decimal>
               </gmd:westBoundLongitude>
               <gmd:eastBoundLongitude>
-                <gco:Decimal>{{dataset['bbox_east']}}</gco:Decimal>
+                <gco:Decimal>{{xml_escape(dataset['bbox_east'])}}</gco:Decimal>
               </gmd:eastBoundLongitude>
               <gmd:southBoundLatitude>
-                <gco:Decimal>{{dataset['bbox_south']}}</gco:Decimal>
+                <gco:Decimal>{{xml_escape(dataset['bbox_south'])}}</gco:Decimal>
               </gmd:southBoundLatitude>
               <gmd:northBoundLatitude>
-                <gco:Decimal>{{dataset['bbox_north']}}</gco:Decimal>
+                <gco:Decimal>{{xml_escape(dataset['bbox_north'])}}</gco:Decimal>
               </gmd:northBoundLatitude>
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>
           {% endif %}
-          {% if dataset['start_time'] %}
+          {% if dataset['start_time'] is not none %}
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
               <gmd:extent>
@@ -186,15 +186,19 @@
             </gmd:EX_TemporalExtent>
           </gmd:temporalElement>
           {% endif %}
-          {% if dataset['vertical_min'] %}
+          {% if dataset['vertical_min'] is not none or dataset['vertical_max'] is not none %}
           <gmd:verticalElement>
             <gmd:EX_VerticalExtent>
+              {% if dataset['vertical_min'] is not none %}
               <gmd:minimumValue>
                 <gco:Real>{{dataset['vertical_min']}}</gco:Real>
               </gmd:minimumValue>
+              {% endif %}
+              {% if dataset['vertical_max'] is not none %}
               <gmd:maximumValue>
                 <gco:Real>{{dataset['vertical_max']}}</gco:Real>
               </gmd:maximumValue>
+              {% endif %}
               {# <!-- TODO: gmd:verticalCRS, is a gml:ProjectedCRS or similar --> #}
             </gmd:EX_VerticalExtent>
           </gmd:verticalElement>

@@ -2,17 +2,17 @@
 {%- macro render_multilingual_attr(attr_name, text) -%}
 
     {%- if not is_multilingual_map(text) -%}
-    <att name="{{attr_name}}">{{text}}</att>
+    <att name="{{xml_quote(attr_name)}}">{{xml_escape(text)}}</att>
     {%- else -%}
         {%- if default_locale in text -%}
-    <att name="{{attr_name}}">{{text['und']}}</att>
+    <att name="{{xml_quote(attr_name)}}">{{xml_escape(text['und'])}}</att>
         {%- elif "und" in text -%}
-    <att name="{{attr_name}}">{{text['und']}}</att>
+    <att name="{{xml_quote(attr_name)}}">{{xml_escape(text['und'])}}</att>
         {%- endif -%}
         {% if check_alt_langs(text, default_locale) %}
             {% for a2l in locale_mapping %}
                 {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
-    <att name="{{attr_name}}_{{a2l}}">{{text[a2l]}}</att>
+    <att name="{{xml_quote(attr_name)}}_{{a2l}}">{{xml_escape(text[a2l])}}</att>
                 {% endif %}
             {% endfor %}
         {% endif %}
@@ -21,39 +21,39 @@
 
 {%- macro render_variable_attributes(var_attrs) -%}
     <addAttributes>
-        {% for name in var_attrs %}
+        {% for name in stable_dict_key_list(var_attrs) %}
         {{ render_multilingual_attr(name, var_attrs[name]) }}
         {% endfor %}
     </addAttributes>
 {%- endmacro -%}
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
-    <fileDir>{{dataset['erddap_data_file_path']}}</fileDir>
-    <fileNameRegex>{{dataset['erddap_data_file_pattern']}}</fileNameRegex>
+    <fileDir>{{xml_escape(dataset['erddap_data_file_path'])}}</fileDir>
+    <fileNameRegex>{{xml_escape(dataset['erddap_data_file_pattern'])}}</fileNameRegex>
     <recursive>true</recursive>
     <metadataFrom>last</metadataFrom>
-    <iso19115File>/cloud_data/config/{{environment}}/metadata/{{dataset.guid()}}.xml</iso19115File>
+    <iso19115File>/cloud_data/config/{{xml_escape(environment)}}/metadata/{{xml_escape(dataset.guid())}}.xml</iso19115File>
     <addAttributes>
-        {% for name in global_attributes %}
+        {% for name in stable_dict_key_list(global_attributes) %}
         {{ render_multilingual_attr(name, global_attributes[name]) }}
         {% endfor %}
     </addAttributes>
     {% for var_name, var_type, var_dims, var_attrs, var in variables %}
         {% if var['is_axis'] %}
         <axisVariable>
-            <sourceName>{{var_name}}</sourceName>
-            {% if var['destination_name'] %}
-            <destinationName>{{var['destination_name']}}</destinationName>
+            <sourceName>{{xml_escape(var_name)}}</sourceName>
+            {% if var['destination_name'] is not none %}
+            <destinationName>{{xml_escape(var['destination_name'])}}</destinationName>
             {% endif %}
             {{ render_variable_attributes(var_attrs) }}
         </axisVariable>
         {% else %}
         <dataVariable>
-            <sourceName>{{var_name}}</sourceName>
-            {% if var['destination_name'] %}
-            <destinationName>{{var['destination_name']}}</destinationName>
+            <sourceName>{{xml_escape(var_name)}}</sourceName>
+            {% if var['destination_name'] is not none %}
+            <destinationName>{{xml_escape(var['destination_name'])}}</destinationName>
             {% endif %}
-            {% if var['source_data_type'] %}
-            <dataType>{{var['source_data_type']['short_name']}}</dataType>
+            {% if var['source_data_type'] is not none %}
+            <dataType>{{xml_escape(var['source_data_type']['short_name'])}}</dataType>
             {% endif %}
             {{ render_variable_attributes(var_attrs) }}
         </dataVariable>

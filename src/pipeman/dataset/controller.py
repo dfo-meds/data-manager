@@ -13,7 +13,8 @@ import sqlalchemy as sa
 import wtforms as wtf
 import zrlog
 from pipeman.i18n import DelayedTranslationString, gettext, MultiLanguageString, format_datetime
-from pipeman.util.flask import TranslatableField, ConfirmationForm, ActionList, Select2Widget, SecureBaseForm
+from pipeman.util.flask import TranslatableField, ConfirmationForm, ActionList, Select2Widget, SecureBaseForm, \
+    xml_escape, xml_quote_attr, c_escape
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, DisplayNameColumn, HtmlField, flasht, PipemanFlaskForm
 from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
@@ -451,7 +452,10 @@ class DatasetController:
         args = {
             "dataset": dataset,
             "environment": environment,
-            "authority": self.config.as_str(("pipeman", "authority"))
+            "authority": self.config.as_str(("pipeman", "authority")),
+            'xml_escape': xml_escape,
+            'xml_quote': xml_quote_attr,
+            'c_escape': c_escape,
         }
         for processor in self.reg.metadata_processors(dataset.profiles, profile_name, format_name):
             updates = processor(**args)

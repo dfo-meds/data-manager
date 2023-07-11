@@ -4,20 +4,20 @@
 
     {%- if not is_multilingual_map(text) -%}
     {%- if text is string -%}
-    <attribute type="String" name="{{attr_name}}" value="{{text}}" />
+    <attribute type="String" name="{{xml_quote(attr_name)}}" value="{{xml_quote(text)}}" />
     {%- else -%}
-    <attribute name="{{attr_name}}" value="{{text}}" />
+    <attribute name="{{attr_name}}" value="{{xml_quote(text)}}" />
     {%- endif -%}
     {%- else -%}
         {%- if default_locale in text -%}
-    <attribute type="String" name="{{attr_name}}" value="{{text['und']}}" />
+    <attribute type="String" name="{{xml_quote(attr_name)}}" value="{{xml_quote(text['und'])}}" />
         {%- elif "und" in text -%}
-    <attribute type="String" name="{{attr_name}}" value="{{text['und']}}" />
+    <attribute type="String" name="{{xml_quote(attr_name)}}" value="{{xml_quote(text['und'])}}" />
         {%- endif -%}
         {% if check_alt_langs(text, default_locale) %}
             {% for a2l in locale_mapping %}
                 {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
-    <attribute type="String" name="{{attr_name}}_{{a2l}}" value="{{text[a2l]}}" />
+    <attribute type="String" name="{{xml_quote(attr_name)}}_{{xml_quote(a2l)}}" value="{{xml_quote(text[a2l])}}" />
                 {% endif %}
             {% endfor %}
         {% endif %}
@@ -29,7 +29,7 @@
     {%- endfor %}
 
     {%- for var_name, var_type, var_dims, var_attrs, var in variables -%}
-    <variable name="{{var_name}}" shape="{{var_dims}}" type="{{var_type}}">
+    <variable name="{{xml_quote(var_name)}}" shape="{{xml_quote(var_dims)}}" type="{{xml_quote(var_type)}}">
       {%- for name in var_attrs -%}
       {{ format_attribute(name, var_attrs[name]) }}
       {%- endfor -%}

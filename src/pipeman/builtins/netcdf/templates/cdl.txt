@@ -1,9 +1,5 @@
 {%- macro render_attribute(prefix, attr_name, text) -%}
-{%- if text is string -%}
-{{prefix}}{{attr_name}} = "{{text}}";
-{%- else -%}
-{{prefix}}{{attr_name}} = {{text}};
-{%- endif -%}
+{{prefix}}{{attr_name}} = {{c_escape(text)}};
 {%- endmacro -%}
 
 {%- macro render_multilingual_attr(attr_name, text, prefix) -%}
