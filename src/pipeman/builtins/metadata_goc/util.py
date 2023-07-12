@@ -1,5 +1,7 @@
 import functools
 
+import zrlog
+
 from pipeman.builtins.iso19115.util import preprocess_metadata
 
 ORIGINALS = {
@@ -231,7 +233,11 @@ NAP_CODE_LOOKUP = {
 
 
 def nap_code_map(code, code_list):
-    if code_list in NAP_CODE_LOOKUP and code in NAP_CODE_LOOKUP[code_list]['values']:
+    if code_list not in NAP_CODE_LOOKUP:
+        zrlog.get_logger("pipeman.metadata_goc").warning(f"Code list [{code_list}] not defined for NAP")
+    elif code not in NAP_CODE_LOOKUP[code_list]['values']:
+        zrlog.get_logger("pipeman.metadata_goc").info(f"Code value [{code}] not found in code list [{code_list}] for NAP")
+    else:
         return NAP_CODE_LOOKUP[code_list]['list'], *NAP_CODE_LOOKUP[code_list]['values'][code]
     return ORIGINALS[code_list], code, code
 

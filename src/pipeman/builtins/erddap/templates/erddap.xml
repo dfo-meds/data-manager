@@ -5,7 +5,7 @@
     <att name="{{xml_quote(attr_name)}}">{{xml_escape(text)}}</att>
     {%- else -%}
         {%- if default_locale in text -%}
-    <att name="{{xml_quote(attr_name)}}">{{xml_escape(text['und'])}}</att>
+    <att name="{{xml_quote(attr_name)}}">{{xml_escape(text[default_locale])}}</att>
         {%- elif "und" in text -%}
     <att name="{{xml_quote(attr_name)}}">{{xml_escape(text['und'])}}</att>
         {%- endif -%}

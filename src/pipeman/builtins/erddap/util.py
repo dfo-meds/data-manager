@@ -27,7 +27,7 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
                         'short_name': f'ERDDAP:{dtype_dir}'
                     },
                     'function': {
-                        'function': 'download'
+                        'short_name': 'download'
                     },
                     'name': {
                         'und': 'ERDDAP',
