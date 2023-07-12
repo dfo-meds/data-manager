@@ -4,13 +4,27 @@ erddap_dataset_types:
     fr: ERDDAP - Types de données
   uri:
   terms:
+    EDDTableFromNcCFFiles:
+      display:
+        en: Table from NetCDF (DSG, non-multidimensional)
+        fr: Tableau en NetCDF (DSG, non multidimensionnel)
+      description:
+        en: Appropriate for NetCDF files that use one of the CF's Discrete Sampling Geometries, but not the multi-dimensional variants.
+        fr: Convient aux fichiers NetCDF qui utilisent l'une des géométries d'échantillonnage discret du CF, mais pas les variantes multidimensionnelles.
+    EDDTableFromMultidimNcFiles:
+      display:
+        en: Table from NetCDF (DSG, multidimensional)
+        fr: Tableau en NetCDF (DSG, multidimensionnel)
+      description:
+        en: Appropriate for NetCDF files that use one of the CF's multi-dimensional variants on the Discrete Sampling Geometries.
+        fr: Convient aux fichiers NetCDF qui utilisent l'une des variantes multidimensionnelles du CF sur les géométries d'échantillonnage discrètes.
     EDDTableFromNcFiles:
       display:
-        en: Table from NetCDF
-        fr: Tableau en NetCDF
+        en: Table from NetCDF (non-DSG)
+        fr: Tableau en NetCDF (non DSG)
       description:
-        en: Appropriate for most NetCDF files
-        fr: Convient à la plupart des fichiers NetCDF
+        en: Appropriate for most other NetCDF files
+        fr: Convient à la plupart des autres fichiers NetCDF
     EDDTableFromAsciiFiles:
       display:
         en: Table from ASCII
