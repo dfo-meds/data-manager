@@ -503,9 +503,7 @@
       <cit:address>
         <cit:CI_Address>
           {% if contact['delivery_point'] %}
-          {% for dp in contact['delivery_point'] %}
-          <cit:deliveryPoint xsi:type="lan:PT_FreeText_PropertyType">{{render_text(dp)}}</cit:deliveryPoint>
-          {% endfor %}
+          <cit:deliveryPoint xsi:type="lan:PT_FreeText_PropertyType">{{render_text(contact['delivery_point'])}}</cit:deliveryPoint>
           {% endif %}
           {% if contact['city'] %}
           <cit:city>

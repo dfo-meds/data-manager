@@ -456,9 +456,7 @@
       <gmd:address>
         <gmd:CI_Address>
           {% if contact['delivery_point'] %}
-          {% for dp in contact['delivery_point'] %}
-          <gmd:deliveryPoint xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(dp)}}</gmd:deliveryPoint>
-          {% endfor %}
+          <gmd:deliveryPoint xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['delivery_point'])}}</gmd:deliveryPoint>
           {% endif %}
           {% if contact['city'] %}
           <gmd:city>
