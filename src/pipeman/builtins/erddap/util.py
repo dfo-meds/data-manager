@@ -146,11 +146,11 @@ def preprocess_dataset(dataset, **kwargs):
             if var['erddap_role']['short_name'] == 'trajectory_extra':
                 cdm_trajectory_vars.append(var['destination_name'])
     if cdm_profile_vars:
-        vars['global_attributes']['cdm_profile_vars'] = ','.join(cdm_profile_vars)
+        vars['global_attributes']['cdm_profile_variables'] = ','.join(cdm_profile_vars)
     if cdm_trajectory_vars:
-        vars['global_attributes']['cdm_trajectory_vars'] = ','.join(cdm_trajectory_vars)
+        vars['global_attributes']['cdm_trajectory_variables'] = ','.join(cdm_trajectory_vars)
     if cdm_timeseries_vars:
-        vars['global_attributes']['cdm_timeseries_vars'] = ','.join(cdm_timeseries_vars)
+        vars['global_attributes']['cdm_timeseries_variables'] = ','.join(cdm_timeseries_vars)
     if subset_vars:
         vars['global_attributes']['subsetVariables'] = ','.join(subset_vars)
     if altitude_proxy:
