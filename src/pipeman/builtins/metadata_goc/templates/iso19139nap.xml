@@ -27,9 +27,7 @@
     {{ iso.render_responsibility(resp['role']['short_name'], resp['contact']) }}
   </gmd:contact>
   {% endfor %}
-  <gmd:dateStamp>
-    {{ dataset.metadata_modified_date().isoformat() }}
-  </gmd:dateStamp>
+  <gmd:dateStamp>{{dataset.metadata_modified_date().isoformat()}}</gmd:dateStamp>
   <gmd:metadataStandardName xsi:type="gmd:PT_FreeText_PropertyType">
     <gco:CharacterString>North American Profile of ISO 19115:2003 - Geographic information - Metadata</gco:CharacterString>
     <gmd:PT_FreeText>
