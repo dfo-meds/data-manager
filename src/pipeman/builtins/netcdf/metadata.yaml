@@ -62,7 +62,6 @@ technical:
       vocabulary_name: cdm_data_types
       netcdf:
         mapping: featureType
-        processor: vocabulary
     conventions:
       data_type: text
       label:
