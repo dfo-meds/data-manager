@@ -17,6 +17,7 @@ universalio
 zirconium>=1.1.0
 zrlog>=0.3.0
 azure-identity
+azure-storage-file-share
 msal
 prometheus-client
 prometheus-flask-exporter
