@@ -11,7 +11,8 @@ from autoinject import injector
 
 class UniqueTaskThreadManager:
 
-    def __init__(self, halt_event, max_threads):
+    def __init__(self, app, halt_event, max_threads):
+        self._app = app
         self.halt = halt_event
         self._max_threads: int = max_threads
         self._queued: dict[str, callable] = {}
@@ -36,7 +37,7 @@ class UniqueTaskThreadManager:
             self._queued_names = self._queued_names[sow_count:]
 
     def _sow(self, key: str):
-        t = TaskThread(self.halt, self._queued[key])
+        t = TaskThread(self._app, self.halt, self._queued[key])
         t.start()
         del self._queued[key]
 
@@ -64,13 +65,15 @@ class UniqueTaskThreadManager:
 
 class TaskThread(threading.Thread):
 
-    def __init__(self, halt_event, callback):
+    def __init__(self, app, halt_event, callback):
         super().__init__()
+        self._app = app
         self.halt = halt_event
         self.callback = callback
 
     def run(self):
-        self.callback(self)
+        with self._app.app_context():
+            self.callback(self)
 
 
 class CronThread(threading.Thread):
@@ -87,8 +90,6 @@ class CronThread(threading.Thread):
         pass
 
     def run(self):
-        print(self.app)
-        print(type(self.app))
         with self.app.app_context():
             self._run()
 

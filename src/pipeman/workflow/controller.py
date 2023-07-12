@@ -566,7 +566,7 @@ class WorkflowCronThread(CronThread):
         self._lock_time = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
         self._finish_delay_time = self.cfg.as_float(("pipeman", "workflow", "max_exit_delay_time_seconds"), default=5)
         self._last_reset = None
-        self._tasks = UniqueTaskThreadManager(self.halt, self._max_threads)
+        self._tasks = UniqueTaskThreadManager(app, self.halt, self._max_threads)
 
     def _run(self):
         while not self.halt.is_set():
