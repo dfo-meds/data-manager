@@ -19,13 +19,33 @@
     {%- endif %}
 {%- endmacro -%}
 
-{%- macro render_variable_attributes(var_attrs) -%}
+{%- macro render_attr_with_type(attr_name, text, type_name) -%}
+    {% if type_name in ('int', 'short', 'byte', 'ubyte', 'ushort', 'uint', 'ulong') %}
+   <att name="{{xml_quote(attr_name)}}" type="{{xml_quote(type_name)}}">{{xml_escape(text | int)}}</att>
+    {% else %}
+   <att name="{{xml_quote(attr_name)}}" type="{{xml_quote(type_name)}}">{{xml_escape(text)}}</att>
+    {% endif %}
+{%- endmacro -%}
+
+{%- macro render_variable_attributes(var_attrs, var_packed_type, var_unpacked_type) -%}
     <addAttributes>
+
         {% for name in stable_dict_key_list(var_attrs) %}
+        {% if name in ('colorBarMinimum', 'colorBarMaximum') %}
+        {{ render_attr_with_type(name, var_attrs[name], 'double') }}
+        {% elif name in ('colorBarNSections') %}
+        {{ render_attr_with_type(name, var_attrs[name], 'int') }}
+        {% elif name in ('actual_min', 'actual_max', 'missing_value', '_FillValue', 'scale_factor', 'add_offset') %}
+        {{ render_attr_with_type(name, var_attrs[name], var_unpacked_type) }}
+        {% elif name in ('valid_min', 'valid_max') %}
+        {{ render_attr_with_type(name, var_attrs[name], var_packed_type) }}
+        {% else %}
         {{ render_multilingual_attr(name, var_attrs[name]) }}
+        {% endif %}
         {% endfor %}
     </addAttributes>
 {%- endmacro -%}
+
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
     <fileDir>{{xml_escape(dataset['erddap_data_file_path'])}}</fileDir>
     <fileNameRegex>{{xml_escape(dataset['erddap_data_file_pattern'])}}</fileNameRegex>
@@ -36,6 +56,10 @@
         {% for name in stable_dict_key_list(global_attributes) %}
         {% if name == 'featureType' %}
         {{ render_multilingual_attr('cdm_data_type', global_attributes[name]) }}
+        {% elif name in ('colorBarMinimum', 'colorBarMaximum') %}
+        {{ render_attr_with_type(attr_name, global_attributes[attr_name], 'double') }}
+        {% elif name in ('colorBarNSections') %}
+        {{ render_attr_with_type(attr_name, global_attributes[attr_name], 'int') }}
         {% else %}
         {{ render_multilingual_attr(name, global_attributes[name]) }}
         {% endif %}
@@ -48,7 +72,13 @@
             {% if var['destination_name'] is not none %}
             <destinationName>{{xml_escape(var['destination_name'])}}</destinationName>
             {% endif %}
-            {{ render_variable_attributes(var_attrs) }}
+            {{ render_variable_attributes(
+                    var_attrs,
+                    var['source_data_type']['short_name'] if var['source_data_type'] else '',
+                    var['destination_data_type']['short_name'] if var['destination_data_type'] else (
+                        var['source_data_type']['short_name'] if var['source_data_type'] else ''
+                    )
+            ) }}
         </axisVariable>
         {% else %}
         <dataVariable>
@@ -59,7 +89,13 @@
             {% if var['source_data_type'] is not none %}
             <dataType>{{xml_escape(var['source_data_type']['short_name'])}}</dataType>
             {% endif %}
-            {{ render_variable_attributes(var_attrs) }}
+            {{ render_variable_attributes(
+                    var_attrs,
+                    var['source_data_type']['short_name'] if var['source_data_type'] else '',
+                    var['destination_data_type']['short_name'] if var['destination_data_type'] else (
+                        var['source_data_type']['short_name'] if var['source_data_type'] else ''
+                    )
+            ) }}
         </dataVariable>
         {% endif %}
     {% endfor %}
