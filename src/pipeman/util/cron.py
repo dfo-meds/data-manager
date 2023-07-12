@@ -7,6 +7,14 @@ import zirconium as zr
 import zrlog
 import time
 from autoinject import injector
+import enum
+
+
+class TaskState(enum.Enum):
+
+    EXECUTING = 2
+    QUEUED = 1
+    NONE = 0
 
 
 class UniqueTaskThreadManager:
@@ -25,6 +33,13 @@ class UniqueTaskThreadManager:
             return
         self._queued[name] = callback
         self._queued_names.append(name)
+
+    def job_state(self, name: str):
+        if name in self._executing:
+            return TaskState.EXECUTING
+        if name in self._queued_names:
+            return TaskState.QUEUED
+        return TaskState.NONE
 
     def sow(self):
         self.reap()
@@ -109,25 +124,19 @@ class PeriodicJob:
         self.delay_seconds = max(1, delay_seconds)
         self.off_peak_only = off_peak_only
 
-    def check_and_execute(self, t: UniqueTaskThreadManager,now: datetime.datetime):
-        if self._check_execution(now):
+    def check_and_execute(self, t: UniqueTaskThreadManager, now: datetime.datetime, is_peak: bool):
+        if self._check_execution(t, now, is_peak):
             t.execute(self.name, self.callback)
             self.last_executed = now
 
-    def _check_execution(self,  now: datetime.datetime):
+    def _check_execution(self, t: UniqueTaskThreadManager, now: datetime.datetime, is_peak: bool):
+        if t.job_state(self.name) != TaskState.NONE:
+            return False
+        if is_peak and self.off_peak_only:
+            return False
         if self.last_executed is None:
             return True
         return (now - self.last_executed).total_seconds() > self.delay_seconds
-
-
-class ScheduledTask(CronThread):
-
-    def __init__(self, job: callable):
-        super().__init__()
-        self._job = job
-
-    def run(self):
-        self._job(self)
 
 
 class CronDaemon:
@@ -140,7 +149,6 @@ class CronDaemon:
         self._app = self.system.main_app
         self.halt = threading.Event()
         self._cron_threads: dict[str, CronThread] = {}
-        self._task_threads: dict[str, ScheduledTask] = {}
         self._cron_thread_classes = {}
         self._periodic_jobs = {}
         self.log = zrlog.get_logger("pipeman.cron")
@@ -149,7 +157,7 @@ class CronDaemon:
         self._max_exit_count = self.config.as_int(("pipeman", "daemon", "max_exit_count"), default=3)
         self._cleanup_sleep_time = self.config.as_float(("pipeman", "daemon", "exit_cleanup_sleep"), default=0.25)
         self._max_cleanup_time = self.config.as_int(("pipeman", "daemon", "max_cleanup_time_seconds"), default=5)
-        self._tasks = UniqueTaskThreadManager(self.halt, self._max_scheduled_tasks)
+        self._tasks = UniqueTaskThreadManager(self._app, self.halt, self._max_scheduled_tasks)
 
     def register_cron_thread(self, cls: type, constructor: callable = None):
         self._cron_thread_classes[cls] = constructor or cls
@@ -201,11 +209,7 @@ class CronDaemon:
                     self._cron_threads[k].cleanup()
                 self._start_thread(k)
         for k in self._periodic_jobs:
-            if k in self._task_threads and self._task_threads[k] and self._task_threads[k].is_alive():
-                continue
-            if is_peak and self._periodic_jobs[k].off_peak_only:
-                continue
-            self._task_threads[k] = self._periodic_jobs[k].check_and_execute(self._tasks, now)
+            self._periodic_jobs[k].check_and_execute(self._tasks, now, is_peak)
         self.system.fire("cron.before", self)
         self.system.fire("cron", self)
         self.system.fire("cron.after", self)
