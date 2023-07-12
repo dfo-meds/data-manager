@@ -76,6 +76,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         if self.parent_id and self.ec.has_access(self.field_config["entity_type"], "create"):
             # TODO: dataset access to edit??
             create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], parent_id=self.parent_id, parent_type=self.parent_type)
+        # TODO: improve this template to use tables and rows instead
         return flask.render_template(
             "component_ref.html",
             create_link=create_link,

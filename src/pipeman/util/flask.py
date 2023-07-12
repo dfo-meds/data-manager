@@ -1266,6 +1266,7 @@ class DataTable:
 
     def to_html(self) -> str:
         """Generate the HTML for the data table."""
+        # TODO: Can we find a way of applying a class to rows here for deprecated entities/datasets?
         html = f'<table id="{self._table_id}" class="data_table" cellpadding="0" cellspacing="0" border="0"><thead><tr>'
         for cname in self._columns:
             if self._columns[cname].show_column:
@@ -1284,7 +1285,6 @@ class DataTable:
         """Generate the AJAX JSON response for searches and paginating."""
         total_records = self._query.count_all(self)
         total_filtered = self._query.count_filtered(self)
-        print(self._columns)
         data = [
             {
                 cname: escape(self._columns[cname].value(row))
