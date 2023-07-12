@@ -312,6 +312,8 @@ class WorkflowController:
         if self._has_access(item, 'decide'):
             actions.add_action('pipeman.workflow.page.continue.link', 'core.approve_item', **kwargs)
             actions.add_action('pipeman.workflow.page.cancel.link', 'core.cancel_item', **kwargs)
+        #if self._has_access(item, 'restart'):
+            #actions.add_action('pipeman.workflow.page.restart.link', 'core.restart_item', **kwargs)
         return actions
 
     def _item_query(self, session, only_active: bool = True):

@@ -204,7 +204,7 @@ class UploadController:
             length = None
 
         # Recursively make the parent directories (if there are any)
-        path_parts = file_path.split("/")
+        path_parts = file_path.lstrip('/').split("/")
         dir_client = None
         for i in range(0, len(path_parts) - 1):
             if dir_client is None:

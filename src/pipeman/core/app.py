@@ -548,6 +548,13 @@ def cancel_item(item_id, wfc: WorkflowController = None):
     return wfc.workflow_form(item_id, False)
 
 
+#@core.i18n_route("/action-items/<int:item_id>/retry", methods=["GET", "POST"])
+#@require_permission("action_items.retry")
+#@injector.inject
+#def retry_item(item_id, wfc: WorkflowController = None):
+#    return wfc.retry_form(item_id)
+
+
 @core.i18n_route("/api/entity-select-field/<entity_types>/<int:by_revision>", methods=["POST", "GET"])
 @require_permission("entities.view")
 @injector.inject

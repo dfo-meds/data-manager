@@ -51,11 +51,11 @@ class DatasetController:
     def has_access(self, dataset, operation, is_attempt: bool = False):
         status = dataset.status if dataset.status is None or isinstance(dataset.status, str) else dataset.status()
         ds_id = dataset.id if hasattr(dataset, "id") else dataset.dataset_id
-        if operation == "activate" and not status == "DRAFT":
+        if operation == "activate" and not (status == "DRAFT" and self.can_activate(dataset)):
             if is_attempt:
                 self.log.warning(f"Access denied to activate non-draft dataset [{ds_id}]")
             return False
-        if operation == "publish" and not status == "ACTIVE":
+        if operation == "publish" and not (status == "ACTIVE" and self.can_publish(dataset)):
             if is_attempt:
                 self.log.warning(f"Access denied to publish non-active dataset [{ds_id}]")
             return False
@@ -413,6 +413,22 @@ class DatasetController:
                                      title=gettext("pipeman.dataset.page.activate_dataset.title"),
                                      back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
+    def can_activate(self, dataset):
+        if hasattr(dataset, "dataset_id"):
+            return not self.workflow.check_exists(
+                "dataset_activation",
+                dataset.extras["act_workflow"],
+                object_id=dataset.dataset_id,
+                object_type='dataset'
+            )
+        else:
+            return not self.workflow.check_exists(
+                "dataset_activation",
+                dataset.act_workflow,
+                object_id=dataset.id,
+                object_type='dataset'
+            )
+
     def activate_dataset(self, dataset):
         self.log.info(f"Activating dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
@@ -429,6 +445,22 @@ class DatasetController:
             flasht("pipeman.dataset.error.during_activation", "error")
         else:
             flasht("pipeman.dataset.message.activation_in_progress", "success")
+
+    def can_publish(self, dataset):
+        if hasattr(dataset, "dataset_id"):
+            return not self.workflow.check_exists(
+                "dataset_publication",
+                dataset.extras["pub_workflow"],
+                object_id=dataset.dataset_id,
+                object_type='dataset'
+            )
+        else:
+            return not self.workflow.check_exists(
+                "dataset_publication",
+                dataset.pub_workflow,
+                object_id=dataset.id,
+                object_type='dataset'
+            )
 
     def publish_dataset(self, dataset):
         self.log.info(f"Publishing dataset {dataset.dataset_id}")
