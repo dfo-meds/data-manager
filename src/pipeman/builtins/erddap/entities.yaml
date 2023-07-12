@@ -41,9 +41,6 @@ variable:
         en: Enter the variable name that users who download this dataset from ERDDAP will see, if different from the source name.
         fr: Entrez le nom de la variable que verront les utilisateurs qui téléchargent cet ensemble de données depuis ERDDAP, s'il est différent du nom de la source.
       order: 100
-      netcdf:
-        mapping: destination_name
-        processor: vocabulary
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories

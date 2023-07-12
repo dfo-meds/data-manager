@@ -8,7 +8,7 @@ from pipeman.util.flask import ActionList
 from pipeman.vocab import VocabularyTermController
 from pipeman.dataset.dataset import Dataset
 from pipeman.util import load_object
-from pipeman.entity.fields import Field
+from pipeman.entity.fields import Field, VocabularyTerm
 from pipeman.entity import EntityController
 from pipeman.entity.entity import Entity, FieldContainer
 from pipeman.i18n import TranslationManager
@@ -456,7 +456,7 @@ def _vocab_processor(attrs: dict, target_name: str, field: Field, config: dict, 
     if 'allow_many' in config and config['allow_many']:
         for x in field.data():
             if x is not None:
-                if not isinstance(x, dict):
+                if not isinstance(x, (dict, VocabularyTerm)):
                     zrlog.get_logger("pipeman.netcdf").error(f"Field {target_name} is supposed to be a list of dicts, but is actually a list of {type(x)}")
                     continue
                 else:
@@ -464,7 +464,7 @@ def _vocab_processor(attrs: dict, target_name: str, field: Field, config: dict, 
     else:
         val = field.data()
         if val is not None:
-            if not isinstance(val, dict):
+            if not isinstance(val, (dict, VocabularyTerm)):
                 zrlog.get_logger("pipeman.netcdf").error(f"Field {target_name} is supposed to be a list of dicts, but is actually a list of {type(val)}")
             else:
                 values.append(val['short_name'])
