@@ -279,6 +279,7 @@ pipeman.label.witem.status: Status
 pipeman.label.witem.status.async_delay: Delayed (Async)
 pipeman.label.witem.status.async_execute: Executing (Async)
 pipeman.label.witem.status.batch_delay: Delayed (Batch)
+pipeman.label.witem.status.batch_in_progress: In Progress (Batch)
 pipeman.label.witem.status.batch_execute: Executing (Batch)
 pipeman.label.witem.status.cancelled: Cancelled
 pipeman.label.witem.status.complete: Completed

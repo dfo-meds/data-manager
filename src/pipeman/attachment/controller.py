@@ -219,8 +219,8 @@ class UploadController:
         # Actually do the file upload
         file_client = client.get_file_client(file_path)
         file_client.upload_file(
-            data=content,
-            length=length
+            data=content#,
+            #length=length
         )
 
         # Set metadata
