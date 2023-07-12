@@ -44,7 +44,7 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
                     'goc_content_formats': {
                         'short_name': f'ERDDAP {dtype_format} Dataset'
                     },
-                    'goc_languages': 'eng,fra'
+                    'goc_languages': ['eng', 'fra'],
                 }
             ]
         })
