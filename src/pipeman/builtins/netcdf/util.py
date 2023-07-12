@@ -478,7 +478,8 @@ def _numeric_processor(attrs: dict, target_name: str, field: Field, config: dict
 
 def _key_value_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
     for key, val in field.data():
-        attrs[key] = val
+        if key != "" and key is not None:
+            attrs[key] = val
 
 
 def _licenses_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
