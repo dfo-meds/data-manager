@@ -25,8 +25,8 @@ def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
         notify_endpoint += "/"
     notify_endpoint += "datasets/compile"
     unpwd = f"{username}:{password}"
+    body = {}
     try:
-        body = {}
         resp = requests.post(
             url=notify_endpoint,
             headers={
