@@ -134,7 +134,7 @@ class UploadController:
             name=file_path,
             data=content,
             metadata=metadata,
-            length=length,
+            #length=length,
             overwrite=True,
             content_settings=ContentSettings(
                 content_type=content_type,
@@ -218,9 +218,9 @@ class UploadController:
 
         # Actually do the file upload
         file_client = client.get_file_client(file_path)
+        # Length is not properly calculated yet, results in truncation. Don't use it.
         file_client.upload_file(
-            data=content#,
-            #length=length
+            data=content
         )
 
         # Set metadata

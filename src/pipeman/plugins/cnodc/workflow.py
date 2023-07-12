@@ -28,7 +28,8 @@ def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
     resp = requests.post(
         url=notify_endpoint,
         headers={
-            "Authorization": f"basic {base64.b64encode(unpwd.encode('utf-8')).decode('ascii')}"
+            "Authorization": f"basic {base64.b64encode(unpwd.encode('utf-8')).decode('ascii')}",
+            "Content-Type": "application/json"
         }
     )
     j = resp.json()
