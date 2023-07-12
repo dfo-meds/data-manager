@@ -47,7 +47,6 @@
         {% endfor %}
     </addAttributes>
 {%- endmacro -%}
-
     <reloadEveryNMinutes>10080</reloadEveryNMinutes>
     <fileDir>{{xml_escape(dataset['erddap_data_file_path'])}}</fileDir>
     <fileNameRegex>{{xml_escape(dataset['erddap_data_file_pattern'])}}</fileNameRegex>
@@ -55,6 +54,7 @@
     <metadataFrom>last</metadataFrom>
     <iso19115File>/cloud_data/config/{{xml_escape(environment)}}/metadata/{{xml_escape(dataset.guid())}}.xml</iso19115File>
     <addAttributes>
+        <att name="sourceUrl">(local files)</att>
         {% for name in stable_dict_key_list(global_attributes) %}
         {% if name == 'featureType' %}
         {{ render_multilingual_attr('cdm_data_type', global_attributes[name]) }}
