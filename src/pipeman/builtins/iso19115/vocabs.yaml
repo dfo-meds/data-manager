@@ -417,6 +417,9 @@ iso19115_ci_role_code:
     publisher:
       description:
         fr: partie qui a publié la ressource
+      display:
+        en: Publisher
+        fr: Éditeur
     resourceProvider:
       description:
         fr: partie qui fournit la ressource
