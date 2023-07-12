@@ -11,8 +11,10 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
     if not (erddap_ds_id and erddap_data_type and servers):
         return
     dtype_dir = 'tabledap'
+    dtype_format = 'TableDAP'
     if erddap_data_type['short_name'].startswith('EDDGrid'):
         dtype_dir = 'griddap'
+        dtype_format = 'GridDAP'
     erddap_distribution_servers = []
     for server in servers:
         base_url = server['base_url']
@@ -31,7 +33,18 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
                     },
                     'name': {
                         'und': 'ERDDAP',
-                    }
+                    },
+                    'goc_content_type': {
+                        'short_name': 'dataset',
+                        'display': {
+                            'en': 'Dataset',
+                            'fr': 'Données'
+                        }
+                    },
+                    'goc_content_formats': {
+                        'short_name': f'ERDDAP {dtype_format} Dataset'
+                    },
+                    'goc_languages': 'eng,fra'
                 }
             ]
         })
