@@ -39,6 +39,8 @@
         {{ render_attr_with_type(name, var_attrs[name], var_unpacked_type) }}
         {% elif name in ('valid_min', 'valid_max') %}
         {{ render_attr_with_type(name, var_attrs[name], var_packed_type) }}
+        {% elif name == 'time_zone' and var_attrs[name] == 'Etc/UTC' %}
+        {{ render_multilingual_attr(name, 'UTC') }}
         {% else %}
         {{ render_multilingual_attr(name, var_attrs[name]) }}
         {% endif %}
