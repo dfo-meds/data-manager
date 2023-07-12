@@ -1,3 +1,4 @@
+import flask
 from autoinject import injector
 from pipeman.dataset import DatasetController
 from pipeman.attachment import UploadController
@@ -34,12 +35,13 @@ def upload_metadata(step, context, dc: DatasetController = None, uc: UploadContr
         raise ValueError(f"Metadata format does not exist {pname} {fname}")
     if pname not in ds.profiles:
         return
-    content, mime_type, encoding, ext = dc.generate_metadata_content(
-        ds,
-        pname,
-        fname,
-        step.item_config["environment"] if "environment" in step.item_config else "live"
-    )
+    with flask.current_app.test_request_context():
+        content, mime_type, encoding, ext = dc.generate_metadata_content(
+            ds,
+            pname,
+            fname,
+            step.item_config["environment"] if "environment" in step.item_config else "live"
+        )
     metadata = {
         "CreationDate": datetime.datetime.now().astimezone().replace(microsecond=0).isoformat(),
     }
