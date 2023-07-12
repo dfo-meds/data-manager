@@ -34,7 +34,11 @@
     <iso19115File>/cloud_data/config/{{xml_escape(environment)}}/metadata/{{xml_escape(dataset.guid())}}.xml</iso19115File>
     <addAttributes>
         {% for name in stable_dict_key_list(global_attributes) %}
+        {% if name == 'featureType' %}
+        {{ render_multilingual_attr('cdm_data_type', global_attributes[name]) }}
+        {% else %}
         {{ render_multilingual_attr(name, global_attributes[name]) }}
+        {% endif %}
         {% endfor %}
     </addAttributes>
     {% for var_name, var_type, var_dims, var_attrs, var in variables %}

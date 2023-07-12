@@ -61,7 +61,7 @@ technical:
         fr: Sélectionnez le type de données CDM le plus approprié pour les données.
       vocabulary_name: cdm_data_types
       netcdf:
-        mapping: cdm_data_type
+        mapping: featureType
         processor: vocabulary
     conventions:
       data_type: text
