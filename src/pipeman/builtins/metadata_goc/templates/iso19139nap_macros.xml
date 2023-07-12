@@ -436,16 +436,12 @@
         <gmd:CI_Telephone>
           {% for phone_no in contact['phone'] %}
           {% if (not phone_no['phone_number_type']) or phone_no['phone_number_type']['short_name'] != 'fax' %}
-          <gmd:voice>
-            <gco:CharacterString>{{xml_escape(phone_no['phone_number'])}}</gco:CharacterString>
-          </gmd:voice>
+          <gmd:voice>{{render_text(phone_no['phone_number'])}}</gmd:voice>
           {% endif %}
           {% endfor %}
           {% for phone_no in contact['phone'] %}
           {% if phone_no['phone_number_type'] and phone_no['phone_number_type']['short_name'] == 'fax' %}
-          <gmd:facsimile>
-            <gco:CharacterString>{{xml_escape(phone_no['phone_number'])}}</gco:CharacterString>
-          </gmd:facsimile>
+          <gmd:facsimile>{{render_text(phone_no['phone_number'])}}</gmd:facsimile>
           {% endif %}
           {% endfor %}
         </gmd:CI_Telephone>
@@ -455,11 +451,9 @@
       <gmd:address>
         <gmd:CI_Address>
           {% if contact['delivery_point'] %}
-          <gmd:deliveryPoint>
           {% for dp in contact['delivery_point'] %}
-            <gco:CharacterString>{{xml_escape(dp)}}</gco:CharacterString>
+          <gmd:deliveryPoint xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(dp)}}</gmd:deliveryPoint>
           {% endfor %}
-          </gmd:deliveryPoint>
           {% endif %}
           {% if contact['city'] %}
           <gmd:city>
