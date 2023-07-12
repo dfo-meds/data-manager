@@ -28,8 +28,8 @@ sysadmin_approval:
   access_check: "pipeman.dataset.dataset_gate_step_access"
 erddap_iso19115_metadata_upload_live:
   label:
-    en: Upload ISO-19115 Metadata File for ERDDAP (Live)
-    fr: Télécharger le fichier de métadonnées ISO-19115 pour ERDDAP (en direct)
+    en: ERDDAP Metadata Upload (Live)
+    fr: Télécharger métadonnées pour ERDDAP (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -39,8 +39,8 @@ erddap_iso19115_metadata_upload_live:
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115_erddap"
 erddap_metadata_upload_live:
   label:
-    en: Upload ERDDAP Config File (Live)
-    fr: Télécharger le fichier de configuration ERDDAP (en direct)
+    en: ERDDAP Config Upload (Live)
+    fr: Télécharger configuration ERDDAP (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
@@ -50,8 +50,8 @@ erddap_metadata_upload_live:
   file_path_pattern_key: "cnodc.metadata.patterns.live_erddap"
 iso19139_metadata_upload_live:
   label:
-    en: Upload ISO-19139 NAP Metadata File (Live)
-    fr: Télécharger le fichier de métadonnées ISO-19139 NAP (en direct)
+    en: HNAP Metadata Upload (Live)
+    fr: Télécharger métadonnées HNAP (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: gociso19115
@@ -61,8 +61,8 @@ iso19139_metadata_upload_live:
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19139"
 iso19115_metadata_upload_live:
   label:
-    en: Upload ISO-19115 NAP Metadata File (Live)
-    fr: Télécharger le fichier de métadonnées ISO-19115 NAP (en direct)
+    en: ISO Metadata Upload (Live)
+    fr: Télécharger métadonnées ISO (en direct)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -72,8 +72,8 @@ iso19115_metadata_upload_live:
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
 erddap_iso19115_metadata_upload_staging:
   label:
-    en: Upload ISO-19115 Metadata File for ERDDAP (Staging)
-    fr: Télécharger le fichier de métadonnées ISO-19115 pour ERDDAP (mise en scène)
+    en: ERDDAP Metadata Upload (Staging)
+    fr: Télécharger métadonnées pour ERDDAP (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -83,8 +83,8 @@ erddap_iso19115_metadata_upload_staging:
   file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115_erddap"
 erddap_metadata_upload_staging:
   label:
-    en: Upload ERDDAP Config File (Staging)
-    fr: Télécharger le fichier de configuration ERDDAP (mise en scène)
+    en: ERDDAP Config Upload (Staging)
+    fr: Télécharger configuration ERDDAP (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: erddap
@@ -94,8 +94,8 @@ erddap_metadata_upload_staging:
   file_path_pattern_key: "cnodc.metadata.patterns.staging_erddap"
 iso19139_metadata_upload_staging:
   label:
-    en: Upload ISO-19139 NAP Metadata File (Staging)
-    fr: Télécharger le fichier de métadonnées ISO-19139 NAP (mise en scène)
+    en: HNAP Metadata Upload (Staging)
+    fr: Télécharger métadonnées HNAP (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: gociso19115
@@ -105,8 +105,8 @@ iso19139_metadata_upload_staging:
   file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19139"
 iso19115_metadata_upload_staging:
   label:
-    en: Upload ISO-19115 NAP Metadata File (Staging)
-    fr: Télécharger le fichier de métadonnées ISO-19115 NAP (mise en scène)
+    en: ISO Metadata Upload (Staging)
+    fr: Télécharger métadonnées ISO (mise en scène)
   step_type: batch
   action: "pipeman.attachment.workflow.upload_metadata"
   profile_name: iso19115
@@ -116,15 +116,15 @@ iso19115_metadata_upload_staging:
   file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
 erddap_notify_staging:
   label:
-    en: Notify ERDDAPUtil (Staging)
-    fr: Notifier ERDDAPUtil (en direct)
+    en: Recompile ERDDAP Datasets (Staging)
+    fr: Recompiler les données ERDDAP (en direct)
   step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: staging
 erddap_notify_live:
   label:
-    en: Notify ERDDAPUtil (Live)
-    fr: Notifier ERDDAPUtil (mise en scène)
+    en: Recompile ERDDAP Datasets (Live)
+    fr: Recompiler les données ERDDAP (mise en scène)
   step_type: batch
   action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
   erddap_cluster: live
