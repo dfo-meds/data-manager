@@ -58,6 +58,7 @@
         {% for name in stable_dict_key_list(global_attributes) %}
         {% if name == 'featureType' %}
         {{ render_multilingual_attr('cdm_data_type', global_attributes[name]) }}
+        {{ render_multilingual_attr(name, global_attributes[name]) }}
         {% elif name in ('colorBarMinimum', 'colorBarMaximum') %}
         {{ render_attr_with_type(attr_name, global_attributes[attr_name], 'double') }}
         {% elif name in ('colorBarNSections') %}
