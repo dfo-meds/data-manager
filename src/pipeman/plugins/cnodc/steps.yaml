@@ -5,6 +5,16 @@ lead_approval:
   step_type: gate
   require_permission: approvals.program_lead
   access_check: "pipeman.dataset.dataset_gate_step_access"
+lead_publishing_notify:
+  label:
+    en: Notify Program Leads
+    fr: # TODO
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - tech_lead
+  limit_to_assigned: yes
 coordinator_approval:
   label:
     en: Regional Coordinator Approval
@@ -19,6 +29,26 @@ pub_coord_approval:
   step_type: gate
   require_permission: approvals.publishing_coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
+pub_coord_activation_notify:
+  label:
+    en: Notify Publishing Coordinators (Act)
+    fr: # TODO
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_activation
+  send_groups:
+    - pub_coord
+  limit_to_assigned: no
+pub_coord_publishing_notify:
+  label:
+    en: Notify Publishing Coordinators (Pub)
+    fr: # TODO
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - pub_coord
+  limit_to_assigned: no
 sysadmin_approval:
   label:
     en: System Administrator Approval
@@ -26,6 +56,16 @@ sysadmin_approval:
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
+sys_admin_publishing_notify:
+  label:
+    en: Notify System Administrators
+    fr: # TODO
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - sysadmin
+  limit_to_assigned: no
 erddap_iso19115_metadata_upload_live:
   label:
     en: ERDDAP Metadata Upload (Live)

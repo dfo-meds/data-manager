@@ -8,13 +8,16 @@ dataset_publication:
       en: CNODC Standard
       fr: Standard de CNDOC
     steps:
+      - lead_publishing_notify
       - lead_approval
+      - pub_coord_publishing_notify
       - pub_coord_approval
       - iso19115_metadata_upload_staging
       - iso19139_metadata_upload_staging
       - erddap_iso19115_metadata_upload_staging
       - erddap_metadata_upload_staging
       - erddap_notify_staging
+      - sysadmin_publishing_notify
       - sysadmin_approval
       - publish_dataset
       - iso19115_metadata_upload_live
@@ -33,6 +36,7 @@ dataset_activation:
       fr: Standard de CNDOC
     steps:
       - flag_dataset_for_review
+      - pub_coord_activation_notify
       - pub_coord_approval
       - activate_dataset
     cleanup:
