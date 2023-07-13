@@ -45,6 +45,19 @@ sysadmin:
     - organizations.manage.global
     - files.upload
     - vocabularies.view
+translator:
+  display:
+    en: Translator
+    fr: Traducteur
+  permissions:
+    - entities.view
+    - entities.view.all
+    - datasets.view
+    - datasets.view.all
+    - action_items.view
+    - organizations.view
+    - vocabularies.view
+    - translations.manage
 pub_coord:
   display:
     en: Publishing Coordinator
