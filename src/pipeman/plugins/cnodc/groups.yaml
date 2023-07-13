@@ -101,8 +101,8 @@ pub_coord:
     - vocabularies.view
 org_coordinator:
   display:
-    en: Data Unit Coordinator
-    fr: Coordinateur de l'unité de données
+    en: Unit Coordinator
+    fr: Coordinateur de l'unité
   permissions:
     - approvals.coordinator
     - attachments.view
