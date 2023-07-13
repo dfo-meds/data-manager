@@ -248,6 +248,9 @@ class WorkflowController:
             return markupsafe.Markup(f"<a href='{obj_link}'>{obj_name}</a>")
         return obj_name
 
+    def _format_workflow_status(self, data_row):
+        return gettext(f'pipeman.label.witem.status.{data_row.status.lower()}')
+
     def object_link(self):
         if self.item.object_type == 'dataset':
             return flask.url_for('core.view_dataset', dataset_id=self.item.object_id)
@@ -287,6 +290,11 @@ class WorkflowController:
             "workflow_name",
             gettext("pipeman.label.witem.workflow_name"),
             self._format_workflow_name
+        ))
+        dt.add_column(CustomDisplayColumn(
+            "status",
+            gettext("pipeman.label.witem.status"),
+            self._format_workflow_status
         ))
         dt.add_column(DatabaseColumn(
             "created_date",

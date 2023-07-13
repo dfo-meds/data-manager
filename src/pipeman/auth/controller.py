@@ -3,7 +3,7 @@ from pipeman.db.db import Database
 from autoinject import injector
 import pipeman.db.orm as orm
 from pipeman.util.flask import ConfirmationForm, ActionList, Select2Widget, RequestInfo
-from pipeman.i18n import gettext, DelayedTranslationString
+from pipeman.i18n import gettext, DelayedTranslationString, TranslationManager
 import flask
 import flask_login
 import wtforms as wtf
@@ -15,6 +15,7 @@ import datetime
 import zrlog
 import sqlalchemy as sa
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, flasht, PipemanFlaskForm
+from pipeman.email import EmailController
 
 
 @injector.injectable
@@ -22,6 +23,7 @@ class DatabaseUserController:
 
     db: Database = None
     sh: SecurityHelper = None
+    emails: EmailController = None
 
     @injector.construct
     def __init__(self):
@@ -117,6 +119,7 @@ class DatabaseUserController:
             form = EditMyselfForm(user=user)
             if form.validate_on_submit():
                 user.display = form.display.data
+                user.language_preference = form.language_preference.data
                 session.commit()
                 flasht("pipeman.auth.page.edit_myself.success", 'success')
                 return flask.redirect(flask.url_for("users.view_myself"))
@@ -209,7 +212,10 @@ class DatabaseUserController:
                         form.username.data,
                         form.display.data,
                         form.email.data,
-                        pw, session, True
+                        pw,
+                        form.language_preference.data,
+                        session,
+                        True
                     )
                     session.commit()
                     for group_id in form.groups.data:
@@ -221,7 +227,13 @@ class DatabaseUserController:
                     return flask.redirect(flask.url_for("users.view_user", user_id=user.id))
         return flask.render_template("form.html", form=form, title=gettext("pipeman.auth.page.create_user.title"))
 
-    def create_user_cli(self, username, email, display, password):
+    def _send_password_email(self, user, new_password):
+        if self.emails.send_template("password_update", user.language_preference, user.email, new_password=new_password, display_name=user.display):
+            flasht("pipeman.auth.message.email_send_success", "success")
+            return True
+        return False
+
+    def create_user_cli(self, username, email, display, password, lang_pref: str = "en", no_email: bool = False):
         skip_check = False
         if password is None:
             password = self.sh.random_password()
@@ -233,8 +245,10 @@ class DatabaseUserController:
             ue = session.query(orm.User.id).filter_by(email=email).first()
             if ue:
                 raise UserInputError("pipeman.auth.error.email_already_exists")
-            self._create_user(username, display, email, password, session, skip_check)
+            user = self._create_user(username, display, email, password, lang_pref, session, skip_check)
             session.commit()
+            if not no_email:
+                self._send_password_email(user, password)
 
     def create_user_from_external(self, username, email, display, roles) -> str:
         with self.db as session:
@@ -250,7 +264,7 @@ class DatabaseUserController:
                 self._update_user_roles_from_external(ue, session, roles)
                 session.commit()
                 return u.username
-            user = self._create_user(username, display, email, None, session, True)
+            user = self._create_user(username, display, email, None, "en", session, True)
             self._update_user_roles_from_external(user, session, roles)
             session.commit()
             return username
@@ -378,11 +392,12 @@ class DatabaseUserController:
         session.execute(st)
         self.log.notice(f"User {user_id} removed from group {group_id}")
 
-    def _create_user(self, username, display_name, email, password, session, skip_check=False):
+    def _create_user(self, username, display_name, email, password, language_preference, session, skip_check=False):
         user = orm.User(
             username=username,
             display=display_name,
             email=email,
+            language_preference=language_preference
         )
         self._set_password(user, password, skip_check)
         session.add(user)
@@ -410,6 +425,7 @@ class DatabaseUserController:
                 else:
                     user.email = form.email.data
                     user.display = form.display.data
+                    user.language_preference = form.language_preference.data
                     in_groups = form.groups.data
                     for group_id, _ in form.group_list:
                         if group_id in in_groups:
@@ -440,6 +456,7 @@ class DatabaseUserController:
             if form.validate_on_submit():
                 new_password = self._reset_password(user)
                 session.commit()
+                self._send_password_email(user, new_password)
                 flasht("pipeman.auth.page.reset_password.success", "success", password=new_password)
                 return flask.redirect(flask.url_for("users.view_user", user_id=user_id))
             return flask.render_template("form.html", form=form, title=gettext("pipeman.auth.page.reset_password.title"), instructions=gettext("pipeman.auth.page.reset_password.instructions"))
@@ -481,6 +498,7 @@ class DatabaseUserController:
 class CreateUserForm(PipemanFlaskForm):
 
     oc: OrganizationController = None
+    tm: TranslationManager = None
 
     username = wtf.StringField(
         DelayedTranslationString("pipeman.label.user.username"),
@@ -509,6 +527,15 @@ class CreateUserForm(PipemanFlaskForm):
         ]
     )
 
+    language_preference = wtf.SelectField(
+        DelayedTranslationString("pipeman.label.user.language_preference"),
+        validators=[
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.error.required_field")
+            )
+        ]
+    )
+
     groups = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.label.user.groups"),
         coerce=int,
@@ -520,7 +547,7 @@ class CreateUserForm(PipemanFlaskForm):
         widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
     )
 
-    submit = wtf.SubmitField("pipeman.common.submit")
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     @injector.construct
     def __init__(self, *args, **kwargs):
@@ -528,11 +555,17 @@ class CreateUserForm(PipemanFlaskForm):
         self.group_list = groups_select()
         self.groups.choices = self.group_list
         self.organizations.choices = self.oc.list_organizations(include_global=False)
+        self.language_preference.choices = [
+            (x, gettext(f"languages.full.{x}"))
+            for x in self.tm.supported_languages()
+            if x != "und"
+        ]
 
 
 class EditUserForm(PipemanFlaskForm):
 
     oc: OrganizationController = None
+    tm: TranslationManager = None
 
     display = wtf.StringField(
         DelayedTranslationString("pipeman.label.user.display_name"),
@@ -545,6 +578,15 @@ class EditUserForm(PipemanFlaskForm):
 
     email = wtf.EmailField(
         DelayedTranslationString("pipeman.label.user.email"),
+        validators=[
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.error.required_field")
+            )
+        ]
+    )
+
+    language_preference = wtf.SelectField(
+        DelayedTranslationString("pipeman.label.user.language_preference"),
         validators=[
             wtfv.InputRequired(
                 message=DelayedTranslationString("pipeman.error.required_field")
@@ -578,9 +620,16 @@ class EditUserForm(PipemanFlaskForm):
         self.groups.choices = self.group_list
         self.org_list = self.oc.list_organizations(include_global=False)
         self.organizations.choices = self.org_list
+        self.language_preference.choices = [
+            (x, gettext(f"languages.full.{x}"))
+            for x in self.tm.supported_languages()
+            if x != "und"
+        ]
 
 
 class EditMyselfForm(PipemanFlaskForm):
+
+    tm: TranslationManager = None
 
     display = wtf.StringField(
         DelayedTranslationString("pipeman.label.user.display_name"),
@@ -591,12 +640,27 @@ class EditMyselfForm(PipemanFlaskForm):
         ]
     )
 
+    language_preference = wtf.SelectField(
+        DelayedTranslationString("pipeman.label.user.language_preference"),
+        validators=[
+            wtfv.InputRequired(
+                message=DelayedTranslationString("pipeman.error.required_field")
+            )
+        ]
+    )
+
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
+    @injector.construct
     def __init__(self, *args, user=None, **kwargs):
         if user:
             kwargs['display'] = user.display
         super().__init__(*args, **kwargs)
+        self.language_preference.choices = [
+            (x, gettext(f"languages.full.{x}"))
+            for x in self.tm.supported_languages()
+            if x != "und"
+        ]
 
 
 class ChangePasswordForm(PipemanFlaskForm):

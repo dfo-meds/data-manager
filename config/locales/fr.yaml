@@ -1,3 +1,7 @@
+pipeman.label.user.language_preference: Preferred Language # TODO
+pipeman.auth.message.email_send_success: An email has been sent to the user with their password # TODO
+pipeman.label.witem.type.send_email: Send Email # TODO
+
 datatable.decimal: ","
 datatable.thousands: " "
 pipeman.auth_db.page.change_password.instructions: ""
@@ -246,7 +250,7 @@ pipeman.validation.level.success: "Succès"
 pipeman.entity.page.remove_component.title: "Supprimer l'élément"
 pipeman.entity.page.remove_entity.title: "Supprimer l'élément"
 pipeman.dataset.page.remove_dataset.title: "Supprimer le jeu de données"
-pipeman.label.witem.status.complete: "Terminé"
+pipeman.label.witem.status.completed: "Terminé"
 pipeman.label.witem.step.complete: "Terminé"
 pipeman.auth_db.error.too_many_recent_logins: "Trop de connexions récentes"
 pipeman.label.witem.type: "Type"

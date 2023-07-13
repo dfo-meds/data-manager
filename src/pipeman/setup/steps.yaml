@@ -64,3 +64,9 @@ fetch_translation:
     fr: Obtenir la traduction
   step_type: batch
   action: pipeman.i18n.workflow.fetch_translation
+actual_send_email:
+  label:
+    en: Send Email
+    fr: Envoyer email
+  step_type: batch
+  action: pipeman.email.controller.send_email

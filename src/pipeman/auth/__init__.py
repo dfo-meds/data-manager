@@ -60,7 +60,7 @@ def setup_plugin(duc: DatabaseUserController = None):
     email = os.environ.get("PIPEMAN_ADMIN_EMAIL", "admin@example.com")
     admin_group = os.environ.get("PIPEMAN_ADMIN_GROUP", "superuser")
     try:
-        duc.create_user_cli(username, email, display, password)
+        duc.create_user_cli(username, email, display, password, no_email=True)
     except UserInputError as ex:
         pass
     try:

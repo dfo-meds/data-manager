@@ -36,6 +36,7 @@ datatable.zeroRecords: No matching records found
 language_names.en: English
 language_names.fr: Français
 languages.full.en: English
+pipeman.label.user.language_preference: Preferred Language
 languages.full.fr: French
 languages.full.und: Undefined
 languages.short.en: ENG
@@ -92,6 +93,8 @@ pipeman.auth_msal.page.login.error_no_response: The response from Azure could no
 pipeman.auth_msal.page.login.error_token_acquisition: The response from Azure could
   not be handled
 pipeman.auth_msal.page.login.msal_error: An error occurred while processing your request
+pipeman.auth.message.email_send_success: An email has been sent to the user with their password
+pipeman.label.witem.type.send_email: Send Email
 pipeman.common.actions: Actions
 pipeman.common.active: Active
 pipeman.common.add_item: Add Item
@@ -282,7 +285,7 @@ pipeman.label.witem.status.batch_delay: Delayed (Batch)
 pipeman.label.witem.status.batch_in_progress: In Progress (Batch)
 pipeman.label.witem.status.batch_execute: Executing (Batch)
 pipeman.label.witem.status.cancelled: Cancelled
-pipeman.label.witem.status.complete: Completed
+pipeman.label.witem.status.completed: Completed
 pipeman.label.witem.status.decision_required: Decision Required
 pipeman.label.witem.status.failure: Failed
 pipeman.label.witem.status.in-progress: In Progress

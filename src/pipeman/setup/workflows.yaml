@@ -10,9 +10,17 @@ send_file:
   basic:
     label:
       en: Upload File (default)
-      fr: Fichier de téléchargement (défaut)
+      fr: Téléchargement ficher (défaut)
     steps:
       - handle_file_upload
+    enabled: yes
+send_email:
+  default:
+    label:
+      en: Send Email (Default)
+      fr: Envoyer email (défaut)
+    steps:
+      - actual_send_email
     enabled: yes
 dataset_publication:
     direct_publish:

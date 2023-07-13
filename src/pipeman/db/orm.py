@@ -114,6 +114,7 @@ class User(_AuditableModel, _BaseModel, Base):
     allowed_api_access = sa.Column(sa.Boolean, nullable=False, default=False)
     locked_until = sa.Column(sa.DateTime, nullable=True)
     properties = sa.Column(sa.Text, nullable=True)
+    language_preference = sa.Column(sa.String, nullable=False, default="en")
 
     groups = orm.relationship("Group", secondary=user_group, back_populates="users")
     organizations = orm.relationship("Organization", secondary=user_organization, back_populates="users")
