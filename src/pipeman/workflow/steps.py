@@ -3,6 +3,8 @@ import flask_login
 import requests
 import zrlog
 from enum import Enum
+import pipeman.db.orm as orm
+import typing as t
 
 
 # gettext('pipeman.label.witem.step.in-progress')
@@ -108,7 +110,7 @@ class ItemNextAction:
 class WorkflowStep:
 
     def __init__(self, step_name: str, item_config: dict):
-        self.item = None
+        self.item: t.Optional[orm.WorkflowItem] = None
         self.item_config = item_config
         self.step_name = step_name
         self.output = []

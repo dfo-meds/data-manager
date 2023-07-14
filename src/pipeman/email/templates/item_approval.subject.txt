@@ -1,1 +1,1 @@
-Dataset Publication Approval - {dataset_name}
+Dataset Publication Approval - {{dataset_name}}

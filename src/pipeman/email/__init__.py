@@ -1,1 +1,1 @@
-from .controller import EmailController
+from .controller import EmailController, QueuedEmailLogHandler, EmailLogHandler

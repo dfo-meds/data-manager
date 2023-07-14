@@ -355,6 +355,8 @@ class WorkflowItem(_BaseModel, _AuditableModel, Base):
 
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 
+    created_by_user = orm.relationship("User")
+
 
 class Attachment(_BaseModel, _AuditableModel, Base):
 

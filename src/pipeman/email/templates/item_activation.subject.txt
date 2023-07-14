@@ -1,1 +1,1 @@
-Dataset Activation Approval - {dataset_name}
+Dataset Activation Approval - {{dataset_name}}

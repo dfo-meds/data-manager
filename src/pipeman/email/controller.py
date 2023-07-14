@@ -1,7 +1,11 @@
 import email.message
+import logging
 import pathlib
 import smtplib
 import typing as t
+import queue
+import logging.handlers
+import atexit
 
 import jinja2
 from autoinject import injector
@@ -15,11 +19,10 @@ from pipeman.workflow.steps import WorkflowStep
 EMAIL_OR_LIST = t.Union[str, t.Iterable[str], None]
 
 
-@injector.injectable
+@injector.injectable_global
 class EmailController:
 
     config: zr.ApplicationConfig = None
-    wc: WorkflowController = None
 
     @injector.construct
     def __init__(self):
@@ -38,6 +41,7 @@ class EmailController:
         self._start_tls = self.config.as_bool(("pipeman", "email", "start_tls"), default=True) and not self._use_ssl
         self._from_email = self.config.as_str(("pipeman", "email", "send_from"), default="no-reply@example.com")
         self._dummy_send = self.config.as_bool(("pipeman", "email", "no_send"), default=True)
+        self.admin_emails = self.config.as_list(("pipeman", "email", "admin_emails"), default=[])
         extra_template_folders = self.config.as_list(("pipeman", "email", "template_folders"), default=None)
         if extra_template_folders:
             extra_template_folders = [
@@ -68,8 +72,8 @@ class EmailController:
     def _get_template_content(self, name, lang, kwargs) -> tuple[str, str, str]:
         message_txt = self._render_template_content(name, lang, "txt", kwargs)
         message_html = self._render_template_content(name, lang, "html", kwargs)
-        subject = self._render_template_content(name + ".subject", lang, "txt", kwargs)
-        return subject or "{name}", message_txt, message_html
+        subject = self._render_template_content(name + ".subject", lang, "txt", kwargs).strip("\r\n\t ")
+        return subject or f"{name}", message_txt, message_html
 
     def _render_template_content(self, name, lang, extension, kwargs):
         file_name_options = [
@@ -85,7 +89,12 @@ class EmailController:
     def send_email(self, to_emails, subject: str, message_txt: str = None, message_html: str = None, cc_emails = None, bcc_emails = None, immediate: bool = False) -> bool:
         if immediate:
             return self.direct_send_email(to_emails, subject, message_txt, message_html, cc_emails, bcc_emails)
-        status, id = self.wc.start_workflow(
+        else:
+            return self.delayed_send_email(to_emails, subject, message_txt, message_html, cc_emails, bcc_emails)
+
+    @injector.inject
+    def delayed_send_email(self, to_emails, subject: str, message_txt: str = None, message_html: str = None, cc_emails = None, bcc_emails = None, wc: WorkflowController = None) -> bool:
+        status, id = wc.start_workflow(
             "send_email",
             "default",
             {
@@ -101,7 +110,7 @@ class EmailController:
         )
         return status != "FAILURE"
 
-    def direct_send_email(self, to_emails: EMAIL_OR_LIST, subject: str, message_txt: str = None, message_html: str = None, cc_emails: EMAIL_OR_LIST = None, bcc_emails: EMAIL_OR_LIST = None) -> bool:
+    def direct_send_email(self, to_emails: EMAIL_OR_LIST, subject: str, message_txt: str = None, message_html: str = None, cc_emails: EMAIL_OR_LIST = None, bcc_emails: EMAIL_OR_LIST = None, _no_output: bool = False) -> bool:
         # Build message
         to_addrs = self._standardize_email_list(to_emails)
         if cc_emails:
@@ -118,13 +127,17 @@ class EmailController:
         if message_html:
             msg.add_alternative(message_html, subtype='html')
         if not self._dummy_send:
-            return self._send_smtp_message(msg)
-        else:
+            return self._send_smtp_message(msg, to_addrs)
+        elif not _no_output:
             print(msg.as_string())
             return False
+        else:
+            return False
 
-    def _send_smtp_message(self, msg):
+    def _send_smtp_message(self, msg, to_addrs):
         # Actually send it
+        if not to_addrs:
+            return False
         smtp = smtplib.SMTP
         if self._use_ssl:
             smtp = smtplib.SMTP_SSL
@@ -133,7 +146,7 @@ class EmailController:
                 smtp.starttls()
             if self._login_args['username'] or self._login_args['password']:
                 smtp.login(**self._login_args)
-            smtp.send_message(msg)
+            smtp.send_message(msg, to_addrs=to_addrs)
             return True
 
     def _standardize_email_list(self, emails: EMAIL_OR_LIST) -> list:
@@ -160,3 +173,32 @@ def send_email(step: WorkflowStep, context, ec: EmailController = None):
         step.output.append(f"No email was sent")
         return ItemResult.FAILURE
 
+
+class EmailLogHandler(logging.Handler):
+
+    emails: EmailController = None
+
+    @injector.construct
+    def __init__(self, *args, subject_line=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._subject_formatter = logging.Formatter(subject_line or "Pipeman Event - %(levelname)s")
+
+    def emit(self, record: logging.LogRecord):
+        self.emails.direct_send_email(
+            self.emails.admin_emails,
+            subject=self._subject_formatter.format(record),
+            message_txt=self.format(record)
+        )
+
+
+class QueuedEmailLogHandler(logging.handlers.QueueHandler):
+
+    def __init__(self, level_name=logging.NOTSET, subject_line=None):
+        self.setLevel(level_name)
+        self._simple_queue = queue.SimpleQueue()
+        self._email_handler = EmailLogHandler(subject_line=subject_line)
+        super().__init__(self._simple_queue)
+        self._listener = logging.handlers.QueueListener(self._simple_queue, self._email_handler)
+        print("starting")
+        self._listener.start()
+        atexit.register(self._listener.stop)
