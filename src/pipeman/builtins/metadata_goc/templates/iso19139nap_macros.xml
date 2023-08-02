@@ -14,12 +14,12 @@
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   {% macro render_text(text) %}
   {% if text is string %}
-  <gmd:CharacterString>{{xml_escape(text)}}</gmd:CharacterString>
+  <gco:CharacterString>{{xml_escape(text)}}</gco:CharacterString>
   {% else %}
   {% if default_locale in text %}
-  <gmd:CharacterString>{{xml_escape(text[default_locale])}}</gmd:CharacterString>
+  <gco:CharacterString>{{xml_escape(text[default_locale])}}</gco:CharacterString>
   {% elif "und" in text %}
-  <gmd:CharacterString>{{xml_escape(text['und'])}}</gmd:CharacterString>
+  <gco:CharacterString>{{xml_escape(text['und'])}}</gco:CharacterString>
   {% endif %}
   {% if check_alt_langs(text, default_locale) %}
   <gmd:PT_FreeText>
@@ -90,10 +90,10 @@
   {% endif %}
   {% if resource['goc_content_type'] or resource['goc_formats'] or resource['goc_languages'] %}
   <gmd:description>
-    <gmd:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display'][default_locale]}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gmd:CharacterString>
+    <gco:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display'][default_locale]}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gco:CharacterString>
     <gmd:PT_FreeText>
       <gmd:textGroup>
-        <gmd:LocalisedCharacterString locale="#{{'fra' if default_locale == 'en' else 'eng'}}"><gmd:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display']['fr' if default_locale == 'en' else 'en']}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gmd:CharacterString></gmd:LocalisedCharacterString>
+        <gmd:LocalisedCharacterString locale="#{{'fra' if default_locale == 'en' else 'eng'}}"><gco:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display']['fr' if default_locale == 'en' else 'en']}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gco:CharacterString></gmd:LocalisedCharacterString>
       </gmd:textGroup>
     </gmd:PT_FreeText>
   </gmd:description>
