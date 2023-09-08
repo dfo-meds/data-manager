@@ -55,6 +55,7 @@ def _has_other_languages(language_dict, default_locale, supported_locales):
 def _preprocess_for_both(dataset, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
+    default_locale3 = def_loc['language'] if def_loc else "eng"
     default_locale = def_loc['a2_language'] if def_loc else "en"
     default_country = def_loc['country'] if def_loc and def_loc['country'] else "CAN"
     default_charset = def_loc['encoding']['short_name'] if def_loc and def_loc['encoding'] else "utf8"
@@ -64,7 +65,7 @@ def _preprocess_for_both(dataset, **kwargs):
     supported = []
     for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
-        name = other_loc['a2_language']
+        name = other_loc['language']
         if other_loc['country']:
             name += f'-{other_loc["country"]}'
         if other_loc['encoding']:
@@ -78,8 +79,8 @@ def _preprocess_for_both(dataset, **kwargs):
         'default_locale': default_locale,
         'check_alt_langs': functools.partial(_has_other_languages, supported_locales=supported_keys),
     }
-    extras['global_attributes']['locale_default'] = f"{default_locale}-{default_country};{default_charset}"
-    extras['global_attributes']['locale_others'] = ",".join(supported)
+    extras['global_attributes']['locale_default'] = f"{default_locale3}-{default_country};{default_charset}"
+    extras['global_attributes']['locale_others'] = " ".join(supported)
     keywords = set()
     vocabularies = set()
     for x in dataset.keywords():
@@ -91,8 +92,10 @@ def _preprocess_for_both(dataset, **kwargs):
             vocabularies.add(disp["vocab"])
     keywords = list(kw.replace(",", "") for kw in keywords)
     keywords.sort()
-    extras['global_attributes']['keywords'] = ','.join(keywords)
-    extras['global_attributes']['keywords_vocabulary'] = ','.join(vocabularies)
+    if keywords:
+        extras['global_attributes']['keywords'] = ','.join(keywords)
+    if vocabularies:
+        extras['global_attributes']['keywords_vocabulary'] = ','.join(vocabularies)
     return extras
 
 
