@@ -10,6 +10,11 @@ def child_exit(server, worker):
     mark_process_dead(worker.pid)
 
 
+def worker_exit(server, worker):
+    from pipeman.db import on_gunicorn_worker_exit
+    on_gunicorn_worker_exit()
+
+
 # Load defaults from environment
 workers_per_core_str = int(os.getenv("WORKERS_PER_CORE", 2))
 web_concurrency_str = os.getenv("WEB_CONCURRENCY", None)
