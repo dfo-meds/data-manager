@@ -185,7 +185,7 @@ class CronDaemon:
         try:
             while not self.halt.is_set():
                 self._inner_loop()
-                self.halt.wait(0.25)
+                self.halt.wait(1)
         finally:
             self.log.debug("Cleaning up...")
             self._cleanup()
@@ -200,6 +200,7 @@ class CronDaemon:
         self.system.fire("cron.start.after", self)
 
     def _inner_loop(self):
+        self.system.fire("cron.before", self)
         now = datetime.datetime.now()
         is_peak = self.is_peak_hours(now)
         for k in self._cron_thread_classes:
@@ -212,7 +213,6 @@ class CronDaemon:
                 self._start_thread(k)
         for k in self._periodic_jobs:
             self._periodic_jobs[k].check_and_execute(self._tasks, now, is_peak)
-        self.system.fire("cron.before", self)
         self.system.fire("cron", self)
         self.system.fire("cron.after", self)
 

@@ -22,21 +22,25 @@ class AzureAuthenticationHandler(AuthenticationHandler):
         self._prompts = self.config.as_str(("pipeman", "auth", "msal", "prompt"), default=None)
         self._domain_hint = self.config.as_str(("pipeman", "auth", "msal", "domain_hint"), default=None)
         self._max_age = self.config.as_int(("pipeman", "auth", "msal", "max_age"), default=None)
-        args = {
+        self._args = {
             "client_id": self.config.as_str(("pipeman", "auth", "msal", "client_id")),
             "authority": self.config.as_str(("pipeman", "auth", "msal", "authority")),
             "app_name": self.config.as_str(("pipeman", "auth", "msal", "app_name"), default="pipeman"),
             "app_version": self.config.as_str(("pipeman", "auth", "msal", "app_version"), default=pipeman.__version__),
         }
         if self.config.is_truthy(("pipeman", "auth", "msal", "client_secret")):
-            args['client_credential'] = self.config.as_str(("pipeman", "auth", "msal", "client_secret"))
+            self._args['client_credential'] = self.config.as_str(("pipeman", "auth", "msal", "client_secret"))
         elif self.config.is_truthy(("pipeman", "auth", "msal", "private_key")):
-            args['client_credential'] = self.config.as_str(("pipeman", "auth", "msal", "thumbprint"))
+            self._args['client_credential'] = self.config.as_str(("pipeman", "auth", "msal", "thumbprint"))
             with open(self.config.as_path(("pipeman", "auth", "msal", "private_key")), "r") as h:
-                args["private_key"] = h.read()
-        self._msal_app = msal.ConfidentialClientApplication(
-            **args
-        )
+                self._args["private_key"] = h.read()
+        self._msal_app = None
+
+    def _ensure_app(self):
+        if self._msal_app is None:
+            self._msal_app = msal.ConfidentialClientApplication(
+                **self._args
+            )
 
     def display_name(self):
         return gettext("pipeman.login.msal")
@@ -55,6 +59,7 @@ class AzureAuthenticationHandler(AuthenticationHandler):
             args["domain_hint"] = self._domain_hint
         if self._max_age is not None:
             args["max_age"] = self._max_age
+        self._ensure_app()
         response = self._msal_app.initiate_auth_code_flow(
             **args
         )
@@ -79,6 +84,7 @@ class AzureAuthenticationHandler(AuthenticationHandler):
             flasht("pipeman.auth_msal.page.login.error_no_response")
             return flask.redirect(flask.url_for("auth.login"))
         try:
+            self._ensure_app()
             token = self._msal_app.acquire_token_by_auth_code_flow(
                 auth_response=response,
                 auth_code_flow=original,

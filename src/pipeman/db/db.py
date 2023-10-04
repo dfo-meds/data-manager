@@ -130,16 +130,18 @@ class Database:
                 self._log.debug("Automatic rollback")
                 self._transaction_stack[-1].rollback()
             else:
+                self._log.debug("Automatic commit")
                 self._transaction_stack[-1].commit()
             del self._transaction_stack[-1]
         else:
             self._log.info(f"Database transaction stack empty during __exit__")
         if not self._transaction_stack:
             if self._session:
+                self._log.debug("Closing session")
                 self._session.close()
                 self._session = None
             else:
-                self._log.info(f"Database session not set during __exit__")
+                self._log.info(f"Database session not set")
         if self._is_closed and not self._transaction_stack:
             self._log.info(f"Database object used after cleanup called")
             self._close()
