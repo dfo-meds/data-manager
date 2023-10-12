@@ -138,13 +138,16 @@ class InlineEntityReferenceField(EntityRefMixin, Field):
 
     def _format_for_ui(self, val):
         ent = self._process_value(val)
-        code = '<table cellpadding="0" cellspacing="0" border="0" class="inline-entity-info property-list">'
-        for display, value in ent.display_values():
-            code += f'<tr><th>{display}</th><td>{value}</td></th></tr>'
-        code += '</table>'
-        return markupsafe.Markup(code)
+        if ent:
+            code = '<table cellpadding="0" cellspacing="0" border="0" class="inline-entity-info property-list">'
+            for display, value in ent.display_values():
+                code += f'<tr><th>{display}</th><td>{value}</td></th></tr>'
+            code += '</table>'
+            return markupsafe.Markup(code)
 
     def _process_value(self, val, **kwargs):
+        if val is None:
+            return None
         return self.ec.reg.new_entity(
             self.field_config["entity_type"],
             parent_type="_field" if not self.is_repeatable() else "_field_repeatable",
@@ -196,7 +199,7 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.display_names())
 
     def _process_value(self, val, **kwargs):
-        if val is None:
+        if val is None or val == '':
             return None
         try:
             ent_id, rev_no = EntitySelectField.parse_entity_option(val, False)

@@ -21,6 +21,12 @@ ORIGINALS = {
     'CI_TelephoneTypeCode': 'https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_TelephoneTypeCode',
 }
 
+PROTOCOL_LOOKUP = {
+    'WWW:LINK': 'HTTP',
+    'ERDDAP:tabledap': 'HTTP',
+    'ERDDAP:griddap': 'HTTP',
+}
+
 NAP_CODE_LOOKUP = {
     'MD_MaintenanceFrequencyCode': {
         'list': 'http://nap.geogratis.gc.ca/metadata/register/napMetadataRegister.xml#IC_102',
@@ -242,7 +248,14 @@ def nap_code_map(code, code_list):
     return ORIGINALS[code_list], code, code
 
 
+def protocol_map(code):
+    if code in PROTOCOL_LOOKUP:
+        return PROTOCOL_LOOKUP[code]
+    return code
+
+
 def preprocess_for_nap(*args, **kwargs):
     keys = preprocess_metadata(*args, **kwargs)
     keys['nap_code_map'] = nap_code_map
+    keys['protocol_map'] = protocol_map
     return keys

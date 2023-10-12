@@ -40,7 +40,7 @@
   <mdb:defaultLocale>
     {{iso.render_locale(dataset['default_locale'], True)}}
   </mdb:defaultLocale>
-  {% if dataset['parent_metadata'] is not none %}
+  {% if not is_empty(dataset['parent_metadata']) %}
   <mdb:parentMetadata>
     {{ iso.render_citation(dataset['parent_metadata']) }}
   </mdb:parentMetadata>
@@ -62,35 +62,35 @@
     {{ iso.render_date(date['type']['short_name'], date['date']) }}
   </mdb:dateInfo>
   {% endfor %}
-  {% if dataset['metadata_standards'] is not none %}
+  {% if not is_empty(dataset['metadata_standards']) %}
   {% for standard in dataset['metadata_standards'] %}
   <mdb:metadataStandard>
     {{ iso.render_citation(standard) }}
   </mdb:metadataStandard>
   {% endfor %}
   {% endif %}
-  {% if dataset['metadata_profiles'] is not none %}
+  {% if not is_empty(dataset['metadata_profiles']) %}
   {% for profile in dataset['metadata_profiles'] %}
   <mdb:metadataProfile>
     {{ iso.render_citation(profile) }}
   </mdb:metadataProfile>
   {% endfor %}
   {% endif %}
-  {% if dataset['alt_metadata'] is not none %}
+  {% if not is_empty(dataset['alt_metadata']) %}
   {% for alt_md in dataset['alt_metadata'] %}
   <mdb:alternativeMetadataReference>
     {{ iso.render_citation(alt_md) }}
   </mdb:alternativeMetadataReference>
   {% endfor %}
   {% endif %}
-  {% if dataset['other_locales'] is not none %}
+  {% if not is_empty(dataset['other_locales']) %}
   {% for locale in dataset['other_locales'] %}
   <mdb:otherLocale>
         {{iso.render_locale(locale, True)}}
   </mdb:otherLocale>
   {% endfor %}
   {% endif %}
-  {% if dataset['canon_urls'] is not none %}
+  {% if not is_empty(dataset['canon_urls']) %}
   {% for meta_url in dataset['canon_urls'] %}
   <mdb:metadataLinkage>
     {{ iso.render_resource(meta_url) }}
@@ -98,17 +98,17 @@
   {% endfor %}
   {% endif %}
   {# <!-- spatialRepresentationInfo --> #}
-  {% if dataset['horizontal_ref_system'] is not none %}
+  {% if not is_empty(dataset['horizontal_ref_system']) %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['horizontal_ref_system'])}}
   </mdb:referenceSystemInfo>
   {% endif %}
-  {% if dataset['vertical_ref_system'] is not none %}
+  {% if not is_empty(dataset['vertical_ref_system']) %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['vertical_ref_system'])}}
   </mdb:referenceSystemInfo>
   {% endif %}
-  {% if dataset['temporal_ref_system'] is not none %}
+  {% if not is_empty(dataset['temporal_ref_system']) %}
   <mdb:referenceSystemInfo>
      {{iso.render_ref_system(dataset['temporal_ref_system'])}}
   </mdb:referenceSystemInfo>
@@ -119,45 +119,45 @@
       <mri:citation>
         {{iso.render_citation(dataset_citation)}}
       </mri:citation>
-      {% if dataset['abstract'] is not none %}
+      {% if not is_empty(dataset['abstract']) %}
       <mri:abstract xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['abstract'])}}</mri:abstract>
       {% endif %}
-      {% if dataset['purpose'] is not none %}
+      {% if not is_empty(dataset['purpose']) %}
       <mri:purpose xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['purpose'])}}</mri:purpose>
       {% endif %}
-      {% if dataset['credit'] is not none %}
+      {% if not is_empty(dataset['credit']) %}
       <mri:credit xsi:type="lan:PT_FreeText_PropertyType">{{iso.render_text(dataset['credit'])}}</mri:credit>
       {% endif %}
-      {% if dataset['status'] is not none %}
+      {% if not is_empty(dataset['status']) %}
       {% for stat in dataset['status'] %}
       <mri:status>
         <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{xml_quote(stat['short_name'])}}" />
       </mri:status>
       {% endfor %}
       {% endif %}
-      {% if dataset['point_of_contact'] is not none %}
+      {% if not is_empty(dataset['point_of_contact']) %}
       <mri:pointOfContact>
         {{ iso.render_responsibility("pointOfContact", dataset['point_of_contact']) }}
       </mri:pointOfContact>
       {% endif %}
-      {% if dataset['spatial_representation_type'] is not none %}
+      {% if not is_empty(dataset['spatial_representation_type']) %}
       {% for srt in dataset['spatial_representation_type'] %}
       <mri:spatialRepresentationType>
         <mcc:MD_SpatialRepresentationTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="{{xml_quote(srt['short_name'])}}" />
       </mri:spatialRepresentationType>
       {% endfor %}
       {% endif %}
-      {% if dataset['spatial_resolution'] is not none %}
+      {% if not is_empty(dataset['spatial_resolution']) %}
       <mri:spatialResolution>
         {{ iso.render_spatial_res(dataset['spatial_resolution']) }}
       </mri:spatialResolution>
       {% endif %}
-      {% if dataset['temporal_resolution'] is not none %}
+      {% if not is_empty(dataset['temporal_resolution']) %}
       <mri:temporalResolution>
         {{ iso.render_temporal_res(dataset['temporal_resolution']) }}
       </mri:temporalResolution>
       {% endif %}
-      {% if dataset['topic_category'] is not none %}
+      {% if not is_empty(dataset['topic_category']) %}
       {% for tc in dataset['topic_category'] %}
       <mri:topicCategory>
         <mri:MD_TopicCategoryCode>{{xml_escape(tc['short_name'])}}</mri:MD_TopicCategoryCode>
@@ -166,7 +166,7 @@
       {% endif %}
       <mri:extent>
         <gex:EX_Extent>
-          {% if dataset['bbox_north'] is not none %}
+          {% if not is_empty(dataset['bbox_north']) %}
           <gex:geographicElement>
             <gex:EX_GeographicBoundingBox>
               <gex:extentTypeCode>
@@ -187,7 +187,7 @@
             </gex:EX_GeographicBoundingBox>
           </gex:geographicElement>
           {% endif %}
-          {% if dataset['start_time'] is not none %}
+          {% if not is_empty(dataset['start_time']) %}
           <gex:temporalElement>
             <gex:EX_TemporalExtent>
               <gex:extent>
@@ -196,20 +196,20 @@
             </gex:EX_TemporalExtent>
           </gex:temporalElement>
           {% endif %}
-          {% if dataset['vertical_min'] is not none or dataset['vertical_max'] is not none %}
+          {% if not (is_empty(dataset['vertical_min']) and is_empty(dataset['vertical_max'])) %}
           <gex:verticalElement>
             <gex:EX_VerticalExtent>
-              {% if dataset['vertical_min'] is not none %}
+              {% if not is_empty(dataset['vertical_min']) %}
               <gex:minimumValue>
                 <gco:Real>{{xml_escape(dataset['vertical_min'])}}</gco:Real>
               </gex:minimumValue>
               {% endif %}
-              {% if dataset['vertical_max'] is not none %}
+              {% if not is_empty(dataset['vertical_max']) %}
               <gex:maximumValue>
                 <gco:Real>{{xml_escape(dataset['vertical_max'])}}</gco:Real>
               </gex:maximumValue>
               {% endif %}
-              {% if dataset['vertical_ref_system'] is not none %}
+              {% if not is_empty(dataset['vertical_ref_system']) %}
               <gex:verticalCRSId>
                 {{ iso.render_ref_system(dataset['vertical_ref_system']) }}
               </gex:verticalCRSId>
@@ -219,26 +219,26 @@
           {% endif %}
         </gex:EX_Extent>
       </mri:extent>
-      {% if dataset['additional_docs'] is not none %}
+      {% if not is_empty(dataset['additional_docs']) %}
       {% for doc in dataset['additional_docs'] %}
       <mri:additionalDocumentation>
         {{ iso.render_citation(doc) }}
       </mri:additionalDocumentation>
       {% endfor %}
       {% endif %}
-      {% if dataset['processing_code'] is not none %}
+      {% if not is_empty(dataset['processing_code']) %}
       <mri:processingLevel>
         {{ iso.render_id(dataset['processing_code'], dataset['processing_desc'], dataset['processing_system']) }}
       </mri:processingLevel>
       {% endif %}
       <mri:resourceMaintenance>
-        {% if dataset['resource_maintenance_frequency'] is not none %}
+        {% if not is_empty(dataset['resource_maintenance_frequency']) %}
         {{ iso.render_maintenance_info(dataset['resource_maintenance_frequency']['short_name'], dataset_maintenance) }}
         {% else %}
         {{ iso.render_maintenance_info("", dataset_maintenance) }}
         {% endif %}
       </mri:resourceMaintenance>
-      {% if dataset['graphics'] is not none %}
+      {% if not is_empty(dataset['graphics']) %}
       {% for graphic in dataset['graphics'] %}
       <mri:graphicOverview>
         {{ iso.render_graphic(graphic) }}
@@ -246,7 +246,7 @@
       {% endfor %}
       {% endif %}
       {# <!-- resourceFormat --> #}
-      {% if grouped_keywords is not none %}
+      {% if not is_empty(grouped_keywords) %}
         {% for key in stable_dict_key_list(grouped_keywords) %}
       <mri:descriptiveKeywords>
         {{ iso.render_keywords(grouped_keywords[key]) }}
@@ -254,7 +254,7 @@
         {% endfor %}
       {% endif %}
       {# <!-- resourceSpecificUsage --> #}
-      {% if dataset['licenses'] is not none %}
+      {% if not is_empty(dataset['licenses']) %}
       {% for license in dataset['licenses'] %}
       <mri:resourceConstraints>
         {{ iso.render_constraint(license) }}
@@ -262,35 +262,35 @@
       {% endfor %}
       {% endif %}
       {# <!-- associatedResource --> #}
-      {% if dataset['dataset_locale'] is not none %}
+      {% if not is_empty(dataset['dataset_locale']) %}
       <mri:defaultLocale>
         {{iso.render_locale(dataset['dataset_locale'])}}
       </mri:defaultLocale>
       {% endif %}
-      {% if dataset['dataset_other_locales'] is not none %}
+      {% if not is_empty(dataset['dataset_other_locales']) %}
       {% for locale in dataset['dataset_other_locales'] %}
       <mri:otherLocale>
         {{iso.render_locale(locale)}}
       </mri:otherLocale>
       {% endfor %}
       {% endif %}
-      {% if dataset['environment_desc'] is not none %}
+      {% if not is_empty(dataset['environment_desc']) %}
       <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
       {% endif %}
-      {% if dataset['supplemental'] is not none %}
+      {% if not is_empty(dataset['supplemental']) %}
       <mri:supplementalInformation>{{ iso.render_text(dataset['supplemental']) }}</mri:supplementalInformation>
       {% endif %}
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
   {# <!-- contentInfo --> #}
-  {% if dataset['distributors'] is not none %}
+  {% if not is_empty(dataset['distributors']) %}
   {% for dc in dataset['distributors'] %}
   <mdb:distributionInfo>
       {{ iso.render_distribution(dc) }}
   </mdb:distributionInfo>
   {% endfor %}
   {% endif %}
-  {% if iso19115_custom_distribution_channels is not none %}
+  {% if not is_empty(iso19115_custom_distribution_channels)%}
   {% for dc in iso19115_custom_distribution_channels %}
   <mdb:distributionInfo>
       {{ iso.render_distribution(dc) }}
@@ -300,7 +300,7 @@
   {# <!-- dataQualityInfo --> #}
   {# <!-- resourceLineage --> #}
   {# <!-- portrayalCatalogueInfo --> #}
-  {% if dataset['meta_licenses'] is not none %}
+  {% if not is_empty(dataset['meta_licenses']) %}
   {% for license in dataset['meta_licenses'] %}
   <mdb:metadataConstraints>
     {{ iso.render_constraint(license) }}
@@ -309,7 +309,7 @@
   {% endif %}
   {# <!-- applicationSchemaInfo --> #}
   <mdb:metadataMaintenance>
-      {% if dataset['metadata_maintenance_frequency'] is not none %}
+      {% if not is_empty(dataset['metadata_maintenance_frequency']) %}
       {{ iso.render_maintenance_info(dataset['metadata_maintenance_frequency']['short_name'], metadata_maintenance) }}
       {% else %}
       {{ iso.render_maintenance_info("", metadata_maintenance) }}

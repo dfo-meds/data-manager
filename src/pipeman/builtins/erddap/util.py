@@ -32,7 +32,8 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
                         'short_name': 'download'
                     },
                     'name': {
-                        'und': 'ERDDAP',
+                        'en': 'ERDDAP Web Site',
+                        'fr': 'Site web ERDDAP',
                     },
                     'goc_content_type': {
                         'short_name': 'dataset',
@@ -41,10 +42,38 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
                             'fr': 'Données'
                         }
                     },
-                    'goc_formats': {
-                        'short_name': f'ERDDAP {dtype_format} Dataset'
+                    'goc_formats': [{
+                        # 'short_name': f'ERDDAP {dtype_format} Dataset'
+                        # TODO: have to get the new short_name approved first
+                        'short_name': 'HTML'
+                    }],
+                    'goc_languages': ['eng'],
+                },
+                {
+                    'url': _assemble_erddap_link(base_url, dtype_dir, erddap_ds_id, 'fr'),
+                    'protocol': {
+                        'short_name': f'ERDDAP:{dtype_dir}'
                     },
-                    'goc_languages': ['eng', 'fra'],
+                    'function': {
+                        'short_name': 'download'
+                    },
+                    'name': {
+                        'en': 'ERDDAP Web Site (French)',
+                        'fr': 'Site web ERDDAP (français)',
+                    },
+                    'goc_content_type': {
+                        'short_name': 'dataset',
+                        'display': {
+                            'en': 'Dataset',
+                            'fr': 'Données'
+                        }
+                    },
+                    'goc_formats': [{
+                        # 'short_name': f'ERDDAP {dtype_format} Dataset'
+                        # TODO: have to get the new short_name approved first
+                        'short_name': 'HTML'
+                    }],
+                    'goc_languages': ['fra'],
                 }
             ]
         })
@@ -56,11 +85,15 @@ def preprocess_metadata_all(dataset: Dataset, **kwargs):
         }
 
 
-def _assemble_erddap_link(erddap_base, dtype_dir, dataset_id):
-    if not erddap_base[-1] == '/':
-        return f"{erddap_base}/{dtype_dir}/{dataset_id}"
+def _assemble_erddap_link(erddap_base, dtype_dir, dataset_id, lang='en'):
+    if lang != 'en':
+        lang = f"{lang}/"
     else:
-        return f"{erddap_base}{dtype_dir}/{dataset_id}"
+        lang = ""
+    if not erddap_base[-1] == '/':
+        return f"{erddap_base}/{lang}{dtype_dir}/{dataset_id}".strip()
+    else:
+        return f"{erddap_base}{lang}{dtype_dir}/{dataset_id}".strip()
 
 
 TIME_PRECISION_MAP = {

@@ -27,7 +27,9 @@
     {{ iso.render_responsibility(resp['role']['short_name'], resp['contact']) }}
   </gmd:contact>
   {% endfor %}
-  <gmd:dateStamp>{{dataset.metadata_modified_date().isoformat()}}</gmd:dateStamp>
+  <gmd:dateStamp>
+    <gco:DateTime>{{dataset.metadata_modified_date().isoformat()}}</gco:DateTime>
+  </gmd:dateStamp>
   <gmd:metadataStandardName xsi:type="gmd:PT_FreeText_PropertyType">
     <gco:CharacterString>North American Profile of ISO 19115:2003 - Geographic information - Metadata</gco:CharacterString>
     <gmd:PT_FreeText>
@@ -154,7 +156,7 @@
       {% endif %}
       <gmd:extent>
         <gmd:EX_Extent>
-          {% if dataset['bbox_north'] is not none %}
+          {% if not is_empty(dataset['bbox_north']) %}
           <gmd:geographicElement>
             <gmd:EX_GeographicBoundingBox>
               <gmd:extentTypeCode>
@@ -175,7 +177,7 @@
             </gmd:EX_GeographicBoundingBox>
           </gmd:geographicElement>
           {% endif %}
-          {% if dataset['start_time'] is not none %}
+          {% if not is_empty(dataset['start_time']) %}
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
               <gmd:extent>
@@ -184,15 +186,15 @@
             </gmd:EX_TemporalExtent>
           </gmd:temporalElement>
           {% endif %}
-          {% if dataset['vertical_min'] is not none or dataset['vertical_max'] is not none %}
+          {% if not (is_empty(dataset['vertical_min']) and is_empty(dataset['vertical_max'])) %}
           <gmd:verticalElement>
             <gmd:EX_VerticalExtent>
-              {% if dataset['vertical_min'] is not none %}
+              {% if not is_empty(dataset['vertical_min']) %}
               <gmd:minimumValue>
                 <gco:Real>{{dataset['vertical_min']}}</gco:Real>
               </gmd:minimumValue>
               {% endif %}
-              {% if dataset['vertical_max'] is not none %}
+              {% if not is_empty(dataset['vertical_max']) %}
               <gmd:maximumValue>
                 <gco:Real>{{dataset['vertical_max']}}</gco:Real>
               </gmd:maximumValue>

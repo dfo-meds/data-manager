@@ -1065,6 +1065,7 @@ contact:
       order: 60
     admin_area:
       data_type: text
+      multilingual: yes
       label:
         en: Administrative Area
         fr: Zone administrative
@@ -1082,20 +1083,22 @@ contact:
         fr: Entrez le code postal ou zip de l'adresse postale du contact.
       order: 80
     country:
-      data_type: text
+      data_type: vocabulary
       label:
         en: Country
         fr: Pays
+      vocabulary_name: iso3166_countries
       order: 90
       description:
-        en: Enter the country for the contact's mailing address.
-        fr: Entrez le pays pour l'adresse postale du contact.
+        en: Select the country for the contact's mailing address.
+        fr: Selectionnez le pays pour l'adresse postale du contact.
     email:
       data_type: email
       label:
         en: E-Mail
         fr: E-mail
       order: 100
+      multilingual: yes
       description:
         en: Enter the primary email address where the contact can be reached.
         fr: Entrez l'adresse e-mail principale où le contact peut être joint.

@@ -641,7 +641,7 @@ class Keyword:
     def use_value_only(self):
         return self.machine_key and self.mode == "value"
 
-    def to_display(self, primary_locale, use_prefixes: bool = False, prefix_separator: str = ":"):
+    def to_display(self, primary_locale, use_prefixes: bool = False, prefix_separator: str = ":", force_translations: bool = False):
         # Only use translations
         display_dict = {
             "primary": None,
@@ -670,7 +670,7 @@ class Keyword:
                 }
 
         # Only use the machine key
-        elif self.mode == "value":
+        elif self.mode == "value" and not force_translations:
             display_dict["primary"] = f"{prefix}{self.machine_key}"
 
         # Use a mix of both (machine key as undefined value)

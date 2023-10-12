@@ -511,8 +511,8 @@
           </cit:city>
           {% endif %}
           {% if contact['admin_area'] %}
-          <cit:administrativeArea>
-            <gco:CharacterString>{{xml_escape(contact['admin_area'])}}</gco:CharacterString>
+          <cit:administrativeArea xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['admin_area'])}}
           </cit:administrativeArea>
           {% endif %}
           {% if contact['postal_code'] %}
@@ -521,13 +521,13 @@
           </cit:postalCode>
           {% endif %}
           {% if contact['country'] %}
-          <cit:country>
-            <gco:CharacterString>{{xml_escape(contact['country'])}}</gco:CharacterString>
+          <cit:country xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['country']['display'])}}
           </cit:country>
           {% endif %}
           {% if contact['email'] %}
-          <cit:electronicMailAddress>
-            <gco:CharacterString>{{xml_escape(contact['email'])}}</gco:CharacterString>
+          <cit:electronicMailAddress xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['email'])}}
           </cit:electronicMailAddress>
           {% endif %}
         </cit:CI_Address>

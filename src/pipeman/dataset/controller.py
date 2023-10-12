@@ -29,6 +29,10 @@ from pipeman.util.metrics import BlockTimer, time_function
 import zirconium as zr
 
 
+def is_empty(x):
+    return x is None or x == ''
+
+
 @injector.injectable
 class DatasetController:
 
@@ -489,6 +493,7 @@ class DatasetController:
             'xml_escape': xml_escape,
             'xml_quote': xml_quote_attr,
             'c_escape': c_escape,
+            'is_empty': is_empty,
         }
         for processor in self.reg.metadata_processors(dataset.profiles, profile_name, format_name):
             updates = processor(**args)

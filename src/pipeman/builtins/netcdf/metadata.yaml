@@ -126,13 +126,23 @@ keywords:
       description:
         en: Standard variables that are used in the dataset.
         fr: Variables standard utilisées dans l'ensemble de données.
-      keyword_config:
-        is_keyword: yes
-        mode: value
-        thesaurus:
-          prefix: CF
-          citation:
-            title:
-              en: CF Standard Name Table
-          type:
-            short_name: theme
+      #keyword_config:
+      #  is_keyword: yes
+      #  mode: value
+      #  thesaurus:
+      #    prefix: CF
+      #    citation:
+      #      title:
+      #        en: CF Standard Name Table
+      #        fr: Tableau des noms standard CF
+      #      revision_date: 2023-10-06
+      #      responsibles:
+      #        -
+      #          role:
+      #            short_name: owner
+      #          contact:
+      #            organization_name:
+      #              en: CF Conventions Committee
+      #              fr: Comité des normes du CF
+      #    type:
+      #      short_name: theme

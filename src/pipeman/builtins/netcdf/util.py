@@ -59,6 +59,7 @@ def _preprocess_for_both(dataset, **kwargs):
     default_locale = def_loc['a2_language'] if def_loc else "en"
     default_country = def_loc['country'] if def_loc and def_loc['country'] else "CAN"
     default_charset = def_loc['encoding']['short_name'] if def_loc and def_loc['encoding'] else "utf8"
+    default_ietf = def_loc['ietf_bcp47'] if def_loc and def_loc['ietf_bcp47'] else "en"
     locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
     olocales = dataset.data("other_locales") or []
     supported_keys = []
@@ -70,7 +71,7 @@ def _preprocess_for_both(dataset, **kwargs):
             name += f'-{other_loc["country"]}'
         if other_loc['encoding']:
             name += f';{other_loc["encoding"]["short_name"]}'
-        supported.append(f"{other_loc['a2_language']}:{name}")
+        supported.append(f"_{other_loc['a2_language']}: {other_loc['ietf_bcp47']}")
         supported_keys.append(other_loc['a2_language'])
     extras = {
         'global_attributes': _global_attributes(dataset),
@@ -79,7 +80,7 @@ def _preprocess_for_both(dataset, **kwargs):
         'default_locale': default_locale,
         'check_alt_langs': functools.partial(_has_other_languages, supported_locales=supported_keys),
     }
-    extras['global_attributes']['locale_default'] = f"{default_locale3}-{default_country};{default_charset}"
+    extras['global_attributes']['locale_default'] = f"{default_ietf}"
     extras['global_attributes']['locale_others'] = " ".join(supported)
     keywords = set()
     vocabularies = set()

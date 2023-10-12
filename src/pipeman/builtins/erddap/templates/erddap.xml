@@ -78,7 +78,7 @@
         {% endif %}
         {% endfor %}
         <att name="locale_default">mul</att>
-        <att name="locale_others">{{default_locale}}:{{global_attributes['locale_default']}} {{global_attributes['locale_others']}}</att>
+        <att name="locale_others">_{{default_locale}}: {{global_attributes['locale_default']}} {{global_attributes['locale_others']}}</att>
     </addAttributes>
     {% for var_name, var_type, var_dims, var_attrs, var in variables %}
         {% if var['is_axis'] %}

@@ -24,6 +24,14 @@ keywords:
               url: https://open.canada.ca/data/en/dataset/d4a0e406-eea9-41a7-bcae-28c31f3b9c65
               protocol:
                 short_name: "WWW:LINK"
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
           type:
             short_name: theme
     goc_publication_place:
@@ -50,6 +58,14 @@ keywords:
               url: https://www12.statcan.gc.ca/census-recensement/2021/ref/dict/az/Definition-eng.cfm?ID=geo008
               protocol:
                 short_name: "WWW:LINK"
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
           prefix: GCPLC
           type:
             short_name: place
@@ -72,6 +88,15 @@ keywords:
             title:
               en: Government of Canada Audiences
               fr: Publics du gouvernement de Canada
+            revision_date: 2023-10-06
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
           prefix: GCAUD
           type:
             short_name: theme

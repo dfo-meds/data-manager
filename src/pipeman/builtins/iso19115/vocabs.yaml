@@ -2569,3 +2569,18 @@ iso19115_angular_units:
       display:
         en: Seconds
         fr: Secondes
+iso3166_countries:
+  display:
+    en: ISO-3166 - Countries
+    fr: ISO-3166 - Pays
+  uri: https://www.iso.org/obp/ui/#search
+  terms:
+    CAN:
+      display:
+        en: Canada
+        fr: Canada (le)
+    USA:
+      display:
+        en: United States of America (the)
+        fr: États-Unis d'Amérique (les)
+    # TODO: more? full list? import from web list?

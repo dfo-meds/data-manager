@@ -289,3 +289,14 @@ variable:
       order: 500
       netcdf:
         processor: key_value_pairs
+locale:
+  fields:
+    ietf_bcp47:
+      label:
+        en: BCP47 Code
+        fr: Code BC47
+      description:
+        en: Enter the most appropriate IETF BCP 47 language code.
+        fr:  Entrez le code de langue le plus approprié de la norme IETF BCP 47.
+      data_type: text
+      order: 35

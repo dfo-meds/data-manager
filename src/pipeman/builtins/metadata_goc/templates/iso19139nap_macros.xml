@@ -12,7 +12,7 @@
  xmlns:gml="http://www.opengis.net/gml/3.2"
  xmlns="http://www.isotc211.org/2005/gmd"
  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  {% macro render_text(text) %}
+  {% macro render_text(text, force_alt_lang) %}
   {% if text is string %}
   <gco:CharacterString>{{xml_escape(text)}}</gco:CharacterString>
   {% else %}
@@ -24,17 +24,33 @@
   {% if check_alt_langs(text, default_locale) %}
   <gmd:PT_FreeText>
   {% for a2l in locale_mapping %}
-      {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) %}
+      {% if a2l in text and (not a2l == "und") and (not a2l == default_locale) and not is_empty(text[a2l]) %}
     <gmd:textGroup>
       <gmd:LocalisedCharacterString locale="#{{xml_quote(locale_mapping[a2l])}}">{{xml_escape(text[a2l])}}</gmd:LocalisedCharacterString>
     </gmd:textGroup>
       {% endif %}
   {% endfor %}
   </gmd:PT_FreeText>
+  {% elif force_alt_lang %}
+  <gmd:PT_FreeText>
+    <gmd:textGroup>
+      <gmd:LocalisedCharacterString locale="#fra" />
+    </gmd:textGroup>
+  </gmd:PT_FreeText>
   {% endif %}
   {% endif %}
 {% endmacro %}
-
+{%- macro render_first_text(text) -%}
+  {%- if text is string -%}
+  {{-xml_escape(text)-}}
+  {%- elif "und" in text -%}
+  {{-xml_escape(text['und'])-}}
+  {%- elif default_locale in text -%}
+  {{-xml_escape(text[default_locale])-}}
+  {%- elif ("fr" if default_locale == "en" else "en") in text -%}
+  {{-xml_escape(text["fr" if default_locale == "en" else "en"])-}}
+  {%- endif -%}
+{%- endmacro -%}
 
 {% macro render_distribution(dc) %}
   <gmd:MD_Distribution>
@@ -76,24 +92,26 @@
 
 {% macro render_resource(resource) %}
 <gmd:CI_OnlineResource>
-  <gmd:linkage xsi:type="gmd:PT_FreeText_PropertyType">{{ render_text(resource['url']) }}</gmd:linkage>
+  <gmd:linkage>
+    <gmd:URL>{{-render_first_text(resource['url'])-}}</gmd:URL>
+  </gmd:linkage>
   {% if resource['protocol'] %}
-  <gmd:protocol>{{ render_text(resource['protocol']['short_name']) }}</gmd:protocol>
+  <gmd:protocol>{{ render_text(protocol_map(resource['protocol']['short_name'])) }}</gmd:protocol>
   {% endif %}
   {% if resource['app_profile'] %}
   <gmd:applicationProfile>{{ render_text(resource['app_profile']) }}</gmd:applicationProfile>
   {% endif %}
   {% if resource['name'] %}
   <gmd:name xsi:type="gmd:PT_FreeText_PropertyType">
-    {{render_text(resource['name'])}}
+    {{render_text(resource['name'], True)}}
   </gmd:name>
   {% endif %}
   {% if resource['goc_content_type'] or resource['goc_formats'] or resource['goc_languages'] %}
-  <gmd:description>
+  <gmd:description xsi:type="gmd:PT_FreeText_PropertyType">
     <gco:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display'][default_locale]}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gco:CharacterString>
     <gmd:PT_FreeText>
       <gmd:textGroup>
-        <gmd:LocalisedCharacterString locale="#{{'fra' if default_locale == 'en' else 'eng'}}"><gco:CharacterString>{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display']['fr' if default_locale == 'en' else 'en']}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gco:CharacterString></gmd:LocalisedCharacterString>
+        <gmd:LocalisedCharacterString locale="#{{'fra' if default_locale == 'en' else 'eng'}}">{% if resource['goc_content_type'] %}{{resource['goc_content_type']['display']['fr' if default_locale == 'en' else 'en']}}{% endif %}{% if resource['goc_formats'] %}{% for fmt in resource['goc_formats'] %};{{fmt['short_name']}}{% endfor %}{% endif %}{% if resource['goc_languages'] %};{{','.join(resource['goc_languages'])}}{% endif%}</gmd:LocalisedCharacterString>
       </gmd:textGroup>
     </gmd:PT_FreeText>
   </gmd:description>
@@ -149,11 +167,15 @@
 {% macro render_responsibility(code, contact) %}
 <gmd:CI_ResponsibleParty>
   {{ render_contact(contact) }}
+  {% if code %}
   <gmd:role>
     {% with code_list, code_value, text_value = nap_code_map(code, 'CI_RoleCode') %}
     <gmd:CI_RoleCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CI_RoleCode>
     {% endwith %}
   </gmd:role>
+  {% else %}
+  <gmd:role gco:nilReason="missing" />
+  {% endif %}
 </gmd:CI_ResponsibleParty>
 {% endmacro %}
 
@@ -193,6 +215,18 @@
   {% if citation["creation_date"] %}
   <gmd:date>{{ render_date('creation', citation['creation_date']) }}</gmd:date>
   {% endif %}
+  {% if not (citation["publication_date"] or citation["revision_date"] or citation["creation_date"]) %}
+  <gmd:date>
+    <gmd:CI_Date>
+      <gmd:date gco:nilReason="missing">
+        <gco:Date />
+      </gmd:date>
+      <gmd:dateType>
+        <gmd:CI_DateTypeCode codeList="http://nap.geogratis.gc.ca/metadata/register/napMetadataRegister.xml#IC_87" codeListValue="RI_367">publication</gmd:CI_DateTypeCode>
+      </gmd:dateType>
+    </gmd:CI_Date>
+  </gmd:date>
+  {% endif %}
   {% if citation['edition'] %}
   <gmd:edition xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(citation['edition'])}}</gmd:edition>
   {% endif %}
@@ -206,7 +240,9 @@
   {% endif %}
   {% if citation['responsibles'] %}
   {% for resp in citation['responsibles'] %}
+  {% if not(is_empty(resp['role']) and is_empty(resp['contact'])) %}
   <gmd:citedResponsibleParty>{{ render_responsibility(resp['role']['short_name'], resp['contact']) }}</gmd:citedResponsibleParty>
+  {% endif %}
   {% endfor %}
   {% endif %}
   {% if citation['presentation_form'] %}
@@ -236,7 +272,9 @@
 {% macro render_locale_details(locale) %}
   {% with a, lang_code_value, b = nap_code_map(locale['language'], 'LanguageCode') %}
     {% with b, country_code_value, b = nap_code_map(locale['country'], 'CountryCode') %}
-  <gmd:language>{{xml_escape(lang_code_value)}}{% if country_code_value %}; {{xml_escape(country_code_value)}}{% endif %}</gmd:language>
+  <gmd:language>
+    <gco:CharacterString>{{xml_escape(lang_code_value)}}{% if country_code_value %}; {{xml_escape(country_code_value)}}{% endif %}</gco:CharacterString>
+  </gmd:language>
     {% endwith %}
     {% endwith %}
   {% if locale['encoding'] %}
@@ -250,7 +288,7 @@
 
 
 {% macro render_long_locale(locale) %}
-<gmd:PT_Locale id="{{locale['a3_language']}}">
+<gmd:PT_Locale id="{{locale['language']}}">
   <gmd:languageCode>
     {% with code_list, code_value, text_value = nap_code_map(locale['language'], 'LanguageCode') %}
     <gmd:LanguageCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:LanguageCode>
@@ -259,7 +297,7 @@
   {% if locale['country'] %}
   <gmd:country>
     {% with code_list, code_value, text_value = nap_code_map(locale['country'], 'CountryCode') %}
-    <gmd:CountryCode codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:CountryCode>
+    <gmd:Country codeList="{{xml_quote(code_list)}}" codeListValue="{{xml_quote(code_value)}}">{{xml_escape(text_value)}}</gmd:Country>
     {% endwith %}
   </gmd:country>
   {% endif %}
@@ -279,18 +317,8 @@
     <gmd:RS_Identifier>
       {% if ref_system['code'] %}
       <gmd:code>
-        <gco:CharacterString>{{xml_escape(ref_system['code'])}}</gco:CharacterString>
+        <gco:CharacterString>EPSG:{{xml_escape(ref_system['code'])}}</gco:CharacterString>
       </gmd:code>
-      {% endif %}
-      {% if ref_system['system'] and ref_system['system']['code_space'] %}
-      <gmd:codeSpace>
-        <gco:CharacterString>{{xml_escape(ref_system['system']['code_space'])}}</gco:CharacterString>
-      </gmd:codeSpace>
-      {% endif %}
-      {% if ref_system['system'] and ref_system['system']['version'] %}
-      <gmd:version>
-        <gco:CharacterString>{{xml_escape(ref_system['system']['version'])}}</gco:CharacterString>
-      </gmd:version>
       {% endif %}
     </gmd:RS_Identifier>
   </gmd:referenceSystemIdentifier>
@@ -300,7 +328,7 @@
 <gmd:MD_Keywords>
   {% for keyword in kwgroup.keywords() %}
   <gmd:keyword xsi:type="gmd:PT_FreeText_PropertyType">
-    {% with keyword_display = keyword.to_display(default_locale) %}
+    {% with keyword_display = keyword.to_display(default_locale, force_translations=True) %}
     <gco:CharacterString>{{ xml_escape(keyword_display["primary"]) }}</gco:CharacterString>
     {% if keyword_display["secondary"] %}
     <gmd:PT_FreeText>
@@ -311,6 +339,11 @@
       </gmd:textGroup>
         {% endif %}
     {% endfor %}
+      {% if "fr" not in keyword_display["secondary"] %}
+      <gmd:textGroup>
+        <gmd:LocalisedCharacterString locale="#{{xml_quote(locale_mapping['fr'])}}">{{xml_escape(keyword_display["primary"])}}</gmd:LocalisedCharacterString>
+      </gmd:textGroup>
+      {% endif %}
     </gmd:PT_FreeText>
     {% endif %}
     {% endwith %}
@@ -456,7 +489,7 @@
       <gmd:address>
         <gmd:CI_Address>
           {% if contact['delivery_point'] %}
-          <gmd:deliveryPoint xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['delivery_point'])}}</gmd:deliveryPoint>
+          <gmd:deliveryPoint xsi:type="gmd:PT_FreeText_PropertyType">{{render_text(contact['delivery_point'], True)}}</gmd:deliveryPoint>
           {% endif %}
           {% if contact['city'] %}
           <gmd:city>
@@ -464,8 +497,8 @@
           </gmd:city>
           {% endif %}
           {% if contact['admin_area'] %}
-          <gmd:administrativeArea>
-            <gco:CharacterString>{{xml_escape(contact['admin_area'])}}</gco:CharacterString>
+          <gmd:administrativeArea xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['admin_area'], True)}}
           </gmd:administrativeArea>
           {% endif %}
           {% if contact['postal_code'] %}
@@ -474,24 +507,22 @@
           </gmd:postalCode>
           {% endif %}
           {% if contact['country'] %}
-          <gmd:country>
-            <gco:CharacterString>{{xml_escape(contact['country'])}}</gco:CharacterString>
+          <gmd:country xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['country']['display'], True)}}
           </gmd:country>
           {% endif %}
           {% if contact['email'] %}
-          <gmd:electronicMailAddress>
-            <gco:CharacterString>{{xml_escape(contact['email'])}}</gco:CharacterString>
+          <gmd:electronicMailAddress xsi:type="gmd:PT_FreeText_PropertyType">
+            {{render_text(contact['email'], True)}}
           </gmd:electronicMailAddress>
           {% endif %}
         </gmd:CI_Address>
       </gmd:address>
       {% endif %}
       {% if contact['web_resource'] %}
-        {% for res in contact['web_resource'] %}
       <gmd:onlineResource>
-        {{render_resource(res)}}
+        {{render_resource(contact['web_resource'][0])}}
       </gmd:onlineResource>
-        {% endfor %}
       {% endif %}
       {% if contact['service_hours'] %}
       <gmd:hoursOfService xsi:type="gmd:PT_FreeText_PropertyType">

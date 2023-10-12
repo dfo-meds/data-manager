@@ -708,7 +708,7 @@ class EntitySelectField(wtf.Field):
         self.entity_types = [entity_types] if isinstance(entity_types, str) else entity_types
         self._full_list = False
         self.allow_multiple = bool(allow_multiple)
-        self.include_empty = False
+        self.include_empty = not self.allow_multiple
         self.by_revision = bool(by_revision)
         if widget is None:
             if allow_select2:
@@ -815,7 +815,8 @@ class EntitySelectField(wtf.Field):
             with self.db as session:
                 if self.allow_multiple:
                     for x in self.data:
-                        EntitySelectField.load_entity_option(x, session, self.by_revision)
+                        if x is not None and x != '':
+                            EntitySelectField.load_entity_option(x, session, self.by_revision)
                 else:
                     EntitySelectField.load_entity_option(self.data, session, self.by_revision)
 
