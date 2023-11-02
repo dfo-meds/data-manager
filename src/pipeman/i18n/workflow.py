@@ -115,7 +115,7 @@ class TranslationEngine:
             except RecoverableError as ex:
                 self.log.warning(str(ex))
             except Exception as ex:
-                self.log.exception(f"Exception while processing translation request {id}")
+                self.log.exception(f"Exception while processing translation request {tr.id}")
                 tr.mark_failed(str(ex))
                 session.commit()
 
