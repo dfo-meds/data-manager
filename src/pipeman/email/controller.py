@@ -46,7 +46,7 @@ class EmailController:
         if extra_template_folders:
             extra_template_folders = [
                 pathlib.Path(x)
-                for x in reversed(self._extra_template_folders)
+                for x in reversed(extra_template_folders)
             ]
         else:
             extra_template_folders = []
