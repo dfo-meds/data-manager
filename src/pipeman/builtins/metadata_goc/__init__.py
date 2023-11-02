@@ -18,5 +18,6 @@ def setup_plugin(ereg: EntityRegistry = None, vreg: VocabularyRegistry = None, r
     ereg.register_from_yaml(root / "entities.yaml")
     vreg.register_from_yaml(root / "vocabs.yaml")
     vreg.register_terms_from_csv("goc_places", root / "places.csv")
+    vreg.register_terms_from_csv("goc_subjects", root / "subjects.csv")
     reg.register_metadata_from_yaml(root / "metadata.yaml")
     reg.register_profiles_from_yaml(root / "profiles.yaml")
