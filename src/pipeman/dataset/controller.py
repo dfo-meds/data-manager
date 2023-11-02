@@ -645,7 +645,7 @@ class DatasetController:
                         revision_no=next_rev,
                         data=json.dumps(dataset.values()),
                         created_date=datetime.datetime.now(),
-                        created_by=flask_login.current_user.user_id
+                        created_by=flask_login.current_user.user_id if flask_login.current_user else None
                     )
                     session.add(ds_data)
                     session.commit()
