@@ -4,6 +4,7 @@ pipeman.label.witem.type.send_email: Send Email # TODO
 
 datatable.decimal: ","
 datatable.thousands: " "
+pipeman.mtrans.error.unicode_error: "Erreur de décodage UTF-8 : assurez-vous que votre fichier est codé en UTF-8"
 pipeman.auth_db.page.change_password.instructions: ""
 pipeman.dataset.page.activate_dataset.instructions: ""
 pipeman.dataset.page.publish_dataset.instructions: ""

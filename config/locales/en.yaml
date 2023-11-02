@@ -8,6 +8,7 @@ cioos.validation.metadata_owner_no_id_code: Identifier code is empty
 cioos.validation.metadata_owner_no_id_code_or_name: Identifier code or name is required
 cioos.validation.metadata_owner_no_id_code_space: Identifier system is missing a code
   space
+pipeman.mtrans.error.unicode_error: UTF-8 decode error - ensure your file is UTF-8 encoded
 cioos.validation.metadata_owner_no_id_system: Identifier system is empty
 cioos.validation.metadata_owner_org_no_ror: ROR is required
 cnodc.page.help.link: User Manual
