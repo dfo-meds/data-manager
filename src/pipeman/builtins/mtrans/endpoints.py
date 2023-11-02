@@ -1,3 +1,5 @@
+import zrlog
+
 from pipeman.util.flask import MultiLanguageBlueprint, PipemanFlaskForm, flasht
 from pipeman.i18n.workflow import TranslationEngine
 from pipeman.auth import require_permission
@@ -52,6 +54,7 @@ def upload_translations(te: TranslationEngine = None):
     if not isinstance(te, ManualTranslationEngine):
         return flask.abort(404)
     form = TranslationUploadForm()
+    log = zrlog.get_logger("pipeman.mtrans.upload")
     if form.validate_on_submit():
         with tempfile.TemporaryDirectory() as td:
             tmp_file = pathlib.Path(td) / "temp_data.csv"
@@ -64,9 +67,11 @@ def upload_translations(te: TranslationEngine = None):
                     if header is None:
                         header = [x.lower() for x in line]
                         if "guid" not in header:
+                            log.error(f"Column [guid] not in [{','.join(header)}], line [{line}]")
                             flasht("pipeman.mtrans.error.no_guid_column", "error")
                             break
                         elif "translation" not in header:
+                            log.error(f"Column [translation] not in [{','.join(header)}], line[{line}]")
                             flasht("pipeman.mtrans.error.no_translation_column", "error")
                             break
                         header = [
