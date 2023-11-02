@@ -49,7 +49,7 @@ class ManualTranslationEngine(TranslationEngine):
             tr = session.query(orm.TranslationRequest).filter_by(guid=translation.guid).first()
             if not tr:
                 raise TranslatableError("pipeman.mtrans.error.no_such_request", guio=translation.guid)
-            if not tr.state == orm.TranslationState.DELAYED:
+            if tr.state not in (orm.TranslationState.DELAYED, orm.TranslationState.FAILURE):
                 raise TranslatableError("pipeman.mtrans.error.request_already_completed", guid=translation.guid)
             tr.set_translation(translation.translation, True)
             session.commit()
