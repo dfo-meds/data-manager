@@ -59,52 +59,59 @@ def upload_translations(te: TranslationEngine = None):
         with tempfile.TemporaryDirectory() as td:
             tmp_file = pathlib.Path(td) / "temp_data.csv"
             form.file_upload.data.save(tmp_file)
-            with open(tmp_file, "r") as h:
-                reader = csv.reader(h)
-                header = None
-                req_size = 0
-                for idx, line in enumerate(reader):
-                    if header is None:
-                        header = [x.lower() for x in line]
-                        if "guid" not in header:
-                            log.error(f"Column [guid] not in [{','.join(header)}], line [{line}]")
-                            flasht("pipeman.mtrans.error.no_guid_column", "error")
-                            break
-                        elif "translation" not in header:
-                            log.error(f"Column [translation] not in [{','.join(header)}], line[{line}]")
-                            flasht("pipeman.mtrans.error.no_translation_column", "error")
-                            break
-                        header = [
-                            header.index("guid"),
-                            header.index("translation")
-                        ]
-                        req_size = max(header)
-                        continue
-                    elif not line:
-                        continue
-                    elif len(line) < req_size:
-                        flasht("pipeman.mtrans.error.not_enough_columns", "warning", lineno=idx)
-                        continue
-                    elif not line[header[0]]:
-                        flasht("pipeman.mtrans.error.missing_guid", "warning", lineno=idx)
-                        continue
-                    elif not line[header[1]]:
-                        flasht("pipeman.mtrans.error.missing_translation", "warning", lineno=idx, guid=line[header[0]])
-                        continue
+            try:
+                with open(tmp_file, "r", encoding="utf-8-sig") as h:
+                    reader = csv.reader(h)
+                    header = None
+                    req_size = 0
+                    for idx, line in enumerate(reader):
+                        if header is None:
+                            header = [x.lower() for x in line]
+                            if "guid" not in header:
+                                log.error(f"Column [guid] not in [{','.join(header)}], line [{line}]")
+                                flasht("pipeman.mtrans.error.no_guid_column", "error")
+                                break
+                            elif "translation" not in header:
+                                log.error(f"Column [translation] not in [{','.join(header)}], line[{line}]")
+                                flasht("pipeman.mtrans.error.no_translation_column", "error")
+                                break
+                            header = [
+                                header.index("guid"),
+                                header.index("translation")
+                            ]
+                            req_size = max(header)
+                            continue
+                        elif not line:
+                            continue
+                        elif len(line) < req_size:
+                            flasht("pipeman.mtrans.error.not_enough_columns", "warning", lineno=idx)
+                            log.warning(f"Line [{idx}] does not have enough columns")
+                            continue
+                        elif not line[header[0]]:
+                            flasht("pipeman.mtrans.error.missing_guid", "warning", lineno=idx)
+                            log.warning(f"Line [{idx}] does not have a guid present")
+                            continue
+                        elif not line[header[1]]:
+                            flasht("pipeman.mtrans.error.missing_translation", "warning", lineno=idx, guid=line[header[0]])
+                            log.warning(f"Line [{idx}] does not have a translation")
+                            continue
+                        else:
+                            try:
+                                te.import_translation(ManualTranslationEntry(
+                                    guid=line[header[0]],
+                                    translation=line[header[1]]
+                                ))
+                            except TranslatableError as ex:
+                                flasht("pipeman.mtrans.error.line_processing_error", "warning", lineno=idx, original=str(ex))
+                                log.warning(str(ex))
+                            except Exception as ex:
+                                flasht("pipeman.mtrans.error.other_error", "error", lineno=idx)
+                                log.exception(f"Error while processing updated translation file")
                     else:
-                        try:
-                            te.import_translation(ManualTranslationEntry(
-                                guid=line[header[0]],
-                                translation=line[header[1]]
-                            ))
-                        except TranslatableError as ex:
-                            flasht("pipeman.mtrans.error.line_processing_error", "warning", lineno=idx, original=str(ex))
-                            logging.getLogger("pipeman.mtrans").warning(str(ex))
-                        except Exception as ex:
-                            flasht("pipeman.mtrans.error.other_error", "error", lineno=idx)
-                            logging.getLogger("pipeman.mtrans").exception(f"Error while processing updated translation file")
-                else:
-                    flasht("pipeman.mtrans.page.upload_translations.success", "success")
+                        flasht("pipeman.mtrans.page.upload_translations.success", "success")
+            except UnicodeDecodeError as ex:
+                flasht("pipeman.mtrans.error.unicode_error", "error")
+                log.exception("unicode error")
         form.file_upload.data = None
     return flask.render_template(
         "form.html",
