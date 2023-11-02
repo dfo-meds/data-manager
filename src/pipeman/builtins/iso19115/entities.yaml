@@ -963,6 +963,16 @@ quick_web_page:
         en: Enter additional information about the resource.
         fr: Entrez des informations supplémentaires sur la ressource.
       order: 60
+    protocol:
+      data_type: vocabulary
+      vocabulary_name: iso19115_link_protocols
+      label:
+        en: Protocol
+        fr: Protocole
+      description:
+        en: Select the appropriate protocol for this resource.
+        fr: Sélectionnez le protocole approprié pour cette ressource.
+      order: 20
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
