@@ -519,9 +519,9 @@
         </gmd:CI_Address>
       </gmd:address>
       {% endif %}
-      {% if contact['web_resource'] %}
+      {% if not is_empty(contact['web_page']) %}
       <gmd:onlineResource>
-        {{render_resource(contact['web_resource'][0])}}
+        {{render_resource(contact['web_page'])}}
       </gmd:onlineResource>
       {% endif %}
       {% if contact['service_hours'] %}
