@@ -39,7 +39,7 @@ class VocabularyRegistry(BaseObjectRegistry):
     @injector.inject
     def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
         self._log.notice(f"Loading terms from {term_file} to {vocab_name}")
-        with open(term_file, "r", encoding="utf-8") as h:
+        with open(term_file, "r", encoding="utf-8-sig") as h:
             r = csv.reader(h)
             header = None
             for line in r:
@@ -120,7 +120,7 @@ class VocabularyTermController:
             elif key.startswith("description__"):
                 displays[key[13:]] = line[idx]
             else:
-                raise ValueError(f"Unrecognized column header {key}")
+                raise ValueError(f"Unrecognized column header [{key}]")
         if not tsname:
             if not displays:
                 raise ValueError(f"Missing a term name")
