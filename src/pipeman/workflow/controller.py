@@ -14,7 +14,7 @@ import markupsafe
 import asyncio
 from pipeman.attachment import AttachmentController
 from pipeman.util.flask import ActionList, flasht
-from pipeman.util.errors import WorkflowNotFoundError
+from pipeman.util.errors import WorkflowNotFoundError, StepNotFoundError
 from autoinject import injector
 from pipeman.db import Database
 from pipeman.i18n import MultiLanguageString
@@ -337,7 +337,11 @@ class WorkflowController:
             yield ItemDisplayWrapper(item), self._build_action_list(item, True)
 
     def _has_access(self, item, mode, log_access_failure: bool = False):
-        step, steps = self._build_next_step(item)
+        step, steps = None, None
+        try:
+            step, steps = self._build_next_step(item)
+        except StepNotFoundError:
+            step, steps = None, None
         if step is None:
             if mode == 'view':
                 if flask_login.current_user.has_permission('action_items.view.completed_steps'):
@@ -475,13 +479,18 @@ class WorkflowController:
         return step, steps
 
     def _start_next_step(self, item, session, steps=None, ctx=None):
-        step, steps = self._build_next_step(item, steps, ctx)
-        if step is None:
+        try:
+            step, steps = self._build_next_step(item, steps, ctx)
+            if step is None:
+                session.commit()
+                return
+            ctx = self._build_context(item, ctx)
+            result = step.execute(ctx)
+            self._handle_step_result(step, result, item, session, steps, ctx)
+        except StepNotFoundError as ex:
+            item.status = StepStatus.FAILURE.value
+            item.step_output = f"StepNotFound: {str(ex)}"
             session.commit()
-            return
-        ctx = self._build_context(item, ctx)
-        result = step.execute(ctx)
-        self._handle_step_result(step, result, item, session, steps, ctx)
 
     def batch_process(self, st, item_id):
         with self.db as session:

@@ -56,7 +56,7 @@ sysadmin_approval:
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
-sys_admin_publishing_notify:
+sysadmin_publishing_notify:
   label:
     en: Notify System Administrators
     fr: # TODO
