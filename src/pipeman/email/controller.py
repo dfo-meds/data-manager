@@ -34,7 +34,7 @@ class EmailController:
             "timeout": self.config.as_int(("pipeman", "email", "connect_timeout"), default=None),
         }
         self._login_args = {
-            "username": self.config.as_str(("pipeman", "email", "username"), default=None),
+            "user": self.config.as_str(("pipeman", "email", "username"), default=None),
             "password": self.config.as_str(("pipeman", "email", "password"), default=None),
         }
         self._use_ssl = self.config.as_bool(("pipeman", "email", "use_ssl"), default=False)
@@ -144,7 +144,7 @@ class EmailController:
         with smtp(**self._connect_args) as smtp:
             if self._start_tls:
                 smtp.starttls()
-            if self._login_args['username'] or self._login_args['password']:
+            if self._login_args['user'] or self._login_args['password']:
                 smtp.login(**self._login_args)
             smtp.send_message(msg, to_addrs=to_addrs)
             return True

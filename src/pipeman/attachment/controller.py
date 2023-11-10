@@ -220,7 +220,8 @@ class UploadController:
         file_client = client.get_file_client(file_path)
         # Length is not properly calculated yet, results in truncation. Don't use it.
         file_client.upload_file(
-            data=content
+            data=content,
+
         )
 
         # Set metadata
