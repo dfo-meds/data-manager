@@ -75,7 +75,7 @@ erddap_iso19115_metadata_upload_live:
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: erddap_config
-  environment: live
+  environment: pilot
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115_erddap"
 erddap_metadata_upload_live:
   label:
@@ -86,7 +86,7 @@ erddap_metadata_upload_live:
   profile_name: erddap
   format_name: erddapxml
   storage_name: erddap_config
-  environment: live
+  environment: pilot
   file_path_pattern_key: "cnodc.metadata.patterns.live_erddap"
 iso19139_metadata_upload_live:
   label:
@@ -97,7 +97,7 @@ iso19139_metadata_upload_live:
   profile_name: gociso19115
   format_name: iso19139_nap
   storage_name: html_live
-  environment: live
+  environment: pilot
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19139"
 iso19115_metadata_upload_live:
   label:
@@ -108,7 +108,7 @@ iso19115_metadata_upload_live:
   profile_name: iso19115
   format_name: iso19115xml
   storage_name: html_live
-  environment: live
+  environment: pilot
   file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
 erddap_iso19115_metadata_upload_staging:
   label:
