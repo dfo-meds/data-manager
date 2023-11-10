@@ -159,8 +159,8 @@ class WorkflowStep:
                 return ItemResult.FAILURE
             return res
         except Exception as ex:
-            self._log.exception(f"Error while executing step function {str(call_me)}")
-            self.output.append(f"Error calling {str(call_me)}: {str(ex)}")
+            self._log.exception(f"Error while executing step function {self.step_name}: {str(call_me)}")
+            self.output.append(f"Error calling {self.step_name}: {str(call_me)}: {str(ex)}")
             return ItemResult.FAILURE
 
     def _execute(self, context: dict) -> ItemResult:
