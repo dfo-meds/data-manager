@@ -28,7 +28,7 @@
       <mcc:authority>
         <cit:CI_Citation>
           <cit:title>
-            <gco:CharacterString>{{xml_escape(authority_uri)}}</gco:CharacterString>
+            <gco:CharacterString>{{xml_escape(authority)}}</gco:CharacterString>
           </cit:title>
         </cit:CI_Citation>
       </mcc:authority>
