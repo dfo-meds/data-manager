@@ -292,7 +292,7 @@
     {% for a2l in locale_mapping %}
         {% if a2l in keyword_display["secondary"] %}
       <lan:textGroup>
-        <lan:LocalisedCharacterString locale="#xml_quote({{a2l}})">{{xml_escape(keyword_display["secondary"][a2l])}}</lan:LocalisedCharacterString>
+        <lan:LocalisedCharacterString locale="#{{xml_quote(a2l)}}">{{xml_escape(keyword_display["secondary"][a2l])}}</lan:LocalisedCharacterString>
       </lan:textGroup>
         {% endif %}
     {% endfor %}
