@@ -36,6 +36,12 @@ class BaseTranslatableString:
         self.format_args = format_args or []
         self.format_kwargs = format_kwargs or {}
 
+    def __bool__(self):
+        return not self.empty()
+
+    def empty(self) -> bool:
+        raise NotImplementedError()
+
     def __add__(self, o):
         return str(self) + str(o)
 
@@ -87,6 +93,9 @@ class DelayedTranslationString(BaseTranslatableString):
     def copy(self):
         return DelayedTranslationString(self.text_key, self.default)
 
+    def empty(self) -> bool:
+        return self.text_key is None or self.text_key == ''
+
     @injector.inject
     def _render_str(self, tm: TranslationManager = None, **kwargs):
         return tm.get_text(self.text_key, self.default)
@@ -100,6 +109,9 @@ class MultiLanguageString(BaseTranslatableString):
 
     def __bool__(self):
         return any(self.language_map[x] for x in self.language_map)
+
+    def empty(self):
+        return not any(self.language_map[x] for x in self.language_map)
 
     @injector.inject
     def _render_str(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None, **kwargs):

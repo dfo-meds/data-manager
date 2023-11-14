@@ -28,9 +28,11 @@ import uuid
 from pipeman.util.metrics import BlockTimer, time_function
 import zirconium as zr
 
+from pipeman.i18n.i18n import BaseTranslatableString
+
 
 def is_empty(x):
-    return x is None or x == ''
+    return x is None or x == '' or (isinstance(x, BaseTranslatableString) and x.empty())
 
 
 @injector.injectable
