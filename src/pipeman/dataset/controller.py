@@ -32,7 +32,7 @@ from pipeman.i18n.i18n import BaseTranslatableString
 
 
 def is_empty(x):
-    return x is None or x == '' or (isinstance(x, BaseTranslatableString) and x.empty())
+    return x is None or x == '' or not x
 
 
 @injector.injectable
