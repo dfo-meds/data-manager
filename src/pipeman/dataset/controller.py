@@ -20,6 +20,7 @@ from pipeman.workflow import WorkflowController, WorkflowRegistry
 from pipeman.core.util import user_list
 from pipeman.org import OrganizationController
 from pipeman.attachment import AttachmentController
+from pipeman.dataset.dataset import Dataset
 import wtforms.validators as wtfv
 import functools
 import re
@@ -219,7 +220,14 @@ class DatasetController:
         )
 
     def create_dataset_from_api_call(self):
-        pass
+        builder = DatasetBuilder()
+        dataset = builder.from_flask_api()
+        self.save_dataset(dataset, True)
+        response = {
+            "dataset_id": dataset.dataset_id,
+            "success": True,
+        }
+        return flask.jsonify(response)
 
     def view_dataset_page(self, dataset):
         groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
@@ -578,86 +586,115 @@ class DatasetController:
                     users=[u.id for u in ds.users]
                 )
 
-    def save_dataset(self, dataset, as_copy: bool = False):
+    def save_dataset(self, dataset, force_new: bool = False):
         with self.db as session:
             ds = None
             name = "pipeman_dataset_save_dataset_update" if dataset.dataset_id else "pipeman_dataset_save_dataset_insert"
             desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
-            if as_copy:
-                dataset.dataset_id = None
             with BlockTimer(name, desc):
-                if dataset.dataset_id:
-                    self.log.info(f"Saving dataset {dataset.dataset_id}")
-                    ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
-                    if not ds:
-                        raise DatasetNotFoundError(dataset.dataset_id)
-                    ds.is_deprecated = dataset.is_deprecated
-                    ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
-                    ds.display_names = json.dumps(dataset.display_names())
-                    ds.profiles = "\n".join(dataset.profiles)
-                    if not ds.guid:
-                        ds.guid = str(uuid.uuid4())
+                if (not force_new) and dataset.dataset_id is not None:
+                    ds = self._update_dataset(dataset, session)
+                    self._update_user_access(dataset, ds, session)
+                    session.commit()
                 else:
-                    self.log.info(f"Creating new dataset")
-                    ds = orm.Dataset(
-                        organization_id=int(dataset.organization_id) or None,
-                        is_deprecated=dataset.is_deprecated,
-                        display_names=json.dumps(dataset.display_names()),
-                        profiles="\n".join(dataset.profiles),
-                        guid=str(uuid.uuid4()),
-                        created_by=flask_login.current_user.user_id
-                    )
-                    session.add(ds)
-                for keyword in dataset.extras:
-                    if keyword not in ('guid', 'created_date', 'modified_date',):
-                        setattr(ds, keyword, dataset.extras[keyword])
-                if as_copy:
-                    ds.status = 'DRAFT'
-                session.commit()
-                dataset.dataset_id = ds.id
-                session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
-                for user_id in dataset.users:
-                    q = orm.user_dataset.insert().values({
-                        "user_id": user_id,
-                        "dataset_id": ds.id
-                    })
-                    session.execute(q)
-                if as_copy:
-                    ds_data = orm.MetadataEdition(
-                        dataset_id=ds.id,
-                        revision_no=1,
-                        data=json.dumps(dataset.values()),
-                        created_date=datetime.datetime.now(),
-                        created_by=flask_login.current_user.user_id
-                    )
-                    session.add(ds_data)
-                session.commit()
+                    ds = self._create_dataset(dataset, session)
+                    # If creating a new dataset works but saving a copy of the metadata or user list doesn't,
+                    # then having the dataset marked as deprecated prevents it from being used in an inconsistent
+                    # state
+                    if force_new:
+                        ds.status = "DRAFT"
+                        ds.is_deprecated = True
+                    elif dataset.users:
+                        ds.is_deprecated = True
+                    session.commit()
+                    dataset.dataset_id = ds.id
+                    if dataset.users or force_new:
+                        if dataset.users:
+                            self._update_user_access(dataset, ds, session)
+                        if force_new:
+                            self._create_metadata(dataset, session, ds)
+                        ds.is_deprecated = False
+                        session.add(ds)
+                        session.commit()
+
+    def _update_user_access(self, dataset, ds, session):
+        session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
+        for user_id in dataset.users:
+            q = orm.user_dataset.insert().values({
+                "user_id": user_id,
+                "dataset_id": ds.id
+            })
+            session.execute(q)
+
+    def _create_dataset(self, dataset: Dataset, session):
+        ds = orm.Dataset(
+            organization_id=int(dataset.organization_id) or None,
+            is_deprecated=dataset.is_deprecated,
+            display_names=json.dumps(dataset.display_names()),
+            profiles="\n".join(dataset.profiles),
+            guid=str(uuid.uuid4()),
+            created_by=flask_login.current_user.user_id
+        )
+        session.add(ds)
+        for keyword in dataset.extras:
+            if keyword not in ('guid', 'created_date', 'modified_date',):
+                setattr(ds, keyword, dataset.extras[keyword])
+        return ds
+
+    def _update_dataset(self, dataset: Dataset, session):
+        ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
+        if not ds:
+            raise DatasetNotFoundError(dataset.dataset_id)
+        ds.is_deprecated = dataset.is_deprecated
+        ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
+        ds.display_names = json.dumps(dataset.display_names())
+        ds.profiles = "\n".join(dataset.profiles)
+        if not ds.guid:
+            ds.guid = str(uuid.uuid4())
+        for keyword in dataset.extras:
+            if keyword not in ('guid', 'created_date', 'modified_date',):
+                setattr(ds, keyword, dataset.extras[keyword])
+        return ds
+
 
     @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
     def save_metadata(self, dataset):
         self.log.info(f"Saving metadata for dataset {dataset.dataset_id}")
         with self.db as session:
-            ds = session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
-            retries = 5
-            while retries > 0:
-                retries -= 1
-                try:
-                    self.log.debug(f"Attempting to save metadata")
-                    rev_nos = [dd.revision_no for dd in ds.data]
-                    next_rev = 1 if not rev_nos else max(rev_nos) + 1
-                    ds_data = orm.MetadataEdition(
-                        dataset_id=ds.id,
-                        revision_no=next_rev,
-                        data=json.dumps(dataset.values()),
-                        created_date=datetime.datetime.now(),
-                        created_by=flask_login.current_user.user_id if flask_login.current_user else None
-                    )
-                    session.add(ds_data)
-                    session.commit()
-                    break
-                except IntegrityError:
-                    self.log.exception(f"Error saving metadata, retries {retries}")
-                    continue
+            if self._create_metadata(dataset, session):
+                session.commit()
+
+    def _create_metadata(self, dataset, session, ds = None):
+        ds = ds if ds is not None else session.query(orm.Dataset).filter_by(id=dataset.dataset_id).first()
+        retries = 5
+        while retries > 0:
+            retries -= 1
+            try:
+                self.log.debug(f"Attempting to save metadata")
+                rev_nos = [dd.revision_no for dd in ds.data]
+                next_rev = 1 if not rev_nos else max(rev_nos) + 1
+                ds_data = orm.MetadataEdition(
+                    dataset_id=ds.id,
+                    revision_no=next_rev,
+                    data=json.dumps(dataset.values()),
+                    created_date=datetime.datetime.now(),
+                    created_by=flask_login.current_user.user_id if flask_login.current_user else None
+                )
+                session.add(ds_data)
+                return True
+            except IntegrityError:
+                self.log.exception(f"Error saving metadata, retries {retries}")
+                continue
+        return False
+
+
+class DatasetBuilder:
+
+    def __init__(self):
+        pass
+
+    def from_flask_api(self) -> Dataset:
+        pass
 
 
 class DatasetForm(PipemanFlaskForm):
