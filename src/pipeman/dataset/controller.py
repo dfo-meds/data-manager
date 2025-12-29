@@ -1,8 +1,8 @@
 import markupsafe
 from autoinject import injector
-from pipeman.db import Database
+from pipeman.db.db import Database, SessionWrapper
 import pipeman.db.orm as orm
-from pipeman.util.errors import DatasetNotFoundError
+from pipeman.util.errors import DatasetNotFoundError, APIInputError
 from .dataset import MetadataRegistry
 import json
 import datetime
@@ -220,8 +220,9 @@ class DatasetController:
         )
 
     def create_dataset_from_api_call(self):
-        builder = DatasetBuilder()
-        dataset = builder.from_flask_api()
+        with self.db as session:
+            builder = DatasetBuilder(session)
+            dataset = builder.from_flask_api()
         self.save_dataset(dataset, True)
         response = {
             "dataset_id": dataset.dataset_id,
@@ -690,11 +691,120 @@ class DatasetController:
 
 class DatasetBuilder:
 
-    def __init__(self):
-        pass
+    reg: MetadataRegistry = None
+    wreg: WorkflowRegistry = None
+    config: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self, db_session: SessionWrapper):
+        self.session = db_session
 
     def from_flask_api(self) -> Dataset:
-        pass
+        """
+        Structure:
+        {
+            profiles: [profile1, profile2, ...],
+            org_name: "shortname",
+        }
+        """
+        data = flask.request.get_json()
+        kwargs = {}
+        if not isinstance(data, dict):
+            raise APIInputError("Dataset must be a JSON dictionary")
+        profiles = self._get_profiles(data)
+        kwargs = {
+            "org_id": self._get_org_id(data),
+            "display_names": self._get_display_names(data),
+            "users": self._get_users(data),
+            "is_deprecated": False,
+            "extras": {
+                "status": "DRAFT",
+                "pub_workflow": self._get_publication_workflow(data),
+                "act_workflow": self._get_activation_workflow(data),
+                "security_level": self._get_security_level(data),
+            },
+        }
+        metadata = self._get_metadata(data)
+        dataset = self.reg.build_dataset(profiles, **kwargs)
+        if metadata:
+            dataset.set_from_file_metadata("json_api",metadata)
+        return dataset
+
+    def _get_metadata(self, data: dict):
+        if 'metadata' in data and data['metadata']:
+            if not isinstance(data['metadata'], dict):
+                raise APIInputError("[metadata] must be a dictionary")
+            return data['metadata']
+        return None
+
+    def _get_profiles(self, data: dict):
+        if "profiles" not in data:
+            raise APIInputError("Missing [profiles]")
+        profiles = data["profiles"]
+        if not isinstance(profiles, list):
+            raise APIInputError("[profiles] must be a list")
+        if not profiles:
+            raise APIInputError("[profiles] must not be empty")
+        for p in profiles:
+            if not self.reg.profile_exists(p):
+                raise APIInputError(f"Profile [{p}] does not exist")
+        return profiles
+
+    def _get_org_id(self, data):
+        org_name = self.config.as_str("pipeman.dataset_api.defaults.organization_shortname", None)
+        if "org_name" in data and data["org_name"]:
+            org_name = data["org_name"]
+        if org_name is None:
+            return None
+        org = self.session.query(orm.Organization).filter_by(short_name=org_name).first()
+        if org:
+            return org.id
+        raise APIInputError(f"Invalid organization name [{data['org_name']}]")
+
+    def _get_display_names(self, data):
+        if "display_names" not in data or not data["display_names"]:
+            raise APIInputError("[display_names] is mandatory")
+        if isinstance(data["display_names"], str):
+            return {"und": data["display_names"]}
+        if isinstance(data["display_names"], dict):
+            # todo: verify languages?
+            return data["display_names"]
+        raise APIInputError("[display_names] is an inappropriate input type")
+
+    def _get_users(self, data):
+        if "users" not in data or not data["users"]:
+            return None
+        ids = set()
+        for u in data["users"]:
+            u = self.session.query(orm.User).filter_by(username=u).first()
+            if not u:
+                raise APIInputError(f"Invalid username [{u}]")
+            ids.add(u.id)
+        return list(ids)
+
+    def _get_activation_workflow(self, data):
+        workflow_name = self.config.as_str("pipeman.dataset_api.defaults.activation_workflow", None)
+        if ['activation_workflow'] in data and data['activation_workflow']:
+            workflow_name = data['activation_workflow']
+        if workflow_name is None or not self.wreg.workflow_exists(workflow_name):
+            raise APIInputError(f"Invalid activation workflow [{workflow_name}]")
+        return workflow_name
+
+    def _get_publication_workflow(self, data):
+        workflow_name = self.config.as_str("pipeman.dataset_api.defaults.publication_workflow", None)
+        if 'publication_workflow' in data and data['publication_workflow']:
+            workflow_name = data['publication_workflow']
+        if workflow_name is None or not self.wreg.workflow_exists(workflow_name):
+            raise APIInputError(f"Invalid publication workflow [{workflow_name}]")
+        return workflow_name
+
+    def _get_security_level(self, data):
+        level = self.config.as_str("pipeman.dataset_api.defaults.security_level", None)
+        if 'security_level' in data and data['security_level']:
+            level = data['security_level']
+        if not self.reg.security_level_exists(level):
+            raise APIInputError(f"Invalid security level [{level}]")
+        return level
 
 
 class DatasetForm(PipemanFlaskForm):

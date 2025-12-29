@@ -1,6 +1,7 @@
 iso19115:
   display:
     und: ISO-19115
+  extends: core
   validation:
     required:
       - title

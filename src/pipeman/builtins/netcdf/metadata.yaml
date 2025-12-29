@@ -19,6 +19,8 @@ data_more_info:
         fr: Entrez un nom abrégé de l'institution qui est ultimement responsable de l'ensemble de données.
       netcdf:
         mapping: institution
+      json_api:
+        mapping: institution
     project:
       data_type: text
       label:
@@ -28,6 +30,8 @@ data_more_info:
         en: If this dataset is a part of a project, enter the name here
         fr: Si cet ensemble de données fait partie d'un projet, entrez le nom ici
       netcdf:
+        mapping: project
+      json_api:
         mapping: project
     program:
       data_type: text
@@ -39,6 +43,8 @@ data_more_info:
         fr: Si cet ensemble de données fait partie d'un programme, entrez le nom ici.
       netcdf:
         mapping: program
+      json_api:
+        mapping: program
     standard_name_vocab:
       data_type: text
       label:
@@ -48,6 +54,8 @@ data_more_info:
         en: Enter the name of the standard name vocabulary used for variable names (e.g. CF 1.10).
         fr: Entrez le nom du vocabulaire de nom standard utilisé pour les noms de variables (par exemple CF 1.10).
       netcdf:
+        mapping: standard_name_vocab
+      json_api:
         mapping: standard_name_vocab
 technical:
   fields:
@@ -74,7 +82,8 @@ technical:
         mapping: Conventions
         processor: text
         allow_many: yes
-
+      json_api:
+        mapping: conventions
 references:
   fields:
     source:
@@ -88,6 +97,8 @@ references:
         fr: Entrez les informations sur la source des données dans cet ensemble de données au format texte brut
       netcdf:
         mapping: source
+      json_api:
+        mapping: source
     references:
       data_type: multitext
       multilingual: yes
@@ -98,6 +109,8 @@ references:
         en: Enter any appropriate reference information about this dataset.
         fr: Entrez toute information de référence appropriée sur cet ensemble de données
       netcdf:
+        mapping: references
+      json_api:
         mapping: references
 custom:
   fields:

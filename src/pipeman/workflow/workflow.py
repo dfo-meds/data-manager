@@ -15,6 +15,9 @@ class WorkflowRegistry:
         self._factories = []
         self._factories.append(DefaultStepFactory())
 
+    def workflow_exists(self, workflow_name):
+        return workflow_name in self._workflows
+
     def remove_all(self):
         self._steps.remove_all()
         self._workflows.remove_all()

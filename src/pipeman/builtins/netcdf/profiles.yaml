@@ -1,6 +1,7 @@
 netcdf:
   display:
     und: NetCDF
+  extends: core
   fields:
     custom_metadata:
     custom_keywords:

@@ -26,6 +26,12 @@ class MetadataRegistry:
         self._security_labels = BaseObjectRegistry("security_label")
         self._dataset_output_processing_hooks = []
 
+    def profile_exists(self, profile_name):
+        return profile_name in self._profiles
+
+    def security_level_exists(self, security_level_name):
+        return security_level_name in self._security_labels
+
     def remove_all(self):
         self._profiles.remove_all()
         self._display_groups.remove_all()
@@ -214,11 +220,14 @@ class MetadataRegistry:
         return link, text
 
     def set_metadata_from_file(self, dataset, file_type: str, file_metadata: dict):
+        seen_objects = set()
         for p in dataset.profiles:
             if p in self._profiles and "mappers" in self._profiles[p] and file_type in self._profiles[p]["mappers"]:
                 obj_name = self._profiles[p]["mappers"][file_type]
-                obj = load_object(obj_name)
-                obj(dataset, file_type, file_metadata)
+                if obj_name not in seen_objects:
+                    obj = load_object(obj_name)
+                    obj(dataset, file_type, file_metadata)
+                    seen_objects.add(obj_name)
 
     def build_extended_profile_list(self, profiles):
         profiles = list(profiles)
@@ -298,10 +307,12 @@ class Dataset(FieldContainer):
         return flask.url_for("core.view_dataset", dataset_id=self.container_id)
 
     def guid(self):
+        # TODO: we should let datasets override this maybe?
         return self.extras['guid'] if 'guid' in self.extras else ""
 
     @injector.inject
     def naming_authority(self, config: zr.ApplicationConfig):
+        # TODO: we should let datasets override this maybe?
         return config.as_str(("pipeman", "metadata", "naming_authority"), default="pipeman")
 
     def created_date(self):

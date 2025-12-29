@@ -1,0 +1,33 @@
+institution,text
+project,text
+program,text
+standard_name_vocab,text
+conventions,text
+source,multilingual long text
+references,multilingual long text
+erddap_dataset_id,text
+erddap_data_file_path,text
+erddap_data_file_pattern,text
+title,multilingual text
+dataset_id_code,text,typically the DOI
+dataset_id_desc,multilingual text
+date_issued,date (YYYY-mm-dd)
+date_modified,date (YYYY-mm-dd)
+date_created,date (YYYY-mm-dd)
+summary,multilingual long text
+purpose,multilingual long text
+acknowledgement,multilingual long text
+processing_level,text
+processing_description,multilingual long text
+processing_environment,multilingual long text
+comment,multilingual long text
+geospatial_lon_min,decimal
+geospatial_lon_max,decimal
+geospatial_lat_min,decimal
+geospatial_lat_max,decimal
+geospatial_bounds,long text (WKT compatible)
+geospatial_vertical_min,decimal
+geospatial_vertical_max,decimal
+time_coverage_start,datetime (YYYY-mm-ddTHH:MM:SS can omit parts)
+time_coverage_end,datetime (YYYY-mm-ddTHH:MM:SS can omit parts)
+is_ongoing,boolean

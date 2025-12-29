@@ -203,9 +203,15 @@ class Field:
         return val is None or val == "" or val == [] or val == {}
 
     def serialize(self, val):
-        return self._unserialize(val)
+        if self.is_repeatable():
+            if isinstance(self.value, list):
+                return [self._serialize(x) for x in self.value]
+            else:
+                return [self._serialize(self.value)]
+        return self._serialize(val)
 
     def unserialize(self, val):
+        # TODO: do we need to handle translation here? only if non-text is translated.
         if self.is_repeatable() and not isinstance(val, list):
             return [self._unserialize(val)]
         elif (not self.is_repeatable()) and isinstance(val, list):
@@ -518,6 +524,9 @@ class BooleanField(Field):
         else:
             return gettext("pipeman.common.yes")
 
+    def _handle_raw(self, raw_value):
+        return not not raw_value
+
 
 class DateField(Field):
 
@@ -530,14 +539,23 @@ class DateField(Field):
         self.with_time = with_time
         self.with_cal = with_cal
 
-    def serialize(self, val):
+    def _handle_raw(self, raw_value):
+        if isinstance(raw_value, str):
+            if self.with_time:
+                return datetime.datetime.fromisoformat(raw_value)
+            else:
+                return datetime.date.fromisoformat(raw_value)
+        else:
+            return raw_value
+
+    def _serialize(self, val):
         if val is None:
             return ""
         if not isinstance(val, str):
             return val.strftime(self.config("storage_format"))
         return val
 
-    def unserialize(self, val):
+    def _unserialize(self, val):
         if val is None or val == "":
             return None
         return datetime.datetime.strptime(val, self.config("storage_format"))
@@ -584,6 +602,10 @@ class DecimalField(NumberValidationMixin, Field):
 
     def _control_class(self) -> t.Callable:
         return wtf.DecimalField
+
+    def _handle_raw(self, raw_value):
+        if isinstance(raw_value, str):
+            return decimal.Decimal(raw_value)
 
     def unserialize(self, val):
         if val is None or val == "":
@@ -762,6 +784,16 @@ class ChoiceField(Field):
         else:
             self.set_from_raw(keyword)
         return True
+
+    def _handle_raw(self, raw_value):
+        if raw_value is None:
+            return None
+        if raw_value in self._values:
+            return raw_value
+        for x in self._values:
+            if raw_value == self._values[x]:
+                return x
+        return None
 
     def choices(self):
         if self._values is None:

@@ -1,0 +1,5 @@
+core:
+  display:
+    und: Core
+  mappers:
+    json_api: pipeman.builtins.api_manner.util.set_metadata_from_api

@@ -10,6 +10,12 @@ i18n_paths_file = ""
 #last = ["plugin3", "plugin4"]
 #skip = ["plugin5"]
 
+[pipeman.dataset_api.defaults]
+# activation_workflow = "direct_activation"
+# publication_workflow = "direct_publish"
+# organization_shortname = "my_org"
+# security_level = "unclassified"
+
 [pipeman.security]
 #random_characters = ""
 #random_password_length = 10
