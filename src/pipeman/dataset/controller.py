@@ -218,6 +218,9 @@ class DatasetController:
             title=gettext('pipeman.dataset.page.create_dataset.title')
         )
 
+    def create_dataset_from_api_call(self):
+        pass
+
     def view_dataset_page(self, dataset):
         groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
         labels = {x: self.reg.display_group_label(x) for x in groups}

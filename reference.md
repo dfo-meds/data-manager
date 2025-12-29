@@ -21,6 +21,7 @@
 |entities.restore
 |entities.restore.all
 |entities.restore.[ENTITY_NAME]
+|datasets.create_api|Ability to create a dataset using an API call|
 |datasets.view
 |datasets.view.deprecated
 |datasets.view.all

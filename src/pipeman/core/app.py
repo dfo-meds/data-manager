@@ -297,6 +297,11 @@ def create_dataset(con: DatasetController = None):
 def view_attachment(attachment_id, atc: AttachmentController = None):
     return atc.download_attachment(attachment_id)
 
+@core.i18n_route("/datasets/api-new", methods=["POST"])
+@require_permission("datasets.create_api")
+@injector.inject
+def create_dataset_from_api_call(con: DatasetController = None):
+    return con.create_dataset_from_api_call()
 
 @core.i18n_route("/datasets/<int:dataset_id>")
 @require_permission("datasets.view")
