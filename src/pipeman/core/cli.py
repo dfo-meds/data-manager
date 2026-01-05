@@ -25,7 +25,6 @@ def org():
 def create(org_name, org_controller: OrganizationController = None):
     org_controller.upsert_organization(org_name)
 
-
 @click.group
 def workflow():
     pass
@@ -70,7 +69,6 @@ def cron():
 @click.group
 def report():
     pass
-
 
 @report.command
 @click.argument('output_file')
