@@ -119,7 +119,11 @@ class SecurityHelper:
 
     def build_auth_header(self, prefix: str, secret_key: str, username: str) -> str:
         """Create an Authorization header for keys."""
-        return f"{prefix}.{secret_key}.{base64.b64encode(username.encode('utf-8')).decode('ascii')}"
+        return ".".join([
+            base64.b64encode(bytes.fromhex(prefix)).decode('ascii'),
+            base64.b64encode(bytes.fromhex(secret_key)).decode('ascii'),
+            base64.b64encode(username.encode('utf-8')).decode('ascii')
+        ])
 
     def parse_auth_header(self, auth_header: str) -> t.Tuple[t.Optional[str], t.Optional[str], t.Optional[str]]:
         """Parse an authorization header."""
@@ -128,7 +132,7 @@ class SecurityHelper:
             self.log.error("Auth header has insufficient pieces")
             return None, None, None
         try:
-            return pieces[0], pieces[1], base64.b64decode(pieces[2]).decode('utf-8')
+            return base64.b64decode(pieces[0]).hex(), base64.b64decode(pieces[1]).hex(), base64.b64decode(pieces[2]).decode('utf-8')
         except (binascii.Error, UnicodeDecodeError):
             self.log.exception(f"Exception while processing auth header")
             return None, None, None

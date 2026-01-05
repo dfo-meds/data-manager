@@ -392,8 +392,7 @@ class DatabaseAuthenticationHandler(FormAuthenticationHandler):
 
     @injector.inject
     def _bearer_auth(self, auth_header, db: Database = None):
-        prefix, key, username = self.sh.parse_auth_header(auth_header)
-        print(prefix)
+        prefix, raw_key, username = self.sh.parse_auth_header(auth_header)
         if prefix is None:
             self._record_login_attempt("", True, "invalid bearer auth format", False, False)
             return None
@@ -412,18 +411,18 @@ class DatabaseAuthenticationHandler(FormAuthenticationHandler):
             error = "expired api key"
             if key.expiry > gate_date:
                 error = "invalid api token"
-                if self.sh.check_secret(auth_header, key.key_salt, key.key_hash):
+                if self.sh.check_secret(raw_key, key.key_salt, key.key_hash):
                     self._record_login_attempt(username, True, session=session)
-                    if self.sh.is_hash_outdated(auth_header, key.key_salt, key.key_hash):
-                        key.key_hash = self.sh.hash_secret(auth_header, key.key_salt)
+                    if self.sh.is_hash_outdated(raw_key, key.key_salt, key.key_hash):
+                        key.key_hash = self.sh.hash_secret(raw_key, key.key_salt)
                         session.commit()
                     return username
-            if key.old_expiry > gate_date:
+            if key.old_expiry is not None and key.old_expiry > gate_date:
                 error = "invalid api token"
-                if self.sh.check_secret(auth_header, key.old_key_salt, key.old_key_hash):
+                if self.sh.check_secret(raw_key, key.old_key_salt, key.old_key_hash):
                     self._record_login_attempt(username, True, session=session)
-                    if self.sh.is_hash_outdated(auth_header, key.old_key_salt, key.old_key_hash):
-                        key.old_key_hash = self.sh.hash_secret(auth_header, key.old_key_salt)
+                    if self.sh.is_hash_outdated(raw_key, key.old_key_salt, key.old_key_hash):
+                        key.old_key_hash = self.sh.hash_secret(raw_key, key.old_key_salt)
                         session.commit()
                     return username
             self._record_login_attempt(username, True, error, session=session)

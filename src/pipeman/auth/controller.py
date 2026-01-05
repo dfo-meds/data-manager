@@ -47,7 +47,7 @@ class DatabaseUserController:
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
             auth_header = self.sh.build_auth_header(prefix, raw_key, user.username)
-            key_hash = self.sh.hash_secret(auth_header, key_salt)
+            key_hash = self.sh.hash_secret(raw_key, key_salt)
             key = orm.APIKey(
                 user_id=user.id,
                 display=display,
@@ -81,7 +81,7 @@ class DatabaseUserController:
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
             auth_header = self.sh.build_auth_header(prefix, raw_key, user.username)
-            key_hash = self.sh.hash_secret(auth_header, key_salt)
+            key_hash = self.sh.hash_secret(raw_key, key_salt)
             if leave_old_active_days > 0:
                 key.old_key_hash = key.key_hash
                 key.old_key_salt = key.key_salt
