@@ -178,6 +178,7 @@ class Entity(_BaseModel, _AuditableModel, Base):
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     parent_id = sa.Column(sa.Integer, nullable=True, index=True)
     parent_type = sa.Column(sa.String(255), nullable=True, index=True)
+    guid = sa.Column(sa.String(255), nullable=True, index=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
     organization = orm.relationship("Organization", back_populates="entities")
