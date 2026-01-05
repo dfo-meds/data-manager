@@ -66,6 +66,15 @@ class EntityRegistry(BaseObjectRegistry):
         keys['und'] = key
         return MultiLanguageString(keys)
 
+    def unique_field_sets(self, entity_type):
+        for field_name in self[entity_type]["fields"]:
+            entry = self[entity_type]["fields"][field_name]
+            if 'unique' in entry and entry['unique']:
+                if isinstance(entry['unique'], (list, tuple)):
+                    yield {field_name, *entry['unique']}
+                else:
+                    yield {field_name}
+
     def new_entity(self, key, **kwargs):
         ent = Entity(
             key,
