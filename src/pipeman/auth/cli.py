@@ -216,11 +216,6 @@ def rotate_api_key(username, prefix, expiry_days, leave_old_active_days, no_erro
     )
 
 
-@user.group
-def group():
-    pass
-
-
 @group.command
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.argument("username")
