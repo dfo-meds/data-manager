@@ -6,6 +6,7 @@ import datetime
 import wtforms as wtf
 from autoinject import injector
 import flask
+import markupsafe
 
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
@@ -326,6 +327,11 @@ class MultiLineTextField(TextField):
 
     def _control_class(self) -> t.Callable:
         return wtf.TextAreaField
+
+    def _format_for_ui(self, val):
+        if val is None:
+            return ""
+        return markupsafe.Markup(val.replace("\n", '<br />'))
 
 
 class TelephoneField(NoControlMixin, Field):
