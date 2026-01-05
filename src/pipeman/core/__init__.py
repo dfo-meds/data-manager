@@ -137,3 +137,5 @@ def core_init_app(app, system: System = None):
     system.register_nav_item("logout", "pipeman.menu.logout", "auth.logout", "_is_not_anonymous", "user", weight=10000)
     system.register_nav_item("login", "pipeman.menu.login", "auth.login", "_is_anonymous", "user", weight=10000)
     app.jinja_env.filters['caps_to_snake'] = caps_to_snake
+    if 'csrf' in app.extensions:
+        app.extensions['csrf'].exempt('pipeman.core.app.create_dataset_from_api_call')
