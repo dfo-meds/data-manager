@@ -668,8 +668,8 @@ class Select2Widget:
         if self.allow_multiple:
             markup += 'multiple="multiple"'
         markup += '>\n'
-        for val, label, selected in field.iter_choices():
-            markup += self.render_option(val, label, selected) + "\n"
+        for opts in field.iter_choices():
+            markup += self.render_option(*opts) + "\n"
         markup += f'</select>\n<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  $('#{field.id}').select2(" + "{\n"
@@ -689,7 +689,7 @@ class Select2Widget:
         markup += '</script>\n'
         return markupsafe.Markup(markup)
 
-    def render_option(self, val, label, selected, **kwargs):
+    def render_option(self, val, label, selected, render_kw = None, **kwargs):
         if val is True or val is False:
             val = str(val)
         if val is None:
