@@ -632,7 +632,7 @@ class DatasetController:
             organization_id=int(dataset.organization_id) or None,
             is_deprecated=dataset.is_deprecated,
             display_names=json.dumps(dataset.display_names()),
-            profiles="\n".join(dataset.profiles),
+            profiles="\n".join(dataset.base_profiles),
             guid=str(uuid.uuid4()),
             created_by=flask_login.current_user.user_id
         )
@@ -649,7 +649,7 @@ class DatasetController:
         ds.is_deprecated = dataset.is_deprecated
         ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
         ds.display_names = json.dumps(dataset.display_names())
-        ds.profiles = "\n".join(dataset.profiles)
+        ds.profiles = "\n".join(dataset.base_profiles)
         if not ds.guid:
             ds.guid = str(uuid.uuid4())
         for keyword in dataset.extras:
