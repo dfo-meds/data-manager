@@ -1,5 +1,5 @@
 from pipeman.entity.entity import ValidationResult, combine_object_path
-from pipeman.entity.fields import KeywordGroup
+from pipeman.entity.keywords import KeywordGroup
 import functools
 
 
