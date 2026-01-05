@@ -629,7 +629,7 @@ class DatasetController:
 
     def _create_dataset(self, dataset: Dataset, session):
         ds = orm.Dataset(
-            organization_id=int(dataset.organization_id) or None,
+            organization_id=int(dataset.organization_id) if dataset.organization_id else None,
             is_deprecated=dataset.is_deprecated,
             display_names=json.dumps(dataset.display_names()),
             profiles="\n".join(dataset.base_profiles),
