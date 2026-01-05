@@ -313,8 +313,9 @@ class Entity(FieldContainer):
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, entity_type, is_component: bool, db_id: int = None, ed_id: int = None, parent_id=None, parent_type=None, **kwargs):
+    def __init__(self, entity_type, is_component: bool, db_id: int = None, ed_id: int = None, parent_id=None, parent_type=None, guid=None, **kwargs):
         super().__init__("entity", db_id, **kwargs)
+        self.guid = guid
         self.is_component = is_component
         self.entity_type = entity_type
         self.db_id = db_id
