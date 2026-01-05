@@ -301,7 +301,11 @@ def view_attachment(attachment_id, atc: AttachmentController = None):
 @require_permission("datasets.create_api")
 @injector.inject
 def create_dataset_from_api_call(con: DatasetController = None):
-    return con.create_dataset_from_api_call()
+    try:
+        return con.create_dataset_from_api_call()
+    except Exception as ex:
+        logging.getLogger("pipeman.api.create_dataset").exception(ex)
+        return {'error': str(ex)}, 500
 
 @core.i18n_route("/datasets/<int:dataset_id>")
 @require_permission("datasets.view")
