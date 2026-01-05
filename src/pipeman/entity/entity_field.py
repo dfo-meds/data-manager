@@ -88,21 +88,29 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
             return
         return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)
 
+    def set_from_external(self, external_value, external_container_setter: callable):
+        if not self.parent_id:
+            raise ValueError("Parent object must be saved before a new entity can be added.")
+        if isinstance(external_value, (list, tuple)):
+            for obj in external_value:
+                self.ec.create_or_update_entity(
+                    obj,
+                    external_container_setter,
+                    self.field_config["entity_type"],
+                    self.parent_id,
+                    self.parent_type
+                )
+        else:
+            self.ec.create_or_update_entity(
+                external_value,
+                external_container_setter,
+                self.field_config["entity_type"],
+                self.parent_id,
+                self.parent_type
+            )
 
-class InlineEntityField(DynamicFormField):
-
-    ec: EntityController = None
-
-    @injector.construct
-    def __init__(self, entity_type, original_data=None, parent_is_repeatable: bool = False, allow_js_controls: bool = True, **kwargs):
-        self._blank_entity = self.ec.reg.new_entity(entity_type,
-                                                    parent_type='_field' if not parent_is_repeatable else "_field_repeatable",
-                                                    field_values=original_data or {})
-        self.entity_type = entity_type
-        if 'widget' not in kwargs:
-            if allow_js_controls:
-                kwargs['widget'] = TabbedFieldFormWidget()
-        super().__init__(self._blank_entity.controls(), **kwargs)
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("ComponentReference field not implemented yet")
 
 
 class InlineEntityReferenceField(EntityRefMixin, Field):
@@ -153,6 +161,21 @@ class InlineEntityReferenceField(EntityRefMixin, Field):
             parent_type="_field" if not self.is_repeatable() else "_field_repeatable",
             field_values=val
         )
+
+    def set_from_external(self, external_value, external_container_setter: callable):
+        if isinstance(external_value, (list, tuple)):
+            if not self.is_repeatable():
+                raise ValueError("List of items provided for non-repeatable field")
+            for obj in external_value:
+                self._handle_external_data(obj, external_container_setter)
+        else:
+            self._handle_external_data(external_value, external_container_setter)
+
+    def _handle_external_data(self, obj: dict, setter: callable):
+        pass
+
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("InlineEntityReference field not implemented yet")
 
 
 class EntityReferenceField(EntityRefMixin, ChoiceField):
@@ -212,3 +235,43 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         if self.is_repeatable() and isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
             return val[0]
         return val
+
+    def set_from_external(self, external_value, external_container_setter: callable):
+        if isinstance(external_value, (list, tuple)):
+            if not self.is_repeatable():
+                raise ValueError("Multiple entities specified for a non-repeatable field")
+            existing = set(self.value)
+            for obj in external_value:
+                ent = self.ec.create_or_update_entity(
+                    obj,
+                    external_container_setter,
+                    self.field_config["entity_type"]
+                )
+                existing.add(EntitySelectField.build_entry(ent, False))
+            self.value = existing
+        else:
+            ent = self.ec.create_or_update_entity(
+                external_value,
+                external_container_setter,
+                self.field_config["entity_type"]
+            )
+            self.value = EntitySelectField.build_entry(ent, False)
+
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("EntityReference field not implemented yet")
+
+
+class InlineEntityField(DynamicFormField):
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, entity_type, original_data=None, parent_is_repeatable: bool = False, allow_js_controls: bool = True, **kwargs):
+        self._blank_entity = self.ec.reg.new_entity(entity_type,
+                                                    parent_type='_field' if not parent_is_repeatable else "_field_repeatable",
+                                                    field_values=original_data or {})
+        self.entity_type = entity_type
+        if 'widget' not in kwargs:
+            if allow_js_controls:
+                kwargs['widget'] = TabbedFieldFormWidget()
+        super().__init__(self._blank_entity.controls(), **kwargs)
