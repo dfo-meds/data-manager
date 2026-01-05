@@ -198,71 +198,51 @@ class ChoiceField(Field):
             self.set_from_raw(keyword)
         return True
 
+    def _find_choice(self, value) -> tuple:
+        if value is None or value == "":
+            return None, None
+        for short, long in self.choices():
+            if short == value:
+                return short, long
+        return None, None
+
+    def _get_display_text(self, value):
+        short, long = self._find_choice(value)
+        return long
+
     def _handle_raw(self, raw_value):
-        if raw_value is None:
-            return None
-        if raw_value in self._values:
-            return raw_value
-        for x in self._values:
-            if raw_value == self._values[x]:
-                return x
-        return None
+        short, long = self._find_choice(raw_value)
+        return short
 
     def choices(self):
         if self._values is None:
-            self._values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
-            for x in self.field_config["values"]:
-                disp = self.field_config["values"][x]
-                if isinstance(disp, dict):
-                    self._values.append((x, MultiLanguageString(disp)))
-                else:
-                    self._values.append((x, disp))
+            self._values = self._build_choices()
         return self._values
+
+    def _build_choices(self) -> list[tuple[str, str]]:
+        v = [("", DelayedTranslationString("pipeman.common.placeholder"))]
+        for x in self.field_config["values"]:
+            disp = self.field_config["values"][x]
+            if isinstance(disp, dict):
+                v.append((x, MultiLanguageString(disp)))
+            else:
+                v.append((x, disp))
+        return v
 
     def sanitize_form_input(self, val):
         if self.is_repeatable() and isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
             return val[0]
         return val
 
-    def filters(self) -> list:
-        filts = super().filters()
-        #filts.append(text_sanitize)
-        return filts
-
-    def _extra_wtf_arguments(self) -> dict:
-        from pipeman.entity import Entity
-        args = {
-            "choices": self.choices,
-            "coerce": str,
-            "widget": Select2Widget(
-                allow_multiple=self.is_repeatable(),
-                placeholder=DelayedTranslationString("pipeman.common.placeholder")
-            ) if self.allow_javascript_controls() else None
-        }
-        if "coerce" in self.field_config and self.field_config["coerce"] == "int":
-            args["coerce"] = int
-        return args
-
-    def _control_class(self) -> t.Callable:
-        return wtf.SelectMultipleField if "repeatable" in self.field_config and self.field_config["repeatable"] else wtf.SelectField
-
     def _format_for_ui(self, val):
-        if val is None or val == "":
+        short, long = self._find_choice(val)
+        if long is None:
             return ""
-        lst = self.choices()
-        for key, disp in lst:
-            if key == val:
-                return disp
-        return gettext("pipeman.common.unknown")
+        return long
 
-    def _process_value(self, val, **kwargs):
-        if val is None:
-            return None
-        if "use_label" in kwargs and kwargs["use_label"]:
-            choices = self.choices()
-            if val in choices:
-                return choices[val]
-        return val
+    def _process_value(self, val, use_label = False, **kwargs):
+        short, long = self._find_choice(val)
+        return long
 
 
 class TextField(NoControlMixin, LengthValidationMixin, Field):
@@ -386,14 +366,8 @@ class DatasetReferenceField(ChoiceField):
     @injector.construct
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._value_cache = None
 
-    def choices(self):
-        if self._value_cache is None:
-            self._value_cache = self._load_values()
-        return self._value_cache
-
-    def _load_values(self):
+    def _build_choices(self):
         values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         with self.db as session:
             for entity in session.query(orm.Dataset).filter_by(is_deprecated=False):
@@ -428,7 +402,6 @@ class VocabularyReferenceField(ChoiceField):
     @injector.construct
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._value_cache = None
 
     def _format_for_ui(self, val):
         if val is None or val == "":
@@ -437,19 +410,6 @@ class VocabularyReferenceField(ChoiceField):
         link = flask.url_for("core.vocabulary_term_list", vocab_name=self.field_config["vocabulary_name"], _anchor=val)
         return MultiLanguageLink(link, txt, new_tab=True)
 
-    def _get_display_text(self, value):
-        with self.db as session:
-            term = session.query(orm.VocabularyTerm).filter_by(
-                vocabulary_name=self.field_config["vocabulary_name"],
-                short_name=value
-            ).first()
-            if term and term.display_names:
-                names = json.loads(term.display_names)
-                if 'und' not in names:
-                    names['und'] = value
-                return names
-        return {'und': value}
-
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.field_config["label"] if "label" in self.field_config else ""
         link = flask.url_for("core.vocabulary_term_list", vocab_name=self.field_config["vocabulary_name"])
@@ -457,12 +417,7 @@ class VocabularyReferenceField(ChoiceField):
             return MultiLanguageLink(link, txt, new_tab=True)
         return MultiLanguageLink(link, {"und": txt}, new_tab=True)
 
-    def choices(self):
-        if self._value_cache is None:
-            self._value_cache = self._load_values()
-        return self._value_cache
-
-    def _load_values(self):
+    def _build_choices(self):
         values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
@@ -472,11 +427,10 @@ class VocabularyReferenceField(ChoiceField):
         return values
 
     def _process_value(self, val, none_as_blank=False, **kwargs):
-        with self.db as session:
-            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config["vocabulary_name"], short_name=val).first()
-            if term is not None:
-                return VocabularyTerm(term.short_name, term.display_names)
-        if none_as_blank:
+        short, long = self._find_choice(val)
+        if short is not None:
+            return VocabularyTerm(short, long)
+        elif none_as_blank:
             return VocabularyTerm()
         else:
             return None
