@@ -19,6 +19,8 @@ import flask_login
 import wtforms.validators as wtfv
 import functools
 
+from ..util import UserInputError
+
 
 @injector.injectable
 class EntityController:
@@ -284,19 +286,25 @@ class EntityController:
                 is_deprecated=e.is_deprecated,
                 org_id=e.organization_id,
                 parent_id=e.parent_id,
-                parent_type=e.parent_type
+                parent_type=e.parent_type,
+                guid=e.guid
             )
             return x
 
     def save_entity(self, entity):
         self._log.info(f"Saving entity {entity.db_id}")
         with self.db as session:
+            if entity.guid:
+                check = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid).first()
+                if check and (entity.db_id is None or not entity.db_id == entity.db_id):
+                    raise UserInputError("pipeman.entity.error.guid_already_exists")
             if entity.db_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
                 e.display_names = json.dumps(entity.display_names())
                 e.organization_id = int(entity.organization_id) if entity.organization_id else None
                 e.parent_id = entity.parent_id if entity.parent_id else None
                 e.parent_type = entity.parent_type if entity.parent_type else None
+                e.guid = entity.guid if entity.guid else None
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
@@ -304,7 +312,8 @@ class EntityController:
                     organization_id=int(entity.organization_id) if entity.organization_id else None,
                     parent_id=entity.parent_id,
                     parent_type=entity.parent_type,
-                    created_by=flask_login.current_user.user_id
+                    created_by=flask_login.current_user.user_id,
+                    guid=entity.guid
                 )
                 session.add(e)
             session.commit()
@@ -343,6 +352,11 @@ class EntityForm(SecureBaseForm):
                 label=DelayedTranslationString("pipeman.common.display_name"),
                 default=self.entity.display_names()
             ),
+            "_guid": wtf.StringField(
+                label=DelayedTranslationString("pipeman.label.entity.guid"),
+                description=DelayedTranslationString("pipeman.label.entity.guid.help"),
+                default=self.entity.guid if self.entity.guid else "",
+            ),
             "_org": wtf.SelectField(
                 label=DelayedTranslationString("pipeman.label.entity.organization_name"),
                 choices=self.ocontroller.list_organizations(),
@@ -374,6 +388,7 @@ class EntityForm(SecureBaseForm):
             self.entity.process_form_data(d)
             for key in d["_name"]:
                 self.entity.set_display_name(key, d["_name"][key])
+            self.entity.guid = d["_guid"] or None
             if self.container:
                 self.entity.parent_id = self.container.container_id
                 self.entity.parent_type = self.container.container_type

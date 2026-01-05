@@ -221,6 +221,7 @@ pipeman.error.range_between: Value must be between {min} and {max}
 pipeman.error.range_greater_than_max: Value must be at most {max}
 pipeman.error.range_less_than_min: Value must be at least {min}
 pipeman.error.required_field: This field is required
+pipeman.entity.error.guid_already_exists: The unique ID you have entered already exists
 pipeman.field.error.translation_already_in_progress: Translation already in progress
 pipeman.field.error.translation_nothing_to_do: All language fields already populated
 pipeman.field.error.translation_nothing_to_work_with: At least one original language
@@ -258,10 +259,12 @@ pipeman.label.entity.dataset.link: View Related Dataset
 pipeman.label.entity.id: ID
 pipeman.label.entity.organization_name: Organization
 pipeman.label.entity.status: Status
+pipeman.label.entity.guid: Unique ID
 pipeman.label.org.global_name: Global
 pipeman.label.org.short_name: Short Name
 pipeman.label.translation.upload: Translation CSV
 pipeman.label.user.display_name: Display Name
+pipeman.label.entity.guid.help: "Used when building datasets from the API to identify this entity"
 pipeman.label.user.email: Email
 pipeman.label.user.groups: Groups
 pipeman.label.user.id: ID
