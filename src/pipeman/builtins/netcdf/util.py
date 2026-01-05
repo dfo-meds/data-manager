@@ -589,26 +589,29 @@ class CFVocabularyManager:
 
     def fetch_cf_standard_names(self):
         self.log.info(f"Loading CF standard names")
-        # TODO convert to http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml
-        terms = {}
-        link = "http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"
-        resp = requests.get(link)
-        soup = bs4.BeautifulSoup(resp.text, 'html.parser')
-        sn_table = soup.find('table', id="standard_name_table")
-        for sn_tr in sn_table.find_all("tr"):
-            base = sn_tr.find("td")
-            var_name = base.find("code").find("a").text
-            var_desc = sn_tr.find("div").text
-            terms[var_name] = {
-                "display": {
-                    "en": var_name,
-                },
-                "description": {
-                    "en": var_desc,
+        try:
+            # TODO convert to http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml
+            terms = {}
+            link = "http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"
+            resp = requests.get(link)
+            soup = bs4.BeautifulSoup(resp.text, 'html.parser')
+            sn_table = soup.find('table', id="standard_name_table")
+            for sn_tr in sn_table.find_all("tr"):
+                base = sn_tr.find("td")
+                var_name = base.find("code").find("a").text
+                var_desc = sn_tr.find("div").text
+                terms[var_name] = {
+                    "display": {
+                        "en": var_name,
+                    },
+                    "description": {
+                        "en": var_desc,
+                    }
                 }
-            }
-        self.log.info(f"Found {len(terms)} standard names")
-        self.vtc.save_terms_from_dict("cf_standard_names", terms)
+            self.log.info(f"Found {len(terms)} standard names")
+            self.vtc.save_terms_from_dict("cf_standard_names", terms)
+        except Exception as ex:
+            self.log.exception(ex)
 
     def fetch_ud_prefixes(self):
         self.log.info("Loading UDUnit prefixes")
