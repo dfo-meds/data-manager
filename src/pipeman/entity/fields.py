@@ -112,7 +112,12 @@ class DecimalField(NumberValidationMixin, Field):
 
     def _handle_raw(self, raw_value):
         if isinstance(raw_value, str):
+            if raw_value == "":
+                return None
             return decimal.Decimal(raw_value)
+        if raw_value is None or isinstance(raw_value, decimal.Decimal):
+            return raw_value
+        return None
 
     def _unserialize(self, val):
         if val is None or val == "":
