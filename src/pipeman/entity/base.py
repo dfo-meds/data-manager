@@ -5,7 +5,7 @@ import wtforms.validators as wtfv
 from autoinject import injector
 import zrlog
 
-from pipeman.i18n import MultiLanguageString, DelayedTranslationString
+from pipeman.i18n import MultiLanguageString, DelayedTranslationString, TranslationManager
 from pipeman.util.flask import TranslatableField, NoControlCharacters, flasht
 from pipeman.entity.keywords import Keyword
 from pipeman.entity.util import HtmlList, _render_mls
@@ -13,6 +13,9 @@ from pipeman.entity.util import HtmlList, _render_mls
 
 class Field:
 
+    tm: TranslationManager = None
+
+    @injector.construct
     def __init__(self, field_name, field_config, container=None):
 
         self.field_name = field_name
@@ -58,6 +61,16 @@ class Field:
                     self._file_translation_request(val)
                 elif self.value and '_translation_request' in self.value and self.value['_translation_request']:
                     val['_translation_request'] = True
+        if self.is_multilingual():
+            if self.is_repeatable():
+                for idx in range(0, min(len(val), len(self.value))):
+                    for k in self.value[idx]:
+                        if k not in val[idx]:
+                            val[idx][k] = self.value[idx][k]
+            else:
+                for k in self.value:
+                    if k not in val:
+                        val[k] = self.value[k]
         return val
 
     def set_from_translation(self, val: dict = None, index: int = None):
@@ -332,6 +345,22 @@ class Field:
         return validators
 
     def default_value(self) -> t.Any:
+        if self.is_multilingual():
+            metadata_langs = self.tm.metadata_supported_languages()
+            if self.is_repeatable():
+                return [
+                    {
+                        x: self.value[x]
+                        for x in obj
+                        if x in metadata_langs or x == '_translation_request' or x == 'und'
+                    }
+                    for obj in self.value
+                ]
+            return {
+                x: self.value[x]
+                for x in self.value
+                if x in metadata_langs or x == '_translation_request' or x == 'und'
+            }
         return self.value
 
     def _wtf_arguments(self) -> dict:
@@ -352,6 +381,7 @@ class Field:
         return {}
 
     def display(self):
+        metadata_langs = self.tm.metadata_supported_languages()
         if self.value is None:
             return ""
         use_multilingual = self.is_multilingual()
@@ -361,6 +391,7 @@ class Field:
                 MultiLanguageString({
                     y: self._format_for_ui(x[y])
                     for y in x
+                    if y in metadata_langs or y == 'und'
                 })
                 for x in self.value
             ]
@@ -372,7 +403,9 @@ class Field:
             if isinstance(self.value, str):
                 return _render_mls(MultiLanguageString({"und": self.value}))
             return _render_mls(MultiLanguageString({
-                x: self._format_for_ui(self.value[x]) for x in self.value
+                x: self._format_for_ui(self.value[x])
+                for x in self.value
+                if x in metadata_langs or x == 'und'
             }))
         else:
             return self._format_for_ui(self.value)
