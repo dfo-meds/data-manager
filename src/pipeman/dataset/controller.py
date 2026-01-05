@@ -786,9 +786,9 @@ class DatasetBuilder:
 
     def _get_activation_workflow(self, data):
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.activation_workflow", None)
-        if ['activation_workflow'] in data and data['activation_workflow']:
+        if 'activation_workflow' in data and data['activation_workflow']:
             workflow_name = data['activation_workflow']
-        if workflow_name is None or not self.wreg.workflow_exists(workflow_name):
+        if workflow_name is None or not self.wreg.workflow_exists("dataset_activation", workflow_name):
             raise APIInputError(f"Invalid activation workflow [{workflow_name}]")
         return workflow_name
 
@@ -796,7 +796,7 @@ class DatasetBuilder:
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.publication_workflow", None)
         if 'publication_workflow' in data and data['publication_workflow']:
             workflow_name = data['publication_workflow']
-        if workflow_name is None or not self.wreg.workflow_exists(workflow_name):
+        if workflow_name is None or not self.wreg.workflow_exists("dataset_publication", workflow_name):
             raise APIInputError(f"Invalid publication workflow [{workflow_name}]")
         return workflow_name
 
