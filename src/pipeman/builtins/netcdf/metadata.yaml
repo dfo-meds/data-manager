@@ -70,6 +70,8 @@ technical:
       vocabulary_name: cdm_data_types
       netcdf:
         mapping: featureType
+      json_api:
+        mapping: feature_type
     conventions:
       data_type: text
       label:
@@ -139,6 +141,8 @@ keywords:
       description:
         en: Standard variables that are used in the dataset.
         fr: Variables standard utilisées dans l'ensemble de données.
+      json_api:
+        mapping: cf_standard_names
       #keyword_config:
       #  is_keyword: yes
       #  mode: value

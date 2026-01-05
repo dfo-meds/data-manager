@@ -10,6 +10,8 @@ keywords:
         en: Select the most appropriate GoC Core Subject Thesaurus keyword.
         fr: Sélectionnez le mot clé du thésaurus des sujets de base du GC le plus approprié.
       order: 15000
+      json_api:
+        mapping: goc_subject
       keyword_config:
         is_keyword: yes
         mode: both
@@ -44,6 +46,8 @@ keywords:
         en: Enter the most appropriate location(s) where the data was published.
         fr: Entrez le ou les emplacements les plus appropriés où les données ont été publiées.
       order: 15010
+      json_api:
+        mapping: goc_publication_place
       repeatable: yes
       keyword_config:
         is_keyword: yes
@@ -80,6 +84,8 @@ keywords:
         fr: Sélectionnez le ou les publics auxquels l'ensemble de données est destiné.
       repeatable: yes
       order: 15020
+      json_api:
+        mapping: goc_audience
       keyword_config:
         is_keyword: yes
         mode: both
@@ -112,6 +118,8 @@ publishing:
         en: Select the collection on Open Government where this data should be published.
         fr: Sélectionnez la collection sur le gouvernement ouvert où ces données doivent être publiées.
       order: 15000
+      json_api:
+        mapping: goc_collection_type
     goc_publisher:
       data_type: entity_ref
       entity_type: goc_publishing_section

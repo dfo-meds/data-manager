@@ -21,6 +21,8 @@ technical:
         en: Select the type of dataset for the ERDDAP XML file.
         fr: Sélectionnez le type de jeu de données pour le fichier XML ERDDAP.
       order: 210
+      json_api:
+        mapping: erddap_dataset_type
     erddap_data_file_path:
       data_type: text
       label:

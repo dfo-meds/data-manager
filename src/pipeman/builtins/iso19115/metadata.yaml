@@ -109,6 +109,8 @@ metadata_info:
       description:
         en: Enter how often the metadata will be updated.
         fr: Saisissez la fréquence de mise à jour des métadonnées.
+      json_api:
+        mapping: metadata_maintenance_frequency
     meta_licenses:
       data_type: entity_ref
       entity_type: use_constraint
@@ -400,6 +402,8 @@ keywords:
         mapping:
           - identification
           - topic_category
+      json_api:
+        mapping: topic_category
 extent:
   fields:
     bbox_west:
@@ -664,6 +668,8 @@ technical:
         mapping:
           - identification
           - status
+      json_api:
+        mapping: status
     spatial_representation_type:
       data_type: vocabulary
       order: 40
@@ -678,6 +684,8 @@ technical:
       iso_yaml:
         mapping:
           - spatial
+      json_api:
+        mapping: spatial_representation_type
     resource_maintenance_frequency:
       data_type: vocabulary
       order: 50
@@ -692,6 +700,8 @@ technical:
         mapping:
           - identification
           - maintenancefrequency
+      json_api:
+        mapping: resource_maintenance_frequency
     iso_maintenance:
       data_type: component_ref
       entity_type: maintenance

@@ -9,6 +9,8 @@ internal_info:
         en: These notes are not published, they are for internal reference only.
         fr: Ces notes ne sont pas publiées, elles sont à usage interne uniquement.
       multilingual: yes
+      json_api:
+        mapping: internal_notes
     file_storage_location:
       data_type: multitext
       label:
@@ -18,6 +20,8 @@ internal_info:
         en: Describe where the data is located. This field is for interal reference only.
         fr: Décrivez où se trouvent les données. Ce champ est pour référence interne seulement.
       multilingual: yes
+      json_api:
+        mapping: file_storage_location
   display:
     en: Internal
     fr: Internes
@@ -32,4 +36,6 @@ publishing:
       description:
         en: Check this box if the dataset can be obtained via the MEDS request form. This will add a transfer option in the distribution methods list.
         fr: Cochez cette case si l'ensemble de données peut être obtenu via le formulaire de demande MEDS. Cela ajoutera une option de transfert dans la liste des méthodes de distribution.
+      json_api:
+        mapping: via_meds_request_form
 
