@@ -757,10 +757,10 @@ class EntitySelectField(wtf.Field):
                 q = q.filter(orm.Entity.display_names.ilike(text))
             q = q.order_by(orm.Entity.id)
             for ent in q:
-                yield EntitySelectField._build_entry(ent, by_revision)
+                yield EntitySelectField.build_entry(ent, by_revision)
 
     @staticmethod
-    def _build_entry(entity, by_revision, revision_no = None):
+    def build_entry(entity, by_revision, revision_no = None):
         rev = None
         if by_revision:
             rev = entity.latest_revision() if revision_no is None else entity.specific_revision(revision_no)
@@ -798,14 +798,14 @@ class EntitySelectField(wtf.Field):
                     for x in self.data:
                         try:
                             ent, rev = EntitySelectField.load_entity_option(x, session, self.by_revision)
-                            entry = EntitySelectField._build_entry(ent, self.by_revision, rev.revision_no if rev else None)
+                            entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
                             yield entry["id"], entry["text"], True
                         except FormValueError:
                             pass
                 else:
                     try:
                         ent, rev = EntitySelectField.load_entity_option(self.data, session, self.by_revision)
-                        entry = EntitySelectField._build_entry(ent, self.by_revision, rev.revision_no if rev else None)
+                        entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
                         yield entry["id"], entry["text"], True
                     except FormValueError:
                         pass
