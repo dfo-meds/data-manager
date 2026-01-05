@@ -17,6 +17,8 @@ goc_publishing_section:
         en: Enter the name of the group within the department which is publishing the data.
         fr: Entrez le nom du groupe au sein du service qui publie les données.
       order: 10
+      unique:
+        - publisher
     publisher:
       data_type: entity_ref
       label:
@@ -79,6 +81,7 @@ goc_publishing_org:
         en: Enter the full formal name of the department
         fr: Entrez le nom officiel complet du département
       order: 0
+      unique: yes
     publisher_code:
       data_type: text
       label:
@@ -88,3 +91,4 @@ goc_publishing_org:
         en: Enter the appropriate code for the department
         fr: Entrez le code approprié pour le département
       order: 10
+      unique: yes

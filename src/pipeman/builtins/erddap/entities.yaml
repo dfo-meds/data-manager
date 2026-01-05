@@ -25,6 +25,7 @@ erddap_servers:
       description:
         en: "Enter the URL for the ERDDAP to server up to and including '/erddap/' (e.g. 'https://mydomain.com/erddap/')"
         fr: "Entrez l'URL du serveur ERDDAP jusqu'à '/erddap/' inclus (par exemple 'https://mydomain.com/erddap/')"
+      unique: yes
 variable:
   validation:
     required:
@@ -41,6 +42,7 @@ variable:
         en: Enter the variable name that users who download this dataset from ERDDAP will see, if different from the source name.
         fr: Entrez le nom de la variable que verront les utilisateurs qui téléchargent cet ensemble de données depuis ERDDAP, s'il est différent du nom de la source.
       order: 100
+      unique: yes
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories

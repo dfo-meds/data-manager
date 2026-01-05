@@ -43,6 +43,7 @@ variable:
         en: Enter the variable name as it appears in the NetCDF file.
         fr: Entrez le nom de la variable tel qu'il apparaît dans le fichier NetCDF.
       order: 0
+      unique: yes
     source_data_type:
       data_type: vocabulary
       vocabulary_name: netcdf_data_types
@@ -297,6 +298,6 @@ locale:
         fr: Code BC47
       description:
         en: Enter the most appropriate IETF BCP 47 language code.
-        fr:  Entrez le code de langue le plus approprié de la norme IETF BCP 47.
+        fr: Entrez le code de langue le plus approprié de la norme IETF BCP 47.
       data_type: text
       order: 35

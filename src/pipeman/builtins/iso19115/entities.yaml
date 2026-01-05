@@ -19,6 +19,8 @@ responsibility:
         en: Select the role most appropriate for this contact.
         fr: Sélectionnez le rôle le plus approprié pour ce contact.
       order: 10
+      unique:
+        - contact
     contact:
       data_type: entity_ref
       entity_type: contact
@@ -81,6 +83,10 @@ locale:
         en: Enter the 3-letter language code from ISO 639 (e.g. 'eng', 'fra')
         fr: Entrez le code de langue à 3 lettres de la norme ISO 639 (par exemple, "eng", "fra")
       order: 10
+      unique:
+        - a2_language
+        - country
+        - encoding
     a2_language:
       data_type: text
       label:
@@ -219,6 +225,7 @@ citation:
         en: If the work has an ISBN number, enter it here
         fr: Si l'œuvre a un numéro ISBN, saisissez-le ici
       order: 110
+      unique: yes
     issn:
       data_type: text
       label:
@@ -227,6 +234,7 @@ citation:
         en: If the work has an ISSN number, enter it here
         fr: Si l'œuvre a un numéro ISSN, saisissez-le ici
       order: 120
+      unique: yes
     resource:
       data_type: inline_entity_ref
       entity_type: resource
@@ -237,6 +245,7 @@ citation:
         en: If there is a link to the work online, select it here
         fr: S'il existe un lien vers l'œuvre en ligne, sélectionnez-le ici
       order: 130
+      unique: yes
     id_code:
       data_type: text
       label:
@@ -246,6 +255,8 @@ citation:
         en: If the work has a DOI or other unique identifier that uses a code system, enter it here and select the appropriate system below.
         fr: Si l'œuvre a un DOI ou un autre identifiant unique qui utilise un système de code, entrez-le ici et sélectionnez le système approprié ci-dessous.
       order: 140
+      unique:
+        - id_system
     id_description:
       data_type: text
       label:
@@ -275,6 +286,8 @@ graphic:
   display:
     en: Graphic
     fr: Graphique
+  deduplicate:
+    - file_url
   validation:
     required:
       - file_url
@@ -288,6 +301,7 @@ graphic:
         en: Enter the URL to the file
         fr: Entrez l'URL du fichier
       order: 10
+      unique: yes
     description:
       data_type: multitext
       label:
@@ -591,6 +605,8 @@ ref_system:
         en: If the reference system has a unique identifier (e.g. an EPSG code), enter it here
         fr: Si le référentiel possède un identifiant unique (par exemple un code EPSG), saisissez-le ici
       order: 20
+      unique:
+        - id_system
     description:
       data_type: text
       label:
@@ -836,6 +852,7 @@ resource:
         en: Enter the URL for the resource including the "HTTP" or "HTTPS" prefix.
         fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
+      unique: yes
     protocol:
       data_type: vocabulary
       vocabulary_name: iso19115_link_protocols
@@ -919,6 +936,8 @@ id_system:
         en: This text should be able to be prepended to all code values and form a unique identifier. An HTTP or HTTPS prefix is recommended to form a navigable URL if possible.
         fr: Ce texte doit pouvoir être ajouté à toutes les valeurs de code et former un identifiant unique. Un préfixe HTTP ou HTTPS est recommandé pour former une URL navigable si possible.
       order: 20
+      unique:
+        - version
     version:
       data_type: text
       label:
@@ -943,6 +962,7 @@ quick_web_page:
         en: Enter the URL for the resource including the "HTTP" or "HTTPS" prefix.
         fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
+      unique: yes
     name:
       data_type: text
       multilingual: yes
@@ -997,6 +1017,8 @@ telephone_info:
       description:
         en: Enter the complete telephone number, including area code.
         fr: Entrez le numéro de téléphone complet, y compris l'indicatif régional.
+      unique:
+        - phone_number_type
     phone_number_type:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_telephone_type_code
@@ -1112,6 +1134,7 @@ contact:
       description:
         en: Enter the primary email address where the contact can be reached.
         fr: Entrez l'adresse e-mail principale où le contact peut être joint.
+      unique: yes
     web_page:
       data_type: inline_entity_ref
       entity_type: quick_web_page
@@ -1162,6 +1185,8 @@ contact:
       description:
         en: If the contact has a unique identifier (e.g. a ROR, ORCID, or other identifier), enter it here.
         fr: Si le contact a un identifiant unique (par exemple un ROR, ORCID ou un autre identifiant), entrez-le ici.
+      unique:
+        - id_system
     id_description:
       data_type: text
       label:
@@ -1395,6 +1420,7 @@ dist_channel:
         en: Enter the information about the primary web link for distribution.
         fr: Entrez les informations sur le lien Web principal pour la distribution.
       order: 20
+      unique: yes
     links:
       data_type: entity_ref
       entity_type: resource
