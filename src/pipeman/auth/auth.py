@@ -393,6 +393,7 @@ class DatabaseAuthenticationHandler(FormAuthenticationHandler):
     @injector.inject
     def _bearer_auth(self, auth_header, db: Database = None):
         prefix, key, username = self.sh.parse_auth_header(auth_header)
+        print(prefix)
         if prefix is None:
             self._record_login_attempt("", True, "invalid bearer auth format", False, False)
             return None

@@ -46,7 +46,7 @@ class DatabaseUserController:
             prefix = self.sh.generate_secret(32)
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
-            auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
+            auth_header = self.sh.build_auth_header(prefix, raw_key, user.username)
             key_hash = self.sh.hash_secret(auth_header, key_salt)
             key = orm.APIKey(
                 user_id=user.id,
@@ -80,7 +80,7 @@ class DatabaseUserController:
                 raise UserInputError("pipeman.auth.error.api_key_does_not_exist")
             raw_key = self.sh.generate_secret(64)
             key_salt = self.sh.generate_salt()
-            auth_header = self.sh.build_auth_header(user.username, prefix, raw_key)
+            auth_header = self.sh.build_auth_header(prefix, raw_key, user.username)
             key_hash = self.sh.hash_secret(auth_header, key_salt)
             if leave_old_active_days > 0:
                 key.old_key_hash = key.key_hash

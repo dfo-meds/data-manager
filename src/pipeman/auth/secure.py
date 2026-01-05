@@ -117,9 +117,8 @@ class SecurityHelper:
             self.rounds
         ).hex()
 
-    def build_auth_header(self, username: str, secret_key: str, prefix: str) -> str:
+    def build_auth_header(self, prefix: str, secret_key: str, username: str) -> str:
         """Create an Authorization header for keys."""
-        # TODO: the last part is showing as a binary string
         return f"{prefix}.{secret_key}.{base64.b64encode(username.encode('utf-8')).decode('ascii')}"
 
     def parse_auth_header(self, auth_header: str) -> t.Tuple[t.Optional[str], t.Optional[str], t.Optional[str]]:
