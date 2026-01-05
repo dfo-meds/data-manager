@@ -112,7 +112,7 @@ class OrganizationController:
                 orgs.append((0, DelayedTranslationString("pipeman.label.org.global_name")))
             for org in session.query(orm.Organization):
                 if all_access or flask_login.current_user.belongs_to(org.id):
-                    orgs.append((org.id, MultiLanguageString(json.loads(org.display_names) if org.display_names else {'und': org.short_name})))
+                    orgs.append((org.id, MultiLanguageString(json.loads(org.display_names if org.display_names else {'und': org.short_name}))))
             return orgs
 
 
