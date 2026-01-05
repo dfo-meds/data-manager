@@ -784,14 +784,14 @@ class EntitySelectField(wtf.Field):
 
     def _iter_choices_for_select(self):
         if self.include_empty:
-            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data, {}
         with self.db as session:
             for row in EntitySelectField.results_list_full(self.entity_types, None, self.by_revision):
-                yield row['id'], row['text'], row['id'] == self.data
+                yield row['id'], row['text'], row['id'] == self.data, {}
 
     def _iter_choices_for_select2(self):
         if self.include_empty:
-            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data, {}
         if self.data:
             with self.db as session:
                 if self.allow_multiple:
@@ -799,14 +799,14 @@ class EntitySelectField(wtf.Field):
                         try:
                             ent, rev = EntitySelectField.load_entity_option(x, session, self.by_revision)
                             entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
-                            yield entry["id"], entry["text"], True
+                            yield entry["id"], entry["text"], True, {}
                         except FormValueError:
                             pass
                 else:
                     try:
                         ent, rev = EntitySelectField.load_entity_option(self.data, session, self.by_revision)
                         entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
-                        yield entry["id"], entry["text"], True
+                        yield entry["id"], entry["text"], True, {}
                     except FormValueError:
                         pass
 
