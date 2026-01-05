@@ -287,6 +287,9 @@ class KeyValueField(Field):
             "form_class": KeyValueForm
         }
 
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("KeyValue field not implemented yet")
+
     def validators(self) -> list:
         return []
 
