@@ -226,6 +226,7 @@ class DatasetController:
         self.save_dataset(dataset, True)
         response = {
             "dataset_id": dataset.dataset_id,
+            'guid': dataset.guid(),
             "success": True,
         }
         return flask.jsonify(response)
@@ -637,6 +638,7 @@ class DatasetController:
             created_by=flask_login.current_user.user_id
         )
         session.add(ds)
+        dataset.extras['guid'] = ds.guid
         for keyword in dataset.extras:
             if keyword not in ('guid', 'created_date', 'modified_date',):
                 setattr(ds, keyword, dataset.extras[keyword])
