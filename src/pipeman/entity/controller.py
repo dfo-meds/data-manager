@@ -1,3 +1,6 @@
+import typing
+from enum import unique
+
 from .entity import EntityRegistry
 from autoinject import injector
 import wtforms as wtf
@@ -71,6 +74,101 @@ class EntityController:
 
     def _build_format_list(self):
         pass
+
+    def create_or_update_entity(self,
+                                external_data: dict,
+                                external_processor: callable,
+                                entity_type: str,
+                                parent_id: typing.Optional[int] = None,
+                                parent_type: typing.Optional[str] = None):
+        with self.db as session:
+            if '_guid' in external_data and external_data['_guid']:
+                check_by_guid = session.query(orm.Entity).filter_by(entity_type=entity_type, guid=external_data['_guid']).first()
+                if check_by_guid:
+                    return self._load_entity_from_orm(check_by_guid)
+
+            new_entity = self.build_entity_from_data(external_data, external_processor, entity_type, parent_id, parent_type)
+            query = session.query(orm.Entity).filter_by(entity_type=entity_type)
+            if parent_id and parent_type:
+                query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
+            for old_entity_orm in query:
+                old_entity = self._load_entity_from_orm(old_entity_orm)
+                if self.compare_entity_from_data(old_entity, new_entity):
+                    return old_entity
+        self.save_entity(new_entity)
+        return new_entity
+
+    def build_entity_from_data(self,
+                               external_data: dict,
+                               external_processor: callable,
+                               entity_type: str,
+                               parent_id: typing.Optional[int] = None,
+                               parent_type: typing.Optional[str] = None):
+        new_entity = self.reg.new_entity(
+            entity_type,
+            parent_id=parent_id,
+            parent_type=parent_type
+        )
+        external_processor(new_entity, external_data)
+        return new_entity
+
+    def compare_entity_from_data(self, entity1, entity2) -> bool:
+        if entity1.guid is not None and entity2.guid is not None and entity1.guid == entity2.guid:
+            return True
+        for unique_field_set in self.reg.unique_field_sets(entity1.entity_type):
+            values1 = {
+                key: entity1.get_field(key).value
+                for key in unique_field_set
+            }
+            values2 = {
+                key: entity2.get_field(key).value
+                for key in unique_field_set
+            }
+            if self._order_insensitive_dict_compare(values1, values2):
+                return True
+        return False
+
+    def _order_insensitive_compare(self, val1, val2):
+        if isinstance(val1, dict):
+            if not isinstance(val2, dict):
+                return False
+            return self._order_insensitive_dict_compare(val1, val2)
+        elif isinstance(val1, (list, tuple, set)):
+            if not isinstance(val2, (list, tuple, set)):
+                return False
+            return self._order_insensitive_list_compare(val1, val2)
+        elif val1 is None:
+            return val2 is None
+        elif val2 is None:
+            return False
+        else:
+            return val1 == val2
+
+    def _order_insensitive_dict_compare(self, dict1, dict2):
+        keys1 = set(dict1.keys())
+        keys2 = set(dict2.keys())
+        if keys1 != keys2:
+            return False
+        for key in keys1:
+            if not self._order_insensitive_compare(dict1[key], dict2[key]):
+                return False
+        return True
+
+    def _order_insensitive_list_compare(self, list1, list2):
+        if len(list1) != len(list2):
+            return False
+        list2 = list(list2)
+        skip_idx = set()
+        for item in list1:
+            for idx, item2 in enumerate(list2):
+                if idx in skip_idx:
+                    continue
+                if self._order_insensitive_compare(item, item2):
+                    skip_idx.add(idx)
+                    break
+            else:
+                return False
+        return True
 
     def view_entity_page(self, ent):
         return flask.render_template(
@@ -271,14 +369,16 @@ class EntityController:
         with self.db as session:
             if entity_type is None:
                 e = session.query(orm.Entity).filter_by(id=entity_id).first()
-                entity_type = e.entity_type if e else None
             else:
                 e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
             if not e:
                 raise EntityNotFoundError(entity_id)
-            entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
-            x = self.reg.new_entity(
-                entity_type,
+            return self._load_entity_from_orm(e, revision_no)
+
+    def _load_entity_from_orm(self, e, revision_no=None):
+        entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
+        return self.reg.new_entity(
+                e.entity_type,
                 field_values=json.loads(entity_data.data) if entity_data else {},
                 display_names=json.loads(e.display_names) if e.display_names else None,
                 db_id=e.id,
@@ -289,7 +389,6 @@ class EntityController:
                 parent_type=e.parent_type,
                 guid=e.guid
             )
-            return x
 
     def save_entity(self, entity):
         self._log.info(f"Saving entity {entity.db_id}")
