@@ -124,7 +124,7 @@ def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **
 
 
 @injector.inject
-def set_metadata_from_netcdf(dataset: Dataset, file_type: str, metadata: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
+def set_metadata_from_netcdf(dataset: Dataset, metadata: dict, file_type: str, results: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
     if 'keywords' in metadata['global']:
         _process_keywords(dataset, metadata['global'].pop('keywords'), ec)
     _import_netcdf_attributes(dataset, metadata['global'], 'custom_metadata')

@@ -91,11 +91,12 @@ class NetCDFController:
                     variables[vname]["_data_type"] = 'str'
                 else:
                     variables[vname]["_data_type"] = nf.variables[vname].datatype
-            dataset.set_from_file_metadata("netcdf", {
+            results = dataset.set_from_file_metadata("netcdf", {
                 "global": metadata,
                 "variables": variables,
                 "dimensions": dimensions
             })
+            # TODO: handle errors in results
             self.dc.save_metadata(dataset)
         except Exception as ex:
             self.log.exception(f"Error processing NetCDF file")

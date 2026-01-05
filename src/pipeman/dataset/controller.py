@@ -729,7 +729,8 @@ class DatasetBuilder:
         metadata = self._get_metadata(data)
         dataset = self.reg.build_dataset(profiles, **kwargs)
         if metadata:
-            dataset.set_from_file_metadata("json_api",metadata)
+            results = dataset.set_from_file_metadata("json_api",metadata)
+        # TODO: handle errors in setting metadata
         return dataset
 
     def _get_metadata(self, data: dict):

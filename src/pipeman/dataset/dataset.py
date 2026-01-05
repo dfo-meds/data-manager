@@ -221,13 +221,18 @@ class MetadataRegistry:
 
     def set_metadata_from_file(self, dataset, file_type: str, file_metadata: dict):
         seen_objects = set()
+        results = {
+            'errors': [],
+            'warnings': [],
+        }
         for p in dataset.profiles:
             if p in self._profiles and "mappers" in self._profiles[p] and file_type in self._profiles[p]["mappers"]:
                 obj_name = self._profiles[p]["mappers"][file_type]
                 if obj_name not in seen_objects:
                     obj = load_object(obj_name)
-                    obj(dataset, file_type, file_metadata)
+                    obj(dataset, file_metadata, file_type, results)
                     seen_objects.add(obj_name)
+        return results
 
     def build_extended_profile_list(self, profiles):
         profiles = list(profiles)
@@ -298,7 +303,7 @@ class Dataset(FieldContainer):
             yield x, x in self.base_profiles
 
     def set_from_file_metadata(self, file_type: str, file_metadata: dict):
-        self.mreg.set_metadata_from_file(self, file_type, file_metadata)
+        return self.mreg.set_metadata_from_file(self, file_type, file_metadata)
 
     def revision_published_date(self):
         return self.extras["pub_date"] if "pub_date" in self.extras else None
