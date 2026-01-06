@@ -222,9 +222,9 @@ class DatasetController:
 
     def create_dataset_from_api_call(self):
         with self.db as session:
-            builder = DatasetBuilder(session)
+            builder = DatasetBuilder(session, self)
             dataset = builder.from_flask_api()
-        self.save_dataset(dataset, True)
+        self.save_dataset(dataset)
         response = {
             "dataset_id": dataset.dataset_id,
             'guid': dataset.guid(),
@@ -700,8 +700,9 @@ class DatasetBuilder:
     config: zr.ApplicationConfig = None
 
     @injector.construct
-    def __init__(self, db_session: SessionWrapper):
+    def __init__(self, db_session: SessionWrapper, ctrl: DatasetController):
         self.session = db_session
+        self.controller = ctrl
 
     def from_flask_api(self) -> Dataset:
         """
@@ -712,7 +713,6 @@ class DatasetBuilder:
         }
         """
         data = flask.request.get_json()
-        kwargs = {}
         if not isinstance(data, dict):
             raise APIInputError("Dataset must be a JSON dictionary")
         profiles = self._get_profiles(data)
@@ -726,13 +726,31 @@ class DatasetBuilder:
                 "pub_workflow": self._get_publication_workflow(data),
                 "act_workflow": self._get_activation_workflow(data),
                 "security_level": self._get_security_level(data),
+                'guid': str(uuid.uuid4()),
             },
         }
         metadata = self._get_metadata(data)
+        ds = orm.Dataset(
+            organization_id=kwargs['org_id'] if kwargs['org_id'] else None,
+            is_deprecated=True,
+            display_names="{}",
+            profiles="core",
+            guid=kwargs['extras']['guid'],
+            created_by=flask_login.current_user.user_id,
+            pub_workflow="",
+            act_workflow="",
+            security_level="",
+            status="DRAFT",
+        )
+        self.session.add(ds)
+        self.session.commit()
+        kwargs['dataset_id'] = ds.id
         dataset = self.reg.build_dataset(profiles, **kwargs)
         if metadata:
             results = dataset.set_from_file_metadata("json_api",metadata)
-        # TODO: handle errors in setting metadata
+            if results['errors']:
+                raise ValueError('\n'.join(results['errors']))
+        dataset.is_deprecated = False
         return dataset
 
     def _get_metadata(self, data: dict):
