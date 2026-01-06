@@ -43,6 +43,8 @@ variable:
         fr: Entrez le nom de la variable que verront les utilisateurs qui téléchargent cet ensemble de données depuis ERDDAP, s'il est différent du nom de la source.
       order: 100
       unique: yes
+      json_api:
+        mapping: destination_name
     ioos_category:
       data_type: vocabulary
       vocabulary_name: ioos_categories
@@ -56,6 +58,8 @@ variable:
       netcdf:
         mapping: ioos_category
         processor: vocabulary
+      json_api:
+        mapping: ioos_category
     time_precision:
       data_type: vocabulary
       vocabulary_name: erddap_time_precisions
@@ -70,6 +74,9 @@ variable:
         mapping: time_precision
         processor: pipeman.builtins.erddap.util.time_precision_output
         importer: pipeman.builtins.erddap.util.time_precision_input
+      json_api:
+        mapping: time_precision
+        processor: pipeman.builtins.erddap.util.time_precision_output
     time_zone:
       data_type: vocabulary
       vocabulary_name: timezones
@@ -83,6 +90,8 @@ variable:
       netcdf:
         mapping: time_zone
         processor: vocabulary
+      json_api:
+        mapping: time_zone
     erddap_role:
       data_type: vocabulary
       vocabulary_name: erddap_extra_roles
@@ -93,6 +102,8 @@ variable:
         en: If the dataset includes multiple profiles, time series or trajectories and this variable describes which profile, time series or trajectory but is not the variable with the CF Role for that purpose, you can specify that fact here.
         fr: Si l'ensemble de données comprend plusieurs profils, séries chronologiques ou trajectoires et que cette variable décrit quel profil, série chronologique ou trajectoire mais n'est pas la variable avec le rôle CF à cette fin, vous pouvez spécifier ce fait ici.
       order: 3020
+      json_api:
+        mapping: erddap_role
     allow_subsets:
       data_type: boolean
       label:
@@ -102,6 +113,8 @@ variable:
         en: If set to true, ERDDAP will allow users to create subsets for this variable. Only recommended for variables with a low cardinality.
         fr: Si la valeur est true, ERDDAP permettra aux utilisateurs de créer des sous-ensembles pour cette variable. Recommandé uniquement pour les variables à faible cardinalité.
       order: 5020
+      json_api:
+        mapping: allow_subsets
     altitude_proxy:
       data_type: boolean
       label:
@@ -111,6 +124,8 @@ variable:
         en: If this variable is a suitable proxy for altitude or depth (e.g. pressure), check this box. Only check this for one variable on each dataset.
         fr: Si cette variable est une approximation appropriée de l'altitude ou de la profondeur (par exemple, la pression), cochez cette case. Ne cochez cette case que pour une variable sur chaque jeu de données.
       order: 5030
+      json_api:
+        mapping: altitude_proxy
     variable_order:
       data_type: integer
       label:
@@ -120,6 +135,8 @@ variable:
         en: Axis variables must be in the same order as the original NetCDF files (if used).
         fr: Les variables d'axe doivent être dans le même ordre que les fichiers NetCDF d'origine (le cas échéant).
       order: 5005
+      json_api:
+        mapping: variable_order
     is_axis:
       data_type: boolean
       label:
@@ -129,3 +146,6 @@ variable:
         en: Check this box for variables that represent a grid axis in gridded datasets.
         fr: Cochez cette case pour les variables qui représentent un axe de grille dans des ensembles de données maillées.
       order: 5010
+      json_api:
+        mapping: is_axis
+

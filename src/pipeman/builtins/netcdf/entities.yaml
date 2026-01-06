@@ -34,6 +34,8 @@ variable:
       order: 41
       netcdf:
         mapping: _Encoding
+      json_api:
+        mapping: encoding
     source_name:
       data_type: text
       label:
@@ -44,6 +46,8 @@ variable:
         fr: Entrez le nom de la variable tel qu'il apparaît dans le fichier NetCDF.
       order: 0
       unique: yes
+      json_api:
+        mapping: source_name
     source_data_type:
       data_type: vocabulary
       vocabulary_name: netcdf_data_types
@@ -54,6 +58,8 @@ variable:
         en: Select the data type of the variable when packed.
         fr: Sélectionnez le type de données de la variable lorsqu'elle est compressée.
       order: 10
+      json_api:
+        mapping: source_data_type
     dimensions:
       data_type: text
       label:
@@ -63,6 +69,8 @@ variable:
         en: A comma-separated list of dimensions in appropriate order (least to most rapidly changing).
         fr: Une liste de dimensions séparées par des virgules dans l'ordre approprié (variant du moins au plus rapidement).
       order: 11
+      json_api:
+        mapping: dimensions
     long_name:
       data_type: text
       label:
@@ -76,6 +84,8 @@ variable:
       netcdf:
         mapping: long_name
         processor: text
+      json_api:
+        mapping: long_name
     standard_name:
       data_type: vocabulary
       vocabulary_name: cf_standard_names
@@ -89,6 +99,8 @@ variable:
       netcdf:
         mapping: standard_name
         processor: vocabulary
+      json_api:
+        mapping: standard_name
     units:
       data_type: text
       label:
@@ -101,6 +113,8 @@ variable:
       netcdf:
         mapping: units
         processor: text
+      json_api:
+        mapping: units
     calendar:
       data_type: vocabulary
       vocabulary_name: cf_calendars
@@ -114,6 +128,8 @@ variable:
       netcdf:
         mapping: calendar
         processor: vocabulary
+      json_api:
+        mapping: calendar
     positive:
       data_type: vocabulary
       vocabulary_name: cf_directions
@@ -127,6 +143,8 @@ variable:
       netcdf:
         mapping: positive
         processor: vocabulary
+      json_api:
+        mapping: positive
     missing_value:
       data_type: text
       label:
@@ -139,6 +157,8 @@ variable:
       netcdf:
         mapping: missing_value
         processor: numeric
+      json_api:
+        mapping: missing_value
     scale_factor:
       data_type: float
       label:
@@ -151,6 +171,8 @@ variable:
       netcdf:
         mapping: scale_factor
         processor: numeric
+      json_api:
+        mapping: scale_factor
     add_offset:
       data_type: float
       label:
@@ -162,6 +184,8 @@ variable:
       netcdf:
         mapping: add_offset
         processor: numeric
+      json_api:
+        mapping: add_offset
     destination_data_type:
       data_type: vocabulary
       vocabulary_name: netcdf_data_types
@@ -172,6 +196,8 @@ variable:
         en: If the variable specifies a scale factor, specify the unpacked data type
         fr: Si la variable spécifie un facteur d'échelle, spécifiez le type de données décompressé
       order: 100
+      json_api:
+        mapping: destination_data_type
     actual_min:
       data_type: decimal
       label:
@@ -184,6 +210,8 @@ variable:
       netcdf:
         mapping: actual_min
         processor: numeric
+      json_api:
+        mapping: actual_min
     actual_max:
       data_type: decimal
       label:
@@ -196,6 +224,8 @@ variable:
       netcdf:
         mapping: actual_max
         processor: numeric
+      json_api:
+        mapping: actual_max
     valid_min:
       data_type: decimal
       label:
@@ -208,6 +238,8 @@ variable:
       netcdf:
         mapping: valid_min
         processor: numeric
+      json_api:
+        mapping: valid_min
     valid_max:
       data_type: decimal
       label:
@@ -220,6 +252,8 @@ variable:
       netcdf:
         mapping: valid_max
         processor: numeric
+      json_api:
+        mapping: valid_max
     cf_role:
       data_type: vocabulary
       vocabulary_name: cf_roles
@@ -233,6 +267,8 @@ variable:
       netcdf:
         mapping: cf_role
         processor: vocabulary
+      json_api:
+        mapping: cf_role
     comment:
       data_type: multitext
       label:
@@ -243,6 +279,8 @@ variable:
         fr: Entrez des commentaires sur cette variable à partager avec les utilisateurs de données.
       order: 160
       netcdf:
+        mapping: comment
+      json_api:
         mapping: comment
     references:
       data_type: multitext
@@ -255,6 +293,8 @@ variable:
       order: 170
       netcdf:
         mapping: references
+      json_api:
+        mapping: references
     source:
       data_type: multitext
       label:
@@ -265,6 +305,8 @@ variable:
         fr: Décrivez les informations sources pertinentes pour cette variable.
       order: 180
       netcdf:
+        mapping: source
+      json_api:
         mapping: source
     coverage_content_type:
       data_type: vocabulary
@@ -278,6 +320,8 @@ variable:
       netcdf:
         mapping: coverage_content_type
         processor: vocabulary
+      json_api:
+        mapping: coverage_content_type
     custom_metadata:
       data_type: key_value
       repeatable: true

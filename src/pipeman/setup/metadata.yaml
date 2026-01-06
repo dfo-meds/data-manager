@@ -77,6 +77,8 @@ variables:
         fr: Variables
       description:
         en: Enter information about the variables included as part of this dataset
+      json_api:
+        mapping: variables
 
 references:
   display:
