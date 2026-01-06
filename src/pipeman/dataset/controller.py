@@ -622,12 +622,13 @@ class DatasetController:
 
     def _update_user_access(self, dataset, ds, session):
         session.query(orm.user_dataset).filter(orm.user_dataset.c.dataset_id == ds.id).delete()
-        for user_id in dataset.users:
-            q = orm.user_dataset.insert().values({
-                "user_id": user_id,
-                "dataset_id": ds.id
-            })
-            session.execute(q)
+        if dataset.users:
+            for user_id in dataset.users:
+                q = orm.user_dataset.insert().values({
+                    "user_id": user_id,
+                    "dataset_id": ds.id
+                })
+                session.execute(q)
 
     def _create_dataset(self, dataset: Dataset, session):
         ds = orm.Dataset(
