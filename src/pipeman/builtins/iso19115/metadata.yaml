@@ -10,6 +10,8 @@ metadata_info:
         en: Select the contact who owns this record.
         fr: Sélectionnez le contact qui possède cet enregistrement.
       order: 10
+      json_api:
+        mapping: metadata_owner
     point_of_contact:
       data_type: entity_ref
       entity_type: contact
@@ -23,6 +25,8 @@ metadata_info:
       netcdf:
         mapping: publisher
         processor: contact
+      json_api:
+        mapping: publisher
     canon_urls:
       data_type: entity_ref
       entity_type: resource
@@ -35,6 +39,8 @@ metadata_info:
         fr: Si les métadonnées sont publiées sous une ou plusieurs URL permanentes, sélectionnez-les ici.
       repeatable: yes
       min_chars_to_search: 2
+      json_api:
+        mapping: canon_urls
     parent_metadata:
       data_type: entity_ref
       entity_type: citation
@@ -45,6 +51,8 @@ metadata_info:
         en: If the metadata belongs to a parent metadata record, select it here.
         fr: Si les métadonnées appartiennent à un enregistrement de métadonnées parent, sélectionnez-le ici.
       order: 1000
+      json_api:
+        mapping: parent_metadata
     alt_metadata:
       data_type: entity_ref
       repeatable: yes
@@ -56,6 +64,8 @@ metadata_info:
       description:
         en: If the metadata is published in alternative forms, select them here.
         fr: Si les métadonnées sont publiées sous des formes alternatives, sélectionnez-les ici.
+      json_api:
+        mapping: alt_metadata
     metadata_standards:
       data_type: entity_ref
       repeatable: yes
@@ -67,6 +77,8 @@ metadata_info:
       description:
         en: If the metadata conforms to any metadata standards, select them here.
         fr: Si les métadonnées sont conformes à des normes de métadonnées, sélectionnez-les ici.
+      json_api:
+        mapping: metadata_standards
     metadata_profiles:
       data_type: entity_ref
       repeatable: yes
@@ -78,6 +90,8 @@ metadata_info:
       description:
         en: If the metadata conforms to any metadata profiles, select them here.
         fr: Si les métadonnées sont conformes à des profils de métadonnées, sélectionnez-les ici.
+      json_api:
+        mapping: metadata_profiles
     default_locale:
       data_type: entity_ref
       order: 100
@@ -175,8 +189,8 @@ data_info:
         fr: Si vous avez entré un identifiant unique pour l'ensemble de données ci-dessus, sélectionnez le système d'identifiants (par exemple DOI) ici.
       entity_type: id_system
       order: 520
-      netcdf:
-        mapping:
+      json_api:
+        mapping: dataset_id_system
     publication_date:
       data_type: date
       label:
@@ -269,6 +283,8 @@ data_info:
         role_map:
           contributor: contributor*
           creator: creator
+      json_api:
+        mapping: responsibles
     licenses:
       data_type: entity_ref
       entity_type: use_constraint
@@ -324,6 +340,8 @@ data_more_info:
         en: If the dataset has a web page with more information, enter it here.
         fr: Si l'ensemble de données a une page Web avec plus d'informations, entrez-la ici.
       order: 40
+      json_api:
+        mapping: info_link
     processing_code:
       data_type: text
       label:
@@ -359,6 +377,8 @@ data_more_info:
         en: If the processing level follows a system of identifiers, select it here.
         fr: Si le niveau de traitement suit un système d'identifiants, sélectionnez-le ici.
       order: 1020
+      json_api:
+        mapping: processing_system
     environment_desc:
       data_type: multitext
       label:
@@ -619,6 +639,8 @@ references:
       description:
         en: Select any additional citations that are relevant to this dataset.
         fr: Sélectionnez toutes les citations supplémentaires qui sont pertinentes pour cet ensemble de données.
+      json_api:
+        mapping: additional_docs
     graphics:
       data_type: entity_ref
       repeatable: yes

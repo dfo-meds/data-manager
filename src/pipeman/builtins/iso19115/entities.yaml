@@ -21,6 +21,8 @@ responsibility:
       order: 10
       unique:
         - contact
+      json_api:
+        mapping: role
     contact:
       data_type: entity_ref
       entity_type: contact
@@ -28,6 +30,8 @@ responsibility:
         en: Contact
         fr: Contact
       order: 5
+      json_api:
+        mapping: contact
 maintenance:
   display:
     en: Maintenance
@@ -142,6 +146,8 @@ citation:
         en: Enter any alternative title of the work being cited
         fr: Entrez tout autre titre de l'œuvre citée
       multilingual: yes
+      json_api:
+        mapping: alt_title
     publication_date:
       data_type: date
       label:
@@ -151,6 +157,8 @@ citation:
         en: Enter the date the work was first made available to the public
         fr: Entrez la date à laquelle l'œuvre a été mise à la disposition du public pour la première fois
       order: 30
+      json_api:
+        mapping: publication_date
     revision_date:
       data_type: date
       label:
@@ -160,6 +168,8 @@ citation:
         en: Enter the date the work was last updated
         fr: Entrez la date à laquelle le travail a été mis à jour pour la dernière fois
       order: 40
+      json_api:
+        mapping: revision_date
     creation_date:
       data_type: date
       label:
@@ -169,6 +179,8 @@ citation:
         en: Enter the date the work was created
         fr: Entrez la date de création de l'œuvre
       order: 50
+      json_api:
+        mapping: creation_date
     edition:
       data_type: text
       label:
@@ -179,6 +191,8 @@ citation:
         fr: S'il existe plusieurs éditions pour l'œuvre et qu'elles n'ont pas d'identifiant de date, entrez celle qui convient ici
       multilingual: yes
       order: 60
+      json_api:
+        mapping: edition
     edition_date:
       data_type: date
       label:
@@ -188,6 +202,8 @@ citation:
         en: If there multiple editions for the work and they have a date identifier, enter the relevant one here
         fr: S'il existe plusieurs éditions pour l'œuvre et qu'elles ont un identifiant de date, entrez celle qui convient ici
       order: 70
+      json_api:
+        mapping: edition_date
     responsibles:
       data_type: inline_entity_ref
       entity_type: responsibility
@@ -199,6 +215,8 @@ citation:
         fr: Ajoutez ici des auteurs, des contributeurs ou d'autres contacts pertinents
       repeatable: yes
       order: 80
+      json_api:
+        mapping: responsibles
     presentation_form:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_presentation_form_code
@@ -209,6 +227,8 @@ citation:
         en: Select the most appropriate description of the cited work
         fr: Sélectionnez la description la plus appropriée de l'œuvre citée
       order: 90
+      json_api:
+        mapping: presentation_form
     #series:
     #  data_type: entity_ref
     #  entity_type: series
@@ -224,6 +244,8 @@ citation:
         fr: S'il y a des détails supplémentaires que vous souhaitez inclure, entrez-les ici.
       multilingual: yes
       order: 100
+      json_api:
+        mapping: details
     isbn:
       data_type: text
       label:
@@ -233,6 +255,8 @@ citation:
         fr: Si l'œuvre a un numéro ISBN, saisissez-le ici
       order: 110
       unique: yes
+      json_api:
+        mapping: isbn
     issn:
       data_type: text
       label:
@@ -242,6 +266,8 @@ citation:
         fr: Si l'œuvre a un numéro ISSN, saisissez-le ici
       order: 120
       unique: yes
+      json_api:
+        mapping: issn
     resource:
       data_type: inline_entity_ref
       entity_type: resource
@@ -253,6 +279,8 @@ citation:
         fr: S'il existe un lien vers l'œuvre en ligne, sélectionnez-le ici
       order: 130
       unique: yes
+      json_api:
+        mapping: resource
     id_code:
       data_type: text
       label:
@@ -264,6 +292,8 @@ citation:
       order: 140
       unique:
         - id_system
+      json_api:
+        mapping:
     id_description:
       data_type: text
       label:
@@ -860,6 +890,8 @@ resource:
         fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
       unique: yes
+      json_api:
+        mapping: url
     protocol:
       data_type: vocabulary
       vocabulary_name: iso19115_link_protocols
@@ -870,6 +902,8 @@ resource:
         en: Select the appropriate protocol for this resource.
         fr: Sélectionnez le protocole approprié pour cette ressource.
       order: 20
+      json_api:
+        mapping: protocol
     protocol_request:
       data_type: text
       label:
@@ -880,6 +914,8 @@ resource:
         fr: Si des informations supplémentaires sont nécessaires sur la façon d'utiliser la ressource, entrez-les ici (par exemple, comment formater les requêtes POST en une URL).
       order: 50
       multilingual: yes
+      json_api:
+        mapping: protocol_request
     app_profile:
       data_type: text
       label:
@@ -889,6 +925,8 @@ resource:
         en: If a specific application is needed to use the resource, enter it here.
         fr: Si une application spécifique est nécessaire pour utiliser la ressource, saisissez-la ici.
       order: 60
+      json_api:
+        mapping: app_profile
     name:
       data_type: text
       multilingual: yes
@@ -899,6 +937,8 @@ resource:
         en: Enter a descriptive name for the resource.
         fr: Entrez un nom descriptif pour la ressource.
       order: 30
+      json_api:
+        mapping: name
     description:
       data_type: multitext
       multilingual: yes
@@ -909,6 +949,8 @@ resource:
         en: Enter additional information about the resource.
         fr: Entrez des informations supplémentaires sur la ressource.
       order: 40
+      json_api:
+        mapping: description
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
@@ -919,6 +961,8 @@ resource:
         en: Select the most appropriate entry that describes what the resource provides to the user.
         fr: Sélectionnez l'entrée la plus appropriée qui décrit ce que la ressource fournit à l'utilisateur.
       order: 70
+      json_api:
+        mapping: function
 id_system:
   display:
     en: Identifying System
@@ -934,6 +978,8 @@ id_system:
         en: Enter reference information about the identifying system (e.g. title, link, contact info).
         fr: Entrez les informations de référence sur le système d'identification (par exemple, titre, lien, coordonnées).
       order: 10
+      json_api:
+        mapping: authority
     code_space:
       data_type: text
       label:
@@ -945,6 +991,8 @@ id_system:
       order: 20
       unique:
         - version
+      json_api:
+        mapping: code_space
     version:
       data_type: text
       label:
@@ -954,6 +1002,8 @@ id_system:
         en: If there are multiple versions of the code space, enter the version number here.
         fr: S'il existe plusieurs versions de l'espace de code, entrez le numéro de version ici.
       order: 30
+      json_api:
+        mapping: version
 quick_web_page:
   display:
     en: Quick Web Page
@@ -970,6 +1020,8 @@ quick_web_page:
         fr: Saisissez l'URL de la ressource, y compris le préfixe "HTTP" ou "HTTPS".
       order: 10
       unique: yes
+      json_api:
+        mapping: url
     name:
       data_type: text
       multilingual: yes
@@ -980,6 +1032,8 @@ quick_web_page:
         en: Enter a descriptive name for the resource.
         fr: Entrez un nom descriptif pour la ressource.
       order: 50
+      json_api:
+        mapping: name
     description:
       data_type: multitext
       multilingual: yes
@@ -990,6 +1044,8 @@ quick_web_page:
         en: Enter additional information about the resource.
         fr: Entrez des informations supplémentaires sur la ressource.
       order: 60
+      json_api:
+        mapping: description
     protocol:
       data_type: vocabulary
       vocabulary_name: iso19115_link_protocols
@@ -1000,6 +1056,8 @@ quick_web_page:
         en: Select the appropriate protocol for this resource.
         fr: Sélectionnez le protocole approprié pour cette ressource.
       order: 20
+      json_api:
+        mapping: protocol
     function:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_on_line_function_code
@@ -1010,6 +1068,8 @@ quick_web_page:
         en: Select the most appropriate entry that describes what the resource provides to the user.
         fr: Sélectionnez l'entrée la plus appropriée qui décrit ce que la ressource fournit à l'utilisateur.
       order: 70
+      json_api:
+        mapping: function
 telephone_info:
   display:
     en: Telephone Info
@@ -1026,6 +1086,8 @@ telephone_info:
         fr: Entrez le numéro de téléphone complet, y compris l'indicatif régional.
       unique:
         - phone_number_type
+      json_api:
+        mapping: phone_number
     phone_number_type:
       data_type: vocabulary
       vocabulary_name: iso19115_ci_telephone_type_code
@@ -1035,6 +1097,8 @@ telephone_info:
       description:
         en: Select the most appropriate type of telephone number.
         fr: Sélectionnez le type de numéro de téléphone le plus approprié.
+      json_api:
+        mapping: phone_number_type
 contact:
   display:
     en: Contact
@@ -1052,6 +1116,8 @@ contact:
         en: If this contact is for a single individual, enter their name.
         fr: Si ce contact est pour une seule personne, entrez son nom.
       order: 10
+      json_api:
+        mapping: individual_name
     organization_name:
       data_type: text
       label:
@@ -1062,6 +1128,8 @@ contact:
         fr: Si ce contact est pour une organisation, entrez son nom ou entrez l'organisation pour laquelle la personne travaille.
       multilingual: yes
       order: 20
+      json_api:
+        mapping:
     position_name:
       data_type: text
       label:
@@ -1072,6 +1140,8 @@ contact:
         fr: Si ce contact est pour une personne ou un poste dans l'organisation, entrez le nom du poste.
       multilingual: yes
       order: 30
+      json_api:
+        mapping: position_name
     phone:
       data_type: inline_entity_ref
       entity_type: telephone_info
@@ -1083,6 +1153,8 @@ contact:
         fr: Entrez le(s) numéro(s) où la personne peut être contactée.
       order: 40
       repeatable: yes
+      json_api:
+        mapping: phone
     delivery_point:
       data_type: text
       label:
@@ -1093,6 +1165,8 @@ contact:
       description:
         en: Enter the address line(s) for the contact's mailing address except those specified below.
         fr: Entrez le(s) ligne(s) d'adresse pour l'adresse postale du contact, à l'exception de celles spécifiées ci-dessous.
+      json_api:
+        mapping: delivery_point
     city:
       data_type: text
       label:
@@ -1102,6 +1176,8 @@ contact:
         en: Enter the city for the contact's mailing address.
         fr: Entrez la ville pour l'adresse postale du contact.
       order: 60
+      json_api:
+        mapping: city
     admin_area:
       data_type: text
       multilingual: yes
@@ -1112,6 +1188,8 @@ contact:
         en: Enter the administrative area (e.g. province or state) for the contact's mailing address.
         fr: Entrez la zone administrative (par exemple, la province ou l'état) pour l'adresse postale du contact.
       order: 70
+      json_api:
+        mapping: admin_area
     postal_code:
       data_type: text
       label:
@@ -1121,6 +1199,8 @@ contact:
         en: Enter the postal or zip code for the contact's mailing address.
         fr: Entrez le code postal ou zip de l'adresse postale du contact.
       order: 80
+      json_api:
+        mapping: postal_code
     country:
       data_type: vocabulary
       label:
@@ -1131,6 +1211,8 @@ contact:
       description:
         en: Select the country for the contact's mailing address.
         fr: Selectionnez le pays pour l'adresse postale du contact.
+      json_api:
+        mapping: country
     email:
       data_type: email
       label:
@@ -1142,6 +1224,8 @@ contact:
         en: Enter the primary email address where the contact can be reached.
         fr: Entrez l'adresse e-mail principale où le contact peut être joint.
       unique: yes
+      json_api:
+        mapping: email
     web_page:
       data_type: inline_entity_ref
       entity_type: quick_web_page
@@ -1152,6 +1236,8 @@ contact:
         en: Enter the contact's primary website, if available.
         fr: Entrez le site Web principal du contact, s'il est disponible.
       order: 105
+      json_api:
+        mapping: web_page
     web_resource:
       data_type: entity_ref
       entity_type: resource
@@ -1163,6 +1249,8 @@ contact:
         fr: S'il existe d'autres ressources Web pertinentes pour le contact, sélectionnez-les ici.
       repeatable: yes
       order: 110
+      json_api:
+        mapping: web_resources
     service_hours:
       data_type: multitext
       multilingual: yes
@@ -1173,6 +1261,8 @@ contact:
         en: If the contact can only be reached during certain hours, enter them here.
         fr: Si le contact n'est joignable qu'à certaines heures, saisissez-le ici.
       order: 120
+      json_api:
+        mapping: service_hours
     instructions:
       data_type: multitext
       multilingual: yes
@@ -1183,6 +1273,8 @@ contact:
         en: If there are additional instructions for connecting with the contact, enter them here.
         fr: S'il existe des instructions supplémentaires pour se connecter avec le contact, entrez-les ici.
       order: 130
+      json_api:
+        mapping: instructions
     id_code:
       data_type: text
       label:
@@ -1194,6 +1286,8 @@ contact:
         fr: Si le contact a un identifiant unique (par exemple un ROR, ORCID ou un autre identifiant), entrez-le ici.
       unique:
         - id_system
+      json_api:
+        mapping: id_code
     id_description:
       data_type: text
       label:
@@ -1204,6 +1298,8 @@ contact:
         fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
       order: 150
       multilingual: yes
+      json_api:
+        mapping: id_description
     id_system:
       data_type: entity_ref
       entity_type: id_system
@@ -1214,6 +1310,8 @@ contact:
       description:
         en: If the contact has a unique identifier, select the relevant ID system.
         fr: Si le contact a un identifiant unique, sélectionnez le système d'identification approprié.
+      json_api:
+        mapping: id_system
     individuals:
       data_type: entity_ref
       entity_type: contact
@@ -1225,6 +1323,8 @@ contact:
         fr: Si le contact est une organisation et que plusieurs personnes peuvent être contactées, sélectionnez-les ici.
       repeatable: yes
       order: 170
+      json_api:
+        mapping: individuals
     logo:
       data_type: entity_ref
       entity_type: graphic

@@ -163,8 +163,21 @@ The tables below include the highest level profiles that the fields are included
  | goc_collection_type            | vocabulary    | no    | no          | GoC         | GC Collection Types                  |                   
  | goc_publication_place          | vocabulary    | no    | yes         | GoC         | GC Places                            |                
  | goc_subject                    | vocabulary    | no    | no          | GoC         | GC Subjects                          |
- | variables                      | component_ref | no    | yes         | ACDD        | Variable entities                    |
- | iso_maintenance                | component_ref | no    | yes         | ISO         | Maintenance entities                 |
+ | variables                      | component_ref | no    | yes         | ACDD        | Variable                             |
+ | iso_maintenance                | component_ref | no    | yes         | ISO         | Maintenance                          |
+ | additional_docs                | entity_ref    | no    | yes         | ISO         | Citation                             |
+ | metadata_profiles              | entity_ref    | no    | yes         | ISO         | Citation                             |
+ | metadata_standards             | entity_ref    | no    | yes         | ISO         | Citation                             |
+ | alt_metadata                   | entity_ref    | no    | yes         | ISO         | Citation                             |
+ | parent_metadata                | entity_ref    | no    | no          | ISO         | Citation                             |
+ | canon_urls                     | entity_ref    | no    | yes         | ISO         | Resource                             |
+ | publisher                      | entity_ref    | no    | no          | ISO         | Contact                              | 
+ | metadata_owner                 | entity_ref    | no    | no          | ISO         | Contact                              | 
+ | processing_system              | entity_ref    | no    | no          | ISO         | ID System                            |
+ | dataset_id_system              | entity_ref    | no    | no          | ISO         | ID System                            |
+ | info_link                      | inline_ref    | no    | no          | ISO         | Quick Web Page                       |
+ | responsibles                   | inline_ref    | no    | yes         | ISO         | Responsibility                       |
+
 
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
@@ -210,6 +223,92 @@ The tables below include the highest level profiles that the fields are included
 | scope      | vocabulary | no    | no          | ISO      | ISO Maintenance Scopes |
 
 
+## Resource Entity Values
+| Field Name       | Data Type  | i18n? | Repeatable? | Profiles | Notes                     |
+|------------------|------------|-------|-------------|----------|---------------------------|
+| url [U]          | url        | no    | no          | ISO      |                           |
+| protocol         | vocabulary | no    | no          | ISO      | ISO Link Protocols        |
+| protocol_request | text       | yes   | no          | ISO      |                           |
+| app_profile      | text       | no    | no          | ISO      |                           |
+| name             | text       | yes   | no          | ISO      |                           | 
+| description      | long text  | yes   | no          | ISO      |                           | 
+| function         | vocabulary | no    | no          | ISO      | ISO Online Function Codes |
+
+
+## Telephone Entity Values
+| Field Name                        | Data Type  | i18n? | Repeatable? | Profiles | Notes               |
+|-----------------------------------|------------|-------|-------------|----------|---------------------|
+| phone_number [U]<sup>A</sup>      | telephone  | no    | no          | ISO      |                     |
+| phone_number_type [U]<sup>A</sup> | vocabulary | no    | no          | ISO      | ISO Telephone Types |
+
+
+## Quick Web Page Entity Values
+| Field Name  | Data Type  | i18n? | Repeatable? | Profiles | Notes                     |
+|-------------|------------|-------|-------------|----------|---------------------------|
+| url [U]     | url        | yes   | no          | ISO      |                           | 
+| name        | text       | yes   | no          | ISO      |                           |
+| description | long text  | yes   | no          | ISO      |                           |
+| function    | vocabulary | no    | no          | ISO      | ISO Online Function Codes |
+| protocol    | vocabulary | no    | no          | ISO      | ISO Link Protocols        |
+
+
+## Citation Entity Values
+| Field Name                | Data Type  | i18n? | Repeatable? | Profiles | Notes                  |
+|---------------------------|------------|-------|-------------|----------|------------------------|
+| alt_title                 | text       | yes   | no          | ISO      |                        |
+| publication_date          | date       | no    | no          | ISO      |                        |
+| revision_date             | date       | no    | no          | ISO      |                        |
+| creation_date             | date       | no    | no          | ISO      |                        |
+| edition                   | text       | yes   | no          | ISO      |                        |
+| edition_date              | date       | no    | no          | ISO      |                        |
+| responsibles              | inline_ref | no    | yes         | ISO      | Responsibility         |
+| presentation_form         | vocabulary | no    | no          | ISO      | ISO Presentation Forms |
+| details                   | long text  | yes   | no          | ISO      |                        |
+| isbn [U]                  | text       | no    | no          | ISO      |                        |
+| issn [U]                  | text       | no    | no          | ISO      |                        | 
+| resource [U]              | inline_ref | no    | no          | ISO      | Resource               |
+| id_code [U]<sup>A</sup>   | text       | no    | no          | ISO      |                        |
+| id_description            | text       | yes   | no          | ISO      |                        |
+| id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System              |
+
+
+## ID System Entity Values
+| Field Name                 | Data Type  | i18n? | Repeatable? | Profiles | Notes    |
+|----------------------------|------------|-------|-------------|----------|----------|
+| authority                  | inline_ref | no    | no          | ISO      | Citation |
+| code_space [U]<sup>A</sup> | text       | no    | no          | ISO      |          |
+| version [U]<sup>A</sup>    | text       | no    | no          | ISO      |          |
+
+
+## Responsibility Entity Valeus
+| Field Name              | Data Type  | i18n? | Repeatable? | Profiles | Notes          |
+|-------------------------|------------|-------|-------------|----------|----------------|
+| role [U]<sup>A</sup>    | vocabulary | no    | no          | ISO      | ISO Role Codes |
+| contact [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | Contact        |
+
+
+ # Contact Entity Values
+| Field Name                | Data Type  | i18n? | Repeatable? | Profiles | Notes                                      |
+|---------------------------|------------|-------|-------------|----------|--------------------------------------------|
+| individual_name           | text       | no    | no          | ISO      |                                            |
+| organization_name         | text       | yes   | no          | ISO      |                                            |
+| position_name             | text       | yes   | no          | ISO      |                                            |
+| phone                     | inline_ref | no    | yes         | ISO      | Telephone                                  |
+| delivery_point            | text       | yes   | no          | ISO      |                                            |
+| city                      | text       | no    | no          | ISO      |                                            | 
+| admin_area                | text       | yes   | no          | ISO      |                                            | 
+| postal_code               | text       | no    | no          | ISO      |                                            |
+| country                   | vocabulary | no    | no          | ISO      | ISO Countries (ISO-3166 three letter code) |
+| email [U]                 | email      | yes   | no          | ISO      |                                            | 
+| web_page                  | inline_ref | no    | no          | ISO      | Quick Web Page                             |
+| web_resources             | entity_ref | no    | no          | ISO      | Resource                                   | 
+| service_hours             | long text  | yes   | no          | ISO      |                                            |
+| instructions              | long text  | no    | no          | ISO      |                                            | 
+| id_code [U]<sup>A</sup>   | text       | no    | no          | ISO      |                                            | 
+| id_description            | text       | yes   | no          | ISO      |                                            |
+| id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System                                  |
+| individuals               | entity_ref | no    | yes         | ISO      | Contact                                    |
+
 
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
@@ -219,3 +318,7 @@ Multivalue fields require a list of items
 
 Internationalized fields require a dictionary of two-letter language codes mapped to values. Use "und" for
 a value that is language agnostic.
+
+Note that [U] indicates a unique field - if an existing entity has the same value in this field, then it is 
+considered a "match" and will be reused. The GUID is always used as a unique field as well. Where a letter is 
+provided (e.g. [U]<sup>A</sup>), all entries with the same letter must match, otherwise only the given field must match.
