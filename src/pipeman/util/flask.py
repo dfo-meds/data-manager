@@ -1014,7 +1014,10 @@ class DisplayNameColumn(DatabaseColumn):
         super().__init__("display_names", gettext("pipeman.common.display_name"), allow_search=True)
 
     def value(self, data_row):
-        return MultiLanguageString(json.loads(data_row.display_names))
+        if data_row.display_names:
+            return MultiLanguageString(json.loads(data_row.display_names))
+        else:
+            return ""
 
 
 class DataQuery:
