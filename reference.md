@@ -197,9 +197,9 @@ The tables below include the highest level profiles that the fields are included
 | references            | long text          | no    | no          | ACDD     |                                                                                                       |
 | source                | long text          | no    | no          | ACDD     |                                                                                                       |
 | coverage_content_type | vocabulary         | no    | no          | ACDD     | ISO Coverage Content Types                                                                            | 
- | altitude_proxy | boolean | no | no | ERDDAP | | 
- | variable_order | integer| no | no | ERDDAP | | 
-| is_axis | boolean| no | no | ERDDAP | | 
+| altitude_proxy        | boolean            | no    | no          | ERDDAP   |                                                                                                       | 
+| variable_order        | integer            | no    | no          | ERDDAP   |                                                                                                       | 
+| is_axis               | boolean            | no    | no          | ERDDAP   |                                                                                                       |
 
 
 ## Maintenance Entity Values
