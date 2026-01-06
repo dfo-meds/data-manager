@@ -146,9 +146,10 @@ class DatasetController:
         if for_revision:
             actions.add_action("pipeman.dataset.page.view_current.link", "core.view_dataset", 0, **kwargs)
         else:
-            actions.add_action("pipeman.dataset.page.validate_dataset.link", "core.validate_dataset", 40, **kwargs)
-            if flask_login.current_user.has_permission("datasets.create"):
-                actions.add_action("pipeman.dataset.page.copy_dataset.link", "core.copy_dataset", 50, **kwargs)
+            if not ds.is_deprecated:
+                actions.add_action("pipeman.dataset.page.validate_dataset.link", "core.validate_dataset", 40, **kwargs)
+                if flask_login.current_user.has_permission("datasets.create"):
+                    actions.add_action("pipeman.dataset.page.copy_dataset.link", "core.copy_dataset", 50, **kwargs)
             if self.has_access(ds, 'edit'):
                 actions.add_action("pipeman.dataset.page.edit_dataset.link", "core.edit_dataset", 1, **kwargs)
                 actions.add_action("pipeman.dataset.page.edit_metadata.link", "core.edit_dataset_metadata_base", 2, **kwargs)
@@ -161,8 +162,8 @@ class DatasetController:
                     actions.add_action("pipeman.dataset.page.activate_dataset.link", "core.activate_dataset", 3, **kwargs)
                 if self.has_access(ds, "publish"):
                     actions.add_action("pipeman.dataset.page.publish_dataset.link", "core.publish_dataset", 4, **kwargs)
-                if self.has_access(ds, "restore"):
-                    actions.add_action("pipeman.dataset.page.restore_dataset.link", "core.restore_dataset", 100, **kwargs)
+            if self.has_access(ds, "restore"):
+                actions.add_action("pipeman.dataset.page.restore_dataset.link", "core.restore_dataset", 100, **kwargs)
         self.reg.extend_action_list(actions, ds, short_list, for_revision)
         return actions
 
