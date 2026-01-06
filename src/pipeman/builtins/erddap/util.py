@@ -125,6 +125,8 @@ def time_precision_input(config: dict, attributes: dict, fc, field):
 
 
 def _map_netcdf_time_precision_to_erddap(tp):
+    if tp in ('month', 'day', 'hour', 'minute', 'second', 'tenth_second', 'hundredth_second', 'millisecond'):
+        return tp
     if tp.count('-') == 0:
         raise ValueError('Year precision not allowed')
     elif tp.count('-') == 1:
