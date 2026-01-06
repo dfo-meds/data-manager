@@ -97,8 +97,9 @@ acdd13:
     dataset_id_code:
     dataset_id_desc:
     dataset_id_system:
-    cf_standard_names:
 cf1_10:
   display:
     und: CF 1.10
   extends: acdd13
+  fields:
+    cf_standard_names:
