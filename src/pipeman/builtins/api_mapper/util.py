@@ -25,3 +25,4 @@ def set_metadata_from_api(fc: FieldContainer, metadata: dict, file_type: str, re
         except Exception as ex:
             logging.getLogger("pipeman.api_mapper").warning(f"Error mapping API data value for [{field_name}]")
             logging.exception(ex)
+            results['errors'].append(str(ex))
