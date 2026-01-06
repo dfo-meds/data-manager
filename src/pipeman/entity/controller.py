@@ -83,7 +83,10 @@ class EntityController:
                                 parent_type: typing.Optional[str] = None):
         with self.db as session:
             if '_guid' in external_data and external_data['_guid']:
-                check_by_guid = session.query(orm.Entity).filter_by(entity_type=entity_type, guid=external_data['_guid']).first()
+                query = session.query(orm.Entity).filter_by(entity_type=entity_type, guid=external_data['_guid'])
+                if parent_id and parent_type:
+                    query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
+                check_by_guid = query.first()
                 if check_by_guid:
                     return self._load_entity_from_orm(check_by_guid)
 
@@ -104,10 +107,17 @@ class EntityController:
                                entity_type: str,
                                parent_id: typing.Optional[int] = None,
                                parent_type: typing.Optional[str] = None):
+        kwargs = {
+            "parent_id": parent_id,
+            "parent_type": parent_type,
+        }
+        if '_display_names' in external_data:
+            kwargs['display_names'] = external_data['_display_names']
+        if '_guid' in external_data:
+            kwargs['guid'] = external_data['_guid']
         new_entity = self.reg.new_entity(
             entity_type,
-            parent_id=parent_id,
-            parent_type=parent_type
+            **kwargs
         )
         external_processor(new_entity, external_data)
         return new_entity
@@ -116,6 +126,8 @@ class EntityController:
         if entity1.guid is not None and entity2.guid is not None and entity1.guid == entity2.guid:
             return True
         for unique_field_set in self.reg.unique_field_sets(entity1.entity_type):
+            if any(entity1.get_field(key).is_empty() or entity2.get_field(key).is_empty() for key in unique_field_set):
+                continue
             values1 = {
                 key: entity1.get_field(key).value
                 for key in unique_field_set
