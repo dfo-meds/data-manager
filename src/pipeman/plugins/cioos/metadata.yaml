@@ -11,6 +11,8 @@ keywords:
         fr: Sélectionnez tous les VOEs qui sont présents dans cet ensemble de données
       order: 2000
       repeatable: yes
+      json_api:
+        mapping: cioos_eovs
       keyword_config:
         is_keyword: yes
         mode: both
