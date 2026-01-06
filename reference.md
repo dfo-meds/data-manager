@@ -164,7 +164,7 @@ The tables below include the highest level profiles that the fields are included
  | goc_publication_place          | vocabulary    | no    | yes         | GoC         | GC Places                            |                
  | goc_subject                    | vocabulary    | no    | no          | GoC         | GC Subjects                          |
  | variables                      | component_ref | no    | yes         | ACDD        | Variable entities                    |
-
+ | iso_maintenance                | component_ref | no    | yes         | ISO         | Maintenance entities                 |
 
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
@@ -200,6 +200,15 @@ The tables below include the highest level profiles that the fields are included
  | altitude_proxy | boolean | no | no | ERDDAP | | 
  | variable_order | integer| no | no | ERDDAP | | 
 | is_axis | boolean| no | no | ERDDAP | | 
+
+
+## Maintenance Entity Values
+| Field Name | Data Type  | i18n? | Repeatable? | Profiles | Notes                  |
+|------------|------------|-------|-------------|----------|------------------------|
+| notes      | long text  | yes   | no          | ISO      |                        |
+| date [U]   | datetime   | no    | no          | ISO      |                        |
+| scope      | vocabulary | no    | no          | ISO      | ISO Maintenance Scopes |
+
 
 
 

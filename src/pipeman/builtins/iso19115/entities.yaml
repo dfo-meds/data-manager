@@ -45,6 +45,8 @@ maintenance:
         en: Select "dataset" or "metadata" depending what change you are describing
         fr: Sélectionnez "ensemble de données" ou "métadonnées" en fonction du changement que vous décrivez
       order: 0
+      json_api:
+        mapping: scope
     date:
       data_type: datetime
       label:
@@ -54,6 +56,9 @@ maintenance:
         en: Enter the date the change was made
         fr: Entrez la date à laquelle le changement a été effectué
       order: 10
+      unique: yes
+      json_api:
+        mapping: date
     notes:
       data_type: multitext
       label:
@@ -64,6 +69,8 @@ maintenance:
         fr: Décrivez le changement effectué
       multilingual: yes
       order: 20
+      json_api:
+        mapping: notes
 thesaurus:
   fields:
     type:

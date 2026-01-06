@@ -711,6 +711,8 @@ technical:
       description:
         en: These records describe work done on the dataset after it was published so that users can be aware of the modifications.
         fr: Ces enregistrements décrivent le travail effectué sur l'ensemble de données après sa publication afin que les utilisateurs puissent être informés des modifications.
+      json_api:
+        mapping: iso_maintenance
 publishing:
   fields:
     distributors:
