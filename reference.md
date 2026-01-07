@@ -184,8 +184,11 @@ The tables below include the highest level profiles that the fields are included
  | data_extra_locales             | entity_ref    | no    | yes         | ISO         | Locale                               | 
  | metadata_locale                | entity_ref    | no    | no          | ISO         | Locale                               | 
  | metadata_extra_locales         | entity_ref    | no    | yes         | ISO         | Locale                               | 
-| spatial_resolution | entity_ref | no | no | ISO | Spatial Resolution                   |
-| temporal_resolution | entity_ref | no | no | ISO | Time Resolution |
+| spatial_resolution             | entity_ref    | no    | no          | ISO         | Spatial Resolution                   |
+| temporal_resolution            | entity_ref    | no    | no          | ISO         | Time Resolution                      |
+| metadata_licenses              | entity_ref    | no    | yes         | ISO         | Use Constraints                      | 
+| licenses                       | entity_ref    | no    | yes         | ISO         | Use Constraints                      |
+
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
 |-----------------------|--------------------|-------|-------------|----------|-------------------------------------------------------------------------------------------------------|
@@ -357,6 +360,20 @@ The tables below include the highest level profiles that the fields are included
  | minutes    | integer   | no    | no          | ISO      |       |
  | seconds    | integer   | no    | no          | ISO      |       |
 
+
+## Use Constraints Entity Values
+ | Field Name            | Data Type     | i18n? | Repeatable? | Profiles | Notes                    |
+ |-----------------------|---------------|-------|-------------|----------|--------------------------|
+ | description           | long text     | yes   | no          | ISO      |                          |
+ | reference [U]         | entity_ref    | no    | yes         | ISO      | Citation                 |
+ | responsibles          | component_ref | no    | yes         | ISO      | Responsibility           |
+ | access_constraints    | vocabulary    | no    | yes         | ISO      | ISO Restriction Codes    |
+ | use_constraints       | vocabulary    | no    | yes         | ISO      | ISO Restriction Codes    |
+ | other_constraints     | long text     | yes   | no          | ISO      |                          |
+ | classification        | vocabulary    | no    | no          | ISO      | ISO Classification Codes |
+ | user_notes            | long text     | yes   | no          | ISO      |                          |
+ | handling_description  | long text     | yes   | no          | ISO      |                          |
+ | classification_system | long text     | yes   | no          | ISO      |                          |
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
 brackets next to the more human friendly name.

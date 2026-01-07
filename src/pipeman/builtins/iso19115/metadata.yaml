@@ -140,6 +140,8 @@ metadata_info:
         fr: Sélectionnez les contraintes d'utilisation qui s'appliquent à l'enregistrement de métadonnées lui-même.
       order: 30
       repeatable: yes
+      json_api:
+        mapping: metadata_licenses
 data_info:
   fields:
     title:
@@ -303,6 +305,8 @@ data_info:
       netcdf:
         mapping: license
         processor: licenses
+      json_api:
+        mapping: license
 data_more_info:
   fields:
     purpose:

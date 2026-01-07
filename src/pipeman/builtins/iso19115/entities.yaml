@@ -729,6 +729,8 @@ use_constraint:
         fr: Entrez une description de toutes les limitations d'utilisation du contenu.
       multilingual: yes
       order: 10
+      json_api:
+        mapping: description
     graphic:
       data_type: entity_ref
       entity_type: graphic
@@ -751,6 +753,9 @@ use_constraint:
         fr: Liens de référence
       repeatable: yes
       order: 30
+      unique: yes
+      json_api:
+        mapping: reference
     responsibles:
       data_type: component_ref
       entity_type: responsibility
@@ -762,6 +767,8 @@ use_constraint:
         fr: Entrez tous les contacts pertinents qui sont responsables de cette contrainte.
       repeatable: yes
       order: 40
+      json_api:
+        mapping: responsibles
     #app_scope:
     #  data_type: entity_ref
     #  entity_type: scope
@@ -785,6 +792,8 @@ use_constraint:
         en: Select any relevant legal constraints for accessing this content.
         fr: Sélectionnez les contraintes légales pertinentes pour accéder à ce contenu.
       order: 70
+      json_api:
+        mapping: access_constraints
     use_constraints:
       repeatable: yes
       data_type: vocabulary
@@ -796,6 +805,8 @@ use_constraint:
         en: Select any relevant legal constraints for using this content.
         fr: Sélectionnez les contraintes légales pertinentes pour l'utilisation de ce contenu.
       order: 80
+      json_api:
+        mapping: use_constraints
     other_constraints:
       data_type: multitext
       label:
@@ -806,6 +817,8 @@ use_constraint:
         fr: Entrez tous les détails juridiques supplémentaires non spécifiés ci-dessus.
       multilingual: yes
       order: 90
+      json_api:
+        mapping: other_constraints
     classification:
       data_type: vocabulary
       label:
@@ -816,6 +829,8 @@ use_constraint:
         fr: Décrivez le système de classification utilisé pour les informations de classification de sécurité ci-dessus.
       vocabulary_name: iso19115_md_classification_code
       order: 100
+      json_api:
+        mapping: classification
     user_notes:
       data_type: multitext
       label:
@@ -826,6 +841,8 @@ use_constraint:
         fr: Entrez tout détail supplémentaire sur la classification de sécurité de ce contenu.
       multilingual: yes
       order: 110
+      json_api:
+        mapping: user_notes
     handling_description:
       data_type: multitext
       label:
@@ -836,6 +853,8 @@ use_constraint:
         fr: Entrez tous les détails sur le traitement approprié de ce contenu.
       multilingual: yes
       order: 120
+      json_api:
+        mapping: handling_description
     classification_system:
       data_type: multitext
       label:
@@ -846,6 +865,8 @@ use_constraint:
         fr: Décrivez le système de classification utilisé pour les informations de classification de sécurité ci-dessus.
       multilingual: yes
       order: 130
+      json_api:
+        mapping: classification_system
 #releasability:
 #  display:
 #    en: Release Statement
