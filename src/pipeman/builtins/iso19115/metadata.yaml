@@ -599,6 +599,8 @@ extent:
       description:
         en: Describe the spatial resolution of the dataset.
         fr: Décrire la résolution spatiale du jeu de données.
+      json_api:
+        mapping: spatial_resolution
     temporal_resolution:
       data_type: inline_entity_ref
       order: 240
@@ -609,6 +611,8 @@ extent:
       description:
         en: Describe the temporal resolution of the dataset.
         fr: Décrire la résolution temporelle du jeu de données.
+      json_api:
+        mapping: temporal_resolution
     horizontal_ref_system:
       data_type: entity_ref
       order: 60

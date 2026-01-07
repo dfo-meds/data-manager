@@ -1369,6 +1369,8 @@ spatial_res:
         en: "Enter the scale factor as a whole integer (e.g. the X in \"1:X\")."
         fr: "Entrez le facteur d'échelle sous la forme d'un entier entier (par exemple, le X dans \"1:X\")."
       order: 0
+      json_api:
+        mapping: scale
     distance:
       data_type: decimal
       label:
@@ -1378,6 +1380,8 @@ spatial_res:
         en: Enter the horizontal resolution in distance units. Specify the units below.
         fr: Entrez la résolution horizontale en unités de distance. Spécifiez les unités ci-dessous.
       order: 10
+      json_api:
+        mapping: distance
     distance_units:
       data_type: vocabulary
       vocabulary_name: iso19115_distance_units
@@ -1388,6 +1392,8 @@ spatial_res:
         en: If you specified a horizontal resolution, select the units.
         fr: Si vous avez spécifié une résolution horizontale, sélectionnez les unités.
       order: 20
+      json_api:
+        mapping: distance_units
     vertical:
       data_type: decimal
       label:
@@ -1397,6 +1403,8 @@ spatial_res:
         en: Enter the vertical resolution in distance units. Specify the units below.
         fr: Entrez la résolution verticale en unités de distance. Spécifiez les unités ci-dessous.
       order: 30
+      json_api:
+        mapping: vertical
     vertical_units:
       data_type: vocabulary
       vocabulary_name: iso19115_distance_units
@@ -1407,6 +1415,8 @@ spatial_res:
         en: If you specified a vertical resolution, select the units.
         fr: Si vous avez spécifié une résolution verticale, sélectionnez les unités.
       order: 40
+      json_api:
+        mapping: vertical_units
     angular:
       data_type: decimal
       label:
@@ -1416,6 +1426,8 @@ spatial_res:
         en: Enter the angular resolution in angular units. Specify the units below.
         fr: Entrez la résolution angulaire en unités angulaires. Spécifiez les unités ci-dessous.
       order: 50
+      json_api:
+        mapping: angular
     angular_units:
       data_type: vocabulary
       vocabulary_name: iso19115_angular_units
@@ -1426,6 +1438,8 @@ spatial_res:
         en: If you specified an angular resolution, select the units.
         fr: Si vous avez spécifié une résolution angulaire, sélectionnez les unités.
       order: 60
+      json_api:
+        mapping: angular_units
     level_of_detail:
       data_type: multitext
       label:
@@ -1436,6 +1450,8 @@ spatial_res:
         fr: S'il y a des détails supplémentaires sur la résolution, entrez-les ici.
       multilingual: yes
       order: 70
+      json_api:
+        mapping: level_of_detail
 
 time_res:
   hidden: yes
@@ -1455,6 +1471,8 @@ time_res:
         en: Enter the number of years for the resolution or leave it empty if the resolution is less than one year.
         fr: Entrez le nombre d'années pour la résolution ou laissez-le vide si la résolution est inférieure à un an.
       order: 0
+      json_api:
+        mapping: years
     months:
       data_type: integer
       label:
@@ -1464,6 +1482,8 @@ time_res:
         en: Enter the number of months for the resolution or leave it empty if the resolution is less than one month or an exact number of years.
         fr: Entrez le nombre de mois pour la résolution ou laissez-le vide si la résolution est inférieure à un mois ou un nombre exact d'années.
       order: 1
+      json_api:
+        mapping: months
     days:
       data_type: integer
       label:
@@ -1473,6 +1493,8 @@ time_res:
         en: Enter the number of days for the resolution or leave it empty if the resolution is less than one day or an exact number of years/months.
         fr: Entrez le nombre de jours pour la résolution ou laissez-le vide si la résolution est inférieure à un jour ou un nombre exact d'années/mois.
       order: 2
+      json_api:
+        mapping: days
     hours:
       data_type: integer
       label:
@@ -1482,6 +1504,8 @@ time_res:
         en: Enter the number of hours for the resolution or leave it empty if the resolution is less than one hour or an exact number of years/months/days.
         fr: Entrez le nombre d'heures pour la résolution ou laissez-le vide si la résolution est inférieure à une heure ou un nombre exact d'années/mois/jours.
       order: 3
+      json_api:
+        mapping: hours
     minutes:
       data_type: integer
       label:
@@ -1491,6 +1515,8 @@ time_res:
         en: Enter the number of minutes for the resolution or leave it empty if the resolution is less than one minute or an exact number of years/months/days/hours.
         fr: Entrez le nombre de minutes pour la résolution ou laissez-le vide si la résolution est inférieure à une minute ou un nombre exact d'années/mois/jours/heures.
       order: 4
+      json_api:
+        mapping: minutes
     seconds:
       data_type: decimal
       label:
@@ -1500,6 +1526,8 @@ time_res:
         en: Enter the number of seconds for the resolution or leave it empty if the resolution is an exact number of years, months, days, hours, and/or minutes. This is the only field that allows fractional parts.
         fr: Entrez le nombre de secondes pour la résolution ou laissez-le vide si la résolution est un nombre exact d'années, de mois, de jours, d'heures et/ou de minutes. C'est le seul champ qui autorise les parties fractionnaires.
       order: 5
+      json_api:
+        mapping: seconds
 dist_channel:
   is_component: yes
   hidden: yes

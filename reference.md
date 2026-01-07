@@ -184,8 +184,8 @@ The tables below include the highest level profiles that the fields are included
  | data_extra_locales             | entity_ref    | no    | yes         | ISO         | Locale                               | 
  | metadata_locale                | entity_ref    | no    | no          | ISO         | Locale                               | 
  | metadata_extra_locales         | entity_ref    | no    | yes         | ISO         | Locale                               | 
-
-
+| spatial_resolution | entity_ref | no | no | ISO | Spatial Resolution                   |
+| temporal_resolution | entity_ref | no | no | ISO | Time Resolution |
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
 |-----------------------|--------------------|-------|-------------|----------|-------------------------------------------------------------------------------------------------------|
@@ -333,6 +333,29 @@ The tables below include the highest level profiles that the fields are included
 | a2_language [U]<sup>A</sup> | text       | no    | no          | ISO      | Two letter language code   |
 | country [U]<sup>A</sup>     | text       | no    | no          | ISO      | Three letter country code  |
 | encoding [U]<sup>A</sup>    | vocabulary | no    | no          | ISO      | Character Sets             |
+
+## Spatial Resolution Entity Values
+| Field Name      | Data Type  | i18n? | Repeatable? | Profiles | Notes              |
+|-----------------|------------|-------|-------------|----------|--------------------|
+| scale           | integer    | no    | no          | ISO      |                    | 
+| distance        | decimal    | no    | no          | ISO      |                    |
+| distance_units  | vocabulary | no    | no          | ISO      | ISO Distance Units |
+| vertical        | decimal    | no    | no          | ISO      |                    |
+| vertical_units  | vocabulary | no    | no          | ISO      | ISO Distance Units |
+| angular         | decimal    | no    | no          | ISO      |                    |
+| angular_units   | vocabulary | no    | no          | ISO      | ISO Angular Units  |
+| level_of_detail | long text  | yes   | no          | ISO      |                    |                  
+
+
+## Time Resolution Entity Values 
+ | Field Name | Data Type | i18n? | Repeatable? | Profiles | Notes |
+ |------------|-----------|-------|-------------|----------|-------|
+ | years      | integer   | no    | no          | ISO      |       |
+ | months     | integer   | no    | no          | ISO      |       |
+ | days       | integer   | no    | no          | ISO      |       |
+ | hours      | integer   | no    | no          | ISO      |       |
+ | minutes    | integer   | no    | no          | ISO      |       |
+ | seconds    | integer   | no    | no          | ISO      |       |
 
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
