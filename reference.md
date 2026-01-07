@@ -189,7 +189,7 @@ The tables below include the highest level profiles that the fields are included
  | metadata_licenses              | entity_ref    | no    | yes         | ISO         | Use Constraints                      | 
  | licenses                       | entity_ref    | no    | yes         | ISO         | Use Constraints                      |
  | erddap_servers                 | entity_ref    | no    | yes         | ERDDAP      | ERDDAP Servers                       |
-
+ | goc_publisher                  | entity_ref    | no    | no          | GoC         | GoC Publishing Section               |
 
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
@@ -245,6 +245,9 @@ The tables below include the highest level profiles that the fields are included
 | name             | text       | yes   | no          | ISO      |                           | 
 | description      | long text  | yes   | no          | ISO      |                           | 
 | function         | vocabulary | no    | no          | ISO      | ISO Online Function Codes |
+| goc_languages    | text       | no    | yes         | GoC      |                           |
+| goc_formats      | vocabulary | no    | yes         | GoC      | GC Content Formats        |
+| goc_content_type | vocabulary | no    | yes         | GoC      | GC Content Types          |
 
 
 ## Telephone Entity Values
@@ -384,6 +387,19 @@ The tables below include the highest level profiles that the fields are included
  | base_url [u] | text          | no    | no          | ERDDAP   |                |
  | responsibles | component_ref | no    | yes         | ISO      | Responsibility |
 
+
+## GoC Publishing Section Entity Values 
+ | Field Name                   | Data Type  | i18n? | Repeatable? | Profiles | Notes                       |
+ |------------------------------|------------|-------|-------------|----------|-----------------------------|
+ | section_name [U]<sup>A</sup> | text       | yes   | no          | GoC      |                             |
+ | publisher [U]<sup>A</sup>    | entity_ref | no    | no          | GoC      | GoC Publishing Organization |
+
+
+## GoC Publishing Organization Entity Values
+ | Field Name         | Data Type | i18n? | Repeatable? | Profiles | Notes |
+ |--------------------|-----------|-------|-------------|----------|-------|
+ | publisher_name [U] | text      | yes   | no          | GoC      |       |
+ | publisher_code [U] | text      | no    | no          | GoC      |       |
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
 brackets next to the more human friendly name.

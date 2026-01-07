@@ -130,3 +130,5 @@ publishing:
         en: Select the group that is publishing this data.
         fr: Sélectionnez le groupe qui publie ces données.
       order: 15010
+      json_api:
+        mapping: goc_publisher
