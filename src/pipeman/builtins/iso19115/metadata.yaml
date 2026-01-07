@@ -544,6 +544,8 @@ extent:
       netcdf:
         mapping: geospatial_bounds_vertical_crs
         processor: ref_system
+      json_api:
+        mapping: geospatial_bounds_vertical_crs
     start_time:
       data_type: datetime
       order: 200
@@ -616,6 +618,8 @@ extent:
       netcdf:
         mapping: geospatial_bounds_crs
         processor: ref_system
+      json_api:
+        mapping: geospatial_bounds_crs
     temporal_ref_system:
       data_type: entity_ref
       order: 230
@@ -626,6 +630,8 @@ extent:
       description:
         en: Specify the temporal coordinate system used.
         fr: Spécifiez le système de coordonnées temporelles utilisé.
+      json_api:
+        mapping: temporal_crs
 references:
   fields:
     additional_docs:

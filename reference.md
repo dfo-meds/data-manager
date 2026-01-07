@@ -177,6 +177,9 @@ The tables below include the highest level profiles that the fields are included
  | dataset_id_system              | entity_ref    | no    | no          | ISO         | ID System                            |
  | info_link                      | inline_ref    | no    | no          | ISO         | Quick Web Page                       |
  | responsibles                   | inline_ref    | no    | yes         | ISO         | Responsibility                       |
+ | geospatial_bounds_vertical_crs | entity_ref    | no    | no          | ISO         | Reference System                     |
+ | geospatial_bounds_crs          | entity_ref    | no    | no          | ISO         | Reference System                     |
+ | temporal_crs                   | entity_ref    | no    | no          | ISO         | Reference System                     |
 
 
 ## Variable Entity Values
@@ -309,6 +312,14 @@ The tables below include the highest level profiles that the fields are included
 | id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System                                  |
 | individuals               | entity_ref | no    | yes         | ISO      | Contact                                    |
 
+
+# Reference System Entity Values
+| Field Name                | Data Type  | i18n? | Repeatable? | Profiles | Notes                  |
+|---------------------------|------------|-------|-------------|----------|------------------------|
+| system_type               | vocabulary | no    | no          | ISO      | Reference System Types |
+| description               | text       | no    | no          | ISO      |                        |
+| code [U]<sup>A</sup>      | text       | no    | no          | ISO      |                        |
+| id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System              |
 
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 

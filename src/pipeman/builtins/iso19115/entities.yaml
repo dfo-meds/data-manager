@@ -633,6 +633,8 @@ ref_system:
         en: Enter the type of reference system. Most map projections are 2-D Geodetic Geographic coordinate systems.
         fr: Entrez le type de système de référence. La plupart des projections cartographiques sont des systèmes de coordonnées géographiques géodésiques 2D.
       order: 10
+      json_api:
+        mapping: system_type
     code:
       data_type: text
       label:
@@ -644,6 +646,8 @@ ref_system:
       order: 20
       unique:
         - id_system
+      json_api:
+        mapping: code
     description:
       data_type: text
       label:
@@ -653,6 +657,8 @@ ref_system:
         en: Enter a human-readable short description of the reference system
         fr: Entrez une courte description lisible par l'homme du système de référence
       order: 30
+      json_api:
+        mapping: description
     id_system:
       data_type: entity_ref
       entity_type: id_system
@@ -663,6 +669,8 @@ ref_system:
         en: If you provided a unique identifier, select the appropriate code system
         fr: Si vous avez fourni un identifiant unique, sélectionnez le système de code approprié
       order: 40
+      json_api:
+        mapping: id_system
 #location:
 #  display:
 #    en: Location
