@@ -27,6 +27,8 @@ keywords:
       repeatable: yes
       order: 1000000000
       entity_type: keyword
+      json_api:
+        mapping: custom_keywords
       label:
         en: Keywords
         fr: Mots-clé

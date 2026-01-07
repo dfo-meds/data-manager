@@ -13,6 +13,9 @@ citation:
         fr: Entrez le titre de l'ouvrage cité.
       order: 10
       multilingual: yes
+      unique: yes
+      json_api:
+        mapping: title
 thesaurus:
   display:
     en: Thesaurus
@@ -31,6 +34,9 @@ thesaurus:
         en: Reference information for the thesaurus.
         fr: Informations de référence pour le thésaurus.
       order: 0
+      unique: yes
+      json_api:
+        mapping: citation
     type:
       data_type: text
       label:
@@ -40,6 +46,8 @@ thesaurus:
         en: Enter the keyword type that best describes the keywords that are part of this thesaurus.
         fr: Entrez le type de mot-clé qui décrit le mieux les mots-clés qui font partie de ce thésaurus.
       order: 10
+      json_api:
+        mapping: type
     prefix:
       data_type: text
       label:
@@ -49,6 +57,9 @@ thesaurus:
         en: This will be used in some metadata files to separate keywords by thesaurus when the whole thesaurus cannot be used.
         fr: Cela sera utilisé dans certains fichiers de métadonnées pour séparer les mots-clés par thésaurus lorsque l'ensemble du thésaurus ne peut pas être utilisé.
       order: 20
+      unique: yes
+      json_api:
+        mapping: prefix
 variable:
   display:
     en: Variable
@@ -72,6 +83,10 @@ keyword:
       description:
         en: Enter the text that should be used in the metadata files. If there is an official value from a controlled list, it should go in the "UND" field.
       order: 0
+      json_api:
+        mapping: keyword
+      unique:
+        - thesaurus
     description:
       data_type: multitext
       multilingual: yes

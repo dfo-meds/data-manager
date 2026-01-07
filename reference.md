@@ -190,6 +190,8 @@ The tables below include the highest level profiles that the fields are included
  | licenses                       | entity_ref    | no    | yes         | ISO         | Use Constraints                      |
  | erddap_servers                 | entity_ref    | no    | yes         | ERDDAP      | ERDDAP Servers                       |
  | goc_publisher                  | entity_ref    | no    | no          | GoC         | GoC Publishing Section               |
+ | custom_keywords                | entity_ref    | no    | yes         | ISO         | Keyword                              |
+
 
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
@@ -268,23 +270,24 @@ The tables below include the highest level profiles that the fields are included
 
 
 ## Citation Entity Values
-| Field Name                | Data Type  | i18n? | Repeatable? | Profiles | Notes                  |
-|---------------------------|------------|-------|-------------|----------|------------------------|
-| alt_title                 | text       | yes   | no          | ISO      |                        |
-| publication_date          | date       | no    | no          | ISO      |                        |
-| revision_date             | date       | no    | no          | ISO      |                        |
-| creation_date             | date       | no    | no          | ISO      |                        |
-| edition                   | text       | yes   | no          | ISO      |                        |
-| edition_date              | date       | no    | no          | ISO      |                        |
-| responsibles              | inline_ref | no    | yes         | ISO      | Responsibility         |
-| presentation_form         | vocabulary | no    | no          | ISO      | ISO Presentation Forms |
-| details                   | long text  | yes   | no          | ISO      |                        |
-| isbn [U]                  | text       | no    | no          | ISO      |                        |
-| issn [U]                  | text       | no    | no          | ISO      |                        | 
-| resource [U]              | inline_ref | no    | no          | ISO      | Resource               |
-| id_code [U]<sup>A</sup>   | text       | no    | no          | ISO      |                        |
-| id_description            | text       | yes   | no          | ISO      |                        |
-| id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System              |
+| Field Name                | Data Type  | i18n? | Repeatable? | Profiles     | Notes                  |
+|---------------------------|------------|-------|-------------|--------------|------------------------|
+| title [U]                 | text       | yes   | no          | ISO and ACDD |                        | 
+| alt_title                 | text       | yes   | no          | ISO          |                        |
+| publication_date          | date       | no    | no          | ISO          |                        |
+| revision_date             | date       | no    | no          | ISO          |                        |
+| creation_date             | date       | no    | no          | ISO          |                        |
+| edition                   | text       | yes   | no          | ISO          |                        |
+| edition_date              | date       | no    | no          | ISO          |                        |
+| responsibles              | inline_ref | no    | yes         | ISO          | Responsibility         |
+| presentation_form         | vocabulary | no    | no          | ISO          | ISO Presentation Forms |
+| details                   | long text  | yes   | no          | ISO          |                        |
+| isbn [U]                  | text       | no    | no          | ISO          |                        |
+| issn [U]                  | text       | no    | no          | ISO          |                        | 
+| resource [U]              | inline_ref | no    | no          | ISO          | Resource               |
+| id_code [U]<sup>A</sup>   | text       | no    | no          | ISO          |                        |
+| id_description            | text       | yes   | no          | ISO          |                        |
+| id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO          | ID System              |
 
 
 ## ID System Entity Values
@@ -402,6 +405,24 @@ The tables below include the highest level profiles that the fields are included
  | publisher_name [U] | text      | yes   | no          | GoC      |       |
  | publisher_code [U] | text      | no    | no          | GoC      |       |
 
+
+## Thesaurus Entity Values
+ | Field Name   | Data Type  | i18n? | Repeatable? | Profiles | Notes    |
+ |--------------|------------|-------|-------------|----------|----------|
+ | citation [U] | inline_ref | no    | no          | ISO      | Citation |
+ | type         | text       | no    | no          | ISO      |          |
+ | prefix [U]   | text       | no    | no          | ACDD     |          | 
+
+
+## Keyword Entity Values
+ | Field Name  | Data Type  | i18n? | Repeatable? | Profiles | Notes     |
+ |-------------|------------|-------|-------------|----------|-----------|
+ | keyword     | long text  | yes   | no          | ISO      |           |
+ | description | text       | yes   | no          | ISO      |           |
+ | thesaurus   | entity_ref | no    | no          | ISO      | Thesaurus |
+
+
+## Notes
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
 brackets next to the more human friendly name.
 
