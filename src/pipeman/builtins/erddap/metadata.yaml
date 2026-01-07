@@ -57,3 +57,5 @@ publishing:
         fr: Sélectionnez sur quel serveur ERDDAP cet ensemble de données sera publié. Le serveur sera ajouté à la liste des méthodes de distribution dans les métadonnées.
       entity_type: erddap_servers
       repeatable: yes
+      json_api:
+        mapping: erddap_servers

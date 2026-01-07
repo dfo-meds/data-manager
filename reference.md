@@ -184,10 +184,12 @@ The tables below include the highest level profiles that the fields are included
  | data_extra_locales             | entity_ref    | no    | yes         | ISO         | Locale                               | 
  | metadata_locale                | entity_ref    | no    | no          | ISO         | Locale                               | 
  | metadata_extra_locales         | entity_ref    | no    | yes         | ISO         | Locale                               | 
-| spatial_resolution             | entity_ref    | no    | no          | ISO         | Spatial Resolution                   |
-| temporal_resolution            | entity_ref    | no    | no          | ISO         | Time Resolution                      |
-| metadata_licenses              | entity_ref    | no    | yes         | ISO         | Use Constraints                      | 
-| licenses                       | entity_ref    | no    | yes         | ISO         | Use Constraints                      |
+ | spatial_resolution             | entity_ref    | no    | no          | ISO         | Spatial Resolution                   |
+ | temporal_resolution            | entity_ref    | no    | no          | ISO         | Time Resolution                      |
+ | metadata_licenses              | entity_ref    | no    | yes         | ISO         | Use Constraints                      | 
+ | licenses                       | entity_ref    | no    | yes         | ISO         | Use Constraints                      |
+ | erddap_servers                 | entity_ref    | no    | yes         | ERDDAP      | ERDDAP Servers                       |
+
 
 ## Variable Entity Values
 | Field Name            | Data Type          | i18n? | Repeatable? | Profiles | Notes                                                                                                 |
@@ -374,6 +376,14 @@ The tables below include the highest level profiles that the fields are included
  | user_notes            | long text     | yes   | no          | ISO      |                          |
  | handling_description  | long text     | yes   | no          | ISO      |                          |
  | classification_system | long text     | yes   | no          | ISO      |                          |
+
+
+## ERDDAP Server Entity Values 
+ | Field Name   | Data Type     | i18n? | Repeatable? | Profiles | Notes          |
+ |--------------|---------------|-------|-------------|----------|----------------|
+ | base_url [u] | text          | no    | no          | ERDDAP   |                |
+ | responsibles | component_ref | no    | yes         | ISO      | Responsibility |
+
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 
 brackets next to the more human friendly name.

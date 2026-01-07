@@ -16,6 +16,8 @@ erddap_servers:
       description:
         en: Enter contact information for who should be contacted if there are questions or feedback regarding this ERDDAP server.
         fr: Entrez les coordonnées de la personne à contacter en cas de questions ou de commentaires concernant ce serveur ERDDAP.
+      json_api:
+        mapping: responsibles
     base_url:
       data_type: text
       label:
@@ -26,6 +28,8 @@ erddap_servers:
         en: "Enter the URL for the ERDDAP to server up to and including '/erddap/' (e.g. 'https://mydomain.com/erddap/')"
         fr: "Entrez l'URL du serveur ERDDAP jusqu'à '/erddap/' inclus (par exemple 'https://mydomain.com/erddap/')"
       unique: yes
+      json_api:
+        mapping: base_url
 variable:
   validation:
     required:
