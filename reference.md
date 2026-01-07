@@ -341,6 +341,7 @@ The tables below include the highest level profiles that the fields are included
 | a2_language [U]<sup>A</sup> | text       | no    | no          | ISO      | Two letter language code   |
 | country [U]<sup>A</sup>     | text       | no    | no          | ISO      | Three letter country code  |
 | encoding [U]<sup>A</sup>    | vocabulary | no    | no          | ISO      | Character Sets             |
+| ietf_bcp47                  | text       | no    | no          | CF       |                            |  
 
 ## Spatial Resolution Entity Values
 | Field Name      | Data Type  | i18n? | Repeatable? | Profiles | Notes              |
@@ -379,7 +380,7 @@ The tables below include the highest level profiles that the fields are included
  | user_notes            | long text     | yes   | no          | ISO      |                          |
  | handling_description  | long text     | yes   | no          | ISO      |                          |
  | classification_system | long text     | yes   | no          | ISO      |                          |
-
+ | plain_text            | long text     | yes   | no          | ACDD     |                          |
 
 ## ERDDAP Server Entity Values 
  | Field Name   | Data Type     | i18n? | Repeatable? | Profiles | Notes          |

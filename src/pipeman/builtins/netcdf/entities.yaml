@@ -8,6 +8,8 @@ use_constraint:
       description:
         en: This text is used where the full ISO record cannot be used (e.g. in NetCDF files)
         fr: Ce texte est utilisé lorsque l'enregistrement ISO complet ne peut pas être utilisé (par exemple dans les fichiers NetCDF)
+      json_api:
+        mapping: plain_text
 variable:
   validation:
     required:
@@ -345,3 +347,5 @@ locale:
         fr: Entrez le code de langue le plus approprié de la norme IETF BCP 47.
       data_type: text
       order: 35
+      json_api:
+        mapping: ietf_bcp47
