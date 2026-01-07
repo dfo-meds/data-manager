@@ -102,6 +102,8 @@ metadata_info:
       description:
         en: Choose the locale that most of the metadata is filled out in.
         fr: Choisissez les paramètres régionaux dans lesquels la plupart des metadonnées sont remplies.
+      json_api:
+        mapping: metadata_locale
     other_locales:
       data_type: entity_ref
       order: 110
@@ -113,6 +115,8 @@ metadata_info:
       description:
         en: If you want to publish metadata files in multiple languages, select all other langauges except the Default Language here.
         fr: Si vous souhaitez publier des fichiers de métadonnées dans plusieurs langues, sélectionnez toutes les autres langues à l'exception de la langue par défaut ici.
+      json_api:
+        mapping: metadata_extra_locales
     metadata_maintenance_frequency:
       data_type: vocabulary
       order: 500
@@ -670,6 +674,8 @@ technical:
       description:
         en: Select the locale that applies to most of the data in the dataset, or leave it empty if there is no data in the dataset.
         fr: Sélectionnez les paramètres régionaux qui s'appliquent à la plupart des données du jeu de données ou laissez-les vides s'il n'y a pas de données dans le jeu de données.
+      json_api:
+        mapping: data_locale
     dataset_other_locales:
       data_type: entity_ref
       order: 26
@@ -681,6 +687,8 @@ technical:
         en: Select any additional locales that are present within the dataset.
         fr: Sélectionnez les paramètres régionaux supplémentaires présents dans l'ensemble de données.
       repeatable: yes
+      json_api:
+        mapping: data_extra_locales
     status:
       data_type: vocabulary
       order: 30

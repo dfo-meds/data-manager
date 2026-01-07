@@ -180,6 +180,10 @@ The tables below include the highest level profiles that the fields are included
  | geospatial_bounds_vertical_crs | entity_ref    | no    | no          | ISO         | Reference System                     |
  | geospatial_bounds_crs          | entity_ref    | no    | no          | ISO         | Reference System                     |
  | temporal_crs                   | entity_ref    | no    | no          | ISO         | Reference System                     |
+ | data_locale                    | entity_ref    | no    | no          | ISO         | Locale                               | 
+ | data_extra_locales             | entity_ref    | no    | yes         | ISO         | Locale                               | 
+ | metadata_locale                | entity_ref    | no    | no          | ISO         | Locale                               | 
+ | metadata_extra_locales         | entity_ref    | no    | yes         | ISO         | Locale                               | 
 
 
 ## Variable Entity Values
@@ -313,13 +317,22 @@ The tables below include the highest level profiles that the fields are included
 | individuals               | entity_ref | no    | yes         | ISO      | Contact                                    |
 
 
-# Reference System Entity Values
+## Reference System Entity Values
 | Field Name                | Data Type  | i18n? | Repeatable? | Profiles | Notes                  |
 |---------------------------|------------|-------|-------------|----------|------------------------|
 | system_type               | vocabulary | no    | no          | ISO      | Reference System Types |
 | description               | text       | no    | no          | ISO      |                        |
 | code [U]<sup>A</sup>      | text       | no    | no          | ISO      |                        |
 | id_system [U]<sup>A</sup> | entity_ref | no    | no          | ISO      | ID System              |
+
+
+## Locale Entity Values
+| Field Name                  | Data Type  | i18n? | Repeatable? | Profiles | Notes                      |
+|-----------------------------|------------|-------|-------------|----------|----------------------------|
+| language [U]<sup>A</sup>    | text       | no    | no          | ISO      | Three letter language code |
+| a2_language [U]<sup>A</sup> | text       | no    | no          | ISO      | Two letter language code   |
+| country [U]<sup>A</sup>     | text       | no    | no          | ISO      | Three letter country code  |
+| encoding [U]<sup>A</sup>    | vocabulary | no    | no          | ISO      | Character Sets             |
 
 
 All vocabulary metadata fields use the short name as the value. You can find this on the Vocabularies page in 

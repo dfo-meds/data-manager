@@ -98,6 +98,8 @@ locale:
         - a2_language
         - country
         - encoding
+      json_api:
+        mapping: language
     a2_language:
       data_type: text
       label:
@@ -107,6 +109,8 @@ locale:
         en: Enter the 2-letter language code from ISO 639 (e.g. 'en', 'fr')
         fr: Entrez le code de langue à 2 lettres de la norme ISO 639 (par exemple 'en', 'fr')
       order: 20
+      json_api:
+        mapping: a2_language
     country:
       data_type: text
       label:
@@ -116,6 +120,8 @@ locale:
         en: Enter the most appropriate ISO 3166-1-A3 country code, if applicable
         fr: Entrez le code de pays le plus approprié de la norme ISO 3166-1-A3, le cas échéant
       order: 30
+      json_api:
+        mapping: country
     encoding:
       data_type: vocabulary
       vocabulary_name: core_charsets
@@ -126,6 +132,8 @@ locale:
         en: Select a character encoding that will be used to encode text data (UTF-8 is a good default).
         fr: Sélectionnez un encodage de caractères qui sera utilisé pour encoder les données textuelles (UTF-8 est une bonne valeur par défaut).
       order: 40
+      json_api:
+        mapping: encoding
   validation:
     required:
       - language
