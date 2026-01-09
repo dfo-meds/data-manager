@@ -17,7 +17,7 @@ class CIOOSVocabularyManager:
     def __init__(self):
         self.cioos_eovs_list_url = self.cfg.as_str(
             ("pipeman", "cioos", "eov_list_url"),
-            default="https://raw.githubusercontent.com/cioos-siooc/metadata-entry-form/main/src/eovs.json"
+            default="https://raw.githubusercontent.com/cioos-siooc/metadata-entry-form/refs/heads/main/src/eovs.js"
         )
         self.log = logging.getLogger("pipeman.cioos_eovs")
 
