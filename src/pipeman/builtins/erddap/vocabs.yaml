@@ -74,7 +74,7 @@ ioos_categories:
   terms:
     Acidity:
       display:
-        en: Activity
+        en: Acidity
     Bathymetry:
       display:
         en: Bathymetry
