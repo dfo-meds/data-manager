@@ -592,14 +592,15 @@ class CFVocabularyManager:
         try:
             # TODO convert to http://cfconventions.org/Data/cf-standard-names/current/src/cf-standard-name-table.xml
             terms = {}
-            link = "http://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"
+            link = "https://cfconventions.org/Data/cf-standard-names/current/build/cf-standard-name-table.html"
             resp = requests.get(link)
+            resp.raise_for_status()
             soup = bs4.BeautifulSoup(resp.text, 'html.parser')
             sn_table = soup.find('table', id="standard_name_table")
             for sn_tr in sn_table.find_all("tr"):
                 base = sn_tr.find("td")
-                var_name = base.find("code").find("a").text
-                var_desc = sn_tr.find("div").text
+                var_name = base.find("div", attrs={"class": "standard-name-summary"}).find("span").text
+                var_desc = sn_tr.find("div", attrs={"class": "standard-name-description"}).text
                 terms[var_name] = {
                     "display": {
                         "en": var_name,
