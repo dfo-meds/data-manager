@@ -312,12 +312,12 @@ class Dataset(FieldContainer):
         return flask.url_for("core.view_dataset", dataset_id=self.container_id)
 
     def guid(self):
-        # TODO: we should let datasets override this maybe?
         return self.extras['guid'] if 'guid' in self.extras else ""
 
     @injector.inject
     def naming_authority(self, config: zr.ApplicationConfig):
-        # TODO: we should let datasets override this maybe?
+        if 'authority' in self.extras and self.extras['authority']:
+            return self.extras['authority']
         return config.as_str(("pipeman", "metadata", "naming_authority"), default="pipeman")
 
     def created_date(self):
@@ -380,6 +380,7 @@ class Dataset(FieldContainer):
             ('pipeman.label.dataset.publication_workflow', self.pub_workflow_display()),  # gettext('pipeman.label.dataset.publication_workflow')
             ('pipeman.label.dataset.security_level', self.security_level_display()),  #gettext('pipeman.label.dataset.security_level')
             ('pipeman.label.dataset.guid', self.guid()),  # gettext('pipeman.label.dataset.guid')
+            ('pipeman.label.dataset.authority', self.naming_authority()), # gettext('pipeman.label.dataset.authority')
         ]
         if 'activated_item_id' in self.extras and self.extras['activated_item_id']:
             props.append((

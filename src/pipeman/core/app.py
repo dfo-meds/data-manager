@@ -307,6 +307,16 @@ def create_dataset_from_api_call(con: DatasetController = None):
         logging.getLogger("pipeman.api.create_dataset").exception(ex)
         return {'error': str(ex)}, 500
 
+@core.i18n_route("/api/upsert-dataset", methods=["POST"])
+@require_permission("datasets.upsert_api")
+@injector.inject
+def upsert_dataset_from_api_call(con: DatasetController = None):
+    try:
+        return con.upsert_dataset_from_api_call()
+    except Exception as ex:
+        logging.getLogger("pipeman.api.upsert_dataset").exception(ex)
+        return {'error': str(ex)}, 500
+
 @core.i18n_route("/datasets/<int:dataset_id>")
 @require_permission("datasets.view")
 @injector.inject

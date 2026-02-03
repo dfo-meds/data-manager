@@ -2584,3 +2584,24 @@ iso3166_countries:
         en: United States of America (the)
         fr: États-Unis d'Amérique (les)
     # TODO: more? full list? import from web list?
+iso19115_mi_operation_type_code:
+  display:
+    en: ISO-19115 - Operation Types
+  uri: http://standards.iso.org/iso/19115/resources/Codelist/cat/codelists.xml#MI_OperationTypeCode
+  terms:
+    # TODO: French translations
+    real:
+      display:
+        en: Real
+      description:
+        en: Field collected data
+    simulated:
+      display:
+        en: Simulated
+      description:
+        en: Simulated data
+    synthesized:
+      display:
+        en: Synthesized
+      description:
+        en: A mix of real and simulated data

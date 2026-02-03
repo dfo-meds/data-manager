@@ -1,3 +1,418 @@
+acquisition:
+  display:
+    en: Acquisition Info
+  is_component: yes
+  hidden: yes
+  validation:
+    required:
+      - scope
+  fields:
+    scope:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_scope_code
+      label:
+        en: Scope
+      # TODO: label + descriptions
+      json_api:
+        mapping: scope
+    attributes:
+      data_type: text
+      label:
+        en: Attributes
+      # TODO: label + descriptions
+      json_api:
+        mapping: attributes
+    features:
+      data_type: text
+      label:
+        en: Features
+      # TODO: label + descriptions
+      json_api:
+        mapping: features
+    feature_instances:
+      data_type: text
+      label:
+        en: Feature Instances
+      # TODO: label + descriptions
+      json_api:
+        mapping: feature_instances
+    attribute_instances:
+      data_type: text
+      label:
+        en: Attribute Instances
+      # TODO: label + descriptions
+      json_api:
+        mapping: attribute_instances
+    dataset:
+      data_type: text
+      label:
+        en: Datasets
+      # TODO: label + descriptions
+      json_api:
+        mapping: dataset
+    other:
+      data_type: text
+      label:
+        en: Other Data
+      # TODO: label + descriptions
+      json_api:
+        mapping: other
+    bbox_west:
+      order: 10
+      data_type: decimal
+      label:
+        en: West
+        fr: Ouest
+      min: -180
+      max: 180
+      # TODO: descriptions
+      json_api:
+        mapping: bbox_west
+    bbox_east:
+      data_type: decimal
+      order: 20
+      label:
+        en: East
+        fr: Est
+      min: -180
+      max: 180
+      # TODO: descriptions
+      json_api:
+        mapping: bbox_east
+    bbox_north:
+      data_type: decimal
+      order: 30
+      label:
+        en: North
+        fr: Nord
+      min: -90
+      max: 90
+      # TODO: descriptions
+      json_api:
+        mapping: bbox_north
+    bbox_south:
+      data_type: decimal
+      order: 40
+      label:
+        en: South
+        fr: Sud
+      min: -90
+      max: 90
+      # TODO: descriptions
+      json_api:
+        mapping: bbox_south
+    wkt_polygon:
+      data_type: multitext
+      order: 50
+      label:
+        en: Polygon Boundary (WKT)
+        fr: Limite polygonale (WKT)
+      # TODO: descriptions
+      json_api:
+        mapping: wkt_polygon
+    vertical_min:
+      data_type: decimal
+      order: 150
+      label:
+        en: Vertical Minimum
+        fr: Minimum vertical
+      # TODO: descriptions
+      json_api:
+        mapping: vertical_min
+    vertical_max:
+      data_type: decimal
+      order: 160
+      label:
+        en: Vertical Maximum
+        fr: Maximum vertical
+      # TODO: descriptions
+      json_api:
+        mapping: vertical_max
+    vertical_ref_system:
+      data_type: entity_ref
+      entity_type: ref_system
+      label:
+        en: Vertical Reference System
+        fr: Système de référence vertical
+      order: 170
+      # TODO: descriptions
+      json_api:
+        mapping: vertical_ref_system
+    start_time:
+      data_type: datetime
+      order: 200
+      label:
+        en: Start Time
+        fr: Début
+      # TODO: descriptions
+      json_api:
+        mapping: start_time
+    end_time:
+      data_type: datetime
+      order: 210
+      label:
+        en: End Time
+        fr: Fin
+      # TODO: descriptions
+      json_api:
+        mapping: end_time
+    is_ongoing:
+      data_type: boolean
+      order: 220
+      label:
+        en: Is Ongoing
+      # TODO: label + descriptions
+      json_api:
+        mapping: is_ongoing
+    horizontal_ref_system:
+      data_type: entity_ref
+      order: 60
+      entity_type: ref_system
+      label:
+        en: Horizontal Reference System
+        fr: Système de référence horizontal
+      description:
+        en: Specify the horizontal coordinate system used.
+        fr: Spécifiez le système de coordonnées horizontales utilisé.
+      json_api:
+        mapping: horizontal_ref_system
+    temporal_ref_system:
+      data_type: entity_ref
+      order: 230
+      entity_type: ref_system
+      label:
+        en: Temporal Reference System
+        fr: Système de référence temporelle
+      description:
+        en: Specify the temporal coordinate system used.
+        fr: Spécifiez le système de coordonnées temporelles utilisé.
+      json_api:
+        mapping: temporal_ref_system
+    instruments:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: instrument
+      label:
+        en: Instruments
+      # TODO: label + descriptions
+      json_api:
+        mapping: instruments
+    missions:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: mission
+      label:
+        en: Missions
+      # TODO: label + descriptions
+      json_api:
+        mapping: missions
+    platforms:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: platform
+      label:
+        en: Platforms
+      # TODO: label + descriptions
+      json_api:
+        mapping: platforms
+mission:
+  display:
+    en: Mission
+    fr: Mission
+  validation:
+    required:
+      - status
+  fields:
+    id_code:
+      data_type: text
+      label:
+        en: ID Code
+      order: 0
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_code
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: ID System
+      order: 20
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_system
+    description:
+      data_type: multitext
+      label:
+        en: Description
+      order: 30
+      multilingual: yes
+      # TODO: label + descriptions
+      json_api:
+        mapping: description
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
+      order: 40
+      # TODO: label + descriptions
+      json_api:
+        mapping: citation
+    status:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_progress_code
+      label:
+        en: Status
+        fr: Statut
+      order: 50
+      # TODO: descriptions
+      json_api:
+        mapping: status
+    mission_type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_mi_operation_type_code
+      label:
+        en: Mission Type
+      order: 50
+      # TODO: label + descriptions
+      json_api:
+        mapping: mission_type
+    parent_mission:
+      data_type: entity_ref
+      entity_type: mission
+      label:
+        en: Parent Mission
+      order: 60
+      # TODO: label + descriptions
+      json_api:
+        mapping: parent_mission
+    platforms:
+      data_type: entity_ref
+      entity_type: platform
+      repeatable: yes
+      label:
+        en: Platforms
+      order: 70
+      # TODO: label + descriptions
+      json_api:
+        mapping: platforms
+platform:
+  display:
+    en: Platform
+  validation:
+    required:
+      - id_code
+      - description
+  fields:
+    id_code:
+      data_type: text
+      label:
+        en: ID Code
+      order: 0
+      multilingual: yes
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_code
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: ID System
+      order: 20
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_system
+    description:
+      data_type: multitext
+      multilingual: yes
+      label:
+        en: Platform Description
+      order: 30
+      # TODO: label + descriptions
+      json_api:
+        mapping: description
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      repeatable: yes
+      label:
+        en: Citations
+      order: 40
+      # TODO: label + descriptions
+      json_api:
+        mapping: citations
+    sponsors:
+      data_type: inline_entity_ref
+      entity_type: responsibility
+      repeatable: yes
+      label:
+        en: Sponsors
+      order: 50
+      # TODO: label + descriptions
+      json_api:
+        mapping: sponsors
+instrument:
+  display:
+    en: Instrument
+  validation:
+    required:
+      - id_code
+      - type
+  fields:
+    id_code:
+      data_type: text
+      label:
+        en: ID Code
+      order: 0
+      multilingual: yes
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_code
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: ID System
+      order: 20
+      # TODO: label + descriptions
+      json_api:
+        mapping: id_system
+    type:
+      data_type: text
+      label:
+        en: Type
+      order: 30
+      multilingual: yes
+      # TODO: label + descriptions
+      json_api:
+        mapping: type
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
+      order: 40
+      # TODO: label + descriptions
+      json_api:
+        mapping: citation
+    description:
+      data_type: multitext
+      multilingual: yes
+      label:
+        en: Description
+      order: 50
+      # TODO: label + descriptions
+      json_api:
+        mapping: description
+    mounted_on:
+      data_type: entity_ref
+      entity_type: platform
+      label:
+        en: Mounted On
+      order: 60
+      # TODO: label + descriptions
+      json_api:
+        mapping: mounted_on
 responsibility:
   display:
     en: Responsibility

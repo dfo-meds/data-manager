@@ -257,6 +257,10 @@ class VocabularyTerm(_BaseModel, _AuditableModel, Base):
 
 class Dataset(_BaseModel, _AuditableModel, Base):
 
+    __table_args__ = (
+        sa.UniqueConstraint("guid", "authority", name="unique_dataset_guid_authority"),
+    )
+
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
@@ -265,7 +269,8 @@ class Dataset(_BaseModel, _AuditableModel, Base):
     act_workflow = sa.Column(sa.String(255), nullable=False)
     status = sa.Column(sa.String(255), nullable=False)
     security_level = sa.Column(sa.String(255), nullable=False)
-    guid = sa.Column(sa.String(255), nullable=False, unique=True)
+    guid = sa.Column(sa.String(255), nullable=False)
+    authority = sa.Column(sa.String(255), nullable=True, default=None)
     activated_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
 
     attachments = orm.relationship("Attachment", back_populates="dataset")

@@ -324,6 +324,13 @@ variable:
         processor: vocabulary
       json_api:
         mapping: coverage_content_type
+    axis:
+      data_type: vocabulary
+      vocabulary_name: cf_axes
+      label:
+        en: Axis
+      json_api:
+        mapping: axis
     custom_metadata:
       data_type: key_value
       repeatable: true
@@ -336,6 +343,8 @@ variable:
       order: 500
       netcdf:
         processor: key_value_pairs
+      json_api:
+        mapping: custom_metadata
 locale:
   fields:
     ietf_bcp47:

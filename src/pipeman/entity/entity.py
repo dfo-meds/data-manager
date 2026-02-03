@@ -247,9 +247,14 @@ class FieldContainer:
         self._display[lang] = name
 
     def label(self):
-        return MultiLanguageString(self._display)
+        return MultiLanguageString(self.display_names())
+
+    def default_display(self):
+        return {"en": "unknown"}
 
     def display_names(self):
+        if not self._display:
+            return self.default_display()
         return self._display
 
 
@@ -331,6 +336,9 @@ class Entity(FieldContainer):
         self.entity_data_id = ed_id
         self.parent_id = parent_id
         self.parent_type = parent_type
+
+    def default_display(self):
+        return {"und": f"{self.entity_type} #{self.db_id}"}
 
     def view_link(self):
         return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.db_id)

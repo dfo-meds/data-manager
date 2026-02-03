@@ -28,6 +28,7 @@ import flask_wtf.file as fwf
 import uuid
 from pipeman.util.metrics import BlockTimer, time_function
 import zirconium as zr
+import typing as t
 
 from pipeman.i18n.i18n import BaseTranslatableString
 
@@ -223,8 +224,20 @@ class DatasetController:
     def create_dataset_from_api_call(self):
         with self.db as session:
             builder = DatasetBuilder(session, self)
-            dataset = builder.from_flask_api()
-        self.save_dataset(dataset)
+            dataset = builder.from_flask_api(False)
+        self.save_dataset(dataset, save_metadata=True)
+        response = {
+            "dataset_id": dataset.dataset_id,
+            'guid': dataset.guid(),
+            "success": True,
+        }
+        return flask.jsonify(response)
+
+    def upsert_dataset_from_api_call(self):
+        with self.db as session:
+            builder = DatasetBuilder(session, self)
+            dataset = builder.from_flask_api(True)
+        self.save_dataset(dataset, save_metadata=True)
         response = {
             "dataset_id": dataset.dataset_id,
             'guid': dataset.guid(),
@@ -305,10 +318,12 @@ class DatasetController:
         )
 
     def copy_dataset_form(self, dataset):
+        # Make sure we don't copy the guid
+        dataset.extras['guid'] = ""
         form = DatasetForm(dataset=dataset)
         if form.validate_on_submit():
             ds = form.build_dataset()
-            self.save_dataset(ds, as_copy=True)
+            self.save_dataset(ds, force_new=True)
             flasht("pipeman.dataset.page.copy_dataset.success", "success")
             return flask.redirect(flask.url_for("core.view_dataset", dataset_id=ds.dataset_id))
         return flask.render_template(self.edit_template,
@@ -547,6 +562,17 @@ class DatasetController:
             ds.is_deprecated = False
             session.commit()
 
+    def load_dataset_by_guid(self, guid: str, authority: t.Optional[str] = None):
+        with self.db as session:
+            query = session.query(orm.Dataset).filter_by(guid=guid)
+            if authority is None:
+                query = query.filter(orm.Dataset.authority.is_(None))
+            else:
+                query = query.filter_by(authority=authority)
+            ds = query.first()
+            if ds:
+                return self._build_dataset(ds, ds.latest_revision())
+
     def load_dataset(self, dataset_id, revision_no=None):
         self.log.debug(f"Loading dataset {dataset_id}-{revision_no if revision_no else '_latest_'}")
         with self.db as session:
@@ -563,33 +589,37 @@ class DatasetController:
                     ds_data = ds.latest_revision()
             if revision_no and not ds_data:
                 raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
-            with BlockTimer("pipeman_dataset_load_dataset_build", "Time to build a dataset object itself"):
-                return self.reg.build_dataset(
-                    profiles=ds.profiles.replace("\r", "").split("\n"),
-                    field_values=json.loads(ds_data.data) if ds_data else {},
-                    dataset_id=ds.id,
-                    ds_data_id=ds_data.id if ds_data else None,
-                    revision_no=ds_data.revision_no if ds_data else None,
-                    display_names=json.loads(ds.display_names) if ds.display_names else None,
-                    is_deprecated=ds.is_deprecated,
-                    org_id=ds.organization_id,
-                    extras={
-                        "pub_workflow": ds.pub_workflow,
-                        "act_workflow": ds.act_workflow,
-                        "status": ds.status,
-                        "security_level": ds.security_level,
-                        "created_date": ds.created_date,
-                        "modified_date": ds.modified_date,
-                        "guid": ds.guid,
-                        "pub_date": ds_data.published_date if ds_data else None,
-                        "metadata_modified_date": ds_data.modified_date if ds_data else ds.created_date,
-                        "activated_item_id": ds.activated_item_id,
-                        "approval_item_id": ds_data.approval_item_id if ds_data else None
-                    },
-                    users=[u.id for u in ds.users]
-                )
+            return self._build_dataset(ds, ds_data)
 
-    def save_dataset(self, dataset, force_new: bool = False):
+    def _build_dataset(self, ds, ds_data):
+        with BlockTimer("pipeman_dataset_load_dataset_build", "Time to build a dataset object itself"):
+            return self.reg.build_dataset(
+                profiles=ds.profiles.replace("\r", "").split("\n"),
+                field_values=json.loads(ds_data.data) if ds_data else {},
+                dataset_id=ds.id,
+                ds_data_id=ds_data.id if ds_data else None,
+                revision_no=ds_data.revision_no if ds_data else None,
+                display_names=json.loads(ds.display_names) if ds.display_names else None,
+                is_deprecated=ds.is_deprecated,
+                org_id=ds.organization_id,
+                extras={
+                    "pub_workflow": ds.pub_workflow,
+                    "act_workflow": ds.act_workflow,
+                    "status": ds.status,
+                    "security_level": ds.security_level,
+                    "created_date": ds.created_date,
+                    "modified_date": ds.modified_date,
+                    "guid": ds.guid,
+                    'authority': ds.authority,
+                    "pub_date": ds_data.published_date if ds_data else None,
+                    "metadata_modified_date": ds_data.modified_date if ds_data else ds.created_date,
+                    "activated_item_id": ds.activated_item_id,
+                    "approval_item_id": ds_data.approval_item_id if ds_data else None
+                },
+                users=[u.id for u in ds.users]
+            )
+
+    def save_dataset(self, dataset, force_new: bool = False, save_metadata: bool = False):
         with self.db as session:
             ds = None
             name = "pipeman_dataset_save_dataset_update" if dataset.dataset_id else "pipeman_dataset_save_dataset_insert"
@@ -598,6 +628,8 @@ class DatasetController:
                 if (not force_new) and dataset.dataset_id is not None:
                     ds = self._update_dataset(dataset, session)
                     self._update_user_access(dataset, ds, session)
+                    if save_metadata:
+                        self._create_metadata(dataset, session, ds)
                     session.commit()
                 else:
                     ds = self._create_dataset(dataset, session)
@@ -614,7 +646,7 @@ class DatasetController:
                     if dataset.users or force_new:
                         if dataset.users:
                             self._update_user_access(dataset, ds, session)
-                        if force_new:
+                        if force_new or save_metadata:
                             self._create_metadata(dataset, session, ds)
                         ds.is_deprecated = False
                         session.add(ds)
@@ -631,18 +663,19 @@ class DatasetController:
                 session.execute(q)
 
     def _create_dataset(self, dataset: Dataset, session):
+        guid = str(uuid.uuid4()) if 'guid' not in dataset.extras or not dataset.extras['guid'] else dataset.extras['guid']
         ds = orm.Dataset(
             organization_id=int(dataset.organization_id) if dataset.organization_id else None,
             is_deprecated=dataset.is_deprecated,
             display_names=json.dumps(dataset.display_names()),
             profiles="\n".join(dataset.base_profiles),
-            guid=str(uuid.uuid4()),
-            created_by=flask_login.current_user.user_id
+            guid=guid,
+            created_by=flask_login.current_user.user_id,
         )
         session.add(ds)
         dataset.extras['guid'] = ds.guid
         for keyword in dataset.extras:
-            if keyword not in ('guid', 'created_date', 'modified_date',):
+            if keyword not in ('guid', 'created_date', 'modified_date'):
                 setattr(ds, keyword, dataset.extras[keyword])
         return ds
 
@@ -654,10 +687,10 @@ class DatasetController:
         ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
         ds.display_names = json.dumps(dataset.display_names())
         ds.profiles = "\n".join(dataset.base_profiles)
-        if not ds.guid:
-            ds.guid = str(uuid.uuid4())
         for keyword in dataset.extras:
-            if keyword not in ('guid', 'created_date', 'modified_date',):
+            if keyword in ('guid', 'authority') and ds.status != "DRAFT":
+                continue
+            if keyword not in ('created_date', 'modified_date'):
                 setattr(ds, keyword, dataset.extras[keyword])
         return ds
 
@@ -704,54 +737,61 @@ class DatasetBuilder:
         self.session = db_session
         self.controller = ctrl
 
-    def from_flask_api(self) -> Dataset:
-        """
-        Structure:
-        {
-            profiles: [profile1, profile2, ...],
-            org_name: "shortname",
-        }
-        """
+    def from_flask_api(self, allow_update: bool) -> Dataset:
         data = flask.request.get_json()
         if not isinstance(data, dict):
             raise APIInputError("Dataset must be a JSON dictionary")
-        profiles = self._get_profiles(data)
-        kwargs = {
-            "org_id": self._get_org_id(data),
-            "display_names": self._get_display_names(data),
-            "users": self._get_users(data),
-            "is_deprecated": False,
-            "extras": {
-                "status": "DRAFT",
-                "pub_workflow": self._get_publication_workflow(data),
-                "act_workflow": self._get_activation_workflow(data),
-                "security_level": self._get_security_level(data),
-                'guid': str(uuid.uuid4()),
-            },
-        }
+        ds = None
+        is_new = False
+        if 'guid' in data and data['guid']:
+            guid = data['guid']
+            authority = data['authority'] if 'authority' in data and data['authority'] else None
+            if allow_update:
+                ds = self.controller.load_dataset_by_guid(guid, authority)
+            else:
+                test_ds = self.controller.load_dataset_by_guid(guid, authority)
+                if test_ds is not None:
+                    raise APIInputError(f"This dataset already exists")
+        else:
+            authority = None
+            guid = str(uuid.uuid4())
+        if ds is None:
+            is_new = True
+            raw = orm.Dataset(
+                is_deprecated=True,
+                display_names="{}",
+                profiles="\n".join(self._get_profiles(data, is_new)),
+                guid=guid,
+                authority=authority,
+                created_by=flask_login.current_user.user_id,
+                pub_workflow="",
+                act_workflow="",
+                security_level="",
+                status="DRAFT",
+            )
+            self.session.add(raw)
+            self.session.commit()
+            ds = self.controller.load_dataset(raw.id)
+            ds.extras['pub_workflow'] = self._get_publication_workflow(data)
+            ds.extras['act_workflow'] = self._get_activation_workflow(data)
+            ds.extras['security_level'] = self._get_security_level(data)
+        ds.is_deprecated = False
+        org_id = self._get_org_id(data)
+        if org_id is not None:
+            ds.organization_id = org_id
+        dnames = self._get_display_names(data, is_new)
+        if dnames is not None:
+            for key in dnames:
+                ds.set_display_name(key, dnames[key])
+        users = self._get_users(data)
+        if users:
+            ds.users = users
         metadata = self._get_metadata(data)
-        ds = orm.Dataset(
-            organization_id=kwargs['org_id'] if kwargs['org_id'] else None,
-            is_deprecated=True,
-            display_names="{}",
-            profiles="core",
-            guid=kwargs['extras']['guid'],
-            created_by=flask_login.current_user.user_id,
-            pub_workflow="",
-            act_workflow="",
-            security_level="",
-            status="DRAFT",
-        )
-        self.session.add(ds)
-        self.session.commit()
-        kwargs['dataset_id'] = ds.id
-        dataset = self.reg.build_dataset(profiles, **kwargs)
         if metadata:
-            results = dataset.set_from_file_metadata("json_api",metadata)
+            results = ds.set_from_file_metadata("json_api", metadata)
             if results['errors']:
                 raise ValueError('\n'.join(results['errors']))
-        dataset.is_deprecated = False
-        return dataset
+        return ds
 
     def _get_metadata(self, data: dict):
         if 'metadata' in data and data['metadata']:
@@ -760,13 +800,16 @@ class DatasetBuilder:
             return data['metadata']
         return None
 
-    def _get_profiles(self, data: dict):
+    def _get_profiles(self, data: dict, is_new: bool = False):
         if "profiles" not in data:
+            if is_new: return []
             raise APIInputError("Missing [profiles]")
         profiles = data["profiles"]
         if not isinstance(profiles, list):
+            if is_new: return []
             raise APIInputError("[profiles] must be a list")
         if not profiles:
+            if is_new: return []
             raise APIInputError("[profiles] must not be empty")
         for p in profiles:
             if not self.reg.profile_exists(p):
@@ -784,19 +827,23 @@ class DatasetBuilder:
             return org.id
         raise APIInputError(f"Invalid organization name [{data['org_name']}]")
 
-    def _get_display_names(self, data):
+    def _get_display_names(self, data, is_new: bool = False):
         if "display_names" not in data or not data["display_names"]:
+            if is_new:
+                return None
             raise APIInputError("[display_names] is mandatory")
         if isinstance(data["display_names"], str):
             return {"und": data["display_names"]}
         if isinstance(data["display_names"], dict):
             # todo: verify languages?
             return data["display_names"]
+        if is_new:
+            return []
         raise APIInputError("[display_names] is an inappropriate input type")
 
     def _get_users(self, data):
         if "users" not in data or not data["users"]:
-            return None
+            return []
         ids = set()
         for u in data["users"]:
             u = self.session.query(orm.User).filter_by(username=u).first()
@@ -805,7 +852,7 @@ class DatasetBuilder:
             ids.add(u.id)
         return list(ids)
 
-    def _get_activation_workflow(self, data):
+    def _get_activation_workflow(self, data, is_new: bool = False):
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.activation_workflow", None)
         if 'activation_workflow' in data and data['activation_workflow']:
             workflow_name = data['activation_workflow']
@@ -839,6 +886,19 @@ class DatasetForm(PipemanFlaskForm):
     names = TranslatableField(
         wtf.StringField,
         label=DelayedTranslationString("pipeman.common.display_name")
+    )
+
+    guid = wtf.StringField(
+        label=DelayedTranslationString("pipeman.label.dataset.guid"),
+        description=DelayedTranslationString("pipeman.label.dataset.guid.help"),
+        validators=[
+            wtfv.Length(max=255, message=DelayedTranslationString("pipeman.error.guid_too_long"))
+        ]
+    )
+
+    authority = wtf.StringField(
+        label=DelayedTranslationString("pipeman.label.dataset.authority"),
+        description=DelayedTranslationString("pipeman.label.dataset.authority.help")
     )
 
     organization = wtf.SelectField(
@@ -917,7 +977,9 @@ class DatasetForm(PipemanFlaskForm):
                 "security_level": dataset.extras['security_level'],
                 "profiles": dataset.base_profiles,
                 "organization": dataset.organization_id,
-                "assigned_users": dataset.users or []
+                "assigned_users": dataset.users or [],
+                'guid': dataset.extras['guid'] if 'guid' in dataset.extras else '',
+                'authority': dataset.extras['authority'] if 'authority' in dataset.extras else ''
             })
         super().__init__(*args, **kwargs)
         self.organization.choices = self.ocontroller.list_organizations()
@@ -938,6 +1000,8 @@ class DatasetForm(PipemanFlaskForm):
             self.dataset.extras["security_level"] = self.security_level.data
             self.dataset.users = self.assigned_users.data
             self.dataset.organization_id = self.organization.data
+            self.dataset.extras["authority"] = self.authority.data
+            self.dataset.extras["guid"] = self.guid.data
             return self.dataset
         else:
             return self.reg.build_dataset(
@@ -949,6 +1013,8 @@ class DatasetForm(PipemanFlaskForm):
                     "act_workflow": self.act_workflow.data,
                     "security_level": self.security_level.data,
                     "status": "DRAFT",
+                    "guid": self.guid.data,
+                    "authority": self.authority.data,
                 },
                 users=self.assigned_users.data
             )

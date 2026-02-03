@@ -761,11 +761,8 @@ class EntitySelectField(wtf.Field):
 
     @staticmethod
     def build_entry(entity, by_revision, revision_no = None):
-        rev = None
-        if by_revision:
-            rev = entity.latest_revision() if revision_no is None else entity.specific_revision(revision_no)
         return {
-            "id": str(entity.id) if not by_revision else f"{entity.id}|{rev.revision_no}",
+            "id": str(entity.id) if not by_revision else f"{entity.id}|{revision_no}",
             "text": MultiLanguageString(
                 json.loads(entity.display_names)
                 if entity.display_names else

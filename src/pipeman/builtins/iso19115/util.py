@@ -1,7 +1,10 @@
+from pipeman.db import Database, orm
+from pipeman.entity import Entity
 from pipeman.entity.entity import ValidationResult, combine_object_path
 from pipeman.entity.keywords import KeywordGroup
 import functools
 
+from autoinject import injector
 
 def validate_use_constraint(uc, object_path, profile, memo):
     errors = []
@@ -115,6 +118,33 @@ def _has_other_languages(language_dict, default_locale, supported_locales):
     return False
 
 
+def _has_type_been_rendered(ref_dict: dict, type_name: str, unique_id):
+    if not unique_id:
+        return False
+    if type_name not in ref_dict:
+        ref_dict[type_name] = set()
+    if unique_id not in ref_dict[type_name]:
+        ref_dict[type_name].add(unique_id)
+        return False
+    return True
+
+def _clean_xml_id(type_name, xml_id, db_id):
+    new_xml_id = ""
+    if xml_id:
+        for ltr in xml_id:
+            if ltr in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-":
+                new_xml_id += ltr
+    if not new_xml_id:
+        new_xml_id = "_" + str(db_id)
+    return f"{type_name}_{new_xml_id}"
+
+@injector.inject
+def get_platform_instruments(platform, db: Database = None):
+    with db as session:
+        for instrument in session.query(orm.Entity).filter_by(entity_type="instrument"):
+            if instrument['mounted_on'].db_id == platform.db_id:
+                yield instrument
+
 def preprocess_metadata(dataset, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
@@ -132,6 +162,7 @@ def preprocess_metadata(dataset, **kwargs):
             dataset_maintenance.append(maintenance)
         elif maintenance['scope']['short_name'] == "metadata":
             metadata_maintenance.append(maintenance)
+    refs = {}
     return {
         "responsibilities": [
             {
@@ -166,4 +197,10 @@ def preprocess_metadata(dataset, **kwargs):
         "metadata_maintenance": metadata_maintenance,
         "grouped_keywords": separate_keywords(dataset.keywords()),
         "check_alt_langs": functools.partial(_has_other_languages, supported_locales=supported),
+        '_refs': refs,
+        'check_platform': functools.partial(_has_type_been_rendered, refs, 'platform'),
+        'check_instrument': functools.partial(_has_type_been_rendered, refs, 'instrument'),
+        'check_mission': functools.partial(_has_type_been_rendered, refs, 'mission'),
+        'clean_id': _clean_xml_id,
+        'get_platform_instruments': get_platform_instruments
     }

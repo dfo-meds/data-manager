@@ -116,6 +116,7 @@
     </mri:MD_Resolution>
     {% endif %}
   {% endmacro %}
+
   {% macro render_time_period(start, end, is_ongoing) %}
   <gml:TimePeriod gml:id="time_period">
     <gml:beginPosition>{{xml_escape(start.isoformat(timespec='milliseconds'))}}</gml:beginPosition>
@@ -604,5 +605,264 @@
     <mcc:description xsi:type="lan:PT_FreeText_PropertyType">{{ render_text(desc) }}</mcc:description>
     {% endif %}
   </mcc:MD_Identifier>
+  {% endmacro %}
+  {% macro iso.render_acquisition(info) %}
+  {% set has_level_description = not (is_empty(info['attributes']) and is_empty(info['features']) and is_empty(info['feature_instances']) and is_empty(info['attribute_instances']) and is_empty(info['dataset']) and is_empty(info['other'])) %}
+  {% set has_scope_code = not is_empty(info['scope']) %}
+  {% set has_extent = not (is_empty(info['bbox_west']) and is_empty(info['bbox_east']) and is_empty(info['bbox_north']) and is_empty(info['bbox_south'])) %}
+  <mac:MI_AcquisitionInformation>
+    {% if has_extent or has_scope_code or has_level_description %}
+    <mac:scope>
+      <mcc:MD_Scope>
+        {% if has_scope_code %}
+        <mcc:level>
+          <mcc:MD_ScopeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="{{xml_quote(info['scope']['short_name'])}}" />
+        </mcc:level>
+        {% endif %}
+        {% if not is_empty(info['attributes']) %}
+        <mcc:MD_ScopeDescription>
+          <attributes>{{ render_text(info['attributes']) }}</attributes>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if not is_empty(info['features']) %}
+        <mcc:MD_ScopeDescription>
+          <features>{{ render_text(info['features']) }}</features>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if not is_empty(info['feature_instances']) %}
+        <mcc:MD_ScopeDescription>
+          <featureInstances>{{ render_text(info['feature_instances']) }}</featureInstances>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if not is_empty(info['attribute_instances']) %}
+        <mcc:MD_ScopeDescription>
+          <attributeInstances>{{ render_text(info['attribute_instances']) }}</attributeInstances>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if not is_empty(info['dataset']) %}
+        <mcc:MD_ScopeDescription>
+          <dataset>{{ render_text(info['dataset']) }}</dataset>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if not is_empty(info['other']) %}
+        <mcc:MD_ScopeDescription>
+          <other>{{ render_text(info['other']) }}</other>
+        </mcc:MD_ScopeDescription>
+        {% endif %}
+        {% if has_extent %}
+        <mcc:extent>
+        {{ render_extent(info) }}
+        </mcc:extent>s
+        {% endif %}
+      </mcc:MD_Scope>
+    </mac:scope>
+    {% endif %}
+    {% if not is_empty(info['instruments']) %}
+    {% for instrument in info['instruments'] %}
+    {{ render_instrument(instrument) }}
+    {% endfor %}
+    {% endif %}
+    {% if not is_empty(info['missions']) %}
+    {% for mission in info['missions'] %}
+    <mac:operation>
+    {{ render_operation(mission) }}
+    </mac:operation>
+    {% endfor %}
+    {% endif %}
+    {% if not is_empty(info['platforms']) %}
+    {% for platform in info['platforms'] %}
+    {{ render_platform(platform) }}
+    {% endfor %}
+    {% endif %}
+    <!-- acquisitionPlan -->
+    <!-- objective -->
+    <!-- acquisitionRequirement -->
+    <!-- environmentalConditions -->
+  </mac:MI_AcquisitionInformation>
+  {% endmacro %}
+  {% macro render_extent(extent) %}
+  <gex:EX_Extent>
+    {% if not is_empty(extent['bbox_north']) %}
+    <gex:geographicElement>
+      <gex:EX_GeographicBoundingBox>
+        <gex:extentTypeCode>
+          <gco:Boolean>true</gco:Boolean>
+        </gex:extentTypeCode>
+        <gex:westBoundLongitude>
+          <gco:Decimal>{{xml_escape(extent['bbox_west'])}}</gco:Decimal>
+        </gex:westBoundLongitude>
+        <gex:eastBoundLongitude>
+          <gco:Decimal>{{xml_escape(extent['bbox_east'])}}</gco:Decimal>
+        </gex:eastBoundLongitude>
+        <gex:southBoundLatitude>
+          <gco:Decimal>{{xml_escape(extent['bbox_south'])}}</gco:Decimal>
+        </gex:southBoundLatitude>
+        <gex:northBoundLatitude>
+          <gco:Decimal>{{xml_escape(extent['bbox_north'])}}</gco:Decimal>
+        </gex:northBoundLatitude>
+      </gex:EX_GeographicBoundingBox>
+    </gex:geographicElement>
+    {% endif %}
+    {% if not is_empty(extent['start_time']) %}
+    <gex:temporalElement>
+      <gex:EX_TemporalExtent>
+        <gex:extent>
+          {{ render_time_period(extent['start_time'], extent['end_time'], extent['is_ongoing']) }}
+        </gex:extent>
+      </gex:EX_TemporalExtent>
+    </gex:temporalElement>
+    {% endif %}
+    {% if not (is_empty(extent['vertical_min']) and is_empty(extent['vertical_max'])) %}
+    <gex:verticalElement>
+      <gex:EX_VerticalExtent>
+        {% if not is_empty(extent['vertical_min']) %}
+        <gex:minimumValue>
+          <gco:Real>{{xml_escape(extent['vertical_min'])}}</gco:Real>
+        </gex:minimumValue>
+        {% endif %}
+        {% if not is_empty(extent['vertical_max']) %}
+        <gex:maximumValue>
+          <gco:Real>{{xml_escape(extent['vertical_max'])}}</gco:Real>
+        </gex:maximumValue>
+        {% endif %}
+        {% if not is_empty(extent['vertical_ref_system']) %}
+        <gex:verticalCRSId>
+          {{ iso.render_ref_system(extent['vertical_ref_system']) }}
+        </gex:verticalCRSId>
+        {% endif %}
+      </gex:EX_VerticalExtent>
+    </gex:verticalElement>
+    {% endif %}
+  </gex:EX_Extent>
+  {% endmacro %}
+
+
+  {% macro render_platform(platform) %}
+  {% set unique_id = clean_id('platform', platform['id_code'], platform.db_id) %}
+  {% if check_platform(unique_id) %}
+  <mac:platform gco:idref="{{xml_escape(unique_id)}}" />
+  {% else %}
+  <mac:platform>
+    <mac:MI_Platform gco:id="{{xml_escape(unique_id)}}">
+      {% if platform['citation'] %}
+      {% for citation in platform['citation'] %}
+      <mac:citation>
+        {{ render_citation(citation) }}
+      </mac:citation>
+      {% endfor %}
+      {% endif %}
+      {% if platform['id_code'] %}
+      <mac:identifier>
+        {{ render_id(platform['id_code'], "", platform['id_system']) }}
+      </mac:identifier>
+      {% endif %}
+      {% if platform['description'] %}
+      <mac:description>
+        {{ render_text(platform['description'] }}
+      </mac:description>
+      {% endif %}
+      {% if platform['sponsors'] %}
+      {% for resp in platform['sponsors'] %}
+      <mac:sponsor>
+        {% render_responsibility(resp['role']['short_name'], resp['contact']) }}
+      </mac:sponsor>
+      {% endfor %}
+      {% endif %}
+      <!-- otherProperty -->
+      <!-- otherPropertyType -->
+      {% for instrument in get_platform_instruments(platform) %}
+      {{ render_instrument(instrument) }}
+      {% endfor %}
+      <!-- history -->
+    </mac:MI_Platform>
+  </mac:platform>
+  {% endif %}
+  {% endmacro %}
+
+
+  {% macro render_operation(operation) %}
+  <mac:MI_Operation>
+    {% if operation['description'] %}
+    <mac:description>{{render_text(operation['description'])}}</mac:description>
+    {% endif %}
+    {% if operation['citation'] %}
+    <mac:citation>{{render_citation(operation['citation'])}}</mac:citation>
+    {% endif %}
+    {% if operation['id_code'] %}
+    <mac:identifier>
+      {{ render_id(operation['id_code'], "", operation["id_system"]) }}
+    </mac:identifier>
+    {% endif %}
+    {% if operation['status'] %}
+    <mac:status>
+      <mcc:MD_ProgressCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ProgressCode" codeListValue="{{xml_quote(operation['status']['short_name'])}}" />
+    </mac:status>
+    {% endif %}
+    {% if operation['mission_type'] %}
+    <mac:type>
+      <mac:MI_OperationTypeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MI_OperationTypeCode" codeListValue="{{xml_quote(operation['mission_type']['short_name'])}}" />
+    </mac:type>
+    {% endif %}
+    {% if operation['parent_mission'] %}
+    <mac:parentOperation>
+      {{ render_operation(operation['parent_mission']) }}
+    </mac:parentOperation>
+    {% endif %}
+    <!-- childOperation -->
+    {% if operation['platforms'] %}
+    {% for platform in operation['platforms'] %}
+    {{render_platform(platform)}}
+    {% endfor %}
+    {% endif %}
+    <!-- objective -->
+    <!-- plan -->
+    <!-- significantEvent -->
+    <!-- otherPropertyType -->
+    <!-- otherProperty  -->
+  </mac:MI_Operation>
+  {% endmacro %}
+
+
+  {% macro render_instrument(instrument) %}
+  {% set unique_id = clean_id('instrument', instrument['id_code'], platform.db_id) %}
+  {% if check_instrument(unique_id) %}
+  <mac:instrument gco:idref="{{xml_escape(unique_id)}}" />
+  {% else %}
+  <mac:instrument>
+    <mac:MI_Instrument gco:id="{{xml_escape(unique_id)}}">
+      {% if instrument['citation'] %}
+      {% for citation in instrument['citation'] %}
+      <mac:citation>
+        {{ render_citation(citation) }}
+      </mac:citation>
+      {% endfor %}
+      {% endif %}
+      {% if instrument['id_code'] %}
+      <mac:identifier>
+      {{ render_id(instrument['id_code'], "", instrument['id_system']) }}
+      </mac:identifier>
+      {% endif %}
+      {% if instrument['description'] %}
+      <mac:type>
+        {{ render_text(instrument['description']) }}
+      </mac:type>
+      {% endif %}
+      {% if instrument['description'] %}
+      <mac:description>
+        {{ render_text(instrument['description']) }}
+      </mac:description>
+      {% endif %}
+      {% if instrument['mounted_on'] %}
+      <mac:mountedOn>
+        {{ render_platform(instrument['mounted_on']) }}
+      </mac:mountedOn>
+      <!-- otherPropertyType -->
+      <!-- otherProperty -->
+      <!-- content -->
+      <!-- sensor -->
+      <!-- history -->
+    </mac:MI_Instrument>
+  </mac:instrument>
+  {% endif %}
   {% endmacro %}
 </templates>

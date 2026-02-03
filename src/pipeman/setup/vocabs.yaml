@@ -31,15 +31,15 @@ timezones:
     "America/Halifax":
       display:
         und: "America/Halifax (Atlantic)"
-    "America/Regina":
-      display:
-        und: "America/Winnepeg (Central)"
-    "America/St_Johns":
-      display:
-        und: "America/St_Johns (Newfoundland; Labrador)"
     "America/Winnipeg":
       display:
-        und: "America/Winnipeg (Pacific)"
+        und: "America/Winnipeg (Central)"
+    "America/St_Johns":
+      display:
+        und: "America/St_Johns (Newfoundland)"
+    "America/Vancouver":
+      display:
+        und: "America/Vancouver (Pacific)"
     # TODO: add more, but these are most common government offices
 
 

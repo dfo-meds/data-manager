@@ -12,6 +12,7 @@ import pipeman.db.orm as orm
 from pipeman.i18n import gettext, format_date, format_datetime
 from pipeman.i18n import MultiLanguageString, DelayedTranslationString, MultiLanguageLink
 from pipeman.db import Database
+from pipeman.util.errors import APIInputError
 from pipeman.util.flask import HtmlField, FlatPickrWidget, Select2Widget
 from pipeman.entity.base import Field, NumberValidationMixin, NoControlMixin, LengthValidationMixin
 from pipeman.entity.keywords import Keyword
@@ -68,7 +69,10 @@ class DateField(Field):
             if self.with_time:
                 return datetime.datetime.fromisoformat(raw_value)
             else:
-                return datetime.date.fromisoformat(raw_value)
+                if 'T' in raw_value:
+                    return datetime.date.fromisoformat(raw_value[:raw_value.find('T')])
+                else:
+                    return datetime.date.fromisoformat(raw_value)
         else:
             return raw_value
 
@@ -116,7 +120,9 @@ class DecimalField(NumberValidationMixin, Field):
             if raw_value == "":
                 return None
             return decimal.Decimal(raw_value)
-        if raw_value is None or isinstance(raw_value, decimal.Decimal):
+        elif isinstance(raw_value, (float, int)):
+            return decimal.Decimal(raw_value)
+        elif raw_value is None or isinstance(raw_value, decimal.Decimal):
             return raw_value
         return None
 
@@ -288,8 +294,40 @@ class KeyValueField(Field):
             "form_class": KeyValueForm
         }
 
-    def _handle_raw(self, raw_value):
-        raise NotImplementedError("KeyValue field not implemented yet")
+    def set_from_raw(self, raw_value):
+        values = []
+        if isinstance(raw_value, dict):
+            for key in raw_value:
+                values.append(self._handle_raw_item(key, raw_value[key]))
+        elif isinstance(raw_value, list):
+            for item in raw_value:
+                if isinstance(item, dict):
+                    values.append(self._handle_raw_item(**item))
+                else:
+                    values.append(self._handle_raw_item(*item))
+        self.value = values
+
+    def _handle_raw_item(self, key, value, data_type=None):
+        if data_type is None:
+            if isinstance(value, (int, float)):
+                data_type = 'numeric'
+            elif isinstance(value, str):
+                data_type = 'str'
+            elif isinstance(value, (list, tuple, set)) and value:
+                first_item = value[0]
+                if isinstance(first_item, (int, float)):
+                    data_type = 'numeric_list'
+                elif isinstance(first_item, str):
+                    data_type = 'str_list'
+                else:
+                    raise APIInputError(f"Invalid value for a key/value list: {type(value[0])}")
+            else:
+                raise APIInputError(f"Invalid value for a key/value entry: {type(value)}")
+        return {
+            'key': key,
+            'value': value,
+            'data_type': data_type,
+        }
 
     def validators(self) -> list:
         return []
@@ -309,9 +347,17 @@ class KeyValueField(Field):
         try:
             if dtype == 'str':
                 return str(val)
+            elif dtype == 'str_list':
+                if isinstance(val, list):
+                    return val
+                return [x.strip() for x in val.split(',')]
             elif dtype == 'numeric':
+                if isinstance(val, (int, float)):
+                    return val
                 return float(val) if '.' in val else int(val)
             elif dtype == 'numeric_list':
+                if isinstance(val, list):
+                    return val
                 return [float(v.strip()) if '.' in v else int(v.strip()) for v in val.split(",") if v.strip()]
             else:
                 self._log.error(f"Datatype not recognized {dtype} - {self.parent_type}.{self.parent_id}.{self.field_name}")
@@ -459,6 +505,7 @@ class KeyValueForm(wtf.Form):
         gettext("pipeman.labels.kv_field.data_type"),
         choices=[
             ("str", gettext("pipeman.labels.kv_field.data_type.str")),
+            ("str_list", gettext("pipeman.labels.kv_field.data_type.str_list")),
             ("numeric", gettext("pipeman.labels.kv_field.data_type.numeric")),
             ("numeric_list", gettext("pipeman.labels.kv_field.data_type.numeric_list")),
         ],
