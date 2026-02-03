@@ -129,6 +129,8 @@ custom:
       netcdf:
         mapping:
         processor: key_value_pairs
+      json_api:
+        mapping: custom_metadata
 keywords:
   fields:
     cf_standard_names:

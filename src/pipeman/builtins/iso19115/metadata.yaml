@@ -646,6 +646,16 @@ extent:
         mapping: temporal_crs
 references:
   fields:
+    acquisition_info:
+      data_type: component_ref
+      repeatable: yes
+      entity_type: acquisition
+      order: 0
+      label:
+        en: Acquisition Info
+      # TODO: label + descriptions
+      json_api:
+        mapping: acquisition_info
     additional_docs:
       data_type: entity_ref
       repeatable: yes

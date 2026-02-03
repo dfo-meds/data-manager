@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<mac:MI_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
   xmlns:gml="http://www.opengis.net/gml/3.2"
   xmlns:mpc="http://standards.iso.org/iso/19115/-3/mpc/1.0"
@@ -165,59 +165,7 @@
       {% endfor %}
       {% endif %}
       <mri:extent>
-        <gex:EX_Extent>
-          {% if not is_empty(dataset['bbox_north']) %}
-          <gex:geographicElement>
-            <gex:EX_GeographicBoundingBox>
-              <gex:extentTypeCode>
-                <gco:Boolean>true</gco:Boolean>
-              </gex:extentTypeCode>
-              <gex:westBoundLongitude>
-                <gco:Decimal>{{xml_escape(dataset['bbox_west'])}}</gco:Decimal>
-              </gex:westBoundLongitude>
-              <gex:eastBoundLongitude>
-                <gco:Decimal>{{xml_escape(dataset['bbox_east'])}}</gco:Decimal>
-              </gex:eastBoundLongitude>
-              <gex:southBoundLatitude>
-                <gco:Decimal>{{xml_escape(dataset['bbox_south'])}}</gco:Decimal>
-              </gex:southBoundLatitude>
-              <gex:northBoundLatitude>
-                <gco:Decimal>{{xml_escape(dataset['bbox_north'])}}</gco:Decimal>
-              </gex:northBoundLatitude>
-            </gex:EX_GeographicBoundingBox>
-          </gex:geographicElement>
-          {% endif %}
-          {% if not is_empty(dataset['start_time']) %}
-          <gex:temporalElement>
-            <gex:EX_TemporalExtent>
-              <gex:extent>
-                {{ iso.render_time_period(dataset['start_time'], dataset['end_time'], dataset['is_ongoing']) }}
-              </gex:extent>
-            </gex:EX_TemporalExtent>
-          </gex:temporalElement>
-          {% endif %}
-          {% if not (is_empty(dataset['vertical_min']) and is_empty(dataset['vertical_max'])) %}
-          <gex:verticalElement>
-            <gex:EX_VerticalExtent>
-              {% if not is_empty(dataset['vertical_min']) %}
-              <gex:minimumValue>
-                <gco:Real>{{xml_escape(dataset['vertical_min'])}}</gco:Real>
-              </gex:minimumValue>
-              {% endif %}
-              {% if not is_empty(dataset['vertical_max']) %}
-              <gex:maximumValue>
-                <gco:Real>{{xml_escape(dataset['vertical_max'])}}</gco:Real>
-              </gex:maximumValue>
-              {% endif %}
-              {% if not is_empty(dataset['vertical_ref_system']) %}
-              <gex:verticalCRSId>
-                {{ iso.render_ref_system(dataset['vertical_ref_system']) }}
-              </gex:verticalCRSId>
-              {% endif %}
-            </gex:EX_VerticalExtent>
-          </gex:verticalElement>
-          {% endif %}
-        </gex:EX_Extent>
+        {{ render_extent(dataset) }}
       </mri:extent>
       {% if not is_empty(dataset['additional_docs']) %}
       {% for doc in dataset['additional_docs'] %}
@@ -315,5 +263,11 @@
       {{ iso.render_maintenance_info("", metadata_maintenance) }}
       {% endif %}
   </mdb:metadataMaintenance>
-  {# <!-- acquisitionInfo --> #}
-</mdb:MD_Metadata>
+  {% if not is_empty(dataset['acquisition_info']) %}
+  {% for acq_info in dataset['acquisition_info'] %}
+  <mdb:acquisitionInfo>
+    {{ iso.render_acquisition(acq_info) }}
+  </mdb:acquisitionInfo>
+  {% endfor %}
+  {% endif %}
+</mac:MI_Metadata>

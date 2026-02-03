@@ -27,7 +27,10 @@ class CIOOSVocabularyManager:
     def fetch_eovs(self):
         try:
             resp = requests.get(self.cioos_eovs_list_url)
+            resp.raise_for_status()
+            return  # TODO: fix
             self.vtc.clear_terms_from_dict("cioos_eovs")
+
             cioos_eovs = resp.json()
             if "eovs" in cioos_eovs:
                 eov_terms = {}

@@ -240,22 +240,22 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         if isinstance(external_value, (list, tuple)):
             if not self.is_repeatable():
                 raise ValueError("Multiple entities specified for a non-repeatable field")
-            existing = set(self.value)
+            existing = set(self.value) if self.value else set()
             for obj in external_value:
                 ent = self.ec.create_or_update_entity(
                     obj,
                     external_container_setter,
                     self.field_config["entity_type"]
                 )
-                existing.add(EntitySelectField.build_entry(ent, False))
-            self.value = existing
+                existing.add(ent.db_id)
+            self.value = list(existing)
         else:
             ent = self.ec.create_or_update_entity(
                 external_value,
                 external_container_setter,
                 self.field_config["entity_type"]
             )
-            self.value = EntitySelectField.build_entry(ent, False)
+            self.value = ent.db_id
 
     def _handle_raw(self, raw_value):
         raise NotImplementedError("EntityReference field not implemented yet")

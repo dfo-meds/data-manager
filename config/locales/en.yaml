@@ -237,7 +237,7 @@ pipeman.label.dataset.activation_chain_link: Approval List
 pipeman.label.dataset.activation_workflow: Activation Workflow
 pipeman.label.dataset.assigned_users: Assigned Users
 pipeman.label.dataset.attachments: Attachments
-pipeman.label.dataset.guid: UUID
+pipeman.label.dataset.guid: Global Identifier
 pipeman.label.dataset.id: ID
 pipeman.label.dataset.metadata: Metadata
 pipeman.label.dataset.metadata_files: Metadata Files
@@ -398,3 +398,7 @@ pipeman.workflow.page.view_item.title: View Item
 pipeman.auth.page.change_password.error_no_password_for_account: "You must enter a password"
 pipeman.dataset.message.no_fields: "No metadata fields are available, please add some metadata profiles to this dataset."
 pipeman.dataset.page.copy_dataset.success: "The dataset has been copied"
+
+pipeman.label.dataset.guid.help: "A globally unique identifier for this dataset. Cannot be changed once published. Leave blank for a random identifier to be generated."
+pipeman.label.dataset.authority: "Identifier Authority"
+pipeman.label.dataset.authority.help: "The authority who issued the unique identifier. Leave blank to use the CNODC's authority."

@@ -23,6 +23,5 @@ def set_metadata_from_api(fc: FieldContainer, metadata: dict, file_type: str, re
                 value = metadata[api_name]
             field.set_from_external(value, functools.partial(set_metadata_from_api, results=results, file_type=file_type))
         except Exception as ex:
-            logging.getLogger("pipeman.api_mapper").warning(f"Error mapping API data value for [{field_name}]")
-            logging.exception(ex)
-            results['errors'].append(str(ex))
+            logging.getLogger("pipeman.api_mapper").exception(f"Error mapping API data value for [{field_name}]")
+            results['errors'].append(f"{type(ex)}: {str(ex)}")
