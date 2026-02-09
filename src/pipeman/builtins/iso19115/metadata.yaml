@@ -779,4 +779,6 @@ publishing:
         en: Add one entry for each method of distributing the data via online methods.
         fr: Ajoutez une entrée pour chaque méthode de distribution des données via des méthodes en ligne.
       repeatable: yes
+      json_api:
+        mapping: distributors
 

@@ -1986,6 +1986,8 @@ dist_channel:
         fr: Décrivez l'option de distribution.
       order: 0
       multilingual: yes
+      json_api:
+        mapping: description
     responsibles:
       data_type: inline_entity_ref
       repeatable: yes
@@ -1997,6 +1999,8 @@ dist_channel:
         en: Enter the information about the contacts responsible for distribution.
         fr: Entrez les informations sur les contacts responsables de la distribution.
       order: 10
+      json_api:
+        mapping: responsibles
     primary_web_link:
       data_type: inline_entity_ref
       entity_type: resource
@@ -2008,6 +2012,8 @@ dist_channel:
         fr: Entrez les informations sur le lien Web principal pour la distribution.
       order: 20
       unique: yes
+      json_api:
+        mapping: primary_web_link
     links:
       data_type: entity_ref
       entity_type: resource
@@ -2019,3 +2025,5 @@ dist_channel:
         fr: S'il existe d'autres ressources Web pertinentes pour cette méthode de distribution, ajoutez-les ici.
       order: 30
       repeatable: yes
+      json_api:
+        mapping: links
