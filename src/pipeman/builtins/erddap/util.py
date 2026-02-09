@@ -162,24 +162,27 @@ def preprocess_dataset(dataset, **kwargs):
     cdm_timeseries_vars = []
     cdm_trajectory_vars = []
     for var in dataset['variables']:
+        actual_name = var['destination_name']
+        if not actual_name:
+            actual_name = var['source_name']
         if var['allow_subsets']:
-            subset_vars.append(var['destination_name'])
+            subset_vars.append(actual_name)
         if var['altitude_proxy']:
-            altitude_proxy = var['destination_name']
+            altitude_proxy = actual_name
         if var['cf_role']:
             if var['cf_role']['short_name'] == 'profile_id':
-                cdm_profile_vars.append(var['destination_name'])
+                cdm_profile_vars.append(actual_name)
             if var['cf_role']['short_name'] == 'timeseries_id':
-                cdm_timeseries_vars.append(var['destination_name'])
+                cdm_timeseries_vars.append(actual_name)
             if var['cf_role']['short_name'] == 'trajectory_id':
-                cdm_trajectory_vars.append(var['destination_name'])
+                cdm_trajectory_vars.append(actual_name)
         if var['erddap_role']:
             if var['erddap_role']['short_name'] == 'profile_extra':
-                cdm_profile_vars.append(var['destination_name'])
+                cdm_profile_vars.append(actual_name)
             if var['erddap_role']['short_name'] == 'timeseries_extra':
-                cdm_timeseries_vars.append(var['destination_name'])
+                cdm_timeseries_vars.append(actual_name)
             if var['erddap_role']['short_name'] == 'trajectory_extra':
-                cdm_trajectory_vars.append(var['destination_name'])
+                cdm_trajectory_vars.append(actual_name)
     if cdm_profile_vars:
         vars['global_attributes']['cdm_profile_variables'] = ','.join(cdm_profile_vars)
     if cdm_trajectory_vars:
