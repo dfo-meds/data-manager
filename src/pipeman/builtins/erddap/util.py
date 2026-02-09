@@ -192,4 +192,8 @@ def preprocess_dataset(dataset, **kwargs):
         vars['global_attributes']['cdm_altitude_proxy'] = altitude_proxy
     if dataset['info_link'] and dataset['info_link']['url']:
         vars['global_attributes']['infoUrl'] = dataset['info_link']['url']
+    else:
+        vars['global_attributes']['infoUrl'] = ""
+    if 'summary' not in vars['global_attributes']:
+        vars['global_attributes']['summary'] = ""
     return vars
