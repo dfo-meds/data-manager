@@ -1,3 +1,5 @@
+import pathlib
+
 import yaml
 import os
 from autoinject import injector
@@ -22,7 +24,7 @@ class YamlTranslationManager:
         elif extra_paths is not None:
             dpaths.extend(extra_paths)
         cfg_paths = self.cfg.as_path(('pipeman', 'i18n_yaml', 'dictionary_paths'), default=None)
-        if isinstance(cfg_paths, str):
+        if isinstance(cfg_paths, (str, pathlib.Path)):
             dpaths.append(cfg_paths)
         elif cfg_paths is not None:
             dpaths.extend(cfg_paths)

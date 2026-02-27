@@ -5,7 +5,7 @@ FROM python:3.9.13-slim-bullseye
 
 # Get the required libraries to compile psycopg
 RUN apt-get update
-RUN apt-get install libpq-dev build-essential -y
+RUN apt-get install libpq-dev build-essential dumb-init -y
 
 WORKDIR /srv/metadb
 
@@ -48,4 +48,6 @@ EXPOSE 80
 
 WORKDIR /srv/metadb/app
 
-CMD ["/srv/metadb/start.sh"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/srv/metadb/start.sh"]
+
+CMD ["webserver"]
