@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Note that 3.9 is required for greenlet to work (as of July 21/2022), 3.10 fails to compile
-FROM python:3.9.13-slim-bullseye
+FROM python:3.14.3-slim-trixie
 
 # Get the required libraries to compile psycopg
 RUN apt-get update
