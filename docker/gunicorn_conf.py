@@ -29,7 +29,7 @@ port = os.getenv("PORT", "80")
 bind_env = os.getenv("BIND", None)
 errorlog = os.getenv("ERROR_LOG", "-")
 accesslog = os.getenv("ACCESS_LOG", None)
-loglevel = os.getenv("LOG_LEVEL", "info")
+loglevel = os.getenv("LOG_LEVEL", "INFO")
 enable_stdio_inheritance = os.getenv("ENABLE_STDIO_INHERITANCE", "1") == "1"
 
 # Set use_bind

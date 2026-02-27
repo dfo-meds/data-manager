@@ -1,5 +1,6 @@
 import email.message
 import logging
+import multiprocessing
 import pathlib
 import smtplib
 import typing as t
@@ -193,12 +194,11 @@ class EmailLogHandler(logging.Handler):
 
 class QueuedEmailLogHandler(logging.handlers.QueueHandler):
 
-    def __init__(self, level_name=logging.NOTSET, subject_line=None):
+    def __init__(self, queue, level_name=logging.NOTSET, subject_line=None):
+        queue = multiprocessing.Queue()
+        super().__init__(queue)
         self.setLevel(level_name)
-        self._simple_queue = queue.SimpleQueue()
         self._email_handler = EmailLogHandler(subject_line=subject_line)
-        super().__init__(self._simple_queue)
-        self._listener = logging.handlers.QueueListener(self._simple_queue, self._email_handler)
-        print("starting")
+        self._listener = logging.handlers.QueueListener(queue, self._email_handler)
         self._listener.start()
         atexit.register(self._listener.stop)
