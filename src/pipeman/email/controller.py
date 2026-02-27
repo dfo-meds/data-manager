@@ -194,7 +194,7 @@ class EmailLogHandler(logging.Handler):
 
 class QueuedEmailLogHandler(logging.handlers.QueueHandler):
 
-    def __init__(self, queue, level_name=logging.NOTSET, subject_line=None):
+    def __init__(self, queue, level_name=logging.ERROR, subject_line=None):
         queue = multiprocessing.Queue()
         super().__init__(queue)
         self.setLevel(level_name)
