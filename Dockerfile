@@ -4,7 +4,7 @@ FROM python:3.14.3-slim-trixie
 
 # Get the required libraries to compile psycopg
 RUN apt-get update
-RUN apt-get install libpq-dev build-essential dumb-init -y
+RUN apt-get install libpq-dev build-essential dumb-init dos2unix -y
 
 WORKDIR /srv/metadb
 
@@ -30,13 +30,22 @@ RUN pip install -r requirements.txt
 
 COPY docker/start.sh start.sh
 RUN chmod +x start.sh
+RUN dos2unix start.sh
 
 COPY docker/gunicorn_conf.py gunicorn_conf.py
 
 COPY docker/pipeman /usr/local/bin/pipeman
 RUN chmod +x /usr/local/bin/pipeman
+RUN dos2unix /usr/local/bin/pipeman
 
-COPY . app
+COPY src/* app/
+COPY alembic/ app/alembic
+copy config/ app/config
+COPY docker/config/ app/docker/config
+COPY static/ app/static
+COPY templates app/templates
+COPY app.py app/app.py
+COPY cli.py app/cli.py
 
 EXPOSE 80
 
