@@ -10,6 +10,19 @@ use_constraint:
         fr: Ce texte est utilisé lorsque l'enregistrement ISO complet ne peut pas être utilisé (par exemple dans les fichiers NetCDF)
       json_api:
         mapping: plain_text
+contact:
+  fields:
+    short_name:
+      data_type: text
+      label:
+        en: Short Name
+        fr: Nom courte
+      description:
+        en: This text is used where a shorter name might be better (e.g. in NetCDF files)
+        fr: Ce texte est utilisé là où un nom plus court pourrait être préférable (par exemple dans les fichiers NetCDF)
+      multilingual: yes
+      json_api:
+        mapping: short_name
 variable:
   validation:
     required:

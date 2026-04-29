@@ -1,0 +1,743 @@
+locale:
+
+  # Canadian English
+  canadian_english_utf8:
+    _display_names:
+      en: Canadian English
+      fr: Anglais canadien
+    language: eng
+    a2_language: en
+    country: CAN
+    encoding: utf8
+    ietf_bcp47: en-CA
+
+  # Canadian French
+  canadian_french_utf8:
+    _display_names:
+      en: Canadian French
+      fr: Français canadien
+    language: fra
+    a2_language: fr
+    country: CAN
+    encoding: utf8
+    ietf_bcp47: fr-CA
+
+id_system:
+
+  # DOI Identifiers
+  DOI:
+    _display_names:
+      en: Digital Object Identifier (DOI)
+      fr: Identifiant d'objet numérique (ION)
+    authority:
+      title:
+        en: Digital Object Identifier (DOI)
+        fr: Identifiant d'objet numérique (ION)
+      presentation_form: documentDigital
+      resource:
+        url: "https://www.doi.org"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+        name:
+          en: DOI Homepage
+          fr: Page d'accueil pour les ION
+    code_space: "https://doi.org/"
+
+  # ROR Identifiers
+  ROR:
+    _display_names:
+      en: Research Organization Registry (ROR)
+      fr: Registre des organisations de recherche (ROR)
+    authority:
+      title:
+        en: Research Organization Registry (ROR)
+        fr: Registre des organisations de recherche (ROR)
+      presentation_form: documentDigital
+      resource:
+        url: "https://ror.org"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+        name:
+          en: ROR Homepage
+          fr: Page d'accueil pour les ROR
+    code_space: "https://ror.org/"
+
+  # ORCID Identifiers
+  ORCID:
+    _display_names:
+      en: Open Research and Contributor ID (ORCID)
+      fr: Identifiant pour la recherche ouverte et les contributeurs (ORCID)
+    authority:
+      title:
+        en: Research Organization Registry (ROR)
+        fr: Identifiant pour la recherche ouverte et les contributeurs (ORCID)
+      presentation_form: documentDigital
+      resource:
+        url: "https://orcid.org/"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+          - FRA
+        name:
+          en: ORCID Homepage
+          fr: Page d'accueil pour les ORCID
+    code_space: "https://orcid.org/"
+
+  IMONumber:
+    _display_names:
+      en: International Maritime Organization (IMO) Number
+      fr: Numéro de l'organization maritime internationale (OMI)
+    authority:
+      title:
+        en: International Maritime Organization (IMO) Number
+        fr: Numéro de l'organization maritime internationale (OMI)
+      presentation_form: documentDigital
+      resource:
+        url: "https://www.spglobal.com/market-intelligence/en/solutions/imo-ship-company"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+        name:
+          en: IMO Homepage
+          fr: Page d'accueil de l'OMI
+
+  EPSG:
+    _display_names:
+      en: EPSG Geodetic Parameter Dataset
+      fr: Ensemble de données des paramètres géodésiques de l'EPSG
+    authority:
+      title:
+        en: EPSG Geodetic Parameter Dataset
+        fr: Ensemble de données des paramètres géodésiques de l'EPSG
+      presentation_form: documentDigital
+      resource:
+        url: "https://epsg.io/"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+        name:
+          en: EPSG Geodetic Parameter Dataset
+          fr: Ensemble de données des paramètres géodésiques de l'EPSG
+    code_space: "https://epsg.io/"
+
+resource:
+  bio_web_page:
+    _display_names:
+      en: Bedford Institute of Oceanography Website
+      fr: Site web de l'Institut océanographique de Bedford
+    name:
+      en: Bedford Institute of Oceanography Website
+      fr: Site web de l'Institut océanographique de Bedford
+    url:
+      en: https://www.bio.gc.ca/index-en.php
+      fr: https://www.bio.gc.ca/index-fr.php
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+      - FRA
+  dfo_web_page:
+    _display_names:
+      en: Fisheries and Oceans Canada Website
+      fr: Site web de Pêches et Océans Canada
+    name:
+      en: Fisheries and Oceans Canada Website
+      fr: Site web de Pêches et Océans Canada
+    url:
+      en: https://www.dfo-mpo.gc.ca/index-eng.html
+      fr: https://www.dfo-mpo.gc.ca/index-fra.html
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+      - FRA
+  meds_web_page:
+    _display_names:
+      en: Marine Environmental Data Section Website
+      fr: Site web de la section des données sur le milieu marin
+    name:
+      en: Marine Environmental Data Section Website
+      fr: Site web de la section des données sur le milieu marin
+    url:
+      en: https://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/index-eng.html
+      fr: https://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/index-fra.html
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+      - FRA
+
+  cnodc_web_page:
+    _display_names:
+      en: Canadian National Oceanographic Data Centre Website
+      fr: Site web de la centre national de données océanographiques du Canada
+    name:
+      en: Canadian National Oceanographic Data Centre Website
+      fr: Site web de la centre national de données océanographiques du Canada
+    url:
+      en: https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/services-eng.html
+      fr: https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/services-fra.html
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+      - FRA
+
+ref_system:
+  nad27:
+    _display_names:
+      und: NAD27
+    system_type: geodeticGeographic2D
+    description: North American Datum of 1927
+    code: 4267
+    id_system: EPSG
+
+  wgs84:
+    _display_names:
+      und: WGS84
+    system_type: geodeticGeographic2D
+    description: World Geodetic System of 1984
+    code: 4326
+    id_system: EPSG
+
+  msl_depth:
+    _display_names:
+      en: Mean Sea Level (Depth)
+    system_type: vertical
+    description: Depth below mean sea level
+    code: 5715
+    id_system: EPSG
+
+  msl_height:
+    _display_names:
+      en: Mean Sea Level (Height)
+    system_type: vertical
+    description: Height above mean sea level
+    code: 5714
+    id_system: EPSG
+
+  instant_depth:
+    _display_names:
+      en: Instant Sea Level (Depth)
+    system_type: vertical
+    description: Instantaneous depth below current sea level
+    code: 5831
+    id_system: EPSG
+
+  instant_height:
+    _display_names:
+      en: Instant Sea Level (Height)
+    system_type: vertical
+    description: Instantaneous height above current sea level
+    code: 5829
+    id_system: EPSG
+
+  gregorian:
+    _display_names:
+      und: Gregorian
+    system_type: temporal
+    description: Standard Gregorian calendar
+
+goc_publishing_org:
+  dfo:
+    _display_names:
+      en: Fisheries and Oceans Canada
+      fr: Pêches et Océans Canada
+    publisher_name:
+      en: Fisheries and Oceans Canada
+      fr: Pêches et Océans Canada
+    publisher_code: DFO
+
+goc_publishing_section:
+  meds:
+    _display_names:
+      en: Marine Environmental Data Section (MEDS)
+      fr:
+    section_name:
+      en: Marine Environmental Data Section (MEDS)
+      fr:
+    publisher: dfo
+
+erddap_servers:
+  cnodc_primary:
+    _display_names:
+      en: CNODC ERDDAP
+      fr: ERDDAP CNDOC
+    responsibles:
+      -
+        role: distributor
+        contact: cnodc
+    base_url: https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/erddap/
+
+
+
+
+citation:
+  metadata_standard_iso19115:
+    _display_names:
+      en: ISO 19115-1 Geographic Information - Metadata
+      fr: ISO 19115-1 Information géographique - Métadonnée
+    title:
+      en: ISO 19115-1 Geographic Information - Metadata
+      fr: ISO 19115-1 Information géographique - Métadonnée
+    edition:
+      en: First Edition 2014-04-01
+      fr: Première édition 2014-04-01
+    edition_date: 2014-04-01
+  metadata_standard_iso19115-1:
+    _display_names:
+      en: ISO 19115-1 Geographic Information - Metadata Amendment 1
+      fr: ISO 19115-1 Information géographique - Modification 1 des métadonnées
+    title:
+      en: ISO 19115-1 Geographic Information - Metadata Amendment 1
+      fr: ISO 19115-1 Information géographique - Modification 1 des métadonnées
+    edition:
+      und: 2018-02
+  metadata_profile_cioos:
+    _display_names:
+      en: Canadian Integrated Ocean Observing System Metadata Profile of ISO-19115
+      fr: Profil des métadonnées du Système intégré d’observation de l’océan de Canada ISO-19115
+    title:
+      en: Canadian Integrated Ocean Observing System Metadata Profile of ISO-19115
+      fr: Profil des métadonnées du Système intégré d’observation de l’océan de Canada ISO-19115
+    publication_date: 2019-11-06
+
+
+  open_government_license_2022:
+    _display_names:
+      en: Open Government License - Canada (2022)
+      fr: Licence du gouvernement ouvert - Canada (2022)
+    title:
+      en: Open Government License - Canada
+      fr: Licence du gouvernement ouvert - Canada
+    publication_date: 2022-12-02
+    edition: 2.0
+    resource:
+      url:
+        en: https://open.canada.ca/en/open-government-licence-canada
+        fr: https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada
+      name:
+        en: Open Government License - Canada
+        fr: Licence du gouvernement ouvert - Canada
+      protocol: https
+      function: information
+      goc_content_type: support_doc
+      goc_formats:
+        - HTML
+      goc_languages:
+        - ENG
+        - FRA
+  goc_security_directive_2019:
+    _display_names:
+      en: "Directive on Security Management - Appendix J: Standard on Security Categorization"
+      fr: "Directive sur la gestion de la sécurité - Annexe J : Norme sur la catégorisation de sécurité"
+    title:
+      en: "Directive on Security Management - Appendix J: Standard on Security Categorization"
+      fr: "Directive sur la gestion de la sécurité - Annexe J : Norme sur la catégorisation de sécurité"
+    publication_date: 2019-07-01
+    resource:
+      url:
+        en: "https://www.tbs-sct.canada.ca/pol/doc-eng.aspx?id=32614"
+        fr: "https://www.tbs-sct.canada.ca/pol/doc-fra.aspx?id=32614"
+      name:
+        en: "Directive on Security Management - Appendix J: Standard on Security Categorization"
+        fr: "Directive sur la gestion de la sécurité - Annexe J : Norme sur la catégorisation de sécurité"
+      protocol: https
+      function: information
+      goc_content_type: support_doc
+      goc_formats:
+        - HTML
+      goc_languages:
+        - ENG
+        - FRA
+  goc_security_levels_2024:
+    _display_names:
+      en: "Levels of security"
+      fr: "Niveaux de sécurité"
+    title:
+      en: "Levels of security"
+      fr: "Niveaux de sécurité"
+    publication_date: 2024-12-31
+    resource:
+      url:
+        en: "https://www.canada.ca/en/public-services-procurement/services/industrial-security/security-requirements-contracting/safeguarding-equipment-sites-assets-information/levels-security.html"
+        fr: "https://www.canada.ca/fr/services-publics-approvisionnement/services/securite-industrielle/exigences-securite-contrats/protection-equipement-lieux-biens-renseignements/niveaux-securite.html"
+      name:
+        en: "Levels of security"
+        fr: "Niveaux de sécurité"
+      protocol: https
+      function: information
+      goc_content_type: support_doc
+      goc_formats:
+        - HTML
+      goc_languages:
+        - ENG
+        - FRA
+
+contact:
+
+  goc:
+    _display_names:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+    short_name:
+      en: GOC
+      fr: GOC
+    organization_name:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  cnodc:
+    _display_names:
+      en: Canadian National Oceanographic Data Centre
+      fr: Centre national de données océanographiques du Canada
+    short_name:
+      en: CNODC
+      fr: CNDOC
+    email:
+      und: DFO.MEDS-SDMM.MPO@dfo-mpo.gc.ca
+    organization_name:
+      en: Canadian National Oceanographic Data Centre
+      fr: Centre national de données océanographiques du Canada
+    web_resource:
+      - cnodc_web_page
+
+  meds:
+    _display_names:
+      en: Marine Environmental Data Section
+      fr: Section des données sur le milieu marin
+    short_name:
+      en: MEDS
+      fr: SDMM
+    organization_name:
+      en: Marine Environmental Data Section
+      fr: Section des données sur le milieu marin
+    email:
+      und: DFO.MEDS-SDMM.MPO@dfo-mpo.gc.ca
+    web_resource:
+      - meds_web_page
+
+
+  03bz9t645:
+    _display_names:
+      en: Bedford Institute of Oceanography
+      fr: Institut océanographique de Bedford
+    organization_name:
+      en: Bedford Institute of Oceanography
+      fr: Institut océanographique de Bedford
+    short_name:
+      en: BIO
+    web_resource:
+      - bio_web_page
+    id_code: 03bz9t645
+    id_system: ROR
+
+  03c62s410:
+    _display_names:
+      en: Canadian-Pacific Robotic Ocean Observing Facility
+      fr: Installation canadienne d’observation de l’océan Pacifique par robotique
+    organization_name:
+      en: Canadian-Pacific Robotic Ocean Observing Facility
+      fr: Installation canadienne d’observation de l’océan Pacifique par robotique
+    short_name:
+      en: C-PROOF
+    id_code: 03c62s410
+    id_system: ROR
+
+  iml:
+    _display_names:
+      en: Maurice Lamontagne Institute
+      fr: Institut Maurice-Lamontagne
+    organization_name:
+      en: Maurice Lamontagne Institute
+      fr: Institut Maurice-Lamontagne
+
+  04haebc03:
+    _display_names:
+      en: Memorial University of Newfoundland
+      fr: Université Memorial de Terre-Neuve
+    short_name:
+      en: Memorial
+    organization_name:
+      en: Memorial University of Newfoundland
+      fr: Université Memorial de Terre-Neuve
+    id_code: 04haebc03
+    id_system: ROR
+
+  04s5mat29:
+    _display_names:
+      en: University of Victoria
+      fr: Université de Victoria
+    organization_name:
+      en: University of Victoria
+      fr: Université de Victoria
+    id_code: 04s5mat29
+    id_system: ROR
+
+  ios:
+    _display_names:
+      en: Institute of Ocean Sciences
+      fr: Institut des sciences de la mer
+    short_name:
+      en: IOS
+    organization_name:
+      en: Institute of Ocean Sciences
+      fr: Institut des sciences de la mer
+
+  nafc:
+    _display_names:
+      en: North Atlantic Fisheries Centre
+      fr: Centre des pêches de l’Atlantique nord-ouest
+    organization_name:
+      en: North Atlantic Fisheries Centre
+      fr: Centre des pêches de l’Atlantique nord-ouest
+    short_name:
+      en: NAFC
+
+  ceotr:
+    _display_names:
+      en: Coastal Environmental Observation Technology and Research
+      fr: Technologie et recherche en bbservation environnementale côtière
+    organization_name:
+      en: Coastal Environmental Observation Technology and Research
+      fr: Technologie et recherche en bbservation environnementale côtière
+    short_name:
+      en: CEOTR
+
+
+  02qa1x782:
+    _display_names:
+      en: Fisheries and Oceans Canada
+      fr: Pêches et Océans Canada
+    organization_name:
+      en: Fisheries and Oceans Canada
+      fr: Pêches et Océans Canada
+    short_name:
+      en: DFO
+      fr: MPO
+    web_resource:
+      - dfo_web_page
+    id_code: 02qa1x782
+    id_system: ROR
+
+
+use_constraint:
+  unclassified_data:
+    _display_names:
+      en: Government of Canada - Unclassified (2019)
+      fr: Gouvernement du Canada - Non classifié (2019)
+    description:
+      en: This information is not considered classified or protected
+      fr:
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: unclassified
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  protected_a:
+    _display_names:
+      en: Government of Canada - Protected A
+      fr: Gouvernement du Canada - Protégé A
+    description:
+      en: This information is considered Protected A
+      fr: Cette information est considérée comme protégée A
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: protected
+    user_notes:
+      en: Access requires Reliability Status and Designated Organization Screening
+      fr: L'accès nécessite le cote de fiabilité et le vérification de l'organisation désignée
+    handling_description:
+      en: Internal email or email with PKI encryption. Fax with confirmation of recipient's number. Locked in an approved storage unit. Dispose in approved shredder. Verify additional handling details with your department.
+      fr: Email interne ou email avec chiffrement PKI. Fax avec confirmation du numéro du destinataire. Verrouillé dans un unité de stockage approuvée. Jeter dans un broyeur approuvé. Vérifiez les détails supplémentaires de manipulation avec votre département.
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  protected_b:
+    _display_names:
+      en: Government of Canada - Protected B
+      fr: Gouvernement du Canada - Protégé B
+    description:
+      en: This information is considered Protected B
+      fr: Cette information est considérée comme protégée B
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: protected
+    user_notes:
+      en: Access requires Reliability Status and Designated Organization Screening
+      fr: L'accès nécessite le cote de fiabilité et le vérification de l'organisation désignée
+    handling_description:
+      en: Internal email or email with PKI encryption. Fax with confirmation of recipient's number. Locked in an approved storage unit. Dispose in approved shredder. Verify additional handling details with your department.
+      fr: Email interne ou email avec chiffrement PKI. Fax avec confirmation du numéro du destinataire. Verrouillé dans un unité de stockage approuvée. Jeter dans un broyeur approuvé. Vérifiez les détails supplémentaires de manipulation avec votre département.
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  protected_c:
+    _display_names:
+      en: Government of Canada - Protected C
+      fr: Gouvernement du Canada - Protégé C
+    description:
+      en: This information is considered Protected C
+      fr: Cette information est considérée comme protégée C
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: protected
+    user_notes:
+      en: Access requires Enhanced Reliability Status and Designated Organization Screening
+      fr: L'accès nécessite le cote de fiabilité approfondie et le vérification de l'organisation désignée
+    handling_description:
+      en: Secure fax and telephone only. Do not email. Approved security containers only. Encrypted USB flash drives only. No storage on unapproved systems. Dispose using an approved shredder. Digital media must be appropriately destroyed by your Department's IT services.  Verify additional handling details with your department.
+      fr: Fax et téléphone sécurisés uniquement. Ne pas envoyer par e-mail. Uniquement des conteneurs de sécurité approuvés. Uniquement des clés USB chiffrées. Pas de stockage sur des systèmes non approuvés. Éliminer en utilisant une déchiqueteuse approuvée. Les supports numériques doivent être détruits de manière appropriée par les services informatiques de votre département. Vérifiez les détails supplémentaires de manipulation avec votre département.
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  confidential:
+    _display_names:
+      en: Government of Canada - Confidential
+      fr: Gouvernement du Canada - Confidentiel
+    description:
+      en: This information is considered Confidential
+      fr: Cette information est considérée comme confidentiel
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: protected
+    user_notes:
+      en: Access requires Secret Clearance and facility security clearance (Confidential)
+      fr: L'accès nécessite le autorisation secret et le attestation de sécurité d'installation (confidentiel)
+    handling_description:
+      en: Secure fax and telephone only. Do not email. Approved security containers only. Encrypted USB flash drives only. No storage on unapproved systems. Dispose using an approved shredder. Digital media must be appropriately destroyed by your Department's IT services.  Verify additional handling details with your department.
+      fr: Fax et téléphone sécurisés uniquement. Ne pas envoyer par e-mail. Uniquement des conteneurs de sécurité approuvés. Uniquement des clés USB chiffrées. Pas de stockage sur des systèmes non approuvés. Éliminer en utilisant une déchiqueteuse approuvée. Les supports numériques doivent être détruits de manière appropriée par les services informatiques de votre département. Vérifiez les détails supplémentaires de manipulation avec votre département.
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  secret:
+    _display_names:
+      en: Government of Canada - Secret
+      fr: Gouvernement du Canada - Secret
+    description:
+      en: This information is considered Secret
+      fr: Cette information est considérée comme secret
+    reference:
+      - goc_security_directive_2019
+      - goc_security_levels_2024
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    classification: protected
+    user_notes:
+      en: Access requires Secret Clearance and facility security clearance (Secret)
+      fr: L'accès nécessite le autorisation secret et le attestation de sécurité d'installation (secret)
+    handling_description:
+      en: Secure fax and telephone only. Do not email. Approved security containers only. Encrypted USB flash drives only. No storage on unapproved systems. Dispose using an approved shredder. Digital media must be appropriately destroyed by your Department's IT services.  Verify additional handling details with your department.
+      fr: Fax et téléphone sécurisés uniquement. Ne pas envoyer par e-mail. Uniquement des conteneurs de sécurité approuvés. Uniquement des clés USB chiffrées. Pas de stockage sur des systèmes non approuvés. Éliminer en utilisant une déchiqueteuse approuvée. Les supports numériques doivent être détruits de manière appropriée par les services informatiques de votre département. Vérifiez les détails supplémentaires de manipulation avec votre département.
+    classification_system:
+      en: Government of Canada
+      fr: Gouvernement du Canada
+
+  open_government_license:
+    _display_names:
+      en: Open Government License - Canada
+      fr: Licence du gouvernement ouvert - Canada
+    description:
+      en: Your use of this content is subject to the Open Government License of Canada (https://open.canada.ca/en/open-government-licence-canada).
+      fr: Votre utilisation de ce contenu est soumise à la Licence du gouvernement ouvert du Canada (https://ouvert.canada.ca/fr/licence-du-gouvernement-ouvert-canada).
+    reference:
+      - open_government_license_2022
+    responsibles:
+      -
+        role: author
+        contact: goc
+      -
+        role: pointOfContact
+        contact: cnodc
+    access_constraints:
+      - licenceUnrestricted
+    use_constraints:
+      - licenceUnrestricted
+    other_constraints:
+      en: Acknowledgement required as per the terms of the Open Government License
+      fr: Reconnaissance requise conformément aux termes de la licence du gouvernement ouvert

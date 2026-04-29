@@ -4,5 +4,5 @@ from autoinject import injector as _injector
 
 
 @_injector.inject
-def on_gunicorn_worker_exit(db_pool: DatabasePool):
+def on_gunicorn_worker_exit(db_pool: DatabasePool = None):
     db_pool.close()

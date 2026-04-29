@@ -76,7 +76,7 @@ def report():
 def entity_types(output_file, ereg: EntityRegistry = None):
     with open(output_file, "w", newline="\n", encoding="utf-8") as h:
         writer = csv.writer(h)
-        ets = dict(ereg.list_entity_types())
+        ets = dict(ereg.list_entity_types(True))
         writer.writerow([
             'entity_type',
             'is_component',
@@ -98,29 +98,44 @@ def entity_types(output_file, ereg: EntityRegistry = None):
 def entity_fields(output_file, ereg: EntityRegistry = None):
     with open(output_file, "w", newline="\n", encoding="utf-8") as h:
         writer = csv.writer(h)
-        ets = dict(ereg.list_entity_types())
+        ets = dict(ereg.list_entity_types(True))
         writer.writerow([
             'entity_type',
             'field_name',
             'order',
             'data_type',
-            'name_und',
+            'repeatable',
+            'multilingual',
+            'json_api_key',
             'name_en',
             'name_fr',
+            'description_en',
+            'description_fr',
         ])
-        for et in ets:
+        for et in sorted(ets.keys()):
             if not ('fields' in ets[et] and ets[et]['fields']):
                 continue
             fields = ets[et]['fields']
-            for fn in fields:
+            for fn in sorted(fields.keys()):
+                default_name = fields[fn]['label'].get('und', '??')
+                default_desc = fields[fn].get('description', {}).get('und', '??')
+                data_type = fields[fn].get('data_type', '')
+                if 'entity_type' in fields[fn] and fields[fn]['entity_type']:
+                    data_type += f" [{fields[fn]['entity_type']}]"
+                if 'vocabulary_name' in fields[fn] and fields[fn]['vocabulary_name']:
+                    data_type += f" [{fields[fn]['vocabulary_name']}]"
                 output = [
                     et,
                     fn,
-                    fields[fn]['order'] if 'order' in fields[fn] else '',
-                    fields[fn]['data_type'],
-                    fields[fn]['label']['und'] if 'und' in fields[fn]['label'] else '',
-                    fields[fn]['label']['en'] if 'en' in fields[fn]['label'] else '',
-                    fields[fn]['label']['fr'] if 'fr' in fields[fn]['label'] else '',
+                    fields[fn].get('order', ''),
+                    data_type,
+                    'yes' if fields[fn].get('repeatable', False) else 'no',
+                    'yes' if fields[fn].get('multilingual', False) else 'no',
+                    fields[fn].get('json_api', {}).get('mapping', ''),
+                    fields[fn].get('label', {}).get('en', default_name),
+                    fields[fn].get('label', {}).get('fr', default_name),
+                    fields[fn].get('description', {}).get('en', default_desc),
+                    fields[fn].get('description', {}).get('fr', default_desc),
                 ]
                 writer.writerow(output)
 
@@ -138,23 +153,32 @@ def fields(output_file, mreg: MetadataRegistry = None):
             'display_group',
             'order',
             'data_type',
-            'name_und',
+            'repeatable',
+            'multilingual',
+            'json_api_key',
+            'profiles',
             'name_en',
             'name_fr',
-            'profiles',
+            'description_en',
+            'description_fr',
         ])
         for fn in fields:
+            default_name = fields[fn].get('label', {}).get('und', '??')
+            default_desc = fields[fn].get('description', {}).get('und', '??')
             output = [
                 fn,
-                fields[fn]["display_group"],
-                fields[fn]['order'] if 'order' in fields[fn] else '',
-                fields[fn]['data_type'],
-                fields[fn]['label']['und'] if 'und' in fields[fn]['label'] else '',
-                fields[fn]['label']['en'] if 'en' in fields[fn]['label'] else '',
-                fields[fn]['label']['fr'] if 'fr' in fields[fn]['label'] else '',
+                fields[fn].get("display_group", ''),
+                fields[fn].get('order', ''),
+                fields[fn].get('data_type', ''),
+                'yes' if fields[fn].get('repeatable', False) else 'no',
+                'yes' if fields[fn].get('multilingual', False) else 'no',
+                fields[fn].get('json_api', {}).get('mapping', ''),
+                ";".join([p for p in profiles if mreg.profile_contains_field(p, fn)]),
+                fields[fn].get('label', {}).get('en', default_name),
+                fields[fn].get('label', {}).get('fr', default_name),
+                fields[fn].get('description', {}).get('en', default_desc),
+                fields[fn].get('description', {}).get('fr', default_desc),
             ]
-            pro = [p for p in profiles if mreg.profile_contains_field(p, fn)]
-            output.append(';'.join(pro) if pro else '')
             writer.writerow(output)
 
 

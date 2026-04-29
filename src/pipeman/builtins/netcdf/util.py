@@ -124,7 +124,7 @@ def _global_attributes(dataset: Dataset, config: zr.ApplicationConfig = None, **
 
 
 @injector.inject
-def set_metadata_from_netcdf(dataset: Dataset, metadata: dict, file_type: str, results: dict, ec: EntityController = None, vtc: VocabularyTermController = None):
+def set_metadata_from_netcdf(dataset: Dataset, metadata: dict, file_type: str, results: dict, key_only: bool = False, ec: EntityController = None, vtc: VocabularyTermController = None):
     if 'keywords' in metadata['global']:
         _process_keywords(dataset, metadata['global'].pop('keywords'), ec)
     _import_netcdf_attributes(dataset, metadata['global'], 'custom_metadata')
@@ -210,16 +210,16 @@ def _process_keywords(dataset: Dataset, keywords: str, ec: EntityController):
                         new_t = ec.reg.new_entity('thesaurus')
                         new_t.get_field('prefix').set_from_raw(dict_name)
                         ec.save_entity(new_t)
-                        _custom_map['thesaurus'][str(new_t.db_id)] = dict_name
-                        actual_tid = str(new_t.db_id)
+                        _custom_map['thesaurus'][str(new_t.container_id)] = dict_name
+                        actual_tid = str(new_t.container_id)
                 new_k = ec.reg.new_entity('keyword')
                 new_k.set_display_name('und', keyword)
                 new_k.get_field('keyword').set_from_raw({"und": keyword})
                 new_k.get_field('thesaurus').set_from_raw(actual_tid)
                 ec.save_entity(new_k)
-                _custom_map['keywords'].append(({keyword}, actual_tid, dict_name, new_k.db_id))
+                _custom_map['keywords'].append(({keyword}, actual_tid, dict_name, new_k.container_id))
                 values = field.value
-                values.append(new_k.db_id)
+                values.append(new_k.container_id)
                 field.set_from_raw(list(set(values)))
 
 

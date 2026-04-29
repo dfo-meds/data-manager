@@ -249,3 +249,22 @@ steward:
     - action_items.decide
     - files.upload
     - vocabularies.view
+
+api_access:
+  display:
+    en: API Access
+    fr: Accès à l'API
+  permissions:
+    - datasets.create_api
+    - datasets.upsert_api
+    - files.upload
+
+api_access_direct:
+  display:
+    en: API Access (Bypass Approvals)
+    fr: Accès à l'API (contourner les approbations)
+  permissions:
+    - workflow.activate_and_publish
+    - datasets.create_api
+    - files.upload
+    - datasets.upsert_api

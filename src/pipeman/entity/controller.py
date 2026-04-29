@@ -1,5 +1,7 @@
+import pathlib
 import typing
-from enum import unique
+
+import yaml
 
 from .entity import EntityRegistry
 from autoinject import injector
@@ -22,8 +24,60 @@ import flask_login
 import wtforms.validators as wtfv
 import functools
 
+from ..builtins.api_mapper.util import set_metadata_from_api
 from ..util import UserInputError
+import typing as t
 
+
+""" This is an order of entity_types that are safe to load without circular references.
+    Where there is a list of entity types, they can cross-reference each other! Be careful. """
+ENTITY_ORDER: list[str | list[str]] = [
+
+    # no references
+    'locale',
+    'resource',
+    'goc_publishing_org',
+    'spatial_res',
+    'telephone_info',
+    'time_res',
+    'variables',
+
+    # only references a goc_publishing_org
+    'goc_publishing_section',
+
+    # these collectively reference each other and the above (will need to order likely)
+    ["id_system", "contact", "citation", "graphic", "use_constraint"],
+
+    # only references an id_system
+    "ref_system",
+
+    # only references a citation
+    "thesaurus",
+
+    # only references a keyword
+    "keyword",
+
+    # only references a contact
+    "responsibility",
+    # refs: contact
+
+    # only references responsibilities and resources
+    "dist_channel",
+
+    # only references responsibilities, citations, and id_systems
+    "platform",
+
+    # only references citations, id_systems, and platforms
+    "instrument",
+
+    # only references citations, id_systems, missions, and platforms
+    "mission",
+    # refs: citation, id_system, mission, platform
+
+    # only references responsibilities
+    "erddap_servers",
+
+]
 
 @injector.injectable
 class EntityController:
@@ -41,11 +95,11 @@ class EntityController:
         actions = ActionList()
         kwargs = {
             "obj_type": ent.entity_type,
-            "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id
+            "obj_id": ent.container_id if hasattr(ent, "container_id") else ent.id
         }
         comp_kwargs = {
             "obj_type": ent.entity_type,
-            "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id,
+            "obj_id": ent.container_id if hasattr(ent, "container_id") else ent.id,
             "parent_id": ent.parent_id,
             "parent_type": ent.parent_type,
         }
@@ -75,13 +129,69 @@ class EntityController:
     def _build_format_list(self):
         pass
 
+    def upsert_from_yaml_file(self, yaml_file_path: pathlib.Path):
+        with open(yaml_file_path, "r", encoding="utf-8") as h:
+            data = yaml.load(h.read(), Loader=yaml.CSafeLoader)
+        def _get_entities_of_type(entity_type: str) -> t.Iterable[dict]:
+            if entity_type in data:
+                for guid in data[entity_type]:
+                    ed = data[entity_type][guid] or {}
+                    ed['_guid'] = guid
+                    ed['_entity_type'] = entity_type
+                    if '_order' not in ed:
+                        ed['_order'] = 0
+                    yield ed
+
+        for entity_type_or_types in ENTITY_ORDER:
+            entity_data = []
+            if isinstance(entity_type_or_types, str):
+                entity_data.extend(_get_entities_of_type(entity_type_or_types))
+            else:
+                for entity_type in entity_type_or_types:
+                    entity_data.extend(_get_entities_of_type(entity_type))
+            entity_data.sort(key=lambda x: x['_order'])
+            for external_data in entity_data:
+                et = external_data['_entity_type']
+                del external_data['_entity_type']
+                del external_data['_order']
+                results = {
+                    'errors': [],
+                    'warnings': []
+                }
+                self.create_or_update_entity(
+                    external_data,
+                    functools.partial(set_metadata_from_api, file_type="yaml", results=results),
+                    et
+                )
+                if results['errors'] or results['warnings']:
+                    print('===')
+                    print(external_data)
+                    print('\n'.join(results['errors']))
+                    print('---')
+                    print('\n'.join(results['warnings']))
+                    print('===')
+
+
     def create_or_update_entity(self,
-                                external_data: dict,
-                                external_processor: callable,
+                                external_data: dict | str,
+                                external_processor: t.Callable,
+                                entity_type: str,
+                                parent_id: typing.Optional[int] = None,
+                                parent_type: typing.Optional[str] = None):
+        entity = self._find_entity_for_upsert(external_data, external_processor, entity_type, parent_id, parent_type)
+        external_processor(entity, external_data)
+        self.save_entity(entity)
+        return entity
+
+    def _find_entity_for_upsert(self,
+                                external_data: dict | str,
+                                external_processor: t.Callable,
                                 entity_type: str,
                                 parent_id: typing.Optional[int] = None,
                                 parent_type: typing.Optional[str] = None):
         with self.db as session:
+            if isinstance(external_data, str):
+                external_data = {'_guid': external_data}
             if '_guid' in external_data and external_data['_guid']:
                 query = session.query(orm.Entity).filter_by(entity_type=entity_type, guid=external_data['_guid'])
                 if parent_id and parent_type:
@@ -90,7 +200,7 @@ class EntityController:
                 if check_by_guid:
                     return self._load_entity_from_orm(check_by_guid)
 
-            new_entity = self.build_entity_from_data(external_data, external_processor, entity_type, parent_id, parent_type)
+            new_entity = self.build_entity_from_data(external_data, external_processor, entity_type, parent_id, parent_type, key_only=True)
             query = session.query(orm.Entity).filter_by(entity_type=entity_type)
             if parent_id and parent_type:
                 query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
@@ -103,10 +213,11 @@ class EntityController:
 
     def build_entity_from_data(self,
                                external_data: dict,
-                               external_processor: callable,
+                               external_processor: t.Callable,
                                entity_type: str,
                                parent_id: typing.Optional[int] = None,
-                               parent_type: typing.Optional[str] = None):
+                               parent_type: typing.Optional[str] = None,
+                               key_only: bool = False):
         kwargs = {
             "parent_id": parent_id,
             "parent_type": parent_type,
@@ -119,7 +230,7 @@ class EntityController:
             entity_type,
             **kwargs
         )
-        external_processor(new_entity, external_data)
+        external_processor(new_entity, external_data, key_only=key_only)
         return new_entity
 
     def compare_entity_from_data(self, entity1, entity2) -> bool:
@@ -246,7 +357,7 @@ class EntityController:
         if form.handle_form():
             self.save_entity(ent)
             flasht("pipeman.entity.page.edit_entity.success", 'success')
-            return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.db_id))
+            return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.container_id))
         return flask.render_template(
             self.edit_template,
             form=form,
@@ -285,7 +396,7 @@ class EntityController:
         if form.handle_form():
             self.save_entity(new_ent)
             flasht("pipeman.entity.page.create_entity.success", 'success')
-            return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.db_id))
+            return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.container_id))
         return flask.render_template(
             self.edit_template,
             form=form,
@@ -363,16 +474,16 @@ class EntityController:
         return dt
 
     def remove_entity(self, entity):
-        self._log.notice(f"Deprecating entity {entity.db_id}")
+        self._log.notice(f"Deprecating entity {entity.container_id}")
         with self.db as session:
-            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
             ent.is_deprecated = True
             session.commit()
 
     def restore_entity(self, entity):
-        self._log.notice(f"Restoring entity {entity.db_id}")
+        self._log.notice(f"Restoring entity {entity.container_id}")
         with self.db as session:
-            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
             ent.is_deprecated = False
             session.commit()
 
@@ -403,14 +514,14 @@ class EntityController:
             )
 
     def save_entity(self, entity):
-        self._log.info(f"Saving entity {entity.db_id}")
+        self._log.info(f"Saving entity {entity.container_id}")
         with self.db as session:
             if entity.guid:
                 check = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid).first()
-                if check and (entity.db_id is None or not entity.db_id == entity.db_id):
+                if check and (entity.container_id is None or not entity.container_id == entity.container_id):
                     raise UserInputError("pipeman.entity.error.guid_already_exists")
-            if entity.db_id is not None:
-                e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            if entity.container_id is not None:
+                e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
                 e.display_names = json.dumps(entity.display_names())
                 e.organization_id = int(entity.organization_id) if entity.organization_id else None
                 e.parent_id = entity.parent_id if entity.parent_id else None
@@ -428,7 +539,7 @@ class EntityController:
                 )
                 session.add(e)
             session.commit()
-            entity.db_id = e.id
+            entity.container_id = e.id
             retries = 5
             while retries > 0:
                 retries -= 1

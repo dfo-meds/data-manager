@@ -72,7 +72,6 @@ class DatabasePool:
             self.engine.dispose()
             del self.engine
             self.engine = None
-            gc.collect()
 
 
 @injector.injectable

@@ -25,10 +25,16 @@ class Field:
         self.value = None
         self._use_default_repeatable = True
         self.parent = container
-        self.parent_id = self.parent.container_id if self.parent else None
-        self.parent_type = self.parent.container_type if self.parent else None
         self._default_thesaurus = None
         self._log = zrlog.get_logger("pipeman.field")
+
+    @property
+    def parent_id(self):
+        return self.parent.container_id if self.parent else None
+
+    @property
+    def parent_type(self):
+        return self.parent.container_type if self.parent else None
 
     def allow_javascript_controls(self):
         from pipeman.entity import Entity
@@ -61,16 +67,17 @@ class Field:
                     self._file_translation_request(val)
                 elif self.value and '_translation_request' in self.value and self.value['_translation_request']:
                     val['_translation_request'] = True
-        if self.is_multilingual():
-            if self.is_repeatable():
-                for idx in range(0, min(len(val), len(self.value))):
-                    for k in self.value[idx]:
-                        if k not in val[idx]:
-                            val[idx][k] = self.value[idx][k]
-            else:
-                for k in self.value:
-                    if k not in val:
-                        val[k] = self.value[k]
+        if self.value:
+            if self.is_multilingual():
+                if self.is_repeatable():
+                    for idx in range(0, min(len(val), len(self.value))):
+                        for k in self.value[idx]:
+                            if k not in val[idx]:
+                                val[idx][k] = self.value[idx][k]
+                else:
+                    for k in self.value:
+                        if k not in val:
+                            val[k] = self.value[k]
         return val
 
     def set_from_translation(self, val: dict = None, index: int = None):
@@ -135,7 +142,7 @@ class Field:
             return False
         return True
 
-    def set_from_external(self, external_value, external_container_setter: callable):
+    def set_from_external(self, external_value, external_container_setter: t.Callable):
         self.set_from_raw(external_value)
 
     def set_from_raw(self, raw_value):
@@ -345,6 +352,13 @@ class Field:
         return validators
 
     def default_value(self) -> t.Any:
+        if not self.value:
+            if self.is_repeatable():
+                return []
+            elif self.is_multilingual():
+                return {}
+            else:
+                return None
         if self.is_multilingual():
             metadata_langs = self.tm.metadata_supported_languages()
             if self.is_repeatable():
@@ -368,7 +382,7 @@ class Field:
             "label": self.label(),
             "description": self.description(),
             "validators": self.validators(),
-            "default": self.default_value,
+            "default": self.default_value(),
             "filters": self.filters()
         }
         args.update(self._extra_wtf_arguments())

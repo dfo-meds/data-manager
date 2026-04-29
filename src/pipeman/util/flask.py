@@ -139,9 +139,10 @@ class NoControlCharacters:
 
 class TabbedFieldFormWidget:
 
-    def __init__(self, no_tab_fields: t.Optional[list] = None, for_txt_input: bool = False):
+    def __init__(self, no_tab_fields: t.Optional[list] = None, for_txt_input: bool = False, default_tab: int = None):
         self._no_tab_fields = no_tab_fields or []
         self._for_txt_input = for_txt_input
+        self._default_tab: t.Optional[int] = default_tab
 
     def __call__(self, field, **kwargs):
         labels = []
@@ -174,7 +175,10 @@ class TabbedFieldFormWidget:
         html += '</div>\n'
         html += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">\n'
         html += "$(document).ready(function() {"
-        html += f"$('#{field.id}').tabs().addClass('ui-tabs-vertical ui-helper-clearfix');"
+        tabs = ''
+        if self._default_tab is not None:
+            tabs = '{active: ' + str(self._default_tab) + '}'
+        html += f"$('#{field.id}').tabs({tabs}).addClass('ui-tabs-vertical ui-helper-clearfix');"
         html += f"$('#{field.id} li').removeClass('ui-corner-top').addClass('ui-corner-left');"
         html += "});"
         html += '</script>\n'
@@ -893,19 +897,37 @@ class DynamicFormField(wtf.FormField):
 class TranslatableField(DynamicFormField):
 
     tm: TranslationManager = None
+    ld: LanguageDetector = None
 
     @injector.construct
     def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, allow_js_widget: bool = True, use_metadata_languages: bool = False, **kwargs):
         self.template_field = template_field
         self.use_undefined = use_undefined
+        self._use_metadata_languages = use_metadata_languages
         self.allow_translation_requests = allow_translation_requests
         self.template_args = field_kwargs or {}
-        self._use_metadata_languages = use_metadata_languages
+        new_default = {}
+        found_languages = []
+        allowed_languages = self.get_language_keys()
+        # prevent crashing because the languages weren't approved
+        if 'default' in kwargs and kwargs['default']:
+            for key in kwargs['default']:
+                if key in allowed_languages:
+                    new_default[key] = kwargs['default'][key]
+                    if new_default[key]:
+                        found_languages.append(key)
+        kwargs['default'] = new_default
+        default_tab = 'und'
+        if found_languages:
+            default_tab = self.ld.detect_language(found_languages)
+            if default_tab not in found_languages:
+                default_tab = 'und'
+
         if "label" in self.template_args:
             del self.template_args["label"]
         if "widget" not in kwargs:
             if allow_js_widget:
-                kwargs['widget'] = TabbedFieldFormWidget(['_translation_request'], for_txt_input=True)
+                kwargs['widget'] = TabbedFieldFormWidget(['_translation_request'], for_txt_input=True, default_tab=allowed_languages.index(default_tab))
         super().__init__(self._build_field_list(), *args, **kwargs)
 
     def __call__(self, *args, **kwargs):
@@ -921,18 +943,26 @@ class TranslatableField(DynamicFormField):
                             }
         return super().__call__(*args, **kwargs)
 
-    def _build_field_list(self):
-        fields = {}
+    def get_language_keys(self) -> list[str]:
+        keys = []
         if self.use_undefined:
-            fields['und'] = self.template_field(label=DelayedTranslationString("languages.short.und"), **self.template_args)
-        fields.update({
-            lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
-            for lang in (self.tm.metadata_supported_languages() if self._use_metadata_languages else self.tm.supported_languages())
-        })
+            keys.append('und')
+        if self._use_metadata_languages:
+            keys.extend(self.tm.metadata_supported_languages())
+        else:
+            keys.extend(self.tm.supported_languages())
+        return keys
+
+    def _build_field_list(self):
+        fields = {
+            key: self.template_field(label=DelayedTranslationString(f"languages.short.{key.lower()}"), **self.template_args)
+            for key in self.get_language_keys()
+        }
         if self.allow_translation_requests:
             fields["_translation_request"] = wtf.BooleanField(
                 label=DelayedTranslationString("pipeman.common.open_translation_request")
             )
+        # gettext('languages.short.und')
         # gettext('languages.short.en')
         # gettext('languages.short.fr')
         return fields

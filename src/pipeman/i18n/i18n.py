@@ -33,8 +33,8 @@ class TranslationManager:
 class BaseTranslatableString:
 
     def __init__(self, *format_args, **format_kwargs):
-        self.format_args = format_args or []
-        self.format_kwargs = format_kwargs or {}
+        self.format_args = format_args
+        self.format_kwargs = format_kwargs
 
     def __bool__(self):
         return not self.empty()
@@ -73,14 +73,11 @@ class BaseTranslatableString:
     def copy(self):
         raise NotImplementedError
 
-    def _render_str(self, **kwargs):
+    def _render_str(self, **kwargs) -> str:
         raise NotImplementedError
 
     def format(self, *args, **kwargs):
-        obj = self.copy()
-        obj.format_args.extend(args)
-        obj.format_kwargs.update(kwargs)
-        return obj
+        return BaseTranslatableString(*self.format_args, *args, **self.format_kwargs, **{k: kwargs[k] for k in kwargs if k not in self.format_kwargs})
 
 
 class DelayedTranslationString(BaseTranslatableString):
@@ -91,7 +88,7 @@ class DelayedTranslationString(BaseTranslatableString):
         self.default = default
 
     def copy(self):
-        return DelayedTranslationString(self.text_key, self.default)
+        return DelayedTranslationString(self.text_key, self.default, *self.format_args, **self.format_kwargs)
 
     def empty(self) -> bool:
         return self.text_key is None or self.text_key == ''
@@ -146,10 +143,10 @@ class MultiLanguageString(BaseTranslatableString):
         return key in self.language_map and self.language_map[key]
 
     def deep_copy(self, memodict):
-        return MultiLanguageString(deepcopy(self.language_map))
+        return MultiLanguageString(deepcopy(self.language_map, memodict), *self.format_args, **self.format_kwargs)
 
     def copy(self):
-        return MultiLanguageString(self.language_map)
+        return MultiLanguageString(self.language_map, *self.format_args, **self.format_kwargs)
 
 
 class MultiLanguageLink(MultiLanguageString):

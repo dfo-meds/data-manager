@@ -91,11 +91,22 @@ class WorkflowRegistry:
         for key in self._workflows:
             yield key, self._workflows[key]
 
-    def list_workflows(self, workflow_type: str):
+    def verify_workflow_available(self, workflow_type, workflow_name, user) -> bool:
+        full_key = f"{workflow_type}__{workflow_name}"
+        if full_key not in self._workflows:
+            return False
+        if "enabled" in self._workflows[full_key] and not self._workflows[full_key]["enabled"]:
+            return False
+        if "permission" in self._workflows[full_key] and (user is None or not user.has_permission(self._workflows[full_key]["permission"])):
+            return False
+        return True
+
+    def list_workflows(self, workflow_type: str, user=None):
         for key in self._workflows:
             if not key.startswith(f"{workflow_type}__"):
                 continue
-            if "enabled" in self._workflows[key] and not self._workflows[key]["enabled"]:
+            workflow_name = key[len(workflow_type)+2:]
+            if not self.verify_workflow_available(workflow_type, workflow_name, user):
                 continue
-            yield key[len(workflow_type)+2:], MultiLanguageString(self._workflows[key]["label"] or {"und": key})
+            yield workflow_name, MultiLanguageString(self._workflows[key]["label"] or {"und": key})
 

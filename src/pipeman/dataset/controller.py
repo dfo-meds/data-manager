@@ -845,10 +845,10 @@ class DatasetBuilder:
         if "users" not in data or not data["users"]:
             return []
         ids = set()
-        for u in data["users"]:
-            u = self.session.query(orm.User).filter_by(username=u).first()
+        for un in data["users"]:
+            u = self.session.query(orm.User).filter_by(username=un).first()
             if not u:
-                raise APIInputError(f"Invalid username [{u}]")
+                raise APIInputError(f"Invalid username [{un}]")
             ids.add(u.id)
         return list(ids)
 
@@ -856,7 +856,7 @@ class DatasetBuilder:
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.activation_workflow", None)
         if 'activation_workflow' in data and data['activation_workflow']:
             workflow_name = data['activation_workflow']
-        if workflow_name is None or not self.wreg.workflow_exists("dataset_activation", workflow_name):
+        if workflow_name is None or not self.wreg.verify_workflow_available("dataset_activation", workflow_name, flask_login.current_user):
             raise APIInputError(f"Invalid activation workflow [{workflow_name}]")
         return workflow_name
 
@@ -864,7 +864,7 @@ class DatasetBuilder:
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.publication_workflow", None)
         if 'publication_workflow' in data and data['publication_workflow']:
             workflow_name = data['publication_workflow']
-        if workflow_name is None or not self.wreg.workflow_exists("dataset_publication", workflow_name):
+        if workflow_name is None or not self.wreg.verify_workflow_available("dataset_publication", workflow_name, flask_login.current_user):
             raise APIInputError(f"Invalid publication workflow [{workflow_name}]")
         return workflow_name
 
@@ -984,8 +984,8 @@ class DatasetForm(PipemanFlaskForm):
         super().__init__(*args, **kwargs)
         self.organization.choices = self.ocontroller.list_organizations()
         self.profiles.choices = self.reg.profiles_for_select()
-        self.act_workflow.choices = [x for x in self.wreg.list_workflows("dataset_activation")]
-        self.pub_workflow.choices = [x for x in self.wreg.list_workflows("dataset_publication")]
+        self.act_workflow.choices = [x for x in self.wreg.list_workflows("dataset_activation", flask_login.current_user)]
+        self.pub_workflow.choices = [x for x in self.wreg.list_workflows("dataset_publication", flask_login.current_user)]
         self.security_level.choices = self.reg.security_labels_for_select()
         self.assigned_users.choices = user_list()
 

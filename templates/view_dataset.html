@@ -25,9 +25,15 @@
 <h3>{{group_labels[group]}}</h3>
 <table class="property-list" cellpadding="0" cellspacing="0">
     <tbody>
-    {% for name, value in dataset.display_values(group) %}
-    <tr>
-        <th>{{name}}</th>
+    {% for name, value, errs, err_level in dataset.display_values(group) %}
+    {% if err_level == 'error' %}
+        <tr class="property_error"><th>{{name}} <span class="property_error property_name_code" title="{{errs}}">X</span>
+    {% elif err_level == 'warning' %}
+        <tr class="property_warning"><th>{{name}} <span class="property_warning property_name_code" title="{{errs}}">!</span>
+    {% else %}
+        <tr><th>{{name}}
+    {% endif %}
+        </th>
         <td>{{value}}</td>
     </tr>
     {% endfor %}</tbody>

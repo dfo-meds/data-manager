@@ -108,9 +108,9 @@ class DecimalField(NumberValidationMixin, Field):
         return wtf.DecimalField
 
     def _extra_wtf_arguments(self) -> dict:
-        args = {}
-        if "places" in self.field_config:
-            args["places"] = self.field_config["places"]
+        args = {
+            "places": self.config('places', 10)
+        }
         if "rounding" in self.field_config and self.field_config["rounding"].startswith("ROUND_") and hasattr(decimal, self.field_config["rounding"]):
             args["rounding"] = getattr(decimal, self.field_config["rounding"])
         return args
@@ -119,12 +119,14 @@ class DecimalField(NumberValidationMixin, Field):
         if isinstance(raw_value, str):
             if raw_value == "":
                 return None
-            return decimal.Decimal(raw_value)
+            raw_value = decimal.Decimal(raw_value)
         elif isinstance(raw_value, (float, int)):
-            return decimal.Decimal(raw_value)
-        elif raw_value is None or isinstance(raw_value, decimal.Decimal):
+            raw_value = decimal.Decimal(raw_value)
+        if isinstance(raw_value, decimal.Decimal):
+            raw_value = round(raw_value, self.config('places', default=10))
             return raw_value
         return None
+
 
     def _unserialize(self, val):
         if val is None or val == "":
@@ -273,6 +275,11 @@ class TextField(NoControlMixin, LengthValidationMixin, Field):
                         return val[key]
                 return None
         return val if not val == "" else None
+
+    def _handle_raw(self, raw_value):
+        if isinstance(raw_value, t.Iterable) and not isinstance(raw_value, str):
+            return str(self.config("separator", default=",")).join(raw_value)
+        return raw_value
 
     def _process_value(self, val, none_as_blank=True, **kwargs):
         if val == "" or val is None:

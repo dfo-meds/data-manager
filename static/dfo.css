@@ -60,6 +60,35 @@ table.property-list > tbody > tr > td > ul > li {
     margin: 6px;
     padding: 0;
 }
+.property_error td {
+    background-color: #FFCCCC;
+}
+.property_warning td {
+    background-color: #FFFFCC;
+}
+.property_error .property_name_code {
+    color: #000000;
+    background-color: #CC0000;
+    border-color: #CC0000;
+}
+.property_warning .property_name_code {
+    color: #000000;
+    background-color: #EEEE00;
+    border-color: #EEEE00;
+}
+.property_name_code {
+    display: inline-block;
+    font-family: monospace;
+    font-size: 1.2 em;
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    padding: 0;
+    border-style: solid;
+    border-with: 2px;
+    float: right;
+
+}
 table.property-list > tbody > tr > td > ul > li > table.property-list {
     font-size: 0.8em;
 }

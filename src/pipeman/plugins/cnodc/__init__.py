@@ -5,17 +5,18 @@ import pathlib
 
 from pipeman.vocab import VocabularyRegistry
 from pipeman.workflow import WorkflowRegistry
-from pipeman.entity import EntityRegistry
+from pipeman.entity import EntityRegistry, EntityController
 
 
 @_injector.inject
 def init_plugin(system: _System):
     system.register_blueprint("pipeman.plugins.cnodc.app", "cnodc")
     system.on_setup(setup_plugin)
+    system.on_setup_data(setup_data_plugin)
 
 
 @_injector.inject
-def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, vreg: VocabularyRegistry = None, ereg: EntityRegistry = None):
+def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, vreg: VocabularyRegistry = None, ereg: EntityRegistry = None, system: _System = None):
     root = pathlib.Path(__file__).absolute().parent
     from pipeman.auth.util import load_groups_from_yaml
     load_groups_from_yaml(root / "groups.yaml")
@@ -27,14 +28,9 @@ def setup_plugin(wreg: WorkflowRegistry = None, mreg: MetadataRegistry = None, v
     vreg.register_from_yaml(root / "vocabs.yaml")
 
 
-# TODO: Create basic entities as follows
-"""
-    - ERDDAP Servers (CNODC primary)
-    - GOC Publishers (DFO)
-    - GOC Publishing Sections (MEDS/CNODC)
-    - Reference Systems (WGS84, MSL Depths, MSL Heights)
-    - Locales (EN, FR)
-    - ID Systems (EPSG, DOI, ROR, ORCID)
-    - Contacts (CNODC and DFO)
-    
-"""
+@_injector.inject
+def setup_data_plugin(ec: EntityController = None):
+    root = pathlib.Path(__file__).absolute().parent
+    ec.upsert_from_yaml_file(root / 'default_entities.yaml')
+
+

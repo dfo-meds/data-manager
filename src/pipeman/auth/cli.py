@@ -97,6 +97,7 @@ def _get_password(password_entry: str, arg_password: str) -> str:
     A password to use for the user.
     """
     pw = arg_password
+    print(password_entry)
     if password_entry == "random":  # noqa: S105
         pw = None
     elif password_entry == "input":  # noqa: S105
@@ -113,7 +114,7 @@ def _get_password(password_entry: str, arg_password: str) -> str:
 @user.command
 @click.option("--display", default="")
 @click.option("--no-error", default=False, is_flag=True, type=bool)
-@click.option("--password-entry", default="argument")
+@click.option("--password-entry", default="input")
 @click.option("--password", default=None)
 @click.argument("username")
 @click.argument("email")
@@ -141,12 +142,12 @@ def unlock(username, duc: DatabaseUserController = None):
 
 
 @user.command
-@click.option("--no-error", default=False, is_flag=True, type=bool)
-@click.option("--password-entry", default="argument")
+@click.option("--no-error", default=True, is_flag=True, type=bool)
+@click.option("--password-entry", default="input")
 @click.option("--password", default=None)
 @click.argument("username")
 @injector.inject
-def set_password(username, password=None, password_entry="", no_error=False, duc: DatabaseUserController = None):
+def set_password(username, password=None, password_entry="", no_error=True, duc: DatabaseUserController = None):
     """Set the password for a user."""
     no_error_wrapper(
         no_error,

@@ -60,6 +60,7 @@ acquisition:
     bbox_west:
       order: 10
       data_type: decimal
+      places: 6
       label:
         en: West
         fr: Ouest
@@ -71,6 +72,7 @@ acquisition:
     bbox_east:
       data_type: decimal
       order: 20
+      places: 6
       label:
         en: East
         fr: Est
@@ -82,6 +84,7 @@ acquisition:
     bbox_north:
       data_type: decimal
       order: 30
+      places: 6
       label:
         en: North
         fr: Nord
@@ -93,6 +96,7 @@ acquisition:
     bbox_south:
       data_type: decimal
       order: 40
+      places: 6
       label:
         en: South
         fr: Sud
@@ -113,6 +117,7 @@ acquisition:
     vertical_min:
       data_type: decimal
       order: 150
+      places: 6
       label:
         en: Vertical Minimum
         fr: Minimum vertical
@@ -122,6 +127,7 @@ acquisition:
     vertical_max:
       data_type: decimal
       order: 160
+      places: 6
       label:
         en: Vertical Maximum
         fr: Maximum vertical
@@ -1708,7 +1714,7 @@ contact:
       multilingual: yes
       label:
         en: Service Hours
-        fr: Si le contact n'est joignable qu'à certaines heures, saisissez-le ici.
+        fr: Heures de service
       description:
         en: If the contact can only be reached during certain hours, enter them here.
         fr: Si le contact n'est joignable qu'à certaines heures, saisissez-le ici.
@@ -1809,6 +1815,7 @@ spatial_res:
         mapping: scale
     distance:
       data_type: decimal
+      places: 6
       label:
         en: Horizontal Resolution
         fr: Résolution horizontale
@@ -1832,6 +1839,7 @@ spatial_res:
         mapping: distance_units
     vertical:
       data_type: decimal
+      places: 6
       label:
         en: Vertical Resolution
         fr: Résolution verticale
@@ -1855,6 +1863,7 @@ spatial_res:
         mapping: vertical_units
     angular:
       data_type: decimal
+      places: 6
       label:
         en: Angular Resolution
         fr: Résolution angulaire
@@ -1955,6 +1964,7 @@ time_res:
         mapping: minutes
     seconds:
       data_type: decimal
+      places: 6
       label:
         en: Seconds
         fr: Secondes

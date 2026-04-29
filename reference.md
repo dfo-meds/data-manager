@@ -67,6 +67,12 @@
 | files.upload                               |                                               |
 | translations.manage                        |                                               |
 | vocabularies.view                          |                                               |
+| workflow.publish.direct | |
+| workflow.publish.with_approval | |
+| workflow.activate.direct | |
+| workflow.activate.with_approval | |
+| workflow.activate_and_publish | |
+
 
 # Entity Types
 

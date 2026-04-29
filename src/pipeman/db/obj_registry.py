@@ -13,7 +13,7 @@ import time
 import zrlog
 
 
-REFRESH_FREQUENCY = 15
+REFRESH_FREQUENCY = 60
 
 
 @injector.injectable_global
@@ -32,19 +32,20 @@ class GlobalObjectRegistry:
         if obj in self._registry:
             self._registry.remove(obj)
 
-    @injector.inject
-    def check_all(self, vc: ValueController = None):
+    def check_all(self):
         # Don't check everytime to prevent a lot of overhead (every 15 seconds)
         if self._last_setup_check and (time.monotonic() - self._last_setup_check) < REFRESH_FREQUENCY:
             return
-        self._log.debug("Checking for registry updates")
         self._last_setup_check = time.monotonic()
+        self._check_all()
 
+    @injector.inject
+    def _check_all(self, vc: ValueController = None):
+        self._log.debug("Checking for registry updates")
         # Check if setup has actually run recently
         setup_last_run = vc.get_value("setup_last_run")
         if self._last_setup_run == setup_last_run:
             return
-
         self._log.info(f"Updating [{len(self._registry)}] registry files")
         # Do the reload
         for obj in self._registry:

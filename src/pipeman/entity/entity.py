@@ -6,6 +6,8 @@ import flask_login
 from pipeman.i18n import MultiLanguageString
 import copy
 import zrlog
+
+from pipeman.i18n.i18n import BaseTranslatableString
 from pipeman.util import deep_update, load_object
 from functools import cache
 from pipeman.db import BaseObjectRegistry
@@ -113,7 +115,7 @@ class FieldContainer:
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, container_type: str, container_id: int, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
+    def __init__(self, container_type: str, container_id: int | None, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
         self._fields = {}
         self.container_type = container_type
         self.container_id = container_id
@@ -171,17 +173,26 @@ class FieldContainer:
             if field_values and field_name in field_values:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
-    def display_values(self, display_group = None):
+    def display_values(self, display_group = None) -> t.Generator[tuple[str | BaseTranslatableString, t.Any, str | None, str | None], None, None]:
         if display_group == "__derived__":
             keys = list(self._derived_fields.keys())
             keys.sort()
             for key in keys:
-                yield MultiLanguageString(self._derived_fields[key]["label"], load_object(self._derived_fields[key]["cb"])(self))
+                yield MultiLanguageString(self._derived_fields[key]["label"]), load_object(self._derived_fields[key]["cb"])(self), None, None
         else:
             for fn in self.ordered_field_names(display_group):
                 if display_group is None or display_group == self._fields[fn].display_group:
                     field = self._fields[fn]
-                    yield field.label(), field.display()
+                    errors: list[ValidationResult] = []
+                    if fn in self._validation_config["fields"]:
+                        for v in self._validation_config["fields"][fn]:
+                            errors.extend(v.validate(None, field, {}))
+                    level = None
+                    if any(x.level == 'error' for x in errors):
+                        level = 'error'
+                    elif any(x.level == 'warning' for x in errors):
+                        level = 'warning'
+                    yield field.label(), field.display(), '\n'.join(str(x) for x in set(str(x.display_text()) for x in errors)), level
 
     def values(self) -> dict:
         return {
@@ -332,21 +343,20 @@ class Entity(FieldContainer):
         self.guid = guid
         self.is_component = is_component
         self.entity_type = entity_type
-        self.db_id = db_id
         self.entity_data_id = ed_id
         self.parent_id = parent_id
         self.parent_type = parent_type
 
     def default_display(self):
-        return {"und": f"{self.entity_type} #{self.db_id}"}
+        return {"und": f"{self.entity_type} #{self.container_id}"}
 
     def view_link(self):
-        return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.db_id)
+        return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.container_id)
 
     def actions(self, for_view: bool = False):
         action_args = {
             "obj_type": self.entity_type,
-            "obj_id": self.db_id
+            "obj_id": self.container_id
         }
         actions = []
         if not for_view:

@@ -74,6 +74,7 @@ technical:
         mapping: feature_type
     conventions:
       data_type: text
+      separator: ","
       label:
         en: Conventions
         fr: Conventions

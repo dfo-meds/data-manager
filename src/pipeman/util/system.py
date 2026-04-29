@@ -126,6 +126,9 @@ class System:
         """Register a function to call on setup."""
         self.on("setup", setup_cb)
 
+    def on_setup_data(self, setup_cb: CallableOrStr):
+        self.on("setup.data", setup_cb)
+
     def post_setup(self, cb: CallableOrStr):
         self.on("setup.after", cb)
 
@@ -163,6 +166,7 @@ class System:
         """Run all the setup scripts."""
         self.fire("setup.before")
         self.fire("setup")
+        self.fire("setup.data")
         self.fire("setup.after")
 
     def cleanup(self):

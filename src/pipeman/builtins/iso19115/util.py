@@ -142,7 +142,7 @@ def _clean_xml_id(type_name, xml_id, db_id):
 def get_platform_instruments(platform, db: Database = None):
     with db as session:
         for instrument in session.query(orm.Entity).filter_by(entity_type="instrument"):
-            if instrument['mounted_on'].db_id == platform.db_id:
+            if instrument['mounted_on'].container_id == platform.container_id:
                 yield instrument
 
 def preprocess_metadata(dataset, **kwargs):

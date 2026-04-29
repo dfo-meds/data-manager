@@ -437,6 +437,7 @@ extent:
     bbox_west:
       order: 10
       data_type: decimal
+      places: 6
       label:
         en: West
         fr: Ouest
@@ -453,6 +454,7 @@ extent:
     bbox_east:
       data_type: decimal
       order: 20
+      places: 6
       label:
         en: East
         fr: Est
@@ -469,6 +471,7 @@ extent:
     bbox_north:
       data_type: decimal
       order: 30
+      places: 6
       label:
         en: North
         fr: Nord
@@ -485,6 +488,7 @@ extent:
     bbox_south:
       data_type: decimal
       order: 40
+      places: 6
       label:
         en: South
         fr: Sud
@@ -514,6 +518,7 @@ extent:
     vertical_min:
       data_type: decimal
       order: 150
+      places: 6
       label:
         en: Vertical Minimum
         fr: Minimum vertical
@@ -528,6 +533,7 @@ extent:
     vertical_max:
       data_type: decimal
       order: 160
+      places: 6
       label:
         en: Vertical Maximum
         fr: Maximum vertical

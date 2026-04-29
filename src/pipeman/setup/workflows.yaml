@@ -30,6 +30,7 @@ dataset_publication:
         steps:
           - publish_dataset
         enabled: yes
+        permission: workflow.publish.direct
     super_user_publish:
       label:
         en: Superuser Approval
@@ -45,6 +46,7 @@ dataset_activation:
         steps:
           - activate_dataset
         enabled: yes
+        permission: workflow.activate.direct
     super_user_activation:
       label:
         en: Superuser Approval
@@ -55,6 +57,15 @@ dataset_activation:
         - activate_dataset
       cleanup:
         - return_to_draft
+    activate_and_publish:
+      label:
+        en: Direct Activation & Publication
+        fr: Activation et publication directe
+      steps:
+        - activate_dataset
+        - publish_dataset
+      permission: workflow.activate_and_publish
+      enabled: yes
 text_translation:
     default:
       label:

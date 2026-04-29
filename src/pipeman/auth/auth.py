@@ -166,6 +166,7 @@ class AnonymousUser(fl.AnonymousUserMixin):
         self.user_id = None
         self.organizations = []
         self.datasets = []
+        self.permissions = []
 
     def belongs_to(self, organization_id):
         return False

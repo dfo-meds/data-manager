@@ -6,11 +6,13 @@ from pipeman.entity.entity import FieldContainer
 
 
 
-def set_metadata_from_api(fc: FieldContainer, metadata: dict, file_type: str, results: dict):
+def set_metadata_from_api(fc: FieldContainer, metadata: dict, file_type: str, results: dict, key_only: bool = False):
     for field_name in fc.ordered_field_names():
         field = fc.get_field(field_name)
         config = field.config("json_api", default=None)
         if config is None:
+            continue
+        if key_only and ('unique' not in config or not config['unique']):
             continue
         api_name = field_name if 'mapping' not in config or not config['mapping'] else config['mapping']
         if api_name not in metadata:
@@ -24,4 +26,4 @@ def set_metadata_from_api(fc: FieldContainer, metadata: dict, file_type: str, re
             field.set_from_external(value, functools.partial(set_metadata_from_api, results=results, file_type=file_type))
         except Exception as ex:
             logging.getLogger("pipeman.api_mapper").exception(f"Error mapping API data value for [{field_name}]")
-            results['errors'].append(f"{type(ex)}: {str(ex)}")
+            results['errors'].append(f"{type(ex)}: {str(ex)} [{field_name}]")

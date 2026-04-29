@@ -1,6 +1,6 @@
 import logging
 from autoinject import injector
-from flask.sessions import SecureCookieSessionInterface, SessionMixin
+from flask.sessions import SecureCookieSessionInterface, SessionMixin, SecureCookieSession
 from .metrics import PromMetrics, time_function
 import pipeman
 from pipeman.i18n import gettext
@@ -48,7 +48,7 @@ def check_request_session(db: Database = None):
 
 @injector.inject
 def invalidate_session(db: Database = None):
-    sess = flask.session.get("_pipeman_uuid", default=None)
+    sess = flask.session.get("_pipeman_uuid", None)
     if sess:
         zrlog.get_logger("pipeman.session").info("Invalidating session")
         with db as session:
@@ -208,13 +208,16 @@ def stable_dict_key_list(d: dict):
 
 
 @injector.inject
-def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
+def core_init_app(system, app: flask.Flask, config, prom_metrics: PromMetrics = None, gor: GlobalObjectRegistry = None):
     #app.session_interface = SessionCookieInterface()
+    # Make sure these are loaded
+    gor.check_all()
     if "flask" in config:
         app.config.update(config["flask"] or {})
     if not app.config.get("SECRET_KEY"):
         raise PipemanConfigurationError("Secret key for Flask must be defined")
     prom_metrics.init_app(app)
+
     flask_autoinject.init_app(app)
     # Set the URL Rule class to our custom one
     app.url_rule_class = CustomRule
@@ -285,6 +288,7 @@ def core_init_app(system, app, config, prom_metrics: PromMetrics = None):
             gor.check_all()
         except Exception as ex:
             zrlog.get_logger("pipeman.teardown").exception("Error while refreshing object registry")
+
 
     # Add the menu items and self_url() function to every template
     @app.context_processor
