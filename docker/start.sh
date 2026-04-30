@@ -30,7 +30,7 @@ else
 
   # Handle prometheus directory
   if [ -e "/srv/metadb/_prometheus" ] ; then
-    rm -r /srv/metadb/_prometheus/*
+    rm -rf /srv/metadb/_prometheus/*
   else
     mkdir /srv/metadb/_prometheus
   fi
