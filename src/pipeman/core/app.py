@@ -77,7 +77,7 @@ def list_entities_by_type(obj_type, con: EntityController):
 
 
 @core.route("/api/objects/<obj_type>", methods=["POST", "GET"])
-@require_permission("entities.view")
+@require_permission("entities.view", check_referrer=False)
 @injector.inject
 def list_entities_by_type_ajax(obj_type, con: EntityController):
     if obj_type not in con.reg:
@@ -278,7 +278,7 @@ def list_datasets(con: DatasetController = None):
 
 
 @core.i18n_route("/api/datasets-ajax", methods=["POST", "GET"])
-@require_permission("datasets.view")
+@require_permission("datasets.view", check_referrer=False)
 @injector.inject
 def list_datasets_ajax(con: DatasetController = None):
     return con.list_datasets_ajax()
@@ -298,7 +298,7 @@ def view_attachment(attachment_id, atc: AttachmentController = None):
     return atc.download_attachment(attachment_id)
 
 @core.i18n_route("/api/create-dataset", methods=["POST"])
-@require_permission("datasets.create_api")
+@require_permission("datasets.create_api", check_referrer=False)
 @injector.inject
 def create_dataset_from_api_call(con: DatasetController = None):
     try:
@@ -308,7 +308,7 @@ def create_dataset_from_api_call(con: DatasetController = None):
         return {'error': str(ex)}, 500
 
 @core.i18n_route("/api/upsert-dataset", methods=["POST"])
-@require_permission("datasets.upsert_api")
+@require_permission("datasets.upsert_api", check_referrer=False)
 @injector.inject
 def upsert_dataset_from_api_call(con: DatasetController = None):
     try:
@@ -501,7 +501,7 @@ def generate_metadata_format_long(dataset_id, revision_no, profile_name, format_
 
 
 @core.i18n_route("/api/datasets/<int:dataset_id>/<int:revision_no>/<profile_name>/<format_name>/<environment>")
-@require_permission("datasets.view")
+@require_permission("datasets.view", check_referrer=False)
 @injector.inject
 def generate_metadata_format_api(dataset_id, revision_no, profile_name, format_name, environment, con: DatasetController = None):
     try:
@@ -534,7 +534,7 @@ def list_workflow_history(wfc: WorkflowController = None):
 
 
 @core.route("/api/action-list/<int:active_only>", methods=["POST", "GET"])
-@require_permission("action_items.view")
+@require_permission("action_items.view", check_referrer=False)
 @injector.inject
 def list_items_ajax(active_only: int, wfc: WorkflowController = None):
     active_only = int(active_only)
@@ -575,7 +575,7 @@ def cancel_item(item_id, wfc: WorkflowController = None):
 
 
 @core.i18n_route("/api/entity-select-field/<entity_types>/<int:by_revision>", methods=["POST", "GET"])
-@require_permission("entities.view")
+@require_permission("entities.view", check_referrer=False)
 @injector.inject
 def api_entity_select_field_list(entity_types, by_revision: int):
     by_revision = int(by_revision)
@@ -679,7 +679,7 @@ def event_firing_form(event_name, wc: WorkflowController):
 
 
 @core.i18n_route("/api/file-upload/<data_store_name>/<filename>", methods=['PUT'])
-@require_permission("files.upload")
+@require_permission("files.upload", check_referrer=False)
 @injector.inject
 def file_upload(data_store_name, filename, fc: FileController = None):
     if not fc.data_store_exists(data_store_name):
@@ -690,7 +690,7 @@ def file_upload(data_store_name, filename, fc: FileController = None):
 
 
 @core.i18n_route("/api/file-upload-status/<int:item_id>")
-@require_permission("files.upload")
+@require_permission("files.upload", check_referrer=False)
 @injector.inject
 def file_upload_status(item_id, fc: FileController = None):
     return fc.upload_status(item_id)
