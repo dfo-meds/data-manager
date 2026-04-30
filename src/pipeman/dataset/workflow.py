@@ -5,7 +5,7 @@ import pipeman.db.orm as orm
 from pipeman.workflow import ItemResult
 import datetime
 import zrlog
-from pipeman.email import EmailController
+from pipeman.smtpout import EmailController
 from pipeman.dataset import DatasetController
 import typing as t
 import sqlalchemy as sa

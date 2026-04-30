@@ -15,7 +15,7 @@ import datetime
 import zrlog
 import sqlalchemy as sa
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, ActionListColumn, flasht, PipemanFlaskForm
-from pipeman.email import EmailController
+from pipeman.smtpout import EmailController
 
 
 @injector.injectable
