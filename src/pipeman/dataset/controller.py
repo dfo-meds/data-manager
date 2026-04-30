@@ -684,7 +684,7 @@ class DatasetController:
         if not ds:
             raise DatasetNotFoundError(dataset.dataset_id)
         ds.is_deprecated = dataset.is_deprecated
-        ds.organization_id = int(dataset.organization_id) if dataset.organization_id is not None else None
+        ds.organization_id = int(dataset.organization_id) if dataset.organization_id else None
         ds.display_names = json.dumps(dataset.display_names())
         ds.profiles = "\n".join(dataset.base_profiles)
         for keyword in dataset.extras:
