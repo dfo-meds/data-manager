@@ -38,7 +38,7 @@ COPY docker/pipeman /usr/local/bin/pipeman
 RUN chmod +x /usr/local/bin/pipeman
 RUN dos2unix /usr/local/bin/pipeman
 
-COPY src/* app/
+COPY src/pipeman/ app/pipeman/
 COPY alembic/ app/alembic
 copy config/ app/config
 COPY docker/config/ app/docker/config

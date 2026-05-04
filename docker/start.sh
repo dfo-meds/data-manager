@@ -1,8 +1,11 @@
 #! /bin/sh
 set -e
 
-PYTHONBUFFERED=TRUE
+PYTHONUNBUFFERED=TRUE
 export PYTHONUNBUFFERED
+
+PYTHONOPTIMIZE = 2
+export PYTHONOPTIMIZE
 
 cd /srv/metadb/app || exit
 
