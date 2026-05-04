@@ -72,12 +72,12 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_attachment_dataset_id'), table_name='attachment')
     op.drop_index(op.f('ix_a_p_i_key_user_id'), table_name='a_p_i_key')
     op.create_table('metric',
-    sa.Column('metric_name', sa.VARCHAR(length=256), nullable=True),
-    sa.Column('timestamp', sa.DATETIME(), nullable=True),
-    sa.Column('value', sa.VARCHAR(length=1024), nullable=True),
-    sa.Column('source_info', sa.VARCHAR(length=1024), nullable=True),
-    sa.Column('username', sa.VARCHAR(length=1024), nullable=True),
-    sa.Column('id', sa.INTEGER(), nullable=False),
+    sa.Column('metric_name', sa.String(length=256), nullable=True),
+    sa.Column('timestamp', sa.DateTime, nullable=True),
+    sa.Column('value', sa.String(length=1024), nullable=True),
+    sa.Column('source_info', sa.String(length=1024), nullable=True),
+    sa.Column('username', sa.String(length=1024), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id', name='pk_metric')
     )
     op.create_index('ix_metric_metric_name', 'metric', ['metric_name'], unique=False)
