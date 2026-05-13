@@ -48,6 +48,7 @@ COPY static/ app/static
 COPY templates app/templates
 COPY app.py app/app.py
 COPY cli.py app/cli.py
+COPY alembic.ini app/alembic.ini
 
 EXPOSE 80
 
