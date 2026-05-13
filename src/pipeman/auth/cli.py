@@ -82,7 +82,7 @@ def user():
     pass
 
 
-def _get_password(password_entry: str, arg_password: str) -> str:
+def _get_password(password_entry: str, arg_password: str | None) -> str | None:
     """Retrieve a password either from the input, at random, or from the passed argument.
 
     Parameters
@@ -97,7 +97,6 @@ def _get_password(password_entry: str, arg_password: str) -> str:
     A password to use for the user.
     """
     pw = arg_password
-    print(password_entry)
     if password_entry == "random":  # noqa: S105
         pw = None
     elif password_entry == "input":  # noqa: S105
