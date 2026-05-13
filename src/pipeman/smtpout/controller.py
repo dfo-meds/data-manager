@@ -38,6 +38,7 @@ class EmailController:
             "user": self.config.as_str(("pipeman", "email", "username"), default=None),
             "password": self.config.as_str(("pipeman", "email", "password"), default=None),
         }
+        self._limit_send_domains = self.config.as_list(("pipeman", "email", "send_domain_filter"), default=[])
         self._use_ssl = self.config.as_bool(("pipeman", "email", "use_ssl"), default=False)
         self._start_tls = self.config.as_bool(("pipeman", "email", "start_tls"), default=True) and not self._use_ssl
         self._from_email = self.config.as_str(("pipeman", "email", "send_from"), default="no-reply@example.com")
@@ -135,10 +136,23 @@ class EmailController:
         else:
             return False
 
-    def _send_smtp_message(self, msg, to_addrs):
+    def _send_smtp_message(self, msg: email.message.Message, to_addrs: list[str]):
         # Actually send it
         if not to_addrs:
             return False
+        if self._limit_send_domains:
+            actual_send_list = []
+            removed_list = []
+            for x in to_addrs:
+                if any(x.endswith(f"@{y}") for y in self._limit_send_domains):
+                    actual_send_list.append(x)
+                else:
+                    removed_list.append(x)
+            if removed_list:
+                self._log.warning(f"Removed emails [%s] from send due to domain filter", removed_list)
+            if not actual_send_list:
+                return False
+            to_addrs = actual_send_list
         smtp = smtplib.SMTP
         if self._use_ssl:
             smtp = smtplib.SMTP_SSL
