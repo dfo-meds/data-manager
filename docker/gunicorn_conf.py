@@ -49,7 +49,7 @@ else:
 assert workers > 0
 assert worker_class in ('sync', 'eventlet', 'gevent', 'tornado', 'gthread')
 
-if os.getenv("DUMP_GUNICORN_CONFIG", "1") == "1":
+if os.getenv("DUMP_GUNICORN_CONFIG", "0") == "1":
     # For debugging and testing
     log_data = {
         "loglevel": loglevel,
