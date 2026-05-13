@@ -115,10 +115,11 @@ def _get_password(password_entry: str, arg_password: str | None) -> str | None:
 @click.option("--no-error", default=False, is_flag=True, type=bool)
 @click.option("--password-entry", default="input")
 @click.option("--password", default=None)
+@click.option("--no-email", default=False)
 @click.argument("username")
 @click.argument("email")
 @injector.inject
-def create(username: str, email: str, display: str = "", password: t.Optional[str] = None, password_entry="", no_error=False, duc: DatabaseUserController = None):
+def create(username: str, email: str, display: str = "", password: t.Optional[str] = None, password_entry="", no_error=False, no_email=False, duc: DatabaseUserController = None):
     """Create a user account."""
     if display == "":
         display = username
@@ -128,7 +129,8 @@ def create(username: str, email: str, display: str = "", password: t.Optional[st
         username,
         email,
         display,
-        _get_password(password_entry, password)
+        _get_password(password_entry, password),
+        no_email=no_email
     )
 
 
