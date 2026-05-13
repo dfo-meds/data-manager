@@ -1,12 +1,6 @@
 #! /bin/sh
 set -e
 
-PYTHONUNBUFFERED=TRUE
-export PYTHONUNBUFFERED
-
-PYTHONOPTIMIZE = 2
-export PYTHONOPTIMIZE
-
 cd /srv/metadb/app || exit
 
 # Run the daemon
