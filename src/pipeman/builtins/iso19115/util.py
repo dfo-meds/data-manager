@@ -162,8 +162,30 @@ def preprocess_metadata(dataset, **kwargs):
             dataset_maintenance.append(maintenance)
         elif maintenance['scope']['short_name'] == "metadata":
             metadata_maintenance.append(maintenance)
+
+    # This handles the dataset-wide acquisition information, which is what we usually provide
+    # If more specifics are needed, we'll need a new attribute and append the result here.
+    acq_info = []
+    missions = dataset.data("missions")
+    instruments = dataset.data("instruments")
+    platforms = dataset.data("platforms")
+    if missions or instruments or platforms:
+        dataset_wide_info = {
+            'missions': missions,
+            'platforms': platforms,
+            'instruments': instruments,
+            'scope': {
+                'short_name': 'dataset',
+            },
+            'dataset': {
+                'en': 'current dataset',
+                'fr': 'jeu de données actuel'
+            }
+        }
+        acq_info.append(dataset_wide_info)
     refs = {}
     return {
+        "acquisition_info": acq_info,
         "responsibilities": [
             {
                 "role": {"short_name": "owner"},

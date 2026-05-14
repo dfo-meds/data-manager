@@ -1,226 +1,3 @@
-acquisition:
-  display:
-    en: Acquisition Info
-  is_component: yes
-  hidden: yes
-  validation:
-    required:
-      - scope
-  fields:
-    scope:
-      data_type: vocabulary
-      vocabulary_name: iso19115_md_scope_code
-      label:
-        en: Scope
-      # TODO: label + descriptions
-      json_api:
-        mapping: scope
-    attributes:
-      data_type: text
-      label:
-        en: Attributes
-      # TODO: label + descriptions
-      json_api:
-        mapping: attributes
-    features:
-      data_type: text
-      label:
-        en: Features
-      # TODO: label + descriptions
-      json_api:
-        mapping: features
-    feature_instances:
-      data_type: text
-      label:
-        en: Feature Instances
-      # TODO: label + descriptions
-      json_api:
-        mapping: feature_instances
-    attribute_instances:
-      data_type: text
-      label:
-        en: Attribute Instances
-      # TODO: label + descriptions
-      json_api:
-        mapping: attribute_instances
-    dataset:
-      data_type: text
-      label:
-        en: Datasets
-      # TODO: label + descriptions
-      json_api:
-        mapping: dataset
-    other:
-      data_type: text
-      label:
-        en: Other Data
-      # TODO: label + descriptions
-      json_api:
-        mapping: other
-    bbox_west:
-      order: 10
-      data_type: decimal
-      places: 6
-      label:
-        en: West
-        fr: Ouest
-      min: -180
-      max: 180
-      # TODO: descriptions
-      json_api:
-        mapping: bbox_west
-    bbox_east:
-      data_type: decimal
-      order: 20
-      places: 6
-      label:
-        en: East
-        fr: Est
-      min: -180
-      max: 180
-      # TODO: descriptions
-      json_api:
-        mapping: bbox_east
-    bbox_north:
-      data_type: decimal
-      order: 30
-      places: 6
-      label:
-        en: North
-        fr: Nord
-      min: -90
-      max: 90
-      # TODO: descriptions
-      json_api:
-        mapping: bbox_north
-    bbox_south:
-      data_type: decimal
-      order: 40
-      places: 6
-      label:
-        en: South
-        fr: Sud
-      min: -90
-      max: 90
-      # TODO: descriptions
-      json_api:
-        mapping: bbox_south
-    wkt_polygon:
-      data_type: multitext
-      order: 50
-      label:
-        en: Polygon Boundary (WKT)
-        fr: Limite polygonale (WKT)
-      # TODO: descriptions
-      json_api:
-        mapping: wkt_polygon
-    vertical_min:
-      data_type: decimal
-      order: 150
-      places: 6
-      label:
-        en: Vertical Minimum
-        fr: Minimum vertical
-      # TODO: descriptions
-      json_api:
-        mapping: vertical_min
-    vertical_max:
-      data_type: decimal
-      order: 160
-      places: 6
-      label:
-        en: Vertical Maximum
-        fr: Maximum vertical
-      # TODO: descriptions
-      json_api:
-        mapping: vertical_max
-    vertical_ref_system:
-      data_type: entity_ref
-      entity_type: ref_system
-      label:
-        en: Vertical Reference System
-        fr: Système de référence vertical
-      order: 170
-      # TODO: descriptions
-      json_api:
-        mapping: vertical_ref_system
-    start_time:
-      data_type: datetime
-      order: 200
-      label:
-        en: Start Time
-        fr: Début
-      # TODO: descriptions
-      json_api:
-        mapping: start_time
-    end_time:
-      data_type: datetime
-      order: 210
-      label:
-        en: End Time
-        fr: Fin
-      # TODO: descriptions
-      json_api:
-        mapping: end_time
-    is_ongoing:
-      data_type: boolean
-      order: 220
-      label:
-        en: Is Ongoing
-      # TODO: label + descriptions
-      json_api:
-        mapping: is_ongoing
-    horizontal_ref_system:
-      data_type: entity_ref
-      order: 60
-      entity_type: ref_system
-      label:
-        en: Horizontal Reference System
-        fr: Système de référence horizontal
-      description:
-        en: Specify the horizontal coordinate system used.
-        fr: Spécifiez le système de coordonnées horizontales utilisé.
-      json_api:
-        mapping: horizontal_ref_system
-    temporal_ref_system:
-      data_type: entity_ref
-      order: 230
-      entity_type: ref_system
-      label:
-        en: Temporal Reference System
-        fr: Système de référence temporelle
-      description:
-        en: Specify the temporal coordinate system used.
-        fr: Spécifiez le système de coordonnées temporelles utilisé.
-      json_api:
-        mapping: temporal_ref_system
-    instruments:
-      data_type: entity_ref
-      repeatable: yes
-      entity_type: instrument
-      label:
-        en: Instruments
-      # TODO: label + descriptions
-      json_api:
-        mapping: instruments
-    missions:
-      data_type: entity_ref
-      repeatable: yes
-      entity_type: mission
-      label:
-        en: Missions
-      # TODO: label + descriptions
-      json_api:
-        mapping: missions
-    platforms:
-      data_type: entity_ref
-      repeatable: yes
-      entity_type: platform
-      label:
-        en: Platforms
-      # TODO: label + descriptions
-      json_api:
-        mapping: platforms
 mission:
   display:
     en: Mission
@@ -233,26 +10,35 @@ mission:
       data_type: text
       label:
         en: ID Code
+        fr: Code d'identification
+      description:
+        en: If the mission has a unique identifier, enter it here
+        fr: Si le mission a un identifiant unique , entrez-le ici.
       order: 0
-      # TODO: label + descriptions
       json_api:
         mapping: id_code
     id_system:
       data_type: entity_ref
       entity_type: id_system
       label:
-        en: ID System
+        en: Identifier System
+        fr: Système d'identification
       order: 20
-      # TODO: label + descriptions
+      description:
+        en: If the mission has a unique identifier, select the relevant ID system.
+        fr: Si le mission a un identifiant unique, sélectionnez le système d'identification approprié.
       json_api:
         mapping: id_system
     description:
       data_type: multitext
       label:
-        en: Description
+        en: Identifier Description
+        fr: Identifiant Description
       order: 30
       multilingual: yes
-      # TODO: label + descriptions
+      description:
+        en: If you wish to provide additional information about the unique identifier, enter it here.
+        fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
       json_api:
         mapping: description
     citation:
@@ -260,8 +46,11 @@ mission:
       entity_type: citation
       label:
         en: Citation
+        fr: Citation
       order: 40
-      # TODO: label + descriptions
+      description:
+        en: Provide any relevant details about the mission here.
+        fr: Fournissez ici tous les détails pertinents sur la mission.
       json_api:
         mapping: citation
     status:
@@ -269,9 +58,11 @@ mission:
       vocabulary_name: iso19115_md_progress_code
       label:
         en: Status
-        fr: Statut
+        fr: Condition
       order: 50
-      # TODO: descriptions
+      description:
+        en: Provide the current status of the mission.
+        fr: Fournir l'état actuel de la mission
       json_api:
         mapping: status
     mission_type:
@@ -279,8 +70,11 @@ mission:
       vocabulary_name: iso19115_mi_operation_type_code
       label:
         en: Mission Type
+        fr: Type de mission
       order: 50
-      # TODO: label + descriptions
+      description:
+        en: Select "real" if your mission is in the field, "simulated" if it is a computer simulation, or "synthesized" if it is a mix of both.
+        fr: Sélectionnez « réel » si votre mission se déroule sur le terrain, « simulé » s'il s'agit d'une simulation informatique, ou « synthétisé » s'il s'agit d'un mélange des deux.
       json_api:
         mapping: mission_type
     parent_mission:
@@ -288,8 +82,11 @@ mission:
       entity_type: mission
       label:
         en: Parent Mission
+        fr: Mission principale
       order: 60
-      # TODO: label + descriptions
+      description:
+        en: If this mission was part of a larger mission, select it here.
+        fr: Si cette mission faisait partie d'une mission plus vaste, sélectionnez-la ici.
       json_api:
         mapping: parent_mission
     platforms:
@@ -298,13 +95,17 @@ mission:
       repeatable: yes
       label:
         en: Platforms
+        fr: Plateformes
       order: 70
-      # TODO: label + descriptions
+      description:
+        en: Select any platforms that participated in this mission.
+        fr: Sélectionnez les plateformes ayant participé à cette mission.
       json_api:
         mapping: platforms
 platform:
   display:
     en: Platform
+    fr: Plateforme
   validation:
     required:
       - id_code
@@ -314,37 +115,48 @@ platform:
       data_type: text
       label:
         en: ID Code
+        fr: Code d'identification
+      description:
+        en: If the platform has a unique identifier (e.g. WMO or WIGOS), enter it here.
+        fr: Si la plateforme a un identifiant unique (par exemple WMO ou WIGOS), entrez-le ici.
       order: 0
-      multilingual: yes
-      # TODO: label + descriptions
       json_api:
         mapping: id_code
     id_system:
       data_type: entity_ref
       entity_type: id_system
       label:
-        en: ID System
+        en: Identifier System
+        fr: Système d'identification
       order: 20
-      # TODO: label + descriptions
+      description:
+        en: If the platform has a unique identifier, select the relevant ID system.
+        fr: Si la plateforme a un identifiant unique, sélectionnez le système d'identification approprié.
       json_api:
         mapping: id_system
     description:
       data_type: multitext
-      multilingual: yes
       label:
-        en: Platform Description
+        en: Identifier Description
+        fr: Identifiant Description
       order: 30
-      # TODO: label + descriptions
+      multilingual: yes
+      description:
+        en: If you wish to provide additional information about the unique identifier, enter it here.
+        fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
       json_api:
         mapping: description
-    citation:
+    citations:
       data_type: entity_ref
       entity_type: citation
       repeatable: yes
       label:
-        en: Citations
+        en: Citation
+        fr: Citation
       order: 40
-      # TODO: label + descriptions
+      description:
+        en: Provide any relevant details about the platform here.
+        fr: Fournissez ici tous les détails pertinents sur la plateforme.
       json_api:
         mapping: citations
     sponsors:
@@ -353,13 +165,30 @@ platform:
       repeatable: yes
       label:
         en: Sponsors
+        fr: Sponsors
       order: 50
-      # TODO: label + descriptions
+      description:
+        en: Provide a list of anyone who supports or sponsored this platform.
+        fr: Veuillez fournir une liste de toutes les personnes qui soutiennent ou parrainent cette plateforme.
       json_api:
         mapping: sponsors
+    instruments:
+      data_type: entity_ref
+      entity_type: instrument
+      repeatable: yes
+      label:
+        en: Instruments
+        fr: Instruments
+      order: 60
+      description:
+        en: Select any instruments that are mounted on this platform.
+        fr: Sélectionnez les instruments montés sur cette plateforme.
+      json_api:
+        mapping: instruments
 instrument:
   display:
     en: Instrument
+    fr: Instrument
   validation:
     required:
       - id_code
@@ -369,27 +198,47 @@ instrument:
       data_type: text
       label:
         en: ID Code
-      order: 0
-      multilingual: yes
-      # TODO: label + descriptions
+        fr: Code d'identification
+      description:
+        en: If the instrument has a unique identifier, enter it here
+        fr: Si l'instrument a un identifiant unique , entrez-le ici.
+      order: 70
       json_api:
         mapping: id_code
     id_system:
       data_type: entity_ref
       entity_type: id_system
       label:
-        en: ID System
-      order: 20
-      # TODO: label + descriptions
+        en: Identifier System
+        fr: Système d'identification
+      order: 80
+      description:
+        en: If the instrument has a unique identifier, select the relevant ID system.
+        fr: Si l'instrument a un identifiant unique, sélectionnez le système d'identification approprié.
       json_api:
         mapping: id_system
+    description:
+      data_type: multitext
+      label:
+        en: Identifier Description
+        fr: Identifiant Description
+      order: 90
+      multilingual: yes
+      description:
+        en: If you wish to provide additional information about the unique identifier, enter it here.
+        fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
+      json_api:
+        mapping: description
     type:
       data_type: text
       label:
-        en: Type
-      order: 30
+        en: Instrument Type
+        fr: Type d'instrument
+      order: 35
       multilingual: yes
-      # TODO: label + descriptions
+      description:
+        en: Provide any details about the type of instrument here.
+        fr: Veuillez fournir ici tous les détails concernant le type d'instrument.
       json_api:
         mapping: type
     citation:
@@ -397,28 +246,91 @@ instrument:
       entity_type: citation
       label:
         en: Citation
+        fr: Citation
       order: 40
-      # TODO: label + descriptions
+      description:
+        en: Provide any relevant details about the instrument here.
+        fr: Fournissez ici tous les détails pertinents sur l'instrument.
       json_api:
         mapping: citation
+    instruments:
+      data_type: entity_ref
+      entity_type: sensor
+      repeatable: yes
+      label:
+        en: Sensors
+      order: 60
+      # TOOD: label + descriptions
+      json_api:
+        mapping: sensors
+sensor:
+  display:
+    en: Sensor
+    fr: Capteur
+  validation:
+    required:
+      - id_code
+      - type
+  fields:
+    id_code:
+      data_type: text
+      label:
+        en: ID Code
+        fr: Code d'identification
+      description:
+        en: If the sensor has a unique identifier, enter it here
+        fr: Si le capteur a un identifiant unique , entrez-le ici.
+      order: 70
+      json_api:
+        mapping: id_code
+    id_system:
+      data_type: entity_ref
+      entity_type: id_system
+      label:
+        en: Identifier System
+        fr: Système d'identification
+      order: 80
+      description:
+        en: If the sensor has a unique identifier, select the relevant ID system.
+        fr: Si le capteur a un identifiant unique, sélectionnez le système d'identification approprié.
+      json_api:
+        mapping: id_system
     description:
       data_type: multitext
-      multilingual: yes
       label:
-        en: Description
-      order: 50
-      # TODO: label + descriptions
+        en: Identifier Description
+        fr: Identifiant Description
+      order: 90
+      multilingual: yes
+      description:
+        en: If you wish to provide additional information about the unique identifier, enter it here.
+        fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
       json_api:
         mapping: description
-    mounted_on:
-      data_type: entity_ref
-      entity_type: platform
+    type:
+      data_type: text
       label:
-        en: Mounted On
-      order: 60
-      # TODO: label + descriptions
+        en: Sensor Type
+        fr: Type de capteur
+      order: 30
+      multilingual: yes
+      descriptions:
+        en: Provide any details about the type of sensor here.
+        fr: Veuillez fournir ici tous les détails concernant le type de capteur.
       json_api:
-        mapping: mounted_on
+        mapping: type
+    citation:
+      data_type: entity_ref
+      entity_type: citation
+      label:
+        en: Citation
+        fr: Citation
+      order: 40
+      description:
+        en: Provide any relevant details about the sensor here.
+        fr: Fournissez ici tous les détails pertinents sur le capteur.
+      json_api:
+        mapping: citation
 responsibility:
   display:
     en: Responsibility

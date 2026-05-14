@@ -72,3 +72,32 @@ cnodc_activities:
       description:
         en: The information of this station was merged with information from a previously existing duplicate record from the same cruise number. The station number of the previous duplicate is stored in O_VALUE
         fr: L'information de cette station a été fusionnée avec l'information d'un doublon du même numéro de croisière, lequel a été effacé. Le numéro de station du doublon effacé figure dans O_VALUE
+
+cnodc_platform_types:
+  display:
+    en: CNODC - Platform Types
+    fr: CNDOC - Types des plateformes
+  uri:
+  terms:
+    glider:
+      display:
+        en: Glider
+        fr: Planeur
+
+cnodc_instrument_types:
+  display:
+    en: CNODC - Instrument Types
+    fr: CNDOC - Types des instruments
+  uri:
+  terms:
+    ctd:
+      display:
+        und: CTD
+    fluorometer:
+      display:
+        en: Fluorometer
+        fr: Fluoromètre
+    doxy_optode:
+      display:
+        en: Dissolved Oxygen Optode
+        fr: Optode d'oxygène dissous

@@ -652,16 +652,48 @@ extent:
         mapping: temporal_crs
 references:
   fields:
-    acquisition_info:
-      data_type: component_ref
+    # our assumption is here that these missions / platforms / instruments were used to collect
+    # ALL the data. If you want to divide it out more, we'll need to add an AcquisitionInfo entity
+    # that the user can configure first to indicate the scope.
+    missions:
+      data_type: entity_ref
       repeatable: yes
-      entity_type: acquisition
-      order: 0
+      entity_type: mission
+      order: 100
       label:
-        en: Acquisition Info
-      # TODO: label + descriptions
+        en: Missions
+        fr: Missions
+      description:
+        en: Select missions that were used to acquire the data.
+        fr: Sélectionnez les missions qui ont permis d'acquérir les données.
       json_api:
-        mapping: acquisition_info
+        mapping: missions
+    platforms:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: platform
+      order: 105
+      label:
+        en: Platforms
+        fr: Plateformes
+      description:
+        en: Select platforms that were used to acquire the data (if not already attached to a selected mission).
+        fr: Sélectionnez les plateformes utilisées pour acquérir les données (si elles ne sont pas déjà rattachées à une mission sélectionnée).
+      json_api:
+        mapping: platforms
+    instruments:
+      data_type: entity_ref
+      repeatable: yes
+      entity_type: instrument
+      order: 110
+      label:
+        en: Instruments
+        fr: Instruments
+      description:
+        en: Select instruments that were used to acquire the data (if not already attached to a selected platform or mission).
+        fr: Sélectionnez les instruments qui ont été utilisés pour acquérir les données (s'ils ne sont pas déjà rattachés à une plateforme ou une mission sélectionnée).
+      json_api:
+        mapping: instruments
     additional_docs:
       data_type: entity_ref
       repeatable: yes

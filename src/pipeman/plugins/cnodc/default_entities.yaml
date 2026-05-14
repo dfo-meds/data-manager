@@ -24,6 +24,40 @@ locale:
 
 id_system:
 
+  WMO:
+    _display_names:
+      en: WMO Identifier
+      fr: Identifiant WMO
+    authority:
+      resource:
+        url:
+          en: "https://community.wmo.int/wigos-station-identifiers"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+    code_space: "urn:wmo:"
+
+  WIGOS:
+    _display_names:
+      en: WIGOS Station Identifier
+      fr: Identifiant de station WIGOS
+    authority:
+      resource:
+        url:
+          en: "https://community.wmo.int/wigos-station-identifiers"
+        protocol: https
+        function: information
+        goc_content_type: support_doc
+        goc_formats:
+          - HTML
+        goc_languages:
+          - ENG
+    code_space: "urn:wigos:"
+
   # DOI Identifiers
   DOI:
     _display_names:
@@ -35,7 +69,8 @@ id_system:
         fr: Identifiant d'objet numérique (ION)
       presentation_form: documentDigital
       resource:
-        url: "https://www.doi.org"
+        url:
+          en: "https://www.doi.org"
         protocol: https
         function: information
         goc_content_type: support_doc
@@ -59,7 +94,8 @@ id_system:
         fr: Registre des organisations de recherche (ROR)
       presentation_form: documentDigital
       resource:
-        url: "https://ror.org"
+        url:
+          en: "https://ror.org"
         protocol: https
         function: information
         goc_content_type: support_doc
@@ -107,7 +143,8 @@ id_system:
         fr: Numéro de l'organization maritime internationale (OMI)
       presentation_form: documentDigital
       resource:
-        url: "https://www.spglobal.com/market-intelligence/en/solutions/imo-ship-company"
+        url:
+          en: "https://www.spglobal.com/market-intelligence/en/solutions/imo-ship-company"
         protocol: https
         function: information
         goc_content_type: support_doc
@@ -129,7 +166,8 @@ id_system:
         fr: Ensemble de données des paramètres géodésiques de l'EPSG
       presentation_form: documentDigital
       resource:
-        url: "https://epsg.io/"
+        url:
+          en: "https://epsg.io/"
         protocol: https
         function: information
         goc_content_type: support_doc
@@ -143,6 +181,35 @@ id_system:
     code_space: "https://epsg.io/"
 
 resource:
+
+  alsemar_web_page:
+    _display_names:
+      en: Alseamar Website
+      fr: Site web de Alseamar
+    url:
+      en: https://www.alseamar-alcen.com/
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+
+  teledyne_webb_research_web_page:
+    _display_names:
+      en: Teledyne Webb Research Website
+      fr: Site web de Teledyne Webb Reserach
+    url:
+      en: https://www.teledynemarine.com/brands/webb-research/
+    protocol: https
+    function: information
+    goc_content_type: support_doc
+    goc_formats:
+      - HTML
+    goc_languages:
+      - ENG
+
   bio_web_page:
     _display_names:
       en: Bedford Institute of Oceanography Website
@@ -161,6 +228,7 @@ resource:
     goc_languages:
       - ENG
       - FRA
+      -
   dfo_web_page:
     _display_names:
       en: Fisheries and Oceans Canada Website
@@ -179,6 +247,7 @@ resource:
     goc_languages:
       - ENG
       - FRA
+      -
   meds_web_page:
     _display_names:
       en: Marine Environmental Data Section Website
@@ -409,6 +478,36 @@ citation:
         - FRA
 
 contact:
+
+  alseamar:
+    _display_names:
+      und: Alseamar
+    organization_name:
+      und: Alseamar
+    web_resource:
+      - alsemar_web_page
+
+  teledyne-webb-research:
+    _display_names:
+      und: Teledyne Webb Research
+    organization_name:
+      en: Teledyne Webb Research
+    email:
+      und: webbresearch@teledyne.com
+    phone:
+      - phone_number: 5085482077
+        phone_number_type: voice
+      - phone_number: 5085401686
+        phone_number_type: fax
+    delivery_point:
+      en: 49 Edgerton Drive
+    city: North Falmouth
+    admin_area:
+      en: Massachusetts
+    postal_code: 02556
+    country: USA
+    web_resource:
+      - teledyne_webb_research_web_page
 
   goc:
     _display_names:
@@ -741,3 +840,4 @@ use_constraint:
     other_constraints:
       en: Acknowledgement required as per the terms of the Open Government License
       fr: Reconnaissance requise conformément aux termes de la licence du gouvernement ouvert
+

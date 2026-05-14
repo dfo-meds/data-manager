@@ -8,7 +8,7 @@ lead_approval:
 lead_publishing_notify:
   label:
     en: Notify Program Leads
-    fr: # TODO
+    fr: Informer les responsables du programme
   step_type: batch
   action: pipeman.dataset.workflow.send_dataset_action_email
   email_template: item_approval
@@ -32,7 +32,7 @@ pub_coord_approval:
 pub_coord_activation_notify:
   label:
     en: Notify Publishing Coordinators (Act)
-    fr: # TODO
+    fr: Notification des coordinateurs de publication (Act)
   step_type: batch
   action: pipeman.dataset.workflow.send_dataset_action_email
   email_template: item_activation
@@ -42,7 +42,7 @@ pub_coord_activation_notify:
 pub_coord_publishing_notify:
   label:
     en: Notify Publishing Coordinators (Pub)
-    fr: # TODO
+    fr: Notification des coordinateurs de publication (Pub)
   step_type: batch
   action: pipeman.dataset.workflow.send_dataset_action_email
   email_template: item_approval
@@ -59,7 +59,7 @@ sysadmin_approval:
 sysadmin_publishing_notify:
   label:
     en: Notify System Administrators
-    fr: # TODO
+    fr: Avertir l'administrateur système
   step_type: batch
   action: pipeman.dataset.workflow.send_dataset_action_email
   email_template: item_approval

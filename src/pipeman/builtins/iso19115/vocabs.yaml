@@ -2589,19 +2589,24 @@ iso19115_mi_operation_type_code:
     en: ISO-19115 - Operation Types
   uri: http://standards.iso.org/iso/19115/resources/Codelist/cat/codelists.xml#MI_OperationTypeCode
   terms:
-    # TODO: French translations
     real:
       display:
         en: Real
+        fr: Réel
       description:
-        en: Field collected data
+        en: Observational data
+        fr: Données observationnelles
     simulated:
       display:
         en: Simulated
+        fr: Simulé
       description:
-        en: Simulated data
+        en: Data which comes from a simulation
+        fr: Données issues d'une simulation
     synthesized:
       display:
         en: Synthesized
+        fr: Synthétisé
       description:
-        en: A mix of real and simulated data
+        en: Combination of observational and simulated data
+        fr: Combinaison de données d'observation et de données simulées
