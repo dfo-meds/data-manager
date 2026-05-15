@@ -75,7 +75,8 @@ def return_to_draft(step, context, db: Database = None):
             log.warning(f"Invalid dataset ID [{context['dataset_id']}]")
             step.output.append(f"Invalid dataset ID [{context['dataset_id']}]")
             return ItemResult.FAILURE
-        ds.status = "DRAFT"
+        if ds.status == "UNDER_REVIEW":
+            ds.status = "DRAFT"
         session.commit()
         log.info(f"Dataset [{context['dataset_id']}] returned to draft")
         return ItemResult.SUCCESS
@@ -84,10 +85,13 @@ def return_to_draft(step, context, db: Database = None):
 @injector.inject
 def send_dataset_action_email(step: WorkflowStep, context: dict, emails: EmailController, dc: DatasetController):
     by_lang_pref = _email_list_for_step(step, context)
-    dataset = dc.load_dataset(dataset_id=context['dataset_id'], revision_no=context['revision_no'])
+    if 'revision_no' in context:
+        dataset = dc.load_dataset(dataset_id=context['dataset_id'], revision_no=context['revision_no'])
+    else:
+        dataset = dc.load_dataset(dataset_id=context['dataset_id'])
     kwargs = {
         'dataset_id': context['dataset_id'],
-        'revision_no': context['revision_no'],
+        'revision_no': context['revision_no'] if 'revision_no' in context else 'N/A',
         'dataset_name': dataset.label(),
         'view_link': flask.url_for('core.view_item', item_id=step.item.id, _external=True),
         'approve_link': flask.url_for('core.approve_item', item_id=step.item.id, _external=True),

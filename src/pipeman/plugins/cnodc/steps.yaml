@@ -39,6 +39,17 @@ pub_coord_activation_notify:
   send_groups:
     - pub_coord
   limit_to_assigned: no
+autopush_notify:
+  label:
+    en: Notifcation - Automatic Push
+    fr: Notification - Poussée automatique
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_auto_pushed
+  send_groups:
+    - pub_coord
+    - sysadmin
+  limit_to_assigned: no
 pub_coord_publishing_notify:
   label:
     en: Notify Publishing Coordinators (Pub)

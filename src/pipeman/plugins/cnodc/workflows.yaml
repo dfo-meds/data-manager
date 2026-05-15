@@ -41,3 +41,26 @@ dataset_activation:
       - activate_dataset
     cleanup:
       - return_to_draft
+  cnodc_activate_and_publish:
+    label:
+      en: CNODC Direct Activation & Publication
+      fr: Activation et publication directe de CNDOC
+    steps:
+      - flag_dataset_for_review
+      - activate_dataset
+      - iso19115_metadata_upload_staging
+      - iso19139_metadata_upload_staging
+      - erddap_iso19115_metadata_upload_staging
+      - erddap_metadata_upload_staging
+      - erddap_notify_staging
+      - publish_dataset
+      - iso19115_metadata_upload_live
+      - iso19139_metadata_upload_live
+      - erddap_iso19115_metadata_upload_live
+      - erddap_metadata_upload_live
+      - erddap_notify_live
+      - autopush_notify
+    permission: workflow.activate_and_publish
+    enabled: yes
+    cleanup:
+      - return_to_draft
