@@ -113,12 +113,13 @@ class MultiLanguageString(BaseTranslatableString):
     @injector.inject
     def _render_str(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None, **kwargs):
         lang_opts = list(self.language_map.keys())
-        lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
-        priority_order = [lang, "und", "en", "fr"]
-        priority_order.extend(self.language_map.keys())
-        for cl in priority_order:
-            if cl in self.language_map and self.language_map[cl]:
-                return self.language_map[cl]
+        if lang_opts:
+            lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
+            priority_order = [lang, "und", "en", "fr"]
+            priority_order.extend(lang_opts)
+            for cl in priority_order:
+                if cl in self.language_map and self.language_map[cl]:
+                    return self.language_map[cl]
         return ""
 
     def keys(self):
