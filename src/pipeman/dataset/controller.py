@@ -222,8 +222,10 @@ class DatasetController:
     def create_dataset_from_api_call(self):
         with self.db as session:
             builder = DatasetBuilder(session, self)
-            dataset = builder.from_flask_api(False)
+            dataset, autostart = builder.from_flask_api(False)
         self.save_dataset(dataset, save_metadata=True)
+        if autostart:
+            self._autostart(dataset)
         response = {
             "dataset_id": dataset.dataset_id,
             'guid': dataset.guid(),
@@ -234,14 +236,27 @@ class DatasetController:
     def upsert_dataset_from_api_call(self):
         with self.db as session:
             builder = DatasetBuilder(session, self)
-            dataset = builder.from_flask_api(True)
+            dataset, autostart = builder.from_flask_api(True)
         self.save_dataset(dataset, save_metadata=True)
+        if autostart:
+            self._autostart(dataset)
         response = {
             "dataset_id": dataset.dataset_id,
             'guid': dataset.guid(),
             "success": True,
         }
         return flask.jsonify(response)
+
+    def _autostart(self, ds: Dataset):
+        if self.has_access(ds, 'activate'):
+            result: str = self.activate_dataset(ds)
+            if result == "FAILURE":
+                raise APIInputError("Error while activating dataset")
+
+        elif self.has_access(ds, 'publish'):
+            result: str = self.publish_dataset(ds)
+            if result == "FAILURE":
+                raise APIInputError("Error while publishing dataset")
 
     def view_dataset_page(self, dataset):
         groups = [x for x in self.reg.ordered_groups(dataset.supported_display_groups())]
@@ -462,7 +477,7 @@ class DatasetController:
                 object_type='dataset'
             )
 
-    def activate_dataset(self, dataset):
+    def activate_dataset(self, dataset) -> str:
         self.log.info(f"Activating dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_activation",
@@ -478,6 +493,7 @@ class DatasetController:
             flasht("pipeman.dataset.error.during_activation", "error")
         else:
             flasht("pipeman.dataset.message.activation_in_progress", "success")
+        return status
 
     def can_publish(self, dataset):
         if hasattr(dataset, "dataset_id"):
@@ -495,7 +511,7 @@ class DatasetController:
                 object_type='dataset'
             )
 
-    def publish_dataset(self, dataset):
+    def publish_dataset(self, dataset) -> str:
         self.log.info(f"Publishing dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_publication",
@@ -513,6 +529,7 @@ class DatasetController:
             flasht("pipeman.dataset.error.during_publication", "error")
         else:
             flasht("pipeman.dataset.message.publication_in_progress", "success")
+        return status
 
     def generate_metadata_content(self, dataset, profile_name, format_name, environment="live"):
         args = {
@@ -735,7 +752,7 @@ class DatasetBuilder:
         self.session = db_session
         self.controller = ctrl
 
-    def from_flask_api(self, allow_update: bool) -> Dataset:
+    def from_flask_api(self, allow_update: bool) -> tuple[Dataset, bool]:
         data = flask.request.get_json()
         if not isinstance(data, dict):
             raise APIInputError("Dataset must be a JSON dictionary")
@@ -744,11 +761,9 @@ class DatasetBuilder:
         if 'guid' in data and data['guid']:
             guid = data['guid']
             authority = data['authority'] if 'authority' in data and data['authority'] else None
-            if allow_update:
-                ds = self.controller.load_dataset_by_guid(guid, authority)
-            else:
-                test_ds = self.controller.load_dataset_by_guid(guid, authority)
-                if test_ds is not None:
+            ds = self.controller.load_dataset_by_guid(guid, authority)
+            if not allow_update:
+                if ds is not None:
                     raise APIInputError(f"This dataset already exists")
         else:
             authority = None
@@ -762,17 +777,14 @@ class DatasetBuilder:
                 guid=guid,
                 authority=authority,
                 created_by=flask_login.current_user.user_id,
-                pub_workflow="",
-                act_workflow="",
-                security_level="",
+                pub_workflow=self._get_publication_workflow(data),
+                act_workflow=self._get_activation_workflow(data),
+                security_level=self._get_security_level(data),
                 status="DRAFT",
             )
             self.session.add(raw)
             self.session.commit()
             ds = self.controller.load_dataset(raw.id)
-            ds.extras['pub_workflow'] = self._get_publication_workflow(data)
-            ds.extras['act_workflow'] = self._get_activation_workflow(data)
-            ds.extras['security_level'] = self._get_security_level(data)
         ds.is_deprecated = False
         org_id = self._get_org_id(data)
         if org_id is not None:
@@ -789,7 +801,7 @@ class DatasetBuilder:
             results = ds.set_from_file_metadata("json_api", metadata)
             if results['errors']:
                 raise ValueError('\n'.join(results['errors']))
-        return ds
+        return t.cast(Dataset, ds), bool(data.get('autostart', False))
 
     def _get_metadata(self, data: dict):
         if 'metadata' in data and data['metadata']:
@@ -850,7 +862,7 @@ class DatasetBuilder:
             ids.add(u.id)
         return list(ids)
 
-    def _get_activation_workflow(self, data, is_new: bool = False):
+    def _get_activation_workflow(self, data):
         workflow_name = self.config.as_str("pipeman.dataset_api.defaults.activation_workflow", None)
         if 'activation_workflow' in data and data['activation_workflow']:
             workflow_name = data['activation_workflow']
