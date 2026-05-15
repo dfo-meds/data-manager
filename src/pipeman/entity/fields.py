@@ -115,6 +115,21 @@ class DecimalField(NumberValidationMixin, Field):
             args["rounding"] = getattr(decimal, self.field_config["rounding"])
         return args
 
+    def _format_for_ui(self, val):
+        # Little niceness for people looking at the data
+        v = str(val)
+        if "." in v:
+            return v.rstrip("0")
+        elif v.startswith("0E"):
+            return "0"
+        return v
+
+    def _process_value(self, val, **kwargs):
+        val = super()._process_value(val, **kwargs)
+        if not val:
+            return val
+        return self._format_for_ui(val)
+
     def _handle_raw(self, raw_value):
         if isinstance(raw_value, str):
             if raw_value == "":
@@ -126,7 +141,6 @@ class DecimalField(NumberValidationMixin, Field):
             raw_value = round(raw_value, self.config('places', default=10))
             return raw_value
         return None
-
 
     def _unserialize(self, val):
         if val is None or val == "":
