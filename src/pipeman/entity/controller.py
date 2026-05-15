@@ -163,13 +163,6 @@ class EntityController:
                     functools.partial(set_metadata_from_api, file_type="yaml", results=results),
                     et
                 )
-                if results['errors'] or results['warnings']:
-                    print('===')
-                    print(external_data)
-                    print('\n'.join(results['errors']))
-                    print('---')
-                    print('\n'.join(results['warnings']))
-                    print('===')
 
 
     def create_or_update_entity(self,
