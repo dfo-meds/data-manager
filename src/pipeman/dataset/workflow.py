@@ -75,7 +75,8 @@ def return_to_draft(step, context, db: Database = None):
             log.warning(f"Invalid dataset ID [{context['dataset_id']}]")
             step.output.append(f"Invalid dataset ID [{context['dataset_id']}]")
             return ItemResult.FAILURE
-        ds.status = "DRAFT"
+        if ds.status == "UNDER_REVIEW":
+            ds.status = "DRAFT"
         session.commit()
         log.info(f"Dataset [{context['dataset_id']}] returned to draft")
         return ItemResult.SUCCESS

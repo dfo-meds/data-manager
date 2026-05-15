@@ -1,4 +1,1 @@
-{{requested_by}} has requested the metadata for "{{dataset_name}}" be published. This
-action can be approved by you.
-
-{{view_link}}
+{{requested_by}} has automatically pushed the dataset "{{dataset_name}}" be published.
