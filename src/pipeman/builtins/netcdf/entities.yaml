@@ -28,7 +28,6 @@ variable:
     required:
       - source_name
       - source_data_type
-      - dimensions
     recommended:
       - units
       - standard_name
@@ -36,6 +35,7 @@ variable:
       - valid_min
       - valid_max
       - missing_value
+      - dimensions
   fields:
     encoding:
       data_type: vocabulary
