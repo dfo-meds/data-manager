@@ -258,6 +258,10 @@ api_access:
     - datasets.create_api
     - datasets.upsert_api
     - files.upload
+    - datasets.activate
+    - datasets.activate.all
+    - datasets.publish
+    - datasets.publish.all
 
 api_access_direct:
   display:
@@ -268,3 +272,7 @@ api_access_direct:
     - datasets.create_api
     - files.upload
     - datasets.upsert_api
+    - datasets.activate
+    - datasets.activate.all
+    - datasets.publish
+    - datasets.publish.all
