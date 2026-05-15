@@ -306,7 +306,7 @@ data_info:
         mapping: license
         processor: licenses
       json_api:
-        mapping: license
+        mapping: licenses
 data_more_info:
   fields:
     purpose:
