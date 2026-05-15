@@ -3,3 +3,70 @@ cioos_eovs:
     en: CIOOS - Essential Ocean Variables
     fr: SIOOS - Variables océaniques essentielles
   uri:
+  terms:
+    oceanColour:
+      en: Ocean Colour
+    oceanSound:
+      en: Ocean Sound
+    marineDebris:
+      en: Marine Debris
+    seaSurfaceHeight:
+      en: Sea Surface Height
+    seaIce:
+      en: Sea Ice
+    seaState:
+      en: Sea State
+    seaSurfaceSalinity:
+      en: Sea Surface Salinity
+    seaSurfaceTemperature:
+      en: Sea Surface Temperature
+    surfaceCurrents:
+      en: Surface Currents
+    subSurfaceSalinity:
+      en: Sub-Surface Salinity
+    subSurfaceTemperature:
+      en: Sub-Surface Temperature
+    subSurfaceCurrents:
+      en: Sub-Surface Currents
+    oceanSurfaceHeatFlux:
+      en: Surface Heat Flux
+    oceanSurfaceStress:
+      en: Surface Stress
+    oceanBottomPressure:
+      en: Bottom Pressure
+    other:
+      en: Other
+    oxygen:
+      en: Oxygen
+    nutrients:
+      en: Nutrients
+    inorganicCarbon:
+      en: Inorganic Carbon
+    dissolvedOrganicCarbon:
+      en: Dissolved Organic Carbon
+    transientTracers:
+      en: Transient Tracers
+    particulateMatter:
+      en: Particulate Matter
+    nitrousOxide:
+      en: Nitrous Oxide
+    stableCarbonIsotopes:
+      en: Stable Carbon Isotopes
+    phytoplanktonBiomassAndDiversity:
+      en: Phytoplankton Biomass and Diversity
+    zooplanktonBiomassAndDiversity:
+      en: Zooplankton Biomass and Diversity
+    fishAbundanceAndDistribution:
+      en: Fish Abundance and Distribution
+    marineTurtlesBirdsMammalsAbundanceAndDistribution:
+      en: Marine Turtles Birds Mammals Abundance and Distribution
+    hardCoralCoverAndComposition:
+      en: HardCoral Cover and Composition
+    seagrassCoverAndComposition:
+      en: Seagrass Cover and Composition
+    macroalgalCanopyCoverAndComposition:
+      en: Macroalgal Canopy Cover and Composition
+    invertebrateAbundanceAndDistribution:
+      en: Invertebrate Abundance and Distribution
+    microbeBiomassAndDiversity:
+      en: Microbe Biomass and Diversity
