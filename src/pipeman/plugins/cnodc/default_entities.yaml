@@ -367,7 +367,7 @@ erddap_servers:
       en: CNODC ERDDAP
       fr: ERDDAP CNDOC
     responsibles:
-      -
+      - _display_names: CNODC - Distributor
         role: distributor
         contact: cnodc
     base_url: https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/erddap/
@@ -666,10 +666,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: unclassified
@@ -688,10 +688,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: protected
@@ -716,10 +716,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: protected
@@ -744,10 +744,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: GOC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: protected
@@ -772,10 +772,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: protected
@@ -800,10 +800,10 @@ use_constraint:
       - goc_security_directive_2019
       - goc_security_levels_2024
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _ display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     classification: protected
@@ -827,10 +827,10 @@ use_constraint:
     reference:
       - open_government_license_2022
     responsibles:
-      -
+      - _display_names: GOC - Author
         role: author
         contact: goc
-      -
+      - _display_names: CNODC - Point of Contact
         role: pointOfContact
         contact: cnodc
     access_constraints:
