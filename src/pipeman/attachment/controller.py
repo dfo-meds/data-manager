@@ -250,6 +250,7 @@ class UploadController:
 
         # Root directory exists check
         root = pathlib.Path(storage_config['root_directory']).resolve()
+        root.mkdir(mode=0o770, parents=True, exist_ok=True)
         if not root.exists():
             self.log.error(f"Root directory {root} does not exist for {storage_config['_name']}")
             return None
@@ -271,6 +272,7 @@ class UploadController:
 
         # Root directory exists check
         root = pathlib.Path(storage_config['root_directory']).resolve()
+        root.mkdir(mode=0o770, parents=True, exist_ok=True)
         if not root.exists():
             self.log.error(f"Root directory {root} does not exist for {storage_config['_name']}")
             return None
