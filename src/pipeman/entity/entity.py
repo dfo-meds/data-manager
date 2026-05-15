@@ -155,7 +155,7 @@ class FieldContainer:
         fns = list(self._fields.keys())
         fns.sort()
         for fn in fns:
-            obj_path = combine_object_path(parent_path, [self._fields[fn].label()])
+            obj_path = combine_object_path(parent_path, [self._fields[fn].clean_label()])
             if fn in self._validation_config["fields"]:
                 for validator in self._validation_config["fields"][fn]:
                     errors.extend(validator.validate(obj_path, self._fields[fn], memo))
@@ -192,7 +192,7 @@ class FieldContainer:
                         level = 'error'
                     elif any(x.level == 'warning' for x in errors):
                         level = 'warning'
-                    yield field.label(), field.display(), '\n'.join(str(x) for x in set(str(x.display_text()) for x in errors)), level
+                    yield field.label(), field.display(), '\n'.join(str(x) for x in set(str(x.short_text()) for x in errors)), level
 
     def values(self) -> dict:
         return {
@@ -285,8 +285,14 @@ class ValidationResult:
     def display_text(self):
         return gettext(self.str_key)
 
+    def short_text(self):
+        return f"{str(gettext('pipeman.validation.level.' + self.level))}: {str(gettext(self.str_key))} [{self.profile}]"
+
     def display_path(self):
-        return " > ".join(str(x) for x in self.object_path)
+        if len(self.object_path) > 1:
+            return " > ".join(str(x) for x in self.object_path[1:])
+        else:
+            return ""
 
 
 class RequiredFieldValidator:

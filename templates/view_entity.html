@@ -20,9 +20,9 @@
         </tr>
         {% for name, value, errs, err_level in entity.display_values() %}
             {% if err_level == 'error' %}
-                <tr class="property_error"><th>{{name}} <span class="property_error property_name_code" title="hello">X</span>
+                <tr class="property_error"><th>{{name}} <span class="property_error property_name_code" title="{{errs}}">X</span>
             {% elif err_level == 'warning' %}
-                <tr class="property_warning"><th>{{name}} <span class="property_warning property_name_code" title="hello">!</span>
+                <tr class="property_warning"><th>{{name}} <span class="property_warning property_name_code" title="{{errs}}">!</span>
             {% else %}
                 <tr><th>{{name}}
             {% endif %}

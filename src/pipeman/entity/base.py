@@ -327,6 +327,9 @@ class Field:
     def related_entities(self):
         return []
 
+    def clean_label(self) -> t.Union[str, MultiLanguageString]:
+        return Field.label(self)
+
     def label(self) -> t.Union[str, MultiLanguageString]:
         txt = self.config("label", default="")
         if isinstance(txt, dict):
