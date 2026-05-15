@@ -3,7 +3,7 @@ import typing
 
 import yaml
 
-from .entity import EntityRegistry
+from .entity import EntityRegistry, Entity
 from autoinject import injector
 import wtforms as wtf
 import flask
@@ -513,12 +513,19 @@ class EntityController:
                 guid=e.guid
             )
 
-    def save_entity(self, entity):
+    def save_entity(self, entity: Entity):
         self._log.info(f"Saving entity {entity.container_id}")
         with self.db as session:
             if entity.guid:
-                check = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid).first()
-                if check and (entity.container_id is None or not entity.container_id == entity.container_id):
+                check_query = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid)
+                if entity.parent_id and entity.parent_type:
+                    check_query = check_query.filter_by(parent_id=entity.parent_id, parent_type=entity.parent_type)
+                check = check_query.first()
+                if check and (entity.container_id is None or not entity.container_id == check.id):
+                    self._log.error("Entity GUID already exists [%s], found [%s;%s;%s;%s] while inserting [%s;%s;%s;%s]",
+                                    entity.guid,
+                                    check.id, check.entity_type, check.parent_id, check.parent_type,
+                                    entity.container_id, entity.entity_type, entity.parent_id, entity.parent_type)
                     raise UserInputError("pipeman.entity.error.guid_already_exists")
             if entity.container_id is not None:
                 e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
