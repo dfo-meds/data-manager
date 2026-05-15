@@ -30,8 +30,6 @@ from pipeman.util.metrics import BlockTimer, time_function
 import zirconium as zr
 import typing as t
 
-from pipeman.i18n.i18n import BaseTranslatableString
-
 
 def is_empty(x):
     return x is None or x == '' or not x
