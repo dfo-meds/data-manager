@@ -727,7 +727,7 @@
         {% endif %}
         {% if not is_empty(extent['vertical_ref_system']) %}
         <gex:verticalCRSId>
-          {{ iso.render_ref_system(extent['vertical_ref_system']) }}
+          {{ ender_ref_system(extent['vertical_ref_system']) }}
         </gex:verticalCRSId>
         {% endif %}
       </gex:EX_VerticalExtent>
