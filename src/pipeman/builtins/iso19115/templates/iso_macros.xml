@@ -758,7 +758,7 @@
       {% endif %}
       {% if platform['description'] %}
       <mac:description>
-        {{ render_text(platform['description']( }}
+        {{ render_text(platform['description']) }}
       </mac:description>
       {% endif %}
       {% if platform['sponsors'] %}
