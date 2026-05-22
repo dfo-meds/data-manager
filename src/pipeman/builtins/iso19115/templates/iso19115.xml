@@ -165,7 +165,7 @@
       {% endfor %}
       {% endif %}
       <mri:extent>
-        {{ render_extent(dataset) }}
+        {{ iso.render_extent(dataset) }}
       </mri:extent>
       {% if not is_empty(dataset['additional_docs']) %}
       {% for doc in dataset['additional_docs'] %}
