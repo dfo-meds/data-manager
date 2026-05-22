@@ -606,7 +606,7 @@
     {% endif %}
   </mcc:MD_Identifier>
   {% endmacro %}
-  {% macro iso.render_acquisition(info) %}
+  {% macro render_acquisition(info) %}
   {% set has_level_description = not (is_empty(info['attributes']) and is_empty(info['features']) and is_empty(info['feature_instances']) and is_empty(info['attribute_instances']) and is_empty(info['dataset']) and is_empty(info['other'])) %}
   {% set has_scope_code = not is_empty(info['scope']) %}
   {% set has_extent = not (is_empty(info['bbox_west']) and is_empty(info['bbox_east']) and is_empty(info['bbox_north']) and is_empty(info['bbox_south'])) %}
