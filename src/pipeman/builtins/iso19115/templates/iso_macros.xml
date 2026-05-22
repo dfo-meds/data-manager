@@ -856,6 +856,7 @@
       <mac:mountedOn>
         {{ render_platform(instrument['mounted_on']) }}
       </mac:mountedOn>
+      {% endif %}
       <!-- otherPropertyType -->
       <!-- otherProperty -->
       <!-- content -->
