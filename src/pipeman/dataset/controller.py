@@ -483,7 +483,10 @@ class DatasetController:
             "dataset_activation",
             dataset.extras['act_workflow'],
             {
-                "dataset_id": dataset.dataset_id
+                "dataset_id": dataset.dataset_id,
+                # Not technically needed usually but helpful in rare cases
+                "metadata_id": dataset.metadata_id,
+                "revision_no": dataset.revision_no
             },
             dataset.dataset_id
         )
