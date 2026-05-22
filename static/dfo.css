@@ -57,7 +57,7 @@ table.property-list > tbody > tr > td > ul {
     padding: 0;
 }
 table.property-list > tbody > tr > td > ul > li {
-    margin: 6px;
+    margin: 0;
     padding: 0;
 }
 .property_error td {
@@ -102,6 +102,12 @@ ul.profile-list li.direct {
 }
 ul.profile-list li.extended {
     font-style: italic;
+}
+
+table.property-list ul.profile-list li {
+    padding: 0 2px;
+    margin-right: 6px;
+    margin-bottom: 6px;
 }
 table.property-list td {
     max-width: 800px;
