@@ -68,6 +68,9 @@ iso19115:
     dataset_other_locales:
     distributors:
     meta_licenses:
+    missions:
+    platforms:
+    instruments:
   formatters:
     iso19115xml:
       label:
