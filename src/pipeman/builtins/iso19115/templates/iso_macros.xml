@@ -764,7 +764,7 @@
       {% if platform['sponsors'] %}
       {% for resp in platform['sponsors'] %}
       <mac:sponsor>
-        {% render_responsibility(resp['role']['short_name'], resp['contact']) %}
+        {{ render_responsibility(resp['role']['short_name'], resp['contact']) }}
       </mac:sponsor>
       {% endfor %}
       {% endif %}
