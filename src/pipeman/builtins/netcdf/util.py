@@ -525,7 +525,7 @@ def _contact_processor(attrs: dict, target_prefix: str, contact: Entity, config:
             if key not in attrs:
                 attrs[key] = contact_info[x]
             else:
-                attrs[key] += sep + contact_info[x]
+                attrs[key] += sep + str(contact_info[x])
     else:
         for x in contact_info:
             attrs[f"{target_prefix}_{x}"] = contact_info[x]
