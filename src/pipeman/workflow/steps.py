@@ -302,3 +302,8 @@ class DefaultStepFactory(GenericStepFactory):
             WorkflowActionStep,
             WorkflowAsynchronousStep,
         ])
+
+
+def noop(*args, **kwargs):
+    """ Automatically succeed"""
+    return ItemResult.SUCCESS

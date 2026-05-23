@@ -70,3 +70,15 @@ actual_send_email:
     fr: Envoyer email
   step_type: batch
   action: pipeman.email.controller.send_email
+trigger_publication:
+  label:
+    en: Start Publication
+    fr: Commencer la publication
+  step_type: action
+  action: pipeman.dataset.workflow.start_publication
+interrupt_live_flow:
+  label:
+    en: Convert to Batch Mode
+    fr: Convertir en mode batch
+  step_type: batch
+  action: pipeman.workflow.steps.noop

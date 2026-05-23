@@ -63,9 +63,11 @@ dataset_activation:
         fr: Activation et publication directe
       steps:
         - activate_dataset
-        - publish_dataset
+        - trigger_publication
       permission: workflow.activate_and_publish
       enabled: yes
+      cleanup:
+        - return_to_draft
 text_translation:
     default:
       label:

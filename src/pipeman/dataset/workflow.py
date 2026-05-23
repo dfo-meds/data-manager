@@ -36,6 +36,16 @@ def publish_dataset(step, context, db: Database = None):
 
 
 @injector.inject
+def start_publication(step, context, dc: DatasetController = None):
+    dataset = dc.load_dataset(context['dataset_id'])
+    if not dataset:
+        step.output.append(f"Invalid dataset ID [{context['dataset_id']}]")
+        return ItemResult.FAILURE
+    dc.activate_dataset(dataset)
+    return ItemResult.SUCCESS
+
+
+@injector.inject
 def activate_dataset(step, context, db: Database = None):
     log = zrlog.get_logger("pipeman.dataset")
     with db as session:
