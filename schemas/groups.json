@@ -1,0 +1,19 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/groups.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^[a-zA-Z0-9_]*$": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display": { "$ref":  "shared.json#/$defs/label" },
+        "permissions": {
+          "type": "array",
+          "items": {"type":  "string"}
+        }
+      }
+    }
+  }
+}

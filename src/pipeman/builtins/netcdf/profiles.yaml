@@ -6,9 +6,6 @@ netcdf:
     custom_metadata:
     custom_keywords:
     variables:
-  mappers:
-    netcdf: pipeman.builtins.netcdf.util.set_metadata_from_netcdf
-  action_callback: pipeman.builtins.netcdf.util.netcdf_dataset_actions
   formatters:
     ncml:
       label:

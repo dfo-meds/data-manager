@@ -1,5 +1,5 @@
 {
-  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/workflows",
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/workflows.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "properties": {
@@ -26,18 +26,13 @@
   "$defs": {
     "workflow": {
       "type": "object",
+      "additionalProperties": false,
       "patternProperties": {
         "^.*$": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
-            "label": {
-              "type": "object",
-              "properties": {
-                "en": {"type":  "string"},
-                "fr": {"type":  "string"},
-                "und": {"type":  "string"}
-              }
-            },
+            "label": { "$ref": "shared.json#/$defs/label" },
             "steps": {
               "type": "array",
               "items": {"type":  "string", "pattern": "^[A-Za-z0-9_]*$"}

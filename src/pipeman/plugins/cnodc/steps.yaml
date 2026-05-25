@@ -14,13 +14,13 @@ lead_publishing_notify:
   email_template: item_approval
   send_groups:
     - tech_lead
-  limit_to_assigned: yes
+  limit_to_assigned: true
 coordinator_approval:
   label:
     en: Regional Coordinator Approval
     fr: Approbation du coordonnateur régional
   step_type: gate
-  require_permssion: approvals.coordinator
+  require_permission: approvals.coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
 pub_coord_approval:
   label:
@@ -38,7 +38,7 @@ pub_coord_activation_notify:
   email_template: item_activation
   send_groups:
     - pub_coord
-  limit_to_assigned: no
+  limit_to_assigned: false
 autopush_notify:
   label:
     en: Notifcation - Automatic Push
@@ -49,7 +49,7 @@ autopush_notify:
   send_groups:
     - pub_coord
     - sysadmin
-  limit_to_assigned: no
+  limit_to_assigned: false
 pub_coord_publishing_notify:
   label:
     en: Notify Publishing Coordinators (Pub)
@@ -59,7 +59,7 @@ pub_coord_publishing_notify:
   email_template: item_approval
   send_groups:
     - pub_coord
-  limit_to_assigned: no
+  limit_to_assigned: false
 sysadmin_approval:
   label:
     en: System Administrator Approval
@@ -76,7 +76,7 @@ sysadmin_publishing_notify:
   email_template: item_approval
   send_groups:
     - sysadmin
-  limit_to_assigned: no
+  limit_to_assigned: false
 erddap_iso19115_metadata_upload_live:
   label:
     en: ERDDAP Metadata Upload (Live)
