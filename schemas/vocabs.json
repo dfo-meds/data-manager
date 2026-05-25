@@ -1,0 +1,32 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/vocabs.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "patternProperties": {
+    "^[A-Za-z0-9_]*$": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "display": {"$ref": "shared.json#/$defs/label"},
+        "uri": {"type":  ["string", "null"]},
+        "terms": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^.*$": {
+              "additionalProperties": false,
+              "type": ["object", "null"],
+              "patternProperties": {
+                "^description$": {"$ref": "shared.json#/$defs/label"}
+              },
+              "properties": {
+                "display": {"$ref": "shared.json#/$defs/label"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

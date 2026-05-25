@@ -2,7 +2,6 @@ from .system import System, load_dynamic_class, load_object
 from .errors import TranslatableError, UserInputError
 from .dict import deep_update
 
-
 def caps_to_snake(txt: str, separator: str = "_") -> str:
     new_s = txt[0].lower()
     for x in txt[1:]:

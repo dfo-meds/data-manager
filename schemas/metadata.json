@@ -1,0 +1,23 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/metadata.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "patternProperties": {
+    "^[a-z_]*$": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "fields": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z_]*$": { "$ref": "shared.json#/$defs/field" }
+          }
+        },
+        "display": { "$ref": "shared.json#/$defs/label" },
+        "order": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}

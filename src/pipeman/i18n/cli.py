@@ -28,3 +28,23 @@ def update(file_path, s: System = None):
             existing[key] = ""
     with open(file_path, "w", encoding="utf-8") as h:
         h.write(yaml.dump(existing, allow_unicode=True))
+
+
+@i18n.command
+@injector.inject
+def with_origin(s: System = None):
+    finder = TranslatableStringFinder()
+    results = finder.search_directory(s.i18n_dirs, with_origin=True)
+    by_origin = {}
+    for key in results:
+        if key[1] not in by_origin:
+            by_origin[key[1]] = set()
+        by_origin[key[1]].add(key[0])
+    skeys = list(by_origin.keys())
+    skeys.sort()
+    for key in skeys:
+        print(f" === {key} === ")
+        kl = list(by_origin[key])
+        kl.sort()
+        for s in kl:
+            print(s)

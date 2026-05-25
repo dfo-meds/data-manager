@@ -3,45 +3,50 @@ from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.i18n import MultiLanguageString, gettext
+from pipeman.db import BaseObjectRegistry
 import json
+import csv
+import zrlog
 
 
 @injector.injectable_global
-class VocabularyRegistry:
+class VocabularyRegistry(BaseObjectRegistry):
 
     def __init__(self):
-        self._vocabularies = {}
+        super().__init__("vocabulary")
+        self._log = zrlog.get_logger("pipeman.vocab")
 
     def list_vocabularies(self):
-        names = list(self._vocabularies.keys())
-        names.sort()
-        for vocab_name in names:
-            yield vocab_name, self._vocabularies[vocab_name][0], self._vocabularies[vocab_name][1]
+        for vocab_name in self.sorted_keys():
+            yield (
+                vocab_name,
+                self[vocab_name]["display"] if "display" in self[vocab_name] else {"und": vocab_name},
+                self[vocab_name]["uri"] if 'uri' in self[vocab_name] else ''
+            )
 
     def display_name(self, vocab_name):
-        return MultiLanguageString(self._vocabularies[vocab_name][0])
+        return MultiLanguageString(self[vocab_name]["display"])
 
-    def register_vocabulary(self, name, display, uri=None):
-        if name in self._vocabularies:
-            self._vocabularies[name][0].update(display)
-            if uri is not None:
-                self._vocabularies[name][1] = uri
-        else:
-            self._vocabularies[name] = (display, uri)
-
-    def vocabulary_exists(self, name):
-        return name in self._vocabularies
-
-    def register_from_dict(self, d: dict):
-        if d:
-            for key in d:
-                self.register_vocabulary(key, d[key]["display"], d[key]["uri"])
-                if "terms" in d[key]:
-                    self.register_terms_from_dict(key, d[key]["terms"])
+    def register(self, obj_name, *args, terms=None, **kwargs):
+        super().register(obj_name, *args, **kwargs)
+        if terms:
+            self.register_terms_from_dict(obj_name, terms)
 
     @injector.inject
-    def register_terms_from_dict(self, vocab_name, terms: dict, vtc: "pipeman.vocab.vocab.VocabularyTermController"):
+    def register_terms_from_dict(self, vocab_name, terms: dict, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
         vtc.save_terms_from_dict(vocab_name, terms)
+
+    @injector.inject
+    def register_terms_from_csv(self, vocab_name, term_file, vtc: "pipeman.vocab.vocab.VocabularyTermController" = None):
+        self._log.notice(f"Loading terms from {term_file} to {vocab_name}")
+        with open(term_file, "r", encoding="utf-8-sig") as h:
+            r = csv.reader(h)
+            header = None
+            for line in r:
+                if header is None:
+                    header = line
+                    continue
+                vtc.upsert_term_by_map(vocab_name, line, header)
 
 
 @injector.injectable
@@ -52,13 +57,13 @@ class VocabularyTermController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self._log = zrlog.get_logger("pipeman.vocab")
 
     def list_vocabularies_page(self):
         return flask.render_template(
             "list_vocabularies.html",
             vocabularies=self._vocabulary_iterator(),
-            title=gettext("pipeman.vocabularies_list.title")
+            title=gettext("pipeman.vocab.page.list_vocabularies.title")
         )
 
     def _vocabulary_iterator(self):
@@ -71,11 +76,11 @@ class VocabularyTermController:
     def list_terms_page(self, vocabulary_name):
         return flask.render_template(
             "list_terms.html",
-            terms=self._term_iterator(vocabulary_name),
+            terms=self.list_terms(vocabulary_name),
             title=self.reg.display_name(vocabulary_name)
         )
 
-    def _term_iterator(self, vocabulary_name):
+    def list_terms(self, vocabulary_name):
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocabulary_name):
                 display_names = json.loads(term.display_names) if term.display_names else {}
@@ -85,6 +90,7 @@ class VocabularyTermController:
                 yield term.short_name, MultiLanguageString(display_names), MultiLanguageString(descriptions)
 
     def clear_terms_from_dict(self, vocab_name):
+        self._log.notice(f"Clearing all terms from {vocab_name}")
         with self.db as session:
             session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name).delete()
             session.commit()
@@ -92,24 +98,70 @@ class VocabularyTermController:
     def save_terms_from_dict(self, vocab_name, terms: dict):
         with self.db as session:
             for tsname in terms:
-                term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
-                if not term:
-                    t = orm.VocabularyTerm(
-                        vocabulary_name=vocab_name,
-                        short_name=tsname,
-                        display_names=json.dumps(terms[tsname]["display"] if "display" in terms[tsname] else {}),
-                        descriptions=json.dumps(terms[tsname]["description"] if "description" in terms[tsname] else {})
-                    )
-                    session.add(t)
-                else:
-                    dn = json.loads(term.display_names)
-                    desc = json.loads(term.descriptions)
-                    if "display" in terms[tsname]:
-                        dn.update(terms[tsname]["display"])
-                        if "description" in terms[tsname]:
-                            desc.update(terms[tsname]["description"])
-                    else:
-                        dn.update(terms[tsname])
-                    term.display_names = json.dumps(dn)
-                    term.descriptions = json.dumps(desc)
-            session.commit()
+                if terms[tsname] is None:
+                    terms[tsname] = {}
+                self.upsert_term(
+                    vocab_name,
+                    str(tsname),
+                    terms[tsname]["display"] if "display" in terms[tsname] else {},
+                    terms[tsname]["description"] if "description" in terms[tsname] else {},
+                    session
+                )
+
+    def upsert_term_by_map(self, vocab_name, line, header):
+        displays = {}
+        descriptions = {}
+        tsname = ""
+        for idx, key in enumerate(header):
+            if key == "short_name":
+                tsname = line[idx]
+            elif key.startswith("display__"):
+                displays[key[9:]] = line[idx]
+            elif key.startswith("description__"):
+                displays[key[13:]] = line[idx]
+            else:
+                raise ValueError(f"Unrecognized column header [{key}]")
+        if not tsname:
+            if not displays:
+                raise ValueError(f"Missing a term name")
+            key_name = "und" if "und" in displays else "en"
+            if key_name not in displays:
+                raise ValueError(f"Missing a fallback term name")
+            tsname = displays[key_name].replace(" ", "_").lower()
+        with self.db as session:
+            self.upsert_term(vocab_name, tsname, displays, descriptions, session)
+
+    def get_term_id(self, vocab_name, tsname):
+        with self.db as session:
+            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
+            if term:
+                return term.id
+            return None
+
+    def get_term_name(self, vocab_name, tsname):
+        with self.db as session:
+            term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
+            if term:
+                return term.short_name
+            return None
+
+    def upsert_term(self, vocab_name, tsname, display, description, session):
+        term = session.query(orm.VocabularyTerm).filter_by(vocabulary_name=vocab_name, short_name=tsname).first()
+        if not term:
+            t = orm.VocabularyTerm(
+                vocabulary_name=vocab_name,
+                short_name=tsname,
+                display_names=json.dumps(display),
+                descriptions=json.dumps(description)
+            )
+            session.add(t)
+        else:
+            dn = json.loads(term.display_names)
+            desc = json.loads(term.descriptions)
+            if display:
+                dn.update(display)
+                term.display_names = json.dumps(dn)
+            if description:
+                desc.update(description)
+                term.descriptions = json.dumps(desc)
+        session.commit()

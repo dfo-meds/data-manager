@@ -6,7 +6,7 @@ from pipeman.workflow import ItemResult
 
 
 @injector.inject
-async def split_send_files(action_config, item_context, dsr: DataStoreRegistry = None, wc: WorkflowController = None):
+async def split_send_files(step, item_context, dsr: DataStoreRegistry = None, wc: WorkflowController = None):
     remote_dir = uio.FileWrapper(dsr.data_store_path(item_context['data_store_name']))
     remote_file = remote_dir / item_context['filename']
     item_context['remote_path'] = str(remote_file)
@@ -20,7 +20,7 @@ async def split_send_files(action_config, item_context, dsr: DataStoreRegistry =
 
 
 @injector.inject
-async def upload_file(action_config, item_context, dsr: DataStoreRegistry = None):
+async def upload_file(step, item_context, dsr: DataStoreRegistry = None):
     local_file = uio.FileWrapper(item_context['local_path'])
     remote_file = await local_file.copy_async(
         uio.FileWrapper(item_context['remote_path']),

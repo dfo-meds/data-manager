@@ -5,99 +5,100 @@ import flask
 import flask_login
 from pipeman.i18n import MultiLanguageString
 import copy
+import zrlog
+
+from pipeman.i18n.i18n import BaseTranslatableString
 from pipeman.util import deep_update, load_object
 from functools import cache
-import markupsafe
+from pipeman.db import BaseObjectRegistry
 from pipeman.i18n import gettext
+from threading import RLock
+import typing as t
 
 
-def entity_access(entity_type: str, op: str) -> bool:
+def entity_access(entity_type: str, op: str, log_access_failures: bool = False) -> bool:
     broad_perm = f"entities.{op}"
+    general_access = f"entities.{op}.all"
     specific_perm = f"entities.{op}.{entity_type}"
     if not flask_login.current_user.has_permission(broad_perm):
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity_type}.{op} denied, missing {broad_perm}")
         return False
+    if flask_login.current_user.has_permission(general_access):
+        return True
     if not flask_login.current_user.has_permission(specific_perm):
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity_type}.{op} denied, missing {general_access} or {specific_perm}")
         return False
     return True
 
 
-def specific_entity_access(entity, op: str) -> bool:
+def specific_entity_access(entity, op: str, log_access_failures: bool = False) -> bool:
     if op == "remove" and entity.is_deprecated:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.remove denied, entity already removed")
         return False
     if op == "restore" and not entity.is_deprecated:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.restore denied, entity not removed")
         return False
-    if flask_login.current_user.has_permission("organization.manage_any"):
+    if flask_login.current_user.has_permission("organizations.manage.any"):
         return True
-    return entity.organization_id in flask_login.current_user.organizations
+    if entity.organization_id and entity.organization_id not in flask_login.current_user.organizations:
+        if log_access_failures:
+            zrlog.get_logger("pipeman.entity").warning(f"Access to {entity.entity_type}.{entity.id}.{op} denied, no access")
+        return False
+    return True
 
 
 @injector.injectable_global
-class EntityRegistry:
+class EntityRegistry(BaseObjectRegistry):
 
     def __init__(self):
-        self._entity_types = {}
+        super().__init__("entity")
 
-    def __iter__(self):
-        return iter(self._entity_types)
-
-    def type_exists(self, key):
-        return key in self._entity_types
-
-    def register_type(self, key, display_names, field_config, derived_config, validation, is_component: bool = None):
-        if key in self._entity_types:
-            deep_update(self._entity_types[key]["display"], display_names)
-            deep_update(self._entity_types[key]["fields"], field_config)
-            deep_update(self._entity_types[key]["validation"], validation)
-            deep_update(self._entity_types[key]["derived_fields"], derived_config)
-            if is_component is not None:
-                self._entity_types[key]['is_component'] = is_component
-        else:
-            self._entity_types[key] = {
-                "display": display_names,
-                "fields": field_config,
-                "is_component": bool(is_component),
-                "validation": validation,
-                "derived_fields": derived_config
-            }
-
-    def register_from_dict(self, cfg_dict):
-        if cfg_dict:
-            for key in cfg_dict:
-                self.register_type(
-                    key,
-                    cfg_dict[key]["display"] if "display" in cfg_dict[key] else {},
-                    cfg_dict[key]["fields"] if "fields" in cfg_dict[key] else {},
-                    cfg_dict[key]["derived_fields"] if "derived_fields" in cfg_dict[key] else {},
-                    cfg_dict[key]["validation"] if "validation" in cfg_dict[key] else {},
-                    cfg_dict[key]["is_component"] if "is_component" in cfg_dict[key] else None
-                )
+    def list_entity_types(self, show_hidden: bool = False):
+        for et in self:
+            if (not show_hidden) and 'hidden' in self[et] and self[et]['hidden']:
+                continue
+            yield et, self[et]
 
     def display(self, key):
-        keys = self._entity_types[key]["display"].copy()
+        keys = self[key]["display"].copy()
         keys['und'] = key
         return MultiLanguageString(keys)
+
+    def unique_field_sets(self, entity_type):
+        for field_name in self[entity_type]["fields"]:
+            entry = self[entity_type]["fields"][field_name]
+            if 'unique' in entry and entry['unique']:
+                if isinstance(entry['unique'], (list, tuple)):
+                    yield {field_name, *entry['unique']}
+                else:
+                    yield {field_name}
 
     def new_entity(self, key, **kwargs):
         ent = Entity(
             key,
-            field_list=self._entity_types[key]["fields"],
-            is_component=self._entity_types[key]["is_component"],
+            field_list=self[key]["fields"],
+            is_component=self[key]["is_component"] if "is_component" in self[key] else False,
             **kwargs
         )
-        if "derived_fields" in self._entity_types[key] and self._entity_types[key]["derived_fields"]:
-            dfns = self._entity_types[key]["derived_fields"]
+        if "derived_fields" in self[key] and self[key]["derived_fields"]:
+            dfns = self[key]["derived_fields"]
             for dfn in dfns:
                 ent.add_derived_field(dfn, dfns[dfn]["label"], dfns[dfn]["value_function"])
-        validation = self._entity_types[key]['validation'] or {}
-        if 'required' in validation and validation['required']:
-            for fn in validation['required']:
-                ent.add_field_validator(fn, RequiredFieldValidator())
-        if 'recommended' in validation and validation['recommended']:
-            for fn in validation['recommended']:
-                ent.add_field_validator(fn, RecommendedFieldValidator())
-        if 'custom' in validation and validation['custom']:
-            for call in validation['custom']:
-                ent.add_self_validator(CustomValidator(call))
+        if 'validation' in self[key] and self[key]['validation']:
+            validation = self[key]['validation']
+            if 'required' in validation and validation['required']:
+                for fn in validation['required']:
+                    ent.add_field_validator(fn, RequiredFieldValidator())
+            if 'recommended' in validation and validation['recommended']:
+                for fn in validation['recommended']:
+                    ent.add_field_validator(fn, RecommendedFieldValidator())
+            if 'custom' in validation and validation['custom']:
+                for call in validation['custom']:
+                    ent.add_self_validator(CustomValidator(call))
         return ent
 
 
@@ -114,7 +115,7 @@ class FieldContainer:
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, container_type: str, container_id: int, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
+    def __init__(self, container_type: str, container_id: int | None, field_list: dict, field_values: dict = None, display_names: dict = None, is_deprecated: bool = False, org_id: int = None):
         self._fields = {}
         self.container_type = container_type
         self.container_id = container_id
@@ -154,7 +155,7 @@ class FieldContainer:
         fns = list(self._fields.keys())
         fns.sort()
         for fn in fns:
-            obj_path = combine_object_path(parent_path, [self._fields[fn].label()])
+            obj_path = combine_object_path(parent_path, [self._fields[fn].clean_label()])
             if fn in self._validation_config["fields"]:
                 for validator in self._validation_config["fields"][fn]:
                     errors.extend(validator.validate(obj_path, self._fields[fn], memo))
@@ -168,21 +169,30 @@ class FieldContainer:
     def _load_fields(self, field_list: dict, field_values: dict = None):
         for field_name in field_list:
             field_config = copy.deepcopy(field_list[field_name])
-            self._fields[field_name] = self.creator.build_field(field_name, field_config.pop('data_type'), field_config, self.container_type, self.container_id)
+            self._fields[field_name] = self.creator.build_field(field_name, field_config.get('data_type'), field_config, self)
             if field_values and field_name in field_values:
                 self._fields[field_name].value = self._fields[field_name].unserialize(field_values[field_name])
 
-    def display_values(self, display_group = None):
+    def display_values(self, display_group = None) -> t.Generator[tuple[str | BaseTranslatableString, t.Any, str | None, str | None], None, None]:
         if display_group == "__derived__":
             keys = list(self._derived_fields.keys())
             keys.sort()
             for key in keys:
-                yield MultiLanguageString(self._derived_fields[key]["label"], load_object(self._derived_fields[key]["cb"])(self))
+                yield MultiLanguageString(self._derived_fields[key]["label"]), load_object(self._derived_fields[key]["cb"])(self), None, None
         else:
-            for fn in self._ordered_field_names(display_group):
+            for fn in self.ordered_field_names(display_group):
                 if display_group is None or display_group == self._fields[fn].display_group:
                     field = self._fields[fn]
-                    yield field.label(), field.display()
+                    errors: list[ValidationResult] = []
+                    if fn in self._validation_config["fields"]:
+                        for v in self._validation_config["fields"][fn]:
+                            errors.extend(v.validate(None, field, {}))
+                    level = None
+                    if any(x.level == 'error' for x in errors):
+                        level = 'error'
+                    elif any(x.level == 'warning' for x in errors):
+                        level = 'warning'
+                    yield field.label(), field.display(), '\n'.join(str(x) for x in set(str(x.short_text()) for x in errors)), level
 
     def values(self) -> dict:
         return {
@@ -227,12 +237,17 @@ class FieldContainer:
         return self.data(key)
 
     def controls(self, display_group=None):
-        return {fn: self._fields[fn].control() for fn in self._ordered_field_names(display_group)}
+        return {fn: self._fields[fn].control() for fn in self.ordered_field_names(display_group)}
 
-    def _ordered_field_names(self, display_group=None):
+    def ordered_field_names(self, display_group=None):
         fields = [fn for fn in self._fields if display_group is None or display_group == self._fields[fn].display_group]
-        fields.sort(key=lambda x: self._fields[x].order)
+        fields.sort(key=lambda x: (self._fields[x].order, x))
         return fields
+
+    def get_field(self, fn) -> t.Optional[Field]:
+        if fn in self._fields:
+            return self._fields[fn]
+        return None
 
     def process_form_data(self, form_data, display_group=None):
         for fn in self._fields:
@@ -243,10 +258,19 @@ class FieldContainer:
         self._display[lang] = name
 
     def label(self):
-        return MultiLanguageString(self._display)
+        return MultiLanguageString(self.display_names())
+
+    def default_display(self):
+        return {"en": "unknown"}
 
     def display_names(self):
+        if not self._display:
+            return self.default_display()
         return self._display
+
+
+# gettext('pipeman.validation.level.warning')
+# gettext('pipeman.validation.level.error')
 
 
 class ValidationResult:
@@ -261,8 +285,14 @@ class ValidationResult:
     def display_text(self):
         return gettext(self.str_key)
 
+    def short_text(self):
+        return f"{str(gettext('pipeman.validation.level.' + self.level))}: {str(gettext(self.str_key))} [{self.profile}]"
+
     def display_path(self):
-        return " > ".join(str(x) for x in self.object_path)
+        if len(self.object_path) > 1:
+            return " > ".join(str(x) for x in self.object_path[1:])
+        else:
+            return ""
 
 
 class RequiredFieldValidator:
@@ -272,7 +302,7 @@ class RequiredFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.required", object_path, "error", "CRE-01", self.profile)]
+            return [ValidationResult("pipeman.validation.error.required_field", object_path, "error", "CRE-01", self.profile)]
         return []
 
 
@@ -283,7 +313,7 @@ class RecommendedFieldValidator:
 
     def validate(self, object_path, field: Field, memo):
         if field.is_empty():
-            return [ValidationResult("pipeman.validation.recommended", object_path, "warning", "CRE-02", self.profile)]
+            return [ValidationResult("pipeman.validation.error.recommended_field", object_path, "warning", "CRE-02", self.profile)]
         return []
 
 
@@ -314,36 +344,39 @@ class Entity(FieldContainer):
     creator: FieldCreator = None
 
     @injector.construct
-    def __init__(self, entity_type, is_component: bool, db_id: int = None, ed_id: int = None, parent_id=None, parent_type=None, **kwargs):
+    def __init__(self, entity_type, is_component: bool, db_id: int = None, ed_id: int = None, parent_id=None, parent_type=None, guid=None, **kwargs):
         super().__init__("entity", db_id, **kwargs)
+        self.guid = guid
         self.is_component = is_component
         self.entity_type = entity_type
-        self.db_id = db_id
         self.entity_data_id = ed_id
         self.parent_id = parent_id
         self.parent_type = parent_type
 
+    def default_display(self):
+        return {"und": f"{self.entity_type} #{self.container_id}"}
+
     def view_link(self):
-        return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.db_id)
+        return flask.url_for("core.view_entity", obj_type=self.entity_type, obj_id=self.container_id)
 
     def actions(self, for_view: bool = False):
         action_args = {
             "obj_type": self.entity_type,
-            "obj_id": self.db_id
+            "obj_id": self.container_id
         }
         actions = []
         if not for_view:
-            actions.append((flask.url_for("core.view_entity", **action_args), "pipeman.general.view"))
+            actions.append((flask.url_for("core.view_entity", **action_args), "pipeman.entity.page.view_entity.link"))
         if entity_access(self.entity_type, 'edit'):
             actions.append((
-                flask.url_for("core.edit_entity", **action_args), "pipeman.general.edit"
+                flask.url_for("core.edit_entity", **action_args), "pipeman.entity.page.edit_entity.link"
             ))
         if (not self.is_deprecated) and entity_access(self.entity_type, 'remove'):
             actions.append((
-                flask.url_for("core.remove_entity", **action_args), "pipeman.general.remove"
+                flask.url_for("core.remove_entity", **action_args), "pipeman.entity.page.remove_entity.link"
             ))
         if self.is_deprecated and entity_access(self.entity_type, 'restore'):
             actions.append((
-                flask.url_for("core.restore_entity", **action_args), "pipeman.general.restore"
+                flask.url_for("core.restore_entity", **action_args), "pipeman.entity.page.restore_entity.link"
             ))
         return actions

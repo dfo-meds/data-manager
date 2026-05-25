@@ -1,0 +1,134 @@
+keywords:
+  fields:
+    goc_subject:
+      data_type: vocabulary
+      vocabulary_name: goc_subjects
+      label:
+        en: GC Subject
+        fr: Sujet GC
+      description:
+        en: Select the most appropriate GoC Core Subject Thesaurus keyword.
+        fr: Sélectionnez le mot clé du thésaurus des sujets de base du GC le plus approprié.
+      order: 15000
+      json_api:
+        mapping: goc_subject
+      keyword_config:
+        is_keyword: yes
+        mode: both
+        thesaurus:
+          prefix: CST
+          citation:
+            title:
+              en: Government of Canada Core Subject Thesaurus
+              fr: Thesaurus subjet core du gouvenerment du Canada
+            revision_date: 2016-10-13
+            resource:
+              url: https://open.canada.ca/data/en/dataset/d4a0e406-eea9-41a7-bcae-28c31f3b9c65
+              protocol:
+                short_name: "WWW:LINK"
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
+          type:
+            short_name: theme
+    goc_publication_place:
+      data_type: vocabulary
+      vocabulary_name: goc_places
+      label:
+        en: GC Publication Places
+        fr: Lieux de publication du GC
+      description:
+        en: Enter the most appropriate location(s) where the data was published.
+        fr: Entrez le ou les emplacements les plus appropriés où les données ont été publiées.
+      order: 15010
+      json_api:
+        mapping: goc_publication_place
+      repeatable: yes
+      keyword_config:
+        is_keyword: yes
+        mode: both
+        thesaurus:
+          citation:
+            title:
+              en: Government of Canada Census Divisions
+              fr: Divisions de recensement du gouvernement de Canada
+            revision_date: 2016-01-01
+            resource:
+              url: https://www12.statcan.gc.ca/census-recensement/2021/ref/dict/az/Definition-eng.cfm?ID=geo008
+              protocol:
+                short_name: "WWW:LINK"
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
+          prefix: GCPLC
+          type:
+            short_name: place
+    goc_audience:
+      data_type: vocabulary
+      vocabulary_name: goc_audiences
+      label:
+        en: GC Audiences
+        fr: Publics du GC
+      description:
+        en: Select the audience(s) that the dataset is aimed at.
+        fr: Sélectionnez le ou les publics auxquels l'ensemble de données est destiné.
+      repeatable: yes
+      order: 15020
+      json_api:
+        mapping: goc_audience
+      keyword_config:
+        is_keyword: yes
+        mode: both
+        thesaurus:
+          citation:
+            title:
+              en: Government of Canada Audiences
+              fr: Publics du gouvernement de Canada
+            revision_date: 2023-10-06
+            responsibles:
+              -
+                role:
+                  short_name: owner
+                contact:
+                  organization_name:
+                    en: Government of Canada
+                    fr: Gouvernement du Canada
+          prefix: GCAUD
+          type:
+            short_name: theme
+publishing:
+  fields:
+    goc_collection_type:
+      data_type: vocabulary
+      vocabulary_name: goc_collection_types
+      label:
+        en: GC Collection Type
+        fr: Type de collection du GC
+      description:
+        en: Select the collection on Open Government where this data should be published.
+        fr: Sélectionnez la collection sur le gouvernement ouvert où ces données doivent être publiées.
+      order: 15000
+      json_api:
+        mapping: goc_collection_type
+    goc_publisher:
+      data_type: entity_ref
+      entity_type: goc_publishing_section
+      label:
+        en: GC Publisher
+        fr: Éditeur du GC
+      description:
+        en: Select the group that is publishing this data.
+        fr: Sélectionnez le groupe qui publie ces données.
+      order: 15010
+      json_api:
+        mapping: goc_publisher

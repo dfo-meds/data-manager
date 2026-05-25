@@ -1,4 +1,105 @@
 cioos_eovs:
   display:
     en: CIOOS - Essential Ocean Variables
+    fr: SIOOS - Variables océaniques essentielles
   uri:
+  terms:
+    oceanColour:
+      display:
+        en: Ocean Colour
+    oceanSound:
+      display:
+        en: Ocean Sound
+    marineDebris:
+      display:
+        en: Marine Debris
+    seaSurfaceHeight:
+      display:
+        en: Sea Surface Height
+    seaIce:
+      display:
+        en: Sea Ice
+    seaState:
+      display:
+        en: Sea State
+    seaSurfaceSalinity:
+      display:
+        en: Sea Surface Salinity
+    seaSurfaceTemperature:
+      display:
+        en: Sea Surface Temperature
+    surfaceCurrents:
+      display:
+        en: Surface Currents
+    subSurfaceSalinity:
+      display:
+        en: Sub-Surface Salinity
+    subSurfaceTemperature:
+      display:
+        en: Sub-Surface Temperature
+    subSurfaceCurrents:
+      display:
+        en: Sub-Surface Currents
+    oceanSurfaceHeatFlux:
+      display:
+        en: Surface Heat Flux
+    oceanSurfaceStress:
+      display:
+        en: Surface Stress
+    oceanBottomPressure:
+      display:
+        en: Bottom Pressure
+    other:
+      display:
+        en: Other
+    oxygen:
+      display:
+        en: Oxygen
+    nutrients:
+      display:
+        en: Nutrients
+    inorganicCarbon:
+      display:
+        en: Inorganic Carbon
+    dissolvedOrganicCarbon:
+      display:
+        en: Dissolved Organic Carbon
+    transientTracers:
+      display:
+        en: Transient Tracers
+    particulateMatter:
+      display:
+        en: Particulate Matter
+    nitrousOxide:
+      display:
+        en: Nitrous Oxide
+    stableCarbonIsotopes:
+      display:
+        en: Stable Carbon Isotopes
+    phytoplanktonBiomassAndDiversity:
+      display:
+        en: Phytoplankton Biomass and Diversity
+    zooplanktonBiomassAndDiversity:
+      display:
+        en: Zooplankton Biomass and Diversity
+    fishAbundanceAndDistribution:
+      display:
+        en: Fish Abundance and Distribution
+    marineTurtlesBirdsMammalsAbundanceAndDistribution:
+      display:
+        en: Marine Turtles Birds Mammals Abundance and Distribution
+    hardCoralCoverAndComposition:
+      display:
+        en: HardCoral Cover and Composition
+    seagrassCoverAndComposition:
+      display:
+        en: Seagrass Cover and Composition
+    macroalgalCanopyCoverAndComposition:
+      display:
+        en: Macroalgal Canopy Cover and Composition
+    invertebrateAbundanceAndDistribution:
+      display:
+        en: Invertebrate Abundance and Distribution
+    microbeBiomassAndDiversity:
+      display:
+        en: Microbe Biomass and Diversity

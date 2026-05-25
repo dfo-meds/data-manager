@@ -4,6 +4,7 @@ from pipeman.vocab import VocabularyTermController
 from autoinject import injector
 import xml.etree.ElementTree as ET
 import zirconium as zr
+import logging
 
 
 @injector.injectable
@@ -16,29 +17,38 @@ class CIOOSVocabularyManager:
     def __init__(self):
         self.cioos_eovs_list_url = self.cfg.as_str(
             ("pipeman", "cioos", "eov_list_url"),
-            default="https://raw.githubusercontent.com/cioos-siooc/metadata-entry-form/main/src/eovs.json"
+            default="https://raw.githubusercontent.com/cioos-siooc/metadata-entry-form/refs/heads/main/src/eovs.js"
         )
+        self.log = logging.getLogger("pipeman.cioos_eovs")
 
     def fetch(self):
         self.fetch_eovs()
 
     def fetch_eovs(self):
-        resp = requests.get(self.cioos_eovs_list_url)
-        self.vtc.clear_terms_from_dict("cioos_eovs")
-        cioos_eovs = resp.json()
-        if "eovs" in cioos_eovs:
-            eov_terms = {}
-            for eov in cioos_eovs["eovs"]:
-                eov_terms[eov['value']] = {
-                    'display': {
-                        'en': eov['label EN'],
-                        'fr': eov['label FR']
-                    },
-                    'description': {
-                        'en': eov['definition EN'],
-                        'fr': eov['definition FR']
+        try:
+            resp = requests.get(self.cioos_eovs_list_url)
+            resp.raise_for_status()
+            return  # TODO: fix
+            self.vtc.clear_terms_from_dict("cioos_eovs")
+
+            cioos_eovs = resp.json()
+            if "eovs" in cioos_eovs:
+                eov_terms = {}
+                for eov in cioos_eovs["eovs"]:
+                    eov_terms[eov['value']] = {
+                        'display': {
+                            'en': eov['label EN'],
+                            'fr': eov['label FR']
+                        },
+                        'description': {
+                            'en': eov['definition EN'],
+                            'fr': eov['definition FR']
+                        }
                     }
-                }
-            self.vtc.save_terms_from_dict("cioos_eovs", eov_terms)
-        else:
-            print("no eovs variable found")
+                self.vtc.save_terms_from_dict("cioos_eovs", eov_terms)
+            else:
+                print("no eovs variable found")
+        except Exception as ex:
+            self.log.exception(ex)
+
+

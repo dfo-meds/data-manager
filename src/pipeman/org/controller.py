@@ -3,7 +3,7 @@ from pipeman.db import Database
 import pipeman.db.orm as orm
 from pipeman.i18n import gettext
 from pipeman.util.errors import UserInputError
-import logging
+import zrlog
 import flask_login
 from pipeman.i18n import DelayedTranslationString, MultiLanguageString
 import json
@@ -11,7 +11,7 @@ import flask
 from flask_wtf import FlaskForm
 import wtforms.validators as wtfv
 import wtforms as wtf
-from pipeman.util.flask import TranslatableField, ActionList
+from pipeman.util.flask import TranslatableField, ActionList, flasht
 
 
 @injector.injectable
@@ -21,7 +21,7 @@ class OrganizationController:
 
     @injector.construct
     def __init__(self):
-        pass
+        self._log = zrlog.get_logger("pipeman.org")
 
     def list_organizations_page(self):
         with self.db as session:
@@ -32,7 +32,7 @@ class OrganizationController:
             return flask.render_template(
                 "list_organizations.html",
                 organizations=self._iterate_organizations(query),
-                title=gettext("pipeman.organization_list.title"),
+                title=gettext("pipeman.org.page.list_organizations.title"),
                 create_link=create_link
             )
 
@@ -41,12 +41,12 @@ class OrganizationController:
             org = session.query(orm.Organization).filter_by(id=org_id).first()
             if not org:
                 return flask.abort(404)
-            display_name = MultiLanguageString(json.loads(org.display_names)) if org.display_names else gettext("pipeman.general.na")
+            display_name = MultiLanguageString(json.loads(org.display_names)) if org.display_names else gettext("pipeman.common.na")
             return flask.render_template(
                 "view_organization.html",
                 org=org,
                 display=display_name,
-                title=gettext('pipeman.organization_view.title'),
+                title=gettext('pipeman.org.page.view_organization.title'),
                 actions=self._build_action_list(org, False)
             )
 
@@ -54,9 +54,9 @@ class OrganizationController:
         actions = ActionList()
         kwargs = {"org_id": org.id}
         if short_list:
-            actions.add_action('pipeman.general.view', 'core.view_organization', **kwargs)
+            actions.add_action('pipeman.org.page.view_organization.link', 'core.view_organization', **kwargs)
         if flask_login.current_user.has_permission("organizations.edit"):
-            actions.add_action("pipeman.general.edit", "core.edit_organization", **kwargs)
+            actions.add_action("pipeman.org.page.edit_organization.link", "core.edit_organization", **kwargs)
         return actions
 
     def _iterate_organizations(self, query):
@@ -68,8 +68,9 @@ class OrganizationController:
         form = OrganizationForm()
         if form.validate_on_submit():
             org_id = self.upsert_organization(form.short_name.data, form.display_names.data)
+            flasht("pipeman.org.page.create_organization.success", 'success')
             return flask.redirect(flask.url_for('core.view_organization', org_id=org_id))
-        return flask.render_template('form.html', form=form, title=gettext('pipeman.organization_create.title'))
+        return flask.render_template('form.html', form=form, title=gettext('pipeman.org.page.create_organization.title'))
 
     def edit_organization_form(self, org_id):
         with self.db as session:
@@ -77,8 +78,9 @@ class OrganizationController:
             form = OrganizationForm(org=org)
             if form.validate_on_submit():
                 org_id = self.upsert_organization(form.short_name.data, form.display_names.data, org.id)
+                flasht("pipeman.org.page.edit_organization.success", "success")
                 return flask.redirect(flask.url_for('core.view_organization', org_id=org_id))
-            return flask.render_template('form.html', form=form, title=gettext('pipeman.organization_edit.title'))
+            return flask.render_template('form.html', form=form, title=gettext('pipeman.org.page.edit_organization.title'))
 
     def upsert_organization(self, org_name, display_names=None, org_id=None):
         with self.db as session:
@@ -87,7 +89,7 @@ class OrganizationController:
                 org = session.query(orm.Organization).filter_by(id=org_id).first()
             check_org = session.query(orm.Organization).filter_by(short_name=org_name).first()
             if check_org and (org_id is None or not check_org.id == org.id):
-                raise UserInputError("pipeman.organization.already_exists")
+                raise UserInputError("pipeman.org.error.org_already_exists")
             if org:
                 if display_names:
                     org.display_names = json.dumps(display_names)
@@ -98,36 +100,36 @@ class OrganizationController:
                 )
                 session.add(org)
             session.commit()
-            logging.getLogger("pipeman.org").out(f"Organization {org_name} created")
+            self._log.notice(f"Organization {org_name} updated or inserted")
             return org.id
 
-    def list_organizations(self):
+    def list_organizations(self, include_global: bool = True):
         with self.db as session:
-            all_access = flask_login.current_user.has_permission("organization.manage_any")
-            global_access = flask_login.current_user.has_permission("organization.manage_global")
+            all_access = flask_login.current_user.has_permission("organizations.manage.any")
+            global_access = flask_login.current_user.has_permission("organizations.manage.global")
             orgs = []
-            if global_access:
-                orgs.append((0, DelayedTranslationString("pipeman.organization.global")))
+            if global_access and include_global:
+                orgs.append((0, DelayedTranslationString("pipeman.label.org.global_name")))
             for org in session.query(orm.Organization):
                 if all_access or flask_login.current_user.belongs_to(org.id):
-                    orgs.append((org.id, MultiLanguageString(json.loads(org.display_names) if org.display_names else {'und': org.short_name})))
+                    orgs.append((org.id, MultiLanguageString(json.loads(org.display_names if org.display_names else {'und': org.short_name}))))
             return orgs
 
 
 class OrganizationForm(FlaskForm):
 
     short_name = wtf.StringField(
-        DelayedTranslationString("pipeman.organization.short_name"),
+        DelayedTranslationString("pipeman.label.org.short_name"),
         validators=[
             wtfv.DataRequired(
-                message=DelayedTranslationString("pipeman.fields.required")
+                message=DelayedTranslationString("pipeman.error.required_field")
             )
         ]
     )
 
-    display_names = TranslatableField(wtf.StringField, label=DelayedTranslationString("pipeman.organization.display_names"))
+    display_names = TranslatableField(wtf.StringField, label=DelayedTranslationString("pipeman.common.display_name"))
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
     def __init__(self, *args, org=None, **kwargs):
         self.org = org

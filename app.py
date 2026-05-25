@@ -19,3 +19,6 @@ def create_app(reg: System = None):
 pipeman_init(extra_files=[".pipeman.app.toml"])
 app = create_app()
 
+if __name__ == "__main__":
+    app.run()
+

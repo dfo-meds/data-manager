@@ -1,0 +1,181 @@
+lead_approval:
+  label:
+    en: Program Lead Approval
+    fr: Approbation du responsable du programme
+  step_type: gate
+  require_permission: approvals.program_lead
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+lead_publishing_notify:
+  label:
+    en: Notify Program Leads
+    fr: Informer les responsables du programme
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - tech_lead
+  limit_to_assigned: true
+coordinator_approval:
+  label:
+    en: Regional Coordinator Approval
+    fr: Approbation du coordonnateur régional
+  step_type: gate
+  require_permission: approvals.coordinator
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+pub_coord_approval:
+  label:
+    en: Publishing Coordinator Approval
+    fr: Approbation du coordinateur de publication
+  step_type: gate
+  require_permission: approvals.publishing_coordinator
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+pub_coord_activation_notify:
+  label:
+    en: Notify Publishing Coordinators (Act)
+    fr: Notification des coordinateurs de publication (Act)
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_activation
+  send_groups:
+    - pub_coord
+  limit_to_assigned: false
+autopush_notify:
+  label:
+    en: Notifcation - Automatic Push
+    fr: Notification - Poussée automatique
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_auto_pushed
+  send_groups:
+    - pub_coord
+    - sysadmin
+  limit_to_assigned: false
+pub_coord_publishing_notify:
+  label:
+    en: Notify Publishing Coordinators (Pub)
+    fr: Notification des coordinateurs de publication (Pub)
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - pub_coord
+  limit_to_assigned: false
+sysadmin_approval:
+  label:
+    en: System Administrator Approval
+    fr: Approbation de l'administrateur système
+  step_type: gate
+  require_permission: approvals.sysadmin
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+sysadmin_publishing_notify:
+  label:
+    en: Notify System Administrators
+    fr: Avertir l'administrateur système
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - sysadmin
+  limit_to_assigned: false
+erddap_iso19115_metadata_upload_live:
+  label:
+    en: ERDDAP Metadata Upload (Live)
+    fr: Télécharger métadonnées pour ERDDAP (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: erddap_config
+  environment: pilot
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115_erddap"
+erddap_metadata_upload_live:
+  label:
+    en: ERDDAP Config Upload (Live)
+    fr: Télécharger configuration ERDDAP (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: erddap
+  format_name: erddapxml
+  storage_name: erddap_config
+  environment: pilot
+  file_path_pattern_key: "cnodc.metadata.patterns.live_erddap"
+iso19139_metadata_upload_live:
+  label:
+    en: HNAP Metadata Upload (Live)
+    fr: Télécharger métadonnées HNAP (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: gociso19115
+  format_name: iso19139_nap
+  storage_name: html_live
+  environment: pilot
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19139"
+iso19115_metadata_upload_live:
+  label:
+    en: ISO Metadata Upload (Live)
+    fr: Télécharger métadonnées ISO (en direct)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: html_live
+  environment: pilot
+  file_path_pattern_key: "cnodc.metadata.patterns.live_iso19115"
+erddap_iso19115_metadata_upload_staging:
+  label:
+    en: ERDDAP Metadata Upload (Staging)
+    fr: Télécharger métadonnées pour ERDDAP (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: erddap_staging_config
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115_erddap"
+erddap_metadata_upload_staging:
+  label:
+    en: ERDDAP Config Upload (Staging)
+    fr: Télécharger configuration ERDDAP (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: erddap
+  format_name: erddapxml
+  storage_name: erddap_staging_config
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_erddap"
+iso19139_metadata_upload_staging:
+  label:
+    en: HNAP Metadata Upload (Staging)
+    fr: Télécharger métadonnées HNAP (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: gociso19115
+  format_name: iso19139_nap
+  storage_name: html_staging
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19139"
+iso19115_metadata_upload_staging:
+  label:
+    en: ISO Metadata Upload (Staging)
+    fr: Télécharger métadonnées ISO (mise en scène)
+  step_type: batch
+  action: "pipeman.attachment.workflow.upload_metadata"
+  profile_name: iso19115
+  format_name: iso19115xml
+  storage_name: html_staging
+  environment: staging
+  file_path_pattern_key: "cnodc.metadata.patterns.staging_iso19115"
+erddap_notify_staging:
+  label:
+    en: Recompile ERDDAP Datasets (Staging)
+    fr: Recompiler les données ERDDAP (en direct)
+  step_type: batch
+  action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
+  erddap_cluster: staging
+erddap_notify_live:
+  label:
+    en: Recompile ERDDAP Datasets (Live)
+    fr: Recompiler les données ERDDAP (mise en scène)
+  step_type: batch
+  action: "pipeman.plugins.cnodc.workflow.notify_erddaputil_http"
+  erddap_cluster: live

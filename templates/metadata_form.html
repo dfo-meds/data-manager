@@ -4,7 +4,7 @@
         {% for link, txt in groups %}
         <li><a href="{{link}}">{{txt}}</a></li>
         {% endfor %}
-        <br style="clear: both;" />
+        <br class="cb" />
     </ul>
     {% if instructions %}
         <div class="instructions">{{instructions}}</div>
@@ -13,6 +13,6 @@
 {% endblock %}
 {% block sidebar %}
 <ul class="action_list">
-    <li><a href="{{back}}">{{'forms.back' | gettext}}</a></li>
+    <li><a href="{{back}}">{{'pipeman.common.back' | gettext}}</a></li>
 </ul>
 {% endblock %}

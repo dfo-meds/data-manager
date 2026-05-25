@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h2>{{'pipeman.workflow_item.properties' | gettext}}</h2>
+<h2>{{'pipeman.label.witem.properties' | gettext}}</h2>
 <table class="property-list" cellpadding="0" cellspacing="0">
     <tbody>
     {% for txt, val in item.properties() %}
@@ -11,13 +11,13 @@
     {% endfor %}
 </tbody>
 </table>
-<h2>{{'pipeman.workflow_item.logs' | gettext}}</h2>
+<h2>{{'pipeman.label.witem.steps' | gettext}}</h2>
 <table cellpadding="0" cellspacing="0" border="0" class="data_table">
     <thead>
         <tr>
-            <th>{{'pipeman.workflow_item.step.name' | gettext}}</th>
-            <th>{{'pipeman.workflow_item.step.notes' | gettext}}</th>
-            <th>{{'pipeman.workflow_item.step.status' | gettext}}</th>
+            <th>{{'pipeman.label.witem.step.name' | gettext}}</th>
+            <th>{{'pipeman.label.witem.step.notes' | gettext}}</th>
+            <th>{{'pipeman.label.witem.step.status' | gettext}}</th>
         </tr>
     </thead>
     <tbody>
@@ -25,7 +25,7 @@
         <tr class="workflow-step-{{status}}">
             <td>{{name}}</td>
             <td>{{notes}}</td>
-            <td>{{('pipeman.workflow_item.core_steps.' + status.lower()) | gettext}}</td>
+            <td>{{('pipeman.label.witem.step.' + status.lower()) | gettext}}</td>
         </tr>
         {% endfor %}
     </tbody>

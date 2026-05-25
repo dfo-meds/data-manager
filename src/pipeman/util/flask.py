@@ -1,4 +1,6 @@
 import markupsafe
+import sqlalchemy.orm
+import wtforms
 import wtforms as wtf
 from pipeman.i18n import TranslationManager, DelayedTranslationString, MultiLanguageString
 from pipeman.db import Database
@@ -6,6 +8,7 @@ import pipeman.db.orm as orm
 from autoinject import injector
 from flask_wtf import FlaskForm
 from wtforms.form import BaseForm
+from wtforms.widgets import html_params
 import pathlib
 from wtforms.meta import DefaultMeta
 from flask_wtf.csrf import _FlaskFormCSRF
@@ -17,6 +20,7 @@ from markupsafe import Markup, escape
 from pipeman.i18n import gettext, LanguageDetector
 from pipeman.util.errors import FormValueError
 import wtforms.validators as wtfv
+import zrlog
 
 import sqlalchemy as sa
 import flask_login
@@ -27,6 +31,53 @@ import shutil
 import yaml
 import secrets
 import datetime
+from xml.sax.saxutils import escape as sax_escape, quoteattr as sax_quote
+
+
+C_REPLACEMENTS = {
+    "\r": "\\r",
+    "\n": "\\n",
+    "\t": "\\t",
+    "\b": "\\b",
+    "\f": "\\f",
+}
+
+
+def xml_escape(v):
+    if v is None:
+        return ""
+    return sax_escape(str(v))
+
+
+def xml_quote_attr(v):
+    return xml_escape(v).replace('"', '&quot;')
+
+
+def c_escape(v, quote_char='"'):
+    if v is None:
+        v = ""
+    if isinstance(v, str):
+        v = v.replace('\\', '\\\\').replace(quote_char, f"\\{quote_char}")
+        for x in C_REPLACEMENTS:
+            v = v.replace(x, C_REPLACEMENTS[x])
+        buffer_v = ""
+        for k in range(0, len(v)):
+            if ord(v[k]) < 32 or ord(v[k]) >= 128:
+                new_c = hex(ord(v[k]))[2:]
+                if len(new_c) < 2:
+                    new_c = f"0{new_c}"
+                buffer_v += f"\\x{new_c}"
+            else:
+                buffer_v += v[k]
+        return f"{quote_char}{buffer_v}{quote_char}"
+    return v
+
+
+def flasht(dts_str, message_type='info', default=None, *args, **kwargs):
+    if isinstance(dts_str, str):
+        dts_str = DelayedTranslationString(dts_str, default, *args, **kwargs)
+    flask.flash(str(dts_str), message_type)
+
 
 WORD_FANCY_MAP = {
     "‘": "'",
@@ -55,16 +106,21 @@ def remove_control_chars(txt):
 
 class PipemanFlaskForm(FlaskForm):
 
+    def __init__(self, *args, **kwargs):
+        self.with_file_upload = False
+        super().__init__(*args, **kwargs)
+        for name in self._fields:
+            if isinstance(self._fields[name], wtf.FileField):
+                self.with_file_upload = True
+                break
+
     def validate_on_submit(self, extra_validators=None):
         if super().validate_on_submit(extra_validators):
             return True
         elif self.errors:
             for key in self.errors:
                 for m in self.errors[key]:
-                    flask.flash(gettext("pipeman.entity.form_error").format(
-                        field=self._fields[key].label.text,
-                        error=m
-                    ), "error")
+                    flasht("pipeman.error.form", "error", field=self._fields[key].label.text, error=m)
         return False
 
 
@@ -72,7 +128,7 @@ class NoControlCharacters:
     """Ensure there are no control characters"""
 
     def __init__(self, exceptions=None, message=None):
-        self.message = message or DelayedTranslationString("pipeman.errors.control_char_in_str")
+        self.message = message or DelayedTranslationString("pipeman.error.control_char_in_str")
         self.exceptions = exceptions or []
 
     def __call__(self, form, field, message=None):
@@ -80,6 +136,111 @@ class NoControlCharacters:
         for cchar in CONTROL_LIST:
             if cchar in txt and not cchar in self.exceptions:
                 raise wtfv.ValidationError(message or self.message)
+
+
+class TabbedFieldFormWidget:
+
+    def __init__(self, no_tab_fields: t.Optional[list] = None, for_txt_input: bool = False, default_tab: int = None):
+        self._no_tab_fields = no_tab_fields or []
+        self._for_txt_input = for_txt_input
+        self._default_tab: t.Optional[int] = default_tab
+
+    def __call__(self, field, **kwargs):
+        labels = []
+        texts = []
+        others = []
+        for subfield in field:
+            name = subfield.name
+            if subfield.type in ("HiddenField", "CSRFTokenField") or any(name.endswith(x) for x in self._no_tab_fields):
+                others.append(subfield)
+            else:
+                labels.append(subfield.label)
+                sf = str(subfield())
+                if subfield.description:
+                    sf += f'<div class="form-description">{subfield.description}</div>'
+                texts.append(sf)
+        cls = "" if not self._for_txt_input else "tabs-for-multilingual"
+        html = f'<div id="{field.id}" class="{cls}">\n'
+        html += '<ul>\n'
+        for idx, label in enumerate(labels, start=1):
+            label = str(label)
+            if '<a' in label:
+                s1 = label.find("<a")
+                e1 = label.find(">", s1)
+                s2 = label.find("</a>")
+                label = label[0:s1] + label[e1+1:s2] + label[s2+4:]
+            html += f'<li><a href="#{field.id}-tab-{idx}">{label}</a></li>\n'
+        html += '</ul>\n'
+        for idx, text in enumerate(texts, start=1):
+            html += f'<div id="{field.id}-tab-{idx}">{text}</div>\n'
+        html += '</div>\n'
+        html += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">\n'
+        html += "$(document).ready(function() {"
+        tabs = ''
+        if self._default_tab is not None:
+            tabs = '{active: ' + str(self._default_tab) + '}'
+        html += f"$('#{field.id}').tabs({tabs}).addClass('ui-tabs-vertical ui-helper-clearfix');"
+        html += f"$('#{field.id} li').removeClass('ui-corner-top').addClass('ui-corner-left');"
+        html += "});"
+        html += '</script>\n'
+        if others:
+            html += f"<table id='{field.id}-other-fields' class='cb'>\n<tbody>\n"
+            hidden = ""
+            for subfield in others:
+                content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
+                if subfield.type in ("HiddenField", "CSRFTokenField"):
+                    hidden += str(subfield)
+                elif subfield.type in ("BooleanField"):
+                    html += "<tr><td colspan='2'>%s%s%s</td></tr>\n" % (content, str(subfield.label), hidden)
+                else:
+                    html += "<tr><th>%s</th><td>%s%s</td></tr>\n" % (str(subfield.label), hidden, content)
+            html += '</tbody>\n</table>\n'
+            if hidden:
+                html += hidden + "\n"
+        return markupsafe.Markup(html)
+
+
+class BetterTableWidget:
+    """
+    Renders a list of fields as a set of table rows with th/td pairs.
+
+    If `with_table_tag` is True, then an enclosing <table> is placed around the
+    rows.
+
+    Hidden fields will not be displayed with a row, instead the field will be
+    pushed into a subsequent table row to ensure XHTML validity. Hidden fields
+    at the end of the field list will appear outside the table.
+    """
+
+    def __init__(self, with_table_tag=True):
+        self.with_table_tag = with_table_tag
+
+    def __call__(self, field, **kwargs):
+        html = []
+        if self.with_table_tag:
+            kwargs.setdefault("id", field.id)
+            html.append("<table %s>\n" % html_params(**kwargs))
+        hidden = ""
+        for subfield in field:
+            content = str(subfield() if not subfield.render_kw else subfield(**subfield.render_kw))
+            if subfield.type in ("HiddenField", "CSRFTokenField"):
+                hidden += str(subfield)
+            elif subfield.type in ("BooleanField"):
+                html.append(
+                    "<tr><td colspan='2'>%s%s%s</td></tr>\n" % (content, str(subfield.label), hidden)
+                )
+                hidden = ""
+            else:
+                html.append(
+                    "<tr><th>%s</th><td>%s%s</td></tr>\n"
+                    % (str(subfield.label), hidden, content)
+                )
+                hidden = ""
+        if self.with_table_tag:
+            html.append("</table>\n")
+        if hidden:
+            html.append(hidden + "\n")
+        return Markup("".join(html))
 
 
 @injector.injectable
@@ -95,6 +256,57 @@ class CSPRegistry:
             'style-src': [],
             'img-src': []
         }
+        self._can_cache_page = True
+        self._cache_time = self.cfg.as_int(("csp", "cache_time"), default=300)
+        self._static_cache_time = self.cfg.as_int(("csp", "static_cache_time"), default=7200)
+        self._allow_caching_default = self.cfg.as_bool(("csp", "allow_caching"), default=True)
+        self._is_static_resource = False
+        self._log = zrlog.get_logger("pipeman.csp")
+
+    def set_static(self, cache_time=None):
+        self._cache_time = cache_time if cache_time is not None else self._static_cache_time
+        self._is_static_resource = True
+
+    def allow_caching(self, response=None):
+        return False
+        # If caching is disabled, lets just not worry about it
+        if not self._allow_caching_default:
+            self._log.debug("Caching disabled")
+            return False
+        # No caching if we used a nonce or anything like it
+        if not self._can_cache_page:
+            self._log.debug("Caching disabled, nonce used")
+            return False
+        if response and response.status_code not in (200, 301):
+            self._log.debug("Non-success error code, caching disabled")
+            return False
+        # No caching for methods other than GET or HEAD
+        if flask.request.method not in ('GET', 'HEAD'):
+            self._log.debug("Request method was not GET or HEAD, caching disabled")
+            return False
+        # Otherwise we can probably cache this resource
+        return True
+
+    def allow_shared_caching(self, response = None):
+        # We can cache static resources even if it is an authenticated request since
+        # there is no extra information
+        if self._is_static_resource:
+            return True
+        # No caching if we used an authorization header in the request
+        if flask.request.headers.get("Authorization", default=None) is not None:
+            self._log.debug("Authorization header present, shared cache disabled")
+            return False
+        # No caching if the user is authenticated
+        if flask_login.current_user.is_authenticated:
+            self._log.debug("Authenticated page, shared cache disabled")
+            return False
+        return True
+
+    def set_cache_time(self, time: int):
+        self._cache_time = time
+
+    def no_cache(self):
+        self._can_cache_page = False
 
     def reset_csp_policy(self, policy_area: str):
         if policy_area in self._csp_policies:
@@ -123,6 +335,22 @@ class CSPRegistry:
                     f"X-Upstream-CSP-{policy_area}",
                     " ".join(str(x) for x in self._csp_policies[policy_area])
                 )
+        if not self.allow_caching(response) or self._cache_time == 0:
+            response.cache_control.max_age = 0
+            response.cache_control.no_cache = True
+            response.cache_control.no_store = True
+            response.cache_control.must_revalidate = True
+            response.cache_control.proxy_revalidate = True
+        else:
+            allow_share = self.allow_shared_caching(response)
+            response.cache_control.no_cache = None
+            response.cache_control.no_store = None
+            response.cache_control.must_revalidate = None
+            response.cache_control.proxy_revalidate = None
+            response.cache_control.max_age = self._cache_time
+            response.expires = (datetime.datetime.utcnow() + datetime.timedelta(seconds=self._cache_time))
+            response.cache_control.private = (not allow_share) or None
+            response.cache_control.public = allow_share or None
         return response
 
     def build_nonce(self) -> str:
@@ -132,6 +360,7 @@ class CSPRegistry:
 @injector.inject
 def csp_nonce(policy_area: str, cspr: CSPRegistry = None):
     nonce = cspr.build_nonce()
+    cspr.no_cache()
     cspr.add_csp_policy(policy_area, f"'nonce-{nonce}'")
     return nonce
 
@@ -333,51 +562,23 @@ class ActionList:
     def __bool__(self):
         return bool(self.action_items)
 
-    def add_action(self, label_str, endpoint, **kwargs):
+    def add_action(self, label_str, endpoint, order: int = 0, **kwargs):
         self.action_items.append((
             flask.url_for(endpoint, **kwargs),
-            label_str
+            label_str,
+            order
         ))
 
     def render(self, html_cls="action_list"):
+        self.action_items.sort(key=lambda x: x[2])
         mu = f'<ul class="{html_cls}">'
-        for path, txt in self.action_items:
+        for path, txt, _ in self.action_items:
             mu += f'<li><a href="{escape(path)}">{escape(gettext(txt))}</a></li>'
         mu += '</ul>'
         return Markup(mu)
 
     def __html__(self):
         return self.render()
-
-
-def paginate_query(query, min_page_size=10, max_page_size=250, default_page_size=50):
-    count = query.count()
-    page_size = flask.request.args.get("size", "")
-    if not page_size.isdigit():
-        page_size = default_page_size
-    else:
-        page_size = int(page_size)
-        if page_size > max_page_size:
-            page_size = max_page_size
-        elif page_size < min_page_size:
-            page_size = min_page_size
-    max_pages = max(1, math.ceil(count / page_size))
-    page = flask.request.args.get("page", "")
-    if not page.isdigit():
-        page = 1
-    else:
-        page = int(page)
-        if page > 1 and page > max_pages:
-            page = max_pages
-    return (
-        query.limit(page_size).offset((page - 1) * page_size),
-        {
-            "current_page": page,
-            "page_size": page_size,
-            "page_count": max_pages,
-            "item_count": count
-        }
-    )
 
 
 class SecureBaseForm(BaseForm):
@@ -404,11 +605,22 @@ class SecureBaseForm(BaseForm):
     def __init__(self, controls, *args, **kwargs):
         meta = SecureBaseForm.Meta()
         super().__init__(controls, *args, meta=meta, **kwargs)
+        
+    def validate_on_submit(self):
+        if flask.request.method == "POST":
+            self.process(flask.request.form)
+            if self.validate():
+                return True
+            else:
+                for key in self.errors:
+                    for m in self.errors[key]:
+                        flasht("pipeman.error.form", "error", field=self._fields[key].label.text, error=m)
+        return False
 
 
 class ConfirmationForm(FlaskForm):
 
-    submit = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+    submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
 
 class FlatPickrWidget:
@@ -426,7 +638,7 @@ class FlatPickrWidget:
         if field.data:
             markup += f"value='{str(field.data)}' "
         markup += '/>'
-        markup += f' <button type="button" id="flatpickr-clear-button-{field.id}">{gettext("pipeman.general.clear")}</button>'
+        markup += f' <button type="button" id="flatpickr-clear-button-{field.id}">{gettext("pipeman.common.clear")}</button>'
         markup += f'<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  let fp = $('#{field.id}').flatpickr(" + "{\n"
@@ -460,10 +672,10 @@ class Select2Widget:
         markup = f'<select class="form-control-select2" id="{field.id}" name="{field.name}"'
         if self.allow_multiple:
             markup += 'multiple="multiple"'
-        markup += '>'
-        for val, label, selected in field.iter_choices():
-            markup += self.render_option(val, label, selected)
-        markup += f'</select><script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
+        markup += '>\n'
+        for opts in field.iter_choices():
+            markup += self.render_option(*opts) + "\n"
+        markup += f'</select>\n<script language="javascript" type="text/javascript" nonce="{csp_nonce("script-src")}">'
         markup += '$(document).ready(function() {\n'
         markup += f"  $('#{field.id}').select2(" + "{\n"
         if self.ajax_callback:
@@ -479,10 +691,10 @@ class Select2Widget:
         markup += f"    delay: {int(self.query_delay)}\n"
         markup += "  });\n"
         markup += "});\n"
-        markup += '</script>'
+        markup += '</script>\n'
         return markupsafe.Markup(markup)
 
-    def render_option(self, val, label, selected, **kwargs):
+    def render_option(self, val, label, selected, render_kw = None, **kwargs):
         if val is True or val is False:
             val = str(val)
         if val is None:
@@ -496,33 +708,45 @@ class EntitySelectField(wtf.Field):
     db: Database = None
 
     @injector.construct
-    def __init__(self, *args, entity_types, allow_multiple=False, min_chars_to_search=0, by_revision=False, widget=None, **kwargs):
+    def __init__(self, *args, entity_types, allow_multiple=False, min_chars_to_search=0, by_revision=False, widget=None, allow_select2: bool = True, **kwargs):
         self.data = None
         self.entity_types = [entity_types] if isinstance(entity_types, str) else entity_types
+        self._full_list = False
         self.allow_multiple = bool(allow_multiple)
-        self.include_empty = False
+        self.include_empty = not self.allow_multiple
         self.by_revision = bool(by_revision)
         if widget is None:
-            widget = Select2Widget(
-                ajax_callback=flask.url_for(
-                    "core.api_entity_select_field_list",
-                    entity_types="|".join(self.entity_types),
-                    by_revision=(1 if self.by_revision else 0),
-                    _external=True
-                ),
-                allow_multiple=self.allow_multiple,
-                query_delay=250,
-                placeholder=DelayedTranslationString("pipeman.general.empty_select"),
-                min_input=min_chars_to_search
-            )
+            if allow_select2:
+                widget = Select2Widget(
+                    ajax_callback=flask.url_for(
+                        "core.api_entity_select_field_list",
+                        entity_types="|".join(self.entity_types),
+                        by_revision=(1 if self.by_revision else 0),
+                        _external=True
+                    ),
+                    allow_multiple=self.allow_multiple,
+                    query_delay=250,
+                    placeholder=DelayedTranslationString("pipeman.common.placeholder"),
+                    min_input=min_chars_to_search
+                )
+            else:
+                widget = wtforms.widgets.Select(self.allow_multiple)
+                self._full_list = True
         super().__init__(*args, widget=widget, **kwargs)
+
+    def has_groups(self):
+        return False
+
+    @staticmethod
+    def results_list(entity_types, text, by_revision):
+        results = {
+            "results": [x for x in EntitySelectField.results_list_full(entity_types, text, by_revision)],
+        }
+        return safe_json(results)
 
     @staticmethod
     @injector.inject
-    def results_list(entity_types, text, by_revision, db: Database = None):
-        results = {
-            "results": [],
-        }
+    def results_list_full(entity_types, text, by_revision, db: Database = None, ec: "pipeman.entity.controller.EntityController" = None):
         with db as session:
             q = session.query(orm.Entity)
             if isinstance(entity_types, str):
@@ -531,27 +755,19 @@ class EntitySelectField(wtf.Field):
                 q = q.filter_by(entity_type=entity_types[0])
             else:
                 q = q.filter(orm.Entity.entity_type.in_(entity_types))
+            q = q.filter(sa.and_(*ec.base_filters()))
             if text:
                 if "%" not in text:
                     text = f"%{text}%"
                 q = q.filter(orm.Entity.display_names.ilike(text))
-            if not flask_login.current_user.has_permission("organization.manage_any"):
-                q = q.filter(sa.or_(
-                    orm.Entity.organization_id.in_(flask_login.current_user.organizations),
-                    orm.Entity.organization_id == None
-                ))
             q = q.order_by(orm.Entity.id)
             for ent in q:
-                results['results'].append(EntitySelectField._build_entry(ent, by_revision))
-        return safe_json(results)
+                yield EntitySelectField.build_entry(ent, by_revision)
 
     @staticmethod
-    def _build_entry(entity, by_revision, revision_no = None):
-        rev = None
-        if by_revision:
-            rev = entity.latest_revision() if revision_no is None else entity.specific_revision(revision_no)
+    def build_entry(entity, by_revision, revision_no = None):
         return {
-            "id": str(entity.id) if not by_revision else f"{entity.id}|{rev.revision_no}",
+            "id": str(entity.id) if not by_revision else f"{entity.id}|{revision_no}",
             "text": MultiLanguageString(
                 json.loads(entity.display_names)
                 if entity.display_names else
@@ -563,23 +779,36 @@ class EntitySelectField(wtf.Field):
         return []
 
     def iter_choices(self):
+        if self._full_list:
+            yield from self._iter_choices_for_select()
+        else:
+            yield from self._iter_choices_for_select2()
+
+    def _iter_choices_for_select(self):
         if self.include_empty:
-            yield "", DelayedTranslationString("pipeman.general.empty_select"), not self.data
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data, {}
+        with self.db as session:
+            for row in EntitySelectField.results_list_full(self.entity_types, None, self.by_revision):
+                yield row['id'], row['text'], row['id'] == self.data, {}
+
+    def _iter_choices_for_select2(self):
+        if self.include_empty:
+            yield "", DelayedTranslationString("pipeman.common.placeholder"), not self.data, {}
         if self.data:
             with self.db as session:
                 if self.allow_multiple:
                     for x in self.data:
                         try:
                             ent, rev = EntitySelectField.load_entity_option(x, session, self.by_revision)
-                            entry = EntitySelectField._build_entry(ent, self.by_revision, rev.revision_no if rev else None)
-                            yield entry["id"], entry["text"], True
+                            entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
+                            yield entry["id"], entry["text"], True, {}
                         except FormValueError:
                             pass
                 else:
                     try:
                         ent, rev = EntitySelectField.load_entity_option(self.data, session, self.by_revision)
-                        entry = EntitySelectField._build_entry(ent, self.by_revision, rev.revision_no if rev else None)
-                        yield entry["id"], entry["text"], True
+                        entry = EntitySelectField.build_entry(ent, self.by_revision, rev.revision_no if rev else None)
+                        yield entry["id"], entry["text"], True, {}
                     except FormValueError:
                         pass
 
@@ -588,28 +817,29 @@ class EntitySelectField(wtf.Field):
             with self.db as session:
                 if self.allow_multiple:
                     for x in self.data:
-                        EntitySelectField.load_entity_option(x, session, self.by_revision)
+                        if x is not None and x != '':
+                            EntitySelectField.load_entity_option(x, session, self.by_revision)
                 else:
                     EntitySelectField.load_entity_option(self.data, session, self.by_revision)
 
     @staticmethod
     def parse_entity_option(value, by_revision):
-        entity_id = value or None
+        entity_id = str(value) or None
         revision_no = None
         if by_revision:
             if "|" not in value:
-                raise FormValueError("pipeman.entity_field.missing_revision_piece")
+                raise FormValueError("pipeman.entity_field.error.missing_revision_piece")
             pieces = value.split("|", maxsplit=1)
             if not len(pieces) == 2:
-                raise FormValueError("pipeman.entity_field.malformed_revision_str")
+                raise FormValueError("pipeman.entity_field.error.malformed_revision_str")
             entity_id = pieces[0] or None
             revision_no = pieces[1] or None
         if entity_id is None:
-            raise FormValueError("pipeman.entity_field_missing_entity_id")
+            raise FormValueError("pipeman.entity_field.error.missing_entity_id")
         if not entity_id.isdigit():
-            raise FormValueError("pipeman.entity_field.bad_entity_id")
+            raise FormValueError("pipeman.entity_field.error.bad_entity_id")
         if revision_no is not None and not revision_no.isdigit():
-            raise FormValueError("pipeman.entity_field.bad_revision_no")
+            raise FormValueError("pipeman.entity_field.error.bad_revision_no")
         return int(entity_id), int(revision_no) if revision_no else None
 
     @staticmethod
@@ -618,14 +848,14 @@ class EntitySelectField(wtf.Field):
         ent = session.query(orm.Entity).filter_by(id=int(entity_id)).first()
         rev = None
         if not ent:
-            raise FormValueError("pipeman.entity_field.no_such_entity")
+            raise FormValueError("pipeman.entity_field.error.no_such_entity")
         if not flask_login.current_user.has_permission("organization.manage_any"):
             if ent.organization_id is not None and ent.organization_id not in flask_login.current_user.organizations:
-                raise FormValueError("pipeman.entity_field.no_entity_access")
+                raise FormValueError("pipeman.entity_field.error.no_entity_access")
         if revision_no:
             rev = session.query(orm.EntityData).filter_by(entity_id=int(entity_id), revision_no=int(revision_no)).first()
             if not rev:
-                raise FormValueError("pipeman.entity_field.no_such_revision")
+                raise FormValueError("pipeman.entity_field.error.no_such_revision")
         return ent, rev
 
     def process_data(self, value):
@@ -645,7 +875,15 @@ class DynamicFormField(wtf.FormField):
 
     def __init__(self, fields, *args, **kwargs):
         self.field_list = fields
+        self.form = None
+        if "widget" not in kwargs:
+            kwargs["widget"] = BetterTableWidget()
         super().__init__(self._generate_form, *args, **kwargs)
+
+    def __getattr__(self, item):
+        if self.form is not None:
+            return getattr(self.form, item)
+        return None
 
     def _generate_form(self, formdata=None, obj=None,  **kwargs):
         defaults = {}
@@ -660,24 +898,74 @@ class DynamicFormField(wtf.FormField):
 class TranslatableField(DynamicFormField):
 
     tm: TranslationManager = None
+    ld: LanguageDetector = None
 
     @injector.construct
-    def __init__(self, template_field, field_kwargs=None, *args, use_undefined=True, **kwargs):
+    def __init__(self, template_field, field_kwargs=None, *args, use_undefined: bool = True, allow_translation_requests: bool = False, allow_js_widget: bool = True, use_metadata_languages: bool = False, **kwargs):
         self.template_field = template_field
         self.use_undefined = use_undefined
+        self._use_metadata_languages = use_metadata_languages
+        self.allow_translation_requests = allow_translation_requests
         self.template_args = field_kwargs or {}
+        new_default = {}
+        found_languages = []
+        allowed_languages = self.get_language_keys()
+        # prevent crashing because the languages weren't approved
+        if 'default' in kwargs and kwargs['default']:
+            for key in kwargs['default']:
+                if key in allowed_languages:
+                    new_default[key] = kwargs['default'][key]
+                    if new_default[key]:
+                        found_languages.append(key)
+        kwargs['default'] = new_default
+        default_tab = 'und'
+        if found_languages:
+            default_tab = self.ld.detect_language(found_languages)
+            if default_tab not in found_languages:
+                default_tab = 'und'
+
         if "label" in self.template_args:
             del self.template_args["label"]
+        if "widget" not in kwargs:
+            if allow_js_widget:
+                kwargs['widget'] = TabbedFieldFormWidget(['_translation_request'], for_txt_input=True, default_tab=allowed_languages.index(default_tab))
         super().__init__(self._build_field_list(), *args, **kwargs)
 
-    def _build_field_list(self):
-        fields = {}
+    def __call__(self, *args, **kwargs):
+        if self.allow_translation_requests:
+            if self.form.data['_translation_request']:
+                for fn in self.form._fields:
+                    if fn != 'und':
+                        if self.form._fields[fn].render_kw:
+                            self.form._fields[fn].render_kw['disabled'] = True
+                        else:
+                            self.form._fields[fn].render_kw = {
+                                'disabled': True
+                            }
+        return super().__call__(*args, **kwargs)
+
+    def get_language_keys(self) -> list[str]:
+        keys = []
         if self.use_undefined:
-            fields['und'] = self.template_field(label=DelayedTranslationString("languages.short.und"), **self.template_args)
-        fields.update({
-            lang: self.template_field(label=DelayedTranslationString(f"languages.short.{lang.lower()}"), **self.template_args)
-            for lang in self.tm.supported_languages()
-        })
+            keys.append('und')
+        if self._use_metadata_languages:
+            keys.extend(self.tm.metadata_supported_languages())
+        else:
+            keys.extend(self.tm.supported_languages())
+        return keys
+
+    def _build_field_list(self):
+        fields = {
+            key: self.template_field(label=DelayedTranslationString(f"languages.short.{key.lower()}"), **self.template_args)
+            for key in self.get_language_keys()
+        }
+        if self.allow_translation_requests:
+            fields["_translation_request"] = wtf.BooleanField(
+                label=DelayedTranslationString("pipeman.common.open_translation_request")
+            )
+        # gettext('languages.short.und')
+        # gettext('languages.short.en')
+        # gettext('languages.short.fr')
         return fields
 
 
@@ -719,7 +1007,7 @@ class ActionListColumn(DataColumn):
     def __init__(self, action_callback=None):
         super().__init__(
             name="_actions",
-            header_text=gettext("pipeman.general.actions")
+            header_text=gettext("pipeman.common.actions")
         )
         self._callback = action_callback
 
@@ -751,10 +1039,13 @@ class DatabaseColumn(DataColumn):
 class DisplayNameColumn(DatabaseColumn):
 
     def __init__(self):
-        super().__init__("display_names", gettext("pipeman.general.display_name"), allow_search=True)
+        super().__init__("display_names", gettext("pipeman.common.display_name"), allow_search=True)
 
     def value(self, data_row):
-        return MultiLanguageString(json.loads(data_row.display_names))
+        if data_row.display_names:
+            return MultiLanguageString(json.loads(data_row.display_names))
+        else:
+            return ""
 
 
 class DataQuery:
@@ -812,8 +1103,8 @@ class DataQuery:
                 return query.filter(sa.or_(*filters))
         return query
 
-    def _base_query(self, session):
-        query = session.query(self.orm_entity)
+    def _base_query(self, session: sqlalchemy.orm.Session):
+        query = session.query(self.orm_entity).populate_existing()
         if self._filters:
             query = query.filter_by(**self._filters)
         if self._extra_filters:
@@ -1007,6 +1298,7 @@ class DataTable:
 
     def to_html(self) -> str:
         """Generate the HTML for the data table."""
+        # TODO: Can we find a way of applying a class to rows here for deprecated entities/datasets?
         html = f'<table id="{self._table_id}" class="data_table" cellpadding="0" cellspacing="0" border="0"><thead><tr>'
         for cname in self._columns:
             if self._columns[cname].show_column:

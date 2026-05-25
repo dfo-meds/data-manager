@@ -1,37 +1,42 @@
-#! /usr/bin/env sh
+#! /bin/sh
 set -e
-
-PYTHONBUFFERED=TRUE
-export PYTHONUNBUFFERED
-
-PIPEMAN_CONFIG_DIR=/metadb-config
-export PIPEMAN_CONFIG_DIR
 
 cd /srv/metadb/app || exit
 
-python -m alembic upgrade head
+# Run the daemon
+if [ "$1" = "cron" ] ; then
 
-python cli.py core setup
+  python cli.py core cron
 
-python cli.py user create --display "Administrator" --no-error --password "${METADB_PASSWORD:-modernmajorgeneral}" "${METADB_USERNAME:-admin}" "${METADB_EMAIL:-meds.erddap@gmail.com}"
+# Upgrade or install
+elif [ "$1" = "upgrade" ] ; then
 
-python cli.py user group assign --no-error "${METADB_USERNAME:-admin}" superadmin
+  python -m alembic upgrade head
 
-# If there's a prestart.sh script in the /app directory, run it before starting
-PRE_START_PATH=/srv/metadb/prestart.sh
-echo "Checking for script in $PRE_START_PATH"
-if [ -f $PRE_START_PATH ] ; then
-    echo "Running script $PRE_START_PATH"
-    . "$PRE_START_PATH"
+  python cli.py core setup
+
 else
-    echo "There is no script $PRE_START_PATH"
+
+  # Check for the default name and remove it
+  if [ "$1" = "webserver" ] ; then
+    shift 1
+  fi
+
+  # Set the Prometheus directory
+  export PROMETHEUS_MULTIPROC_DIR=/srv/metadb/_prometheus
+
+  # Handle prometheus directory
+  if [ -e "/srv/metadb/_prometheus" ] ; then
+    rm -rf /srv/metadb/_prometheus/*
+  else
+    mkdir /srv/metadb/_prometheus
+  fi
+
+  # Start Gunicorn or Flask
+  if [ -z "$USE_FLASK" ]; then
+    exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
+  else
+    python -m flask run --host="0.0.0.0" --port=80
+  fi
+
 fi
-
-# Start Gunicorn or Flask
-if [ -z "$USE_FLASK" ]; then
-  exec gunicorn --chdir /srv/metadb -c "$GUNICORN_CONF" "$APP_MODULE" "$@"
-else
-  python -m flask run --host="0.0.0.0" --port=80
-fi
-
-

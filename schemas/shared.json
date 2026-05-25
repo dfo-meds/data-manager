@@ -1,0 +1,64 @@
+{
+  "$id": "shared.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "label": {
+      "type": "object",
+      "properties": {
+        "en": {"type":  "string"},
+        "fr": {"type":  "string"},
+        "und": {"type":  "string"}
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "recommended": {
+          "type": "array",
+          "items": {"type":  "string"}
+        },
+        "custom": {
+          "type": "array",
+          "items": {"type":  "string"}
+        }
+      },
+      "patternProperties": {
+        "^required$": {
+          "type": "array",
+          "items": {"type":  "string"}
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "patternProperties": {
+        "^description$": {"$ref":  "#/$defs/label"}
+      },
+      "additionalProperties": false,
+      "properties": {
+        "keyword_config": {
+          "type": "object",
+          "properties": {
+            "is_keyword": {"type":  "boolean"}
+          }
+        },
+        "repeatable": {"type":  "boolean"},
+        "multilingual": {"type":  "boolean"},
+        "min_chars_to_search": {"type":  "integer"},
+        "data_type": {"type":  "string"},
+        "entity_type": {"type":  "string"},
+        "vocabulary_name": {"type":  "string"},
+        "label": {"$ref":  "#/$defs/label"},
+        "order": {"type":  "integer"},
+        "json_api": {
+          "type": "object",
+          "properties": {
+            "mapping": {"type":  "string"}
+          }
+        }
+      }
+    }
+  }
+}

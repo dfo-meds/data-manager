@@ -1,0 +1,54 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/steps.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "patternProperties": {
+    "^[A-Za-z0-9_]*$": {
+      "type": "object",
+      "properties": {
+        "label": {"$ref":  "shared.json#/$defs/label"},
+        "step_type": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "require_permission": {
+          "type": "string"
+        },
+        "access_check": {
+          "type": "string"
+        },
+        "email_template": {
+          "type": "string"
+        },
+        "send_groups": {
+          "type": "array",
+          "items": {"type":  "string"}
+        },
+        "limit_to_assigned": {
+          "type": "boolean"
+        },
+        "profile_name":  {
+          "type": "string"
+        },
+        "format_name": {
+          "type": "string"
+        },
+        "storage_name": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "file_path_pattern_key": {
+          "type": "string"
+        },
+        "erddap_cluster": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

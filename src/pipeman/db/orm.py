@@ -3,6 +3,8 @@ import sqlalchemy.orm as orm
 from sqlalchemy.ext.declarative import declared_attr
 import json
 from pipeman.i18n import MultiLanguageString
+import enum
+
 
 meta = sa.MetaData(naming_convention={
     "ix": "ix_%(column_0_label)s",
@@ -52,6 +54,17 @@ class _BaseModel(object):
     id = sa.Column(sa.Integer, primary_key=True, nullable=False)
 
 
+class _AuditableDateModel:
+
+    created_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now())
+    modified_date = sa.Column(sa.DateTime(timezone=True), default=sa.func.now(), onupdate=sa.func.now())
+
+
+class _AuditableModel(_AuditableDateModel):
+
+    created_by = sa.Column(sa.ForeignKey("user.id"), nullable=True)
+
+
 class _DisplayNameModel(_BaseModel):
 
     short_name = sa.Column(sa.String(255), unique=True, nullable=False)
@@ -78,23 +91,20 @@ class _DisplayNameModel(_BaseModel):
         return self.short_name
 
 
-class Metric(_BaseModel, Base):
+class KeyValue(_BaseModel, Base):
 
-    metric_name = sa.Column(sa.String(256), index=True)
-    timestamp = sa.Column(sa.DateTime)
-    value = sa.Column(sa.String(1024))
-    source_info = sa.Column(sa.String(1024))
-    username = sa.Column(sa.String(1024))
+    key = sa.Column(sa.String(256), unique=True, nullable=False)
+    value = sa.Column(sa.Text, nullable=True)
 
 
-class Organization(_DisplayNameModel, Base):
+class Organization(_DisplayNameModel, _AuditableModel, Base):
 
     users = orm.relationship("User", secondary=user_organization, back_populates="organizations")
     entities = orm.relationship("Entity", back_populates="organization")
     datasets = orm.relationship("Dataset", back_populates="organization")
 
 
-class User(_BaseModel, Base):
+class User(_AuditableModel, _BaseModel, Base):
 
     username = sa.Column(sa.String(255), unique=True, nullable=False)
     display = sa.Column(sa.String(255), nullable=False)
@@ -104,6 +114,7 @@ class User(_BaseModel, Base):
     allowed_api_access = sa.Column(sa.Boolean, nullable=False, default=False)
     locked_until = sa.Column(sa.DateTime, nullable=True)
     properties = sa.Column(sa.Text, nullable=True)
+    language_preference = sa.Column(sa.String, nullable=False, default="en")
 
     groups = orm.relationship("Group", secondary=user_group, back_populates="users")
     organizations = orm.relationship("Organization", secondary=user_organization, back_populates="users")
@@ -122,9 +133,9 @@ class UserLoginRecord(_BaseModel, Base):
     lockable = sa.Column(sa.Boolean, nullable=False)
 
 
-class APIKey(_BaseModel, Base):
+class APIKey(_BaseModel, _AuditableModel, Base):
 
-    user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False)
+    user_id = sa.Column(sa.ForeignKey("user.id"), nullable=False, index=True)
     display = sa.Column(sa.String(1024), nullable=True)
     prefix = sa.Column(sa.String(64), nullable=False, index=True)
     key_hash = sa.Column(sa.String(128), nullable=True)
@@ -136,9 +147,10 @@ class APIKey(_BaseModel, Base):
     is_active = sa.Column(sa.Boolean, default=True)
 
 
-class Group(_DisplayNameModel, Base):
+class Group(_DisplayNameModel, _AuditableModel, Base):
 
     permissions = sa.Column(sa.Text)
+    restricted_access = sa.Column(sa.Boolean)
 
     users = orm.relationship("User", back_populates="groups", secondary=user_group)
 
@@ -157,17 +169,16 @@ class Group(_DisplayNameModel, Base):
         self.permissions = ""
 
 
-class Entity(_BaseModel, Base):
+class Entity(_BaseModel, _AuditableModel, Base):
 
     entity_type = sa.Column(sa.String(255), nullable=False, index=True)
 
-    created_date = sa.Column(sa.DateTime)
-    modified_date = sa.Column(sa.DateTime)
     is_deprecated = sa.Column(sa.Boolean)
     organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
-    parent_id = sa.Column(sa.Integer, nullable=True)
-    parent_type = sa.Column(sa.String(255), nullable=True)
+    parent_id = sa.Column(sa.Integer, nullable=True, index=True)
+    parent_type = sa.Column(sa.String(255), nullable=True, index=True)
+    guid = sa.Column(sa.String(255), nullable=True, index=True)
 
     data = orm.relationship("EntityData", back_populates="entity")
     organization = orm.relationship("Organization", back_populates="entities")
@@ -203,27 +214,28 @@ class Entity(_BaseModel, Base):
         return f"{self.entity_type}_{self.id}"
 
 
-class EntityData(_BaseModel, Base):
+class EntityData(_BaseModel, _AuditableModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("entity_id", "revision_no", name="unique_entity_revision_data"),
     )
 
-    entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False)
-    revision_no = sa.Column(sa.Integer, nullable=False)
+    entity_id = sa.Column(sa.ForeignKey("entity.id"), nullable=False, index=True)
+    revision_no = sa.Column(sa.Integer, nullable=False, index=True)
     data = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
 
     entity = orm.relationship("Entity", back_populates="data")
 
 
-class VocabularyTerm(_BaseModel, Base):
+class VocabularyTerm(_BaseModel, _AuditableModel, Base):
 
     vocabulary_name = sa.Column(sa.String(255), nullable=False, index=True)
     short_name = sa.Column(sa.String(255), nullable=False)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     descriptions = sa.Column(sa.Text, default=None, nullable=True)
-    __table_args__ = (sa.UniqueConstraint("vocabulary_name", "short_name", name="unique_vocab_short_term"),)
+    __table_args__ = (
+        sa.UniqueConstraint("vocabulary_name", "short_name", name="unique_vocab_short_term"),
+    )
 
     def set_display_name(self, language, display_name):
         dns = {}
@@ -243,20 +255,25 @@ class VocabularyTerm(_BaseModel, Base):
         return self.short_name
 
 
-class Dataset(_BaseModel, Base):
+class Dataset(_BaseModel, _AuditableModel, Base):
 
-    created_date = sa.Column(sa.DateTime)
-    modified_date = sa.Column(sa.DateTime)
+    __table_args__ = (
+        sa.UniqueConstraint("guid", "authority", name="unique_dataset_guid_authority"),
+    )
+
     is_deprecated = sa.Column(sa.Boolean)
-    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True)
+    organization_id = sa.Column(sa.ForeignKey("organization.id"), nullable=True, index=True)
     display_names = sa.Column(sa.Text, default=None, nullable=True)
     profiles = sa.Column(sa.Text)
     pub_workflow = sa.Column(sa.String(255), nullable=False)
     act_workflow = sa.Column(sa.String(255), nullable=False)
     status = sa.Column(sa.String(255), nullable=False)
     security_level = sa.Column(sa.String(255), nullable=False)
-    guid = sa.Column(sa.String(255), nullable=False, unique=True)
+    guid = sa.Column(sa.String(255), nullable=False)
+    authority = sa.Column(sa.String(255), nullable=True, default=None)
+    activated_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
 
+    attachments = orm.relationship("Attachment", back_populates="dataset")
     organization = orm.relationship("Organization", back_populates="datasets")
     data = orm.relationship("MetadataEdition", back_populates="dataset")
     users = orm.relationship("User", secondary=user_dataset, back_populates="datasets")
@@ -301,47 +318,74 @@ class Dataset(_BaseModel, Base):
         return f"{self.entity_type}_{self.id}"
 
 
-class MetadataEdition(_BaseModel, Base):
+class MetadataEdition(_BaseModel, _AuditableModel, Base):
 
     __table_args__ = (
         sa.UniqueConstraint("dataset_id", "revision_no", name="unique_dataset_revision_data"),
     )
 
-    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False)
-    revision_no = sa.Column(sa.Integer, nullable=False)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=False, index=True)
+    revision_no = sa.Column(sa.Integer, nullable=False, index=True)
     data = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
     is_published = sa.Column(sa.Boolean, default=False, nullable=False)
     published_date = sa.Column(sa.DateTime, nullable=True, default=None)
+    approval_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
 
     dataset = orm.relationship("Dataset", back_populates="data")
+    approval_item = orm.relationship("WorkflowItem")
 
 
-class WorkflowItem(_BaseModel, Base):
+class ConfigRegistry(_BaseModel, _AuditableModel, Base):
+
+    __table_args__ = (
+        sa.UniqueConstraint("obj_type", "obj_name", name="unique_registry_name_type"),
+    )
+    obj_type = sa.Column(sa.String(255), index=True)
+    obj_name = sa.Column(sa.String(255), index=True)
+    config = sa.Column(sa.Text)
+
+
+class WorkflowItem(_BaseModel, _AuditableModel, Base):
 
     context = sa.Column(sa.Text)
     workflow_type = sa.Column(sa.String(255), index=True)
     workflow_name = sa.Column(sa.String(255), index=True)
+    object_type = sa.Column(sa.String(255), default="dataset", nullable=True)
     object_id = sa.Column(sa.Integer)
     step_list = sa.Column(sa.Text)
-    created_date = sa.Column(sa.DateTime)
     completed_index = sa.Column(sa.Integer, default=None, nullable=True)
     status = sa.Column(sa.String(255))
     locked_by = sa.Column(sa.String(36))
     locked_since = sa.Column(sa.DateTime)
+    step_output = sa.Column(sa.Text)
 
     decisions = orm.relationship("WorkflowDecision", back_populates="workflow_item")
 
+    created_by_user = orm.relationship("User")
 
-class WorkflowDecision(_BaseModel, Base):
 
-    workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False)
+class Attachment(_BaseModel, _AuditableModel, Base):
+
+    file_name = sa.Column(sa.String(1024), nullable=False)
+    storage_path = sa.Column(sa.String(1024), nullable=False)
+    dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True, index=True)
+    storage_name = sa.Column(sa.String(1024), nullable=True)
+
+    dataset = orm.relationship("Dataset", back_populates="attachments")
+
+
+class WorkflowDecision(_BaseModel, _AuditableModel, Base):
+
+    workflow_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=False, index=True)
     step_name = sa.Column(sa.String(255))
     decider_id = sa.Column(sa.String(1024), nullable=False)
     decision = sa.Column(sa.Boolean)
     decision_date = sa.Column(sa.DateTime)
+    comments = sa.Column(sa.Text, nullable=True)
+    attachment_id = sa.Column(sa.ForeignKey("attachment.id"), nullable=True)
 
     workflow_item = orm.relationship("WorkflowItem", back_populates="decisions")
+    attachment = orm.relationship("Attachment")
 
 
 class ServerSession(_BaseModel, Base):
@@ -349,3 +393,37 @@ class ServerSession(_BaseModel, Base):
     guid = sa.Column(sa.String(1024), nullable=False, unique=True)
     valid_until = sa.Column(sa.DateTime, nullable=False)
     is_valid = sa.Column(sa.Boolean, nullable=False)
+
+
+class TranslationState(enum.Enum):
+
+    IN_PROGRESS = 0
+    SUCCESS = 1
+    FAILURE = 2
+    DELAYED = 9
+
+
+class TranslationRequest(_BaseModel, _AuditableDateModel, Base):
+
+    guid = sa.Column(sa.String(1024), nullable=False, index=True)
+    lang_key = sa.Column(sa.String(16), nullable=False, index=True)
+    source_hash = sa.Column(sa.String(128), nullable=False)
+    source_info = sa.Column(sa.Text)
+    translation = sa.Column(sa.Text, nullable=True, default=None)
+    state = sa.Column(sa.Enum(TranslationState), nullable=False, default=TranslationState.IN_PROGRESS)
+    handler_info = sa.Column(sa.Text)
+    allow_reuse = sa.Column(sa.Boolean, default=True)
+    error_text = sa.Column(sa.Text)
+
+    def set_translation(self, translation_text: str, allow_reuse: bool = True):
+        self.translation = translation_text
+        self.allow_reuse = allow_reuse
+        self.state = TranslationState.SUCCESS
+
+    def mark_failed(self, failed_reason: str):
+        self.error_text = failed_reason
+        self.allow_reuse = False
+        self.state = TranslationState.FAILURE
+
+    def delay(self):
+        self.state = TranslationState.DELAYED

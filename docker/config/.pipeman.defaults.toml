@@ -5,6 +5,11 @@ i18n_paths_files = [
     "/metadb-config/paths.yaml"
 ]
 
+[pipeman.email]
+template_folders = [
+    "/metadb-config/email_templates"
+]
+
 [flask]
 UPLOAD_FOLDER = "/metadb-data/flask"
 

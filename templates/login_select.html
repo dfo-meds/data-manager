@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="login-select">
+{% for handler_name in options %}
+  <li id="{{handler_name}}"><a href="{{options[handler_name].link()}}">{{options[handler_name].display_name()}}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

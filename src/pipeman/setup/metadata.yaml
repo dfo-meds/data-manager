@@ -1,0 +1,89 @@
+metadata_info:
+  display:
+    en: Metadata
+    fr: Métadonnées
+  order: 0
+
+data_info:
+  display:
+    en: Dataset
+    fr: Ensemble de données
+  order: 10
+
+data_more_info:
+  display:
+    en: Additional Info
+    fr: Information additionnelle
+  order: 20
+
+keywords:
+  display:
+    en: Keywords
+    fr: Mots-clé
+  order: 100
+  fields:
+    custom_keywords:
+      data_type: entity_ref
+      repeatable: yes
+      order: 1000000000
+      entity_type: keyword
+      json_api:
+        mapping: custom_keywords
+      label:
+        en: Keywords
+        fr: Mots-clé
+      description:
+        en: Select any relevant keywords for this dataset
+      keyword_config:
+        is_keyword: yes
+        mode: translate
+        thesaurus_field: thesaurus
+        keyword_field: keyword
+
+extent:
+  display:
+    en: Geographical
+    fr: Géographique
+  order: 30
+
+technical:
+  display:
+    en: Technical
+    fr: Technique
+  order: 90
+
+publishing:
+  display:
+    en: Distribution
+    fr: Acheminement
+  order: 110
+
+custom:
+  display:
+    en: Custom Metadata
+    fr: Métadonnées personnalisées
+  order: 120
+
+variables:
+  display:
+    en: Variables
+    fr: Variables
+  order: 130
+  fields:
+    variables:
+      data_type: component_ref
+      order: 0
+      entity_type: variable
+      label:
+        en: Variables
+        fr: Variables
+      description:
+        en: Enter information about the variables included as part of this dataset
+      json_api:
+        mapping: variables
+
+references:
+  display:
+    en: References
+    fr: Références
+  order: 80

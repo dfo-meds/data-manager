@@ -3,16 +3,16 @@
 <ul class="component-list">
     {% for ent, txt, actions in entities %}
     {% if ent.is_deprecated %}
-    <li class="removed"><span class="name">{{'pipeman.component.removed' | gettext}} {{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
+    <li class="removed"><span class="name">{{'pipeman.label.entity.component_removed' | gettext}} {{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
     {% else %}
     <li><span class="name">{{txt}}</span> [{{actions.render(html_cls="table_actions")}}]</li>
     {% endif %}
     {% endfor %}
 </ul>
 {% else %}
-<p class="none">{{"pipeman.general.none" | gettext}}</p>
+<p class="none">{{"pipeman.common.empty_list" | gettext}}</p>
 {% endif %}
 {% if create_link %}
-<p class="create_link"><a href="{{create_link}}">{{"pipeman.general.add" | gettext}}</a></p>
+<p class="create_link"><a href="{{create_link}}">{{"pipeman.common.add_item" | gettext}}</a></p>
 {% endif %}
 </div>

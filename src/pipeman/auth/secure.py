@@ -6,7 +6,7 @@ import zirconium as zr
 import re
 import math
 import base64
-import logging
+import zrlog
 import typing as t
 from pipeman.util import UserInputError
 import binascii
@@ -29,7 +29,7 @@ class PasswordGenerator:
             self.character_list = "ABCDEFGHIJKLMNOPQRSTVWXYZabcdefghijklmnopqrstvwxyz2345679@#$%&"
         entropy = math.log2(len(self.character_list)) * self.length
         if entropy < 50:
-            logging.getLogger("pipeman.auth").warning(f"Insufficient password entropy {entropy} for a random password.")
+            zrlog.get_logger("pipeman.auth").warning(f"Insufficient password entropy [{entropy}] for a random password.")
 
     def generate_password(self) -> str:
         """Generate a random password using secure functions."""
@@ -45,7 +45,7 @@ class SecurityHelper:
 
     @injector.construct
     def __init__(self):
-        self.log = logging.getLogger("pipeman.auth")
+        self.log = zrlog.get_logger("pipeman.auth")
         self.default_algo = self.cfg.as_str(("pipeman", "security", "hash_algorithm"), default="sha256")
         self.rounds = max(100000, self.cfg.as_int(("pipeman", "security", "hash_rounds"), default=521931))
         self.salt_size = self.cfg.as_int(("pipeman", "security", "salt_length"), default=32)
@@ -105,10 +105,10 @@ class SecurityHelper:
         if _pepper is None:
             _pepper = self.pepper
         if len(pw) > self.max_password_length:
-            raise UserInputError("pipeman.auth.password_too_long")
+            raise UserInputError("pipeman.auth.error.password_too_long")
         if self.default_algo not in hashlib.algorithms_available:
             self.log.error(f"Hash algorithm {self.default_algo} not available")
-            raise UserInputError("pipeman.auth.hash_not_available")
+            raise UserInputError("pipeman.auth.error.hash_not_available")
         pw += _pepper
         return hashlib.pbkdf2_hmac(
             self.default_algo,
@@ -117,18 +117,24 @@ class SecurityHelper:
             self.rounds
         ).hex()
 
-    def build_auth_header(self, username: str, secret_key: str, prefix: str) -> str:
+    def build_auth_header(self, prefix: str, secret_key: str, username: str) -> str:
         """Create an Authorization header for keys."""
-        return f"{prefix}.{secret_key}.{base64.b64encode(username.encode('utf-8'))}"
+        return ".".join([
+            base64.b64encode(bytes.fromhex(prefix)).decode('ascii'),
+            base64.b64encode(bytes.fromhex(secret_key)).decode('ascii'),
+            base64.b64encode(username.encode('utf-8')).decode('ascii')
+        ])
 
     def parse_auth_header(self, auth_header: str) -> t.Tuple[t.Optional[str], t.Optional[str], t.Optional[str]]:
         """Parse an authorization header."""
         pieces = auth_header.split(".", maxsplit=2)
         if len(pieces) != 3:
+            self.log.error("Auth header has insufficient pieces")
             return None, None, None
         try:
-            return pieces[0], pieces[1], base64.b64decode(pieces[2]).decode('utf-8')
+            return base64.b64decode(pieces[0]).hex(), base64.b64decode(pieces[1]).hex(), base64.b64decode(pieces[2]).decode('utf-8')
         except (binascii.Error, UnicodeDecodeError):
+            self.log.exception(f"Exception while processing auth header")
             return None, None, None
 
     def generate_secret(self, secret_length_bytes: int) -> str:
@@ -148,13 +154,13 @@ class SecurityHelper:
     def check_password_strength(self, password: str) -> bool:
         """Check that the password meets the strength requirements."""
         if not password:
-            raise UserInputError("pipeman.auth.blank_password")
+            raise UserInputError("pipeman.auth.error.blank_password")
         if len(password) < self.cfg.as_int(("pipeman", "security", "password_min_length"), default=0):
-            raise UserInputError("pipeman.auth.too_short_password")
+            raise UserInputError("pipeman.auth.error.too_short_password")
         complexities = self.cfg.get(("pipeman", "security", "password_complexity_classes"), default=None)
         if complexities:
             for complexity_key in complexities:
                 complexity_re = complexities[complexity_key]
                 if not re.match(complexity_re, password):
-                    raise UserInputError(f"pipeman.auth.complexity.{complexity_key}")
+                    raise UserInputError(f"pipeman.auth.error.missing_complexity.{complexity_key}")
         return True

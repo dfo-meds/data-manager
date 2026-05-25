@@ -41,4 +41,4 @@ def flask_init_lang(app, ld: LanguageDetector = None, tm: TranslationManager = N
 @_injector.inject
 def init_plugin(reg: _System = None):
     """Register the application init function."""
-    reg.register_init_app(flask_init_lang)
+    reg.on_app_init(flask_init_lang)

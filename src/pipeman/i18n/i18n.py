@@ -1,8 +1,8 @@
 from copy import deepcopy
-
 from autoinject import injector
 import markupsafe
-
+import zirconium as zr
+import typing as t
 
 @injector.injectable_global
 class LanguageDetector:
@@ -14,18 +14,33 @@ class LanguageDetector:
 @injector.injectable_global
 class TranslationManager:
 
+    cfg: zr.ApplicationConfig = None
+
+    @injector.construct
+    def __init__(self):
+        self._metadata_languages = self.cfg.as_list(("pipeman", "metadata", "languages"), default=['en'])
+
     def get_text(self, text_key: str, default: str = None) -> str:
         return default if default is not None else text_key
 
     def supported_languages(self):
-        return ['en', 'fr']
+        return ['en']
+
+    def metadata_supported_languages(self):
+        return self._metadata_languages
 
 
 class BaseTranslatableString:
 
     def __init__(self, *format_args, **format_kwargs):
-        self.format_args = format_args or []
-        self.format_kwargs = format_kwargs or {}
+        self.format_args = format_args
+        self.format_kwargs = format_kwargs
+
+    def __bool__(self):
+        return not self.empty()
+
+    def empty(self) -> bool:
+        raise NotImplementedError()
 
     def __add__(self, o):
         return str(self) + str(o)
@@ -55,17 +70,17 @@ class BaseTranslatableString:
             return self._render_str(**kwargs).format(*self.format_args, **self.format_kwargs)
         return self._render_str(**kwargs)
 
-    def copy(self):
+    def copy(self) -> t.Self:
         raise NotImplementedError
 
-    def _render_str(self, **kwargs):
+    def _render_str(self, **kwargs) -> str:
         raise NotImplementedError
 
     def format(self, *args, **kwargs):
-        obj = self.copy()
-        obj.format_args.extend(args)
-        obj.format_kwargs.update(kwargs)
-        return obj
+        x = self.copy()
+        x.format_args = (*x.format_args, *args)
+        x.format_kwargs.update(**kwargs)
+        return x
 
 
 class DelayedTranslationString(BaseTranslatableString):
@@ -76,7 +91,10 @@ class DelayedTranslationString(BaseTranslatableString):
         self.default = default
 
     def copy(self):
-        return DelayedTranslationString(self.text_key, self.default)
+        return DelayedTranslationString(self.text_key, self.default, *self.format_args, **self.format_kwargs)
+
+    def empty(self) -> bool:
+        return self.text_key is None or self.text_key == ''
 
     @injector.inject
     def _render_str(self, tm: TranslationManager = None, **kwargs):
@@ -85,28 +103,34 @@ class DelayedTranslationString(BaseTranslatableString):
 
 class MultiLanguageString(BaseTranslatableString):
 
-    def __init__(self, language_map: dict, *args, **kwargs):
+    def __init__(self, language_map: dict | str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.language_map = language_map
+        self.language_map = language_map if isinstance(language_map, dict) else {"und": language_map}
 
     def __bool__(self):
         return any(self.language_map[x] for x in self.language_map)
 
+    def empty(self):
+        return not any(self.language_map[x] for x in self.language_map)
+
     @injector.inject
     def _render_str(self, language=None, tm: TranslationManager = None, ld: LanguageDetector = None, **kwargs):
         lang_opts = list(self.language_map.keys())
-        lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
-        use_blank = lang in self.language_map
-        if lang in self.language_map and self.language_map[lang]:
-            return self.language_map[lang]
-        if "und" in self.language_map and self.language_map["und"]:
-            return self.language_map["und"]
-        if use_blank:
-            return ""
-        return tm.get_text("pipeman.general.unknown")
+        if lang_opts:
+            lang = language if language is not None and language in lang_opts else ld.detect_language(lang_opts)
+            priority_order = [lang, "und", "en", "fr"]
+            priority_order.extend(lang_opts)
+            for cl in priority_order:
+                if cl in self.language_map and self.language_map[cl]:
+                    return self.language_map[cl]
+        return ""
 
     def keys(self):
-        return self.language_map.keys()
+        keys = []
+        for key in self.language_map:
+            if self.language_map[key]:
+                keys.append(key)
+        return keys
 
     def __len__(self):
         return len(self.language_map)
@@ -117,16 +141,16 @@ class MultiLanguageString(BaseTranslatableString):
         raise KeyError(key)
 
     def __iter__(self):
-        return iter(self.language_map.keys())
+        return iter(self.keys())
 
     def __contains__(self, key):
-        return key in self.language_map
+        return key in self.language_map and self.language_map[key]
 
     def deep_copy(self, memodict):
-        return MultiLanguageString(deepcopy(self.language_map))
+        return MultiLanguageString(deepcopy(self.language_map, memodict), *self.format_args, **self.format_kwargs)
 
     def copy(self):
-        return MultiLanguageString(self.language_map)
+        return MultiLanguageString(self.language_map, *self.format_args, **self.format_kwargs)
 
 
 class MultiLanguageLink(MultiLanguageString):

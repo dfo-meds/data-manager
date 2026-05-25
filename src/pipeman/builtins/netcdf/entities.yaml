@@ -1,0 +1,361 @@
+contact:
+  fields:
+    short_name:
+      data_type: text
+      label:
+        en: Short Name
+        fr: Nom courte
+      description:
+        en: This text is used where a shorter name might be better (e.g. in NetCDF files)
+        fr: Ce texte est utilisé là où un nom plus court pourrait être préférable (par exemple dans les fichiers NetCDF)
+      multilingual: yes
+      json_api:
+        mapping: short_name
+variable:
+  validation:
+    required:
+      - source_name
+      - source_data_type
+    recommended:
+      - units
+      - standard_name
+      - long_name
+      - valid_min
+      - valid_max
+      - missing_value
+      - dimensions
+  fields:
+    encoding:
+      data_type: vocabulary
+      vocabulary_name: core_charsets
+      label:
+        en: Encoding
+        fr: Codage
+      description:
+        en: For string fields, select the character encoding.
+        fr: Pour les champs de chaîne, sélectionnez l'encodage des caractères.
+      order: 41
+      netcdf:
+        mapping: _Encoding
+      json_api:
+        mapping: encoding
+    source_name:
+      data_type: text
+      label:
+        en: Variable Name
+        fr: Nom de variable
+      description:
+        en: Enter the variable name as it appears in the NetCDF file.
+        fr: Entrez le nom de la variable tel qu'il apparaît dans le fichier NetCDF.
+      order: 0
+      unique: yes
+      json_api:
+        mapping: source_name
+    source_data_type:
+      data_type: vocabulary
+      vocabulary_name: netcdf_data_types
+      label:
+        en: Packed Data Type
+        fr: Type de données compactées
+      description:
+        en: Select the data type of the variable when packed.
+        fr: Sélectionnez le type de données de la variable lorsqu'elle est compressée.
+      order: 10
+      json_api:
+        mapping: source_data_type
+    dimensions:
+      data_type: text
+      label:
+        en: Dimensions
+        fr: Dimensions
+      description:
+        en: A comma-separated list of dimensions in appropriate order (least to most rapidly changing).
+        fr: Une liste de dimensions séparées par des virgules dans l'ordre approprié (variant du moins au plus rapidement).
+      order: 11
+      json_api:
+        mapping: dimensions
+    long_name:
+      data_type: text
+      label:
+        en: Long Name
+        fr: Nom long
+      description:
+        en: Enter a longer description of the variable.
+        fr: Entrez une description plus longue de la variable.
+      multilingual: yes
+      order: 20
+      netcdf:
+        mapping: long_name
+        processor: text
+      json_api:
+        mapping: long_name
+    standard_name:
+      data_type: vocabulary
+      vocabulary_name: cf_standard_names
+      label:
+        en: CF Standard Name
+        fr: Nom de la norme CF
+      description:
+        en: Select the standard name of the variable.
+        fr: Sélectionnez le nom standard de la variable.
+      order: 30
+      netcdf:
+        mapping: standard_name
+        processor: vocabulary
+      json_api:
+        mapping: standard_name
+    units:
+      data_type: text
+      label:
+        en: Units
+        fr: Unités
+      description:
+        en: Specify the units of the variable when unpacked using UDUnit-compatible symbols.
+        fr: Spécifiez les unités de la variable lorsqu'elle est décompressée à l'aide de symboles compatibles UDUnit.
+      order: 40
+      netcdf:
+        mapping: units
+        processor: text
+      json_api:
+        mapping: units
+    calendar:
+      data_type: vocabulary
+      vocabulary_name: cf_calendars
+      label:
+        en: Calendar
+        fr: Calendrier
+      description:
+        en: If the variable contains date/time values, select the calendar used.
+        fr: Si la variable contient des valeurs de date/heure, sélectionnez le calendrier utilisé.
+      order: 50
+      netcdf:
+        mapping: calendar
+        processor: vocabulary
+      json_api:
+        mapping: calendar
+    positive:
+      data_type: vocabulary
+      vocabulary_name: cf_directions
+      label:
+        en: Positive Direction
+        fr: Sens positif
+      description:
+        en: If the variable describes a vertical coordinate system, specify the direction of positive values.
+        fr: Si la variable décrit un système de coordonnées verticales, spécifiez la direction des valeurs positives.
+      order: 60
+      netcdf:
+        mapping: positive
+        processor: vocabulary
+      json_api:
+        mapping: positive
+    missing_value:
+      data_type: text
+      label:
+        en: Missing Value
+        fr: Valeur manquante
+      description:
+        en: Specify a value that indicates a missing value (defaults to the maximum value for the data type). If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Spécifiez une valeur qui indique une valeur manquante (par défaut, la valeur maximale pour le type de données). Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
+      order: 70
+      netcdf:
+        mapping: missing_value
+        processor: numeric
+      json_api:
+        mapping: missing_value
+    scale_factor:
+      data_type: float
+      label:
+        en: Scale Factor
+        fr: Facteur d'échelle
+      description:
+        en: Specify a scale factor to apply when unpacking values.
+        fr: Spécifiez un facteur d'échelle à appliquer lors de la décompression des valeurs.
+      order: 80
+      netcdf:
+        mapping: scale_factor
+        processor: numeric
+      json_api:
+        mapping: scale_factor
+    add_offset:
+      data_type: float
+      label:
+        en: Add Offset
+        fr: Ajouter un décalage
+      description:
+        en: Enter an offset value to add when unpacking values
+      order: 90
+      netcdf:
+        mapping: add_offset
+        processor: numeric
+      json_api:
+        mapping: add_offset
+    destination_data_type:
+      data_type: vocabulary
+      vocabulary_name: netcdf_data_types
+      label:
+        en: Unpacked Data Type
+        fr: Type de données décompressé
+      description:
+        en: If the variable specifies a scale factor, specify the unpacked data type
+        fr: Si la variable spécifie un facteur d'échelle, spécifiez le type de données décompressé
+      order: 100
+      json_api:
+        mapping: destination_data_type
+    actual_min:
+      data_type: decimal
+      label:
+        en: Minimum Value
+        fr: Valeur minimum
+      description:
+        en: Enter the actual minimum value for this variable within the dataset
+        fr: Entrez la valeur minimale réelle pour cette variable dans l'ensemble de données
+      order: 110
+      netcdf:
+        mapping: actual_min
+        processor: numeric
+      json_api:
+        mapping: actual_min
+    actual_max:
+      data_type: decimal
+      label:
+        en: Maximum Value
+        fr: Valeur maximum
+      description:
+        en: Enter the actual maximum value for this variable within the dataset. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur maximale réelle pour cette variable dans l'ensemble de données. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
+      order: 120
+      netcdf:
+        mapping: actual_max
+        processor: numeric
+      json_api:
+        mapping: actual_max
+    valid_min:
+      data_type: decimal
+      label:
+        en: Minimum Valid Value
+        fr: Valeur valide minimale
+      description:
+        en: Enter the theoretical minimum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur minimale théorique pour cette variable, le cas échéant. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
+      order: 130
+      netcdf:
+        mapping: valid_min
+        processor: numeric
+      json_api:
+        mapping: valid_min
+    valid_max:
+      data_type: decimal
+      label:
+        en: Maximum Valid Value
+        fr: Valeur valide maximale
+      description:
+        en: Enter the theoretical maximum value for this variable, if applicable. If the data has a scale or offset, enter the pre-scaled/offset value.
+        fr: Entrez la valeur maximale théorique pour cette variable, le cas échéant. Si les données ont une échelle ou un décalage, entrez la valeur pré-mise à l'échelle/décalage.
+      order: 140
+      netcdf:
+        mapping: valid_max
+        processor: numeric
+      json_api:
+        mapping: valid_max
+    cf_role:
+      data_type: vocabulary
+      vocabulary_name: cf_roles
+      label:
+        en: CF Role
+        fr: Rôle de CF
+      description:
+        en: If this variable uniquely identifies a timeseries, a profile, or a trajectory, select the appropriate option.
+        fr: Si cette variable identifie de manière unique une série chronologique, un profil ou une trajectoire, sélectionnez l'option appropriée.
+      order: 150
+      netcdf:
+        mapping: cf_role
+        processor: vocabulary
+      json_api:
+        mapping: cf_role
+    comment:
+      data_type: multitext
+      label:
+        en: Comment
+        fr: Commentaire
+      description:
+        en: Enter comments about this variable to share with data users.
+        fr: Entrez des commentaires sur cette variable à partager avec les utilisateurs de données.
+      order: 160
+      netcdf:
+        mapping: comment
+      json_api:
+        mapping: comment
+    references:
+      data_type: multitext
+      label:
+        en: References
+        fr: Références
+      description:
+        en: Describe relevant references for this variable.
+        fr: Décrivez les références pertinentes pour cette variable.
+      order: 170
+      netcdf:
+        mapping: references
+      json_api:
+        mapping: references
+    source:
+      data_type: multitext
+      label:
+        en: Source
+        fr: Source
+      description:
+        en: Describe relevant source information for this variable.
+        fr: Décrivez les informations sources pertinentes pour cette variable.
+      order: 180
+      netcdf:
+        mapping: source
+      json_api:
+        mapping: source
+    coverage_content_type:
+      data_type: vocabulary
+      vocabulary_name: iso19115_md_coverage_content_type_code
+      label:
+        en: Coverage Content Type
+        fr: Type de contenu de la couverture
+      description:
+        en: Coverage content type for the variable.
+        fr: Type de contenu de couverture pour la variable.
+      netcdf:
+        mapping: coverage_content_type
+        processor: vocabulary
+      json_api:
+        mapping: coverage_content_type
+    axis:
+      data_type: vocabulary
+      vocabulary_name: cf_axes
+      label:
+        en: Axis
+      json_api:
+        mapping: axis
+    custom_metadata:
+      data_type: key_value
+      repeatable: true
+      label:
+        en: Extra Metadata
+        fr: Métadonnées extra
+      description:
+        en: Add other attributes to this variable.
+        fr: Ajouter d'autres attributs à cette variable.
+      order: 500
+      netcdf:
+        processor: key_value_pairs
+      json_api:
+        mapping: custom_metadata
+locale:
+  fields:
+    ietf_bcp47:
+      label:
+        en: BCP47 Code
+        fr: Code BC47
+      description:
+        en: Enter the most appropriate IETF BCP 47 language code.
+        fr: Entrez le code de langue le plus approprié de la norme IETF BCP 47.
+      data_type: text
+      order: 35
+      json_api:
+        mapping: ietf_bcp47

@@ -1,6 +1,10 @@
+from pipeman.db import Database, orm
+from pipeman.entity import Entity
 from pipeman.entity.entity import ValidationResult, combine_object_path
-from pipeman.entity.fields import KeywordGroup
+from pipeman.entity.keywords import KeywordGroup
+import functools
 
+from autoinject import injector
 
 def validate_use_constraint(uc, object_path, profile, memo):
     errors = []
@@ -104,14 +108,42 @@ def separate_keywords(keywords):
     return groups
 
 
-def _has_other_languages(language_dict, default_locale):
+def _has_other_languages(language_dict, default_locale, supported_locales):
     for key in language_dict:
         if key == "und" or key == default_locale:
             continue
-        if language_dict[key]:
-            return True
+        if key not in supported_locales:
+            continue
+        return True
     return False
 
+
+def _has_type_been_rendered(ref_dict: dict, type_name: str, unique_id):
+    if not unique_id:
+        return False
+    if type_name not in ref_dict:
+        ref_dict[type_name] = set()
+    if unique_id not in ref_dict[type_name]:
+        ref_dict[type_name].add(unique_id)
+        return False
+    return True
+
+def _clean_xml_id(type_name, xml_id, db_id):
+    new_xml_id = ""
+    if xml_id:
+        for ltr in xml_id:
+            if ltr in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-":
+                new_xml_id += ltr
+    if not new_xml_id:
+        new_xml_id = "_" + str(db_id)
+    return f"{type_name}_{new_xml_id}"
+
+@injector.inject
+def get_platform_instruments(platform, db: Database = None):
+    with db as session:
+        for instrument in session.query(orm.Entity).filter_by(entity_type="instrument"):
+            if instrument['mounted_on'].container_id == platform.container_id:
+                yield instrument
 
 def preprocess_metadata(dataset, **kwargs):
     locale_mapping = {}
@@ -119,16 +151,41 @@ def preprocess_metadata(dataset, **kwargs):
     default_locale = def_loc['a2_language'] if def_loc else "en"
     locale_mapping[default_locale] = def_loc['language'] if def_loc else "eng"
     olocales = dataset.data("other_locales") or []
+    supported = []
     for other_loc in olocales:
         locale_mapping[other_loc['a2_language']] = other_loc['language']
+        supported.append(other_loc['a2_language'])
     dataset_maintenance = []
     metadata_maintenance = []
-    for maintenance in dataset.data("iso_maintenance"):
+    for maintenance in dataset.data("iso_maintenance") or []:
         if maintenance['scope']['short_name'] == "dataset":
             dataset_maintenance.append(maintenance)
         elif maintenance['scope']['short_name'] == "metadata":
             metadata_maintenance.append(maintenance)
+
+    # This handles the dataset-wide acquisition information, which is what we usually provide
+    # If more specifics are needed, we'll need a new attribute and append the result here.
+    acq_info = []
+    missions = dataset.data("missions")
+    instruments = dataset.data("instruments")
+    platforms = dataset.data("platforms")
+    if missions or instruments or platforms:
+        dataset_wide_info = {
+            'missions': missions,
+            'platforms': platforms,
+            'instruments': instruments,
+            'scope': {
+                'short_name': 'dataset',
+            },
+            'dataset': {
+                'en': 'current dataset',
+                'fr': 'jeu de données actuel'
+            }
+        }
+        acq_info.append(dataset_wide_info)
+    refs = {}
     return {
+        "acquisition_info": acq_info,
         "responsibilities": [
             {
                 "role": {"short_name": "owner"},
@@ -141,8 +198,8 @@ def preprocess_metadata(dataset, **kwargs):
                 "date": dataset.created_date()
             },
             {
-                "type": {"short_name": "modified"},
-                "date": dataset.modified_date()
+                "type": {"short_name": "revision"},
+                "date": dataset.metadata_modified_date()
             },
         ],
         "default_locale": default_locale,
@@ -156,9 +213,16 @@ def preprocess_metadata(dataset, **kwargs):
             "id_system": dataset["dataset_id_system"],
             "id_description": dataset["dataset_id_desc"],
             "responsibles": dataset["responsibles"],
+            'resource': dataset['info_link']
         },
         "dataset_maintenance": dataset_maintenance,
         "metadata_maintenance": metadata_maintenance,
         "grouped_keywords": separate_keywords(dataset.keywords()),
-        "check_alt_langs": _has_other_languages,
+        "check_alt_langs": functools.partial(_has_other_languages, supported_locales=supported),
+        '_refs': refs,
+        'check_platform': functools.partial(_has_type_been_rendered, refs, 'platform'),
+        'check_instrument': functools.partial(_has_type_been_rendered, refs, 'instrument'),
+        'check_mission': functools.partial(_has_type_been_rendered, refs, 'mission'),
+        'clean_id': _clean_xml_id,
+        'get_platform_instruments': get_platform_instruments
     }

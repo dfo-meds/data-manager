@@ -1,0 +1,5 @@
+superadmin:
+  display:
+    und: superadmin
+  permissions:
+    - superuser

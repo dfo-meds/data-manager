@@ -3,6 +3,7 @@ import csv
 from pipeman.vocab import VocabularyTermController
 from autoinject import injector
 import xml.etree.ElementTree as ET
+import zrlog
 
 
 @injector.injectable
@@ -12,13 +13,14 @@ class ISO19115VocabularyManager:
 
     @injector.construct
     def __init__(self):
-        pass
+        self.log = zrlog.get_logger("pipeman.iso19115")
 
     def fetch(self):
         self.fetch_link_properties()
         self.fetch_schema_terms()
 
     def fetch_schema_terms(self):
+        self.log.info(f"Loading ISO-19115 schema terms")
         link = 'https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml'
         resp = requests.get(link)
         tree = ET.fromstring(resp.text)
@@ -37,12 +39,13 @@ class ISO19115VocabularyManager:
                 desc = entry[0].find("{http://standards.iso.org/iso/19115/-3/cat/1.0}description")[0].text.strip()
                 vocab_terms[name] = {
                     "display": {
-                        "en": name,
+                        "und": name,
                     },
                     "description": {
                         "en": desc,
                     }
                 }
+            self.log.debug(f"{len(vocab_terms)} loaded for {vocab_name}")
             self.vtc.save_terms_from_dict(vocab_name, vocab_terms)
 
     def fetch_link_properties(self):

@@ -1,4 +1,9 @@
-from .entity import EntityRegistry
+import pathlib
+import typing
+
+import yaml
+
+from .entity import EntityRegistry, Entity
 from autoinject import injector
 import wtforms as wtf
 import flask
@@ -9,16 +14,70 @@ from pipeman.util.flask import TranslatableField
 import pipeman.db.orm as orm
 from pipeman.util.errors import EntityNotFoundError
 import json
-import datetime
+import zrlog
 import sqlalchemy as sa
 from pipeman.org import OrganizationController
 from sqlalchemy.exc import IntegrityError
-from pipeman.util.flask import ConfirmationForm, SecureBaseForm, ActionList, Select2Widget
+from pipeman.util.flask import ConfirmationForm, SecureBaseForm, ActionList, Select2Widget, flasht
 from pipeman.util.flask import ActionListColumn, DatabaseColumn, DataQuery, DataTable, DisplayNameColumn
 import flask_login
 import wtforms.validators as wtfv
 import functools
 
+from ..builtins.api_mapper.util import set_metadata_from_api
+from ..util import UserInputError
+import typing as t
+
+
+""" This is an order of entity_types that are safe to load without circular references.
+    Where there is a list of entity types, they can cross-reference each other! Be careful. """
+ENTITY_ORDER: list[str | list[str]] = [
+
+    # no references
+    'locale',
+    'resource',
+    'goc_publishing_org',
+    'spatial_res',
+    'telephone_info',
+    'time_res',
+    'variables',
+
+    # only references a goc_publishing_org
+    'goc_publishing_section',
+
+    # these collectively reference each other and the above (will need to order likely)
+    ["id_system", "contact", "citation", "graphic", "use_constraint"],
+
+    # only references an id_system
+    "ref_system",
+
+    # only references a citation
+    "thesaurus",
+
+    # only references a keyword
+    "keyword",
+
+    # only references a contact
+    "responsibility",
+    # refs: contact
+
+    # only references responsibilities and resources
+    "dist_channel",
+
+    # only references responsibilities, citations, and id_systems
+    "platform",
+
+    # only references citations, id_systems, and platforms
+    "instrument",
+
+    # only references citations, id_systems, missions, and platforms
+    "mission",
+    # refs: citation, id_system, mission, platform
+
+    # only references responsibilities
+    "erddap_servers",
+
+]
 
 @injector.injectable
 class EntityController:
@@ -30,50 +89,208 @@ class EntityController:
     def __init__(self, view_template="view_entity.html", edit_template="form.html"):
         self.view_template = view_template
         self.edit_template = edit_template
+        self._log = zrlog.get_logger("pipeman.entity")
 
     def build_action_list(self, ent, short_list: bool = False):
         actions = ActionList()
         kwargs = {
             "obj_type": ent.entity_type,
-            "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id
+            "obj_id": ent.container_id if hasattr(ent, "container_id") else ent.id
         }
         comp_kwargs = {
             "obj_type": ent.entity_type,
-            "obj_id": ent.db_id if hasattr(ent, "db_id") else ent.id,
+            "obj_id": ent.container_id if hasattr(ent, "container_id") else ent.id,
             "parent_id": ent.parent_id,
             "parent_type": ent.parent_type,
         }
         for_comp = ent.parent_id is not None
         if short_list:
-            actions.add_action("pipeman.general.view", "core.view_entity", **kwargs)
+            actions.add_action("pipeman.entity.page.view_entity.link", "core.view_entity", **kwargs)
         elif for_comp:
             if ent.parent_type == 'dataset':
-                actions.add_action("pipeman.entity.view_dataset", "core.view_dataset", dataset_id=ent.parent_id)
+                actions.add_action("pipeman.label.entity.dataset.link", "core.view_dataset", dataset_id=ent.parent_id)
         if self.has_specific_access(ent, "edit"):
             if for_comp:
-                actions.add_action("pipeman.general.edit", "core.edit_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.edit_component.link", "core.edit_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.edit", "core.edit_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.edit_entity.link", "core.edit_entity", **kwargs)
         if self.has_specific_access(ent, "remove"):
             if for_comp:
-                actions.add_action("pipeman.general.remove", "core.remove_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.remove_component.link", "core.remove_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.remove", "core.remove_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.remove_entity.link", "core.remove_entity", **kwargs)
         if self.has_specific_access(ent, "restore"):
             if for_comp:
-                actions.add_action("pipeman.general.restore", "core.restore_component", **comp_kwargs)
+                actions.add_action("pipeman.entity.page.restore_component.link", "core.restore_component", **comp_kwargs)
             else:
-                actions.add_action("pipeman.general.restore", "core.restore_entity", **kwargs)
+                actions.add_action("pipeman.entity.page.restore_entity.link", "core.restore_entity", **kwargs)
         return actions
 
     def _build_format_list(self):
         pass
 
+    def upsert_from_yaml_file(self, yaml_file_path: pathlib.Path):
+        with open(yaml_file_path, "r", encoding="utf-8") as h:
+            data = yaml.load(h.read(), Loader=yaml.CSafeLoader)
+        def _get_entities_of_type(entity_type: str) -> t.Iterable[dict]:
+            if entity_type in data:
+                for guid in data[entity_type]:
+                    ed = data[entity_type][guid] or {}
+                    ed['_guid'] = guid
+                    ed['_entity_type'] = entity_type
+                    if '_order' not in ed:
+                        ed['_order'] = 0
+                    yield ed
+
+        for entity_type_or_types in ENTITY_ORDER:
+            entity_data = []
+            if isinstance(entity_type_or_types, str):
+                entity_data.extend(_get_entities_of_type(entity_type_or_types))
+            else:
+                for entity_type in entity_type_or_types:
+                    entity_data.extend(_get_entities_of_type(entity_type))
+            entity_data.sort(key=lambda x: x['_order'])
+            for external_data in entity_data:
+                et = external_data['_entity_type']
+                del external_data['_entity_type']
+                del external_data['_order']
+                results = {
+                    'errors': [],
+                    'warnings': []
+                }
+                self.create_or_update_entity(
+                    external_data,
+                    functools.partial(set_metadata_from_api, file_type="yaml", results=results),
+                    et
+                )
+
+
+    def create_or_update_entity(self,
+                                external_data: dict | str,
+                                external_processor: t.Callable,
+                                entity_type: str,
+                                parent_id: typing.Optional[int] = None,
+                                parent_type: typing.Optional[str] = None):
+        entity = self._find_entity_for_upsert(external_data, external_processor, entity_type, parent_id, parent_type)
+        external_processor(entity, external_data)
+        self.save_entity(entity)
+        return entity
+
+    def _find_entity_for_upsert(self,
+                                external_data: dict | str,
+                                external_processor: t.Callable,
+                                entity_type: str,
+                                parent_id: typing.Optional[int] = None,
+                                parent_type: typing.Optional[str] = None):
+        with self.db as session:
+            if isinstance(external_data, str):
+                external_data = {'_guid': external_data}
+            if '_guid' in external_data and external_data['_guid']:
+                query = session.query(orm.Entity).filter_by(entity_type=entity_type, guid=external_data['_guid'])
+                if parent_id and parent_type:
+                    query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
+                check_by_guid = query.first()
+                if check_by_guid:
+                    return self._load_entity_from_orm(check_by_guid)
+
+            new_entity = self.build_entity_from_data(external_data, external_processor, entity_type, parent_id, parent_type, key_only=True)
+            query = session.query(orm.Entity).filter_by(entity_type=entity_type)
+            if parent_id and parent_type:
+                query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
+            for old_entity_orm in query:
+                old_entity = self._load_entity_from_orm(old_entity_orm)
+                if self.compare_entity_from_data(old_entity, new_entity):
+                    return old_entity
+        self.save_entity(new_entity)
+        return new_entity
+
+    def build_entity_from_data(self,
+                               external_data: dict,
+                               external_processor: t.Callable,
+                               entity_type: str,
+                               parent_id: typing.Optional[int] = None,
+                               parent_type: typing.Optional[str] = None,
+                               key_only: bool = False):
+        kwargs = {
+            "parent_id": parent_id,
+            "parent_type": parent_type,
+        }
+        if '_display_names' in external_data:
+            kwargs['display_names'] = external_data['_display_names']
+        if '_guid' in external_data:
+            kwargs['guid'] = external_data['_guid']
+        new_entity = self.reg.new_entity(
+            entity_type,
+            **kwargs
+        )
+        external_processor(new_entity, external_data, key_only=key_only)
+        return new_entity
+
+    def compare_entity_from_data(self, entity1, entity2) -> bool:
+        if entity1.guid is not None and entity2.guid is not None and entity1.guid == entity2.guid:
+            return True
+        for unique_field_set in self.reg.unique_field_sets(entity1.entity_type):
+            if any(entity1.get_field(key).is_empty() or entity2.get_field(key).is_empty() for key in unique_field_set):
+                continue
+            values1 = {
+                key: entity1.get_field(key).value
+                for key in unique_field_set
+            }
+            values2 = {
+                key: entity2.get_field(key).value
+                for key in unique_field_set
+            }
+            if self._order_insensitive_dict_compare(values1, values2):
+                return True
+        return False
+
+    def _order_insensitive_compare(self, val1, val2):
+        if isinstance(val1, dict):
+            if not isinstance(val2, dict):
+                return False
+            return self._order_insensitive_dict_compare(val1, val2)
+        elif isinstance(val1, (list, tuple, set)):
+            if not isinstance(val2, (list, tuple, set)):
+                return False
+            return self._order_insensitive_list_compare(val1, val2)
+        elif val1 is None:
+            return val2 is None
+        elif val2 is None:
+            return False
+        else:
+            return val1 == val2
+
+    def _order_insensitive_dict_compare(self, dict1, dict2):
+        keys1 = set(dict1.keys())
+        keys2 = set(dict2.keys())
+        if keys1 != keys2:
+            return False
+        for key in keys1:
+            if not self._order_insensitive_compare(dict1[key], dict2[key]):
+                return False
+        return True
+
+    def _order_insensitive_list_compare(self, list1, list2):
+        if len(list1) != len(list2):
+            return False
+        list2 = list(list2)
+        skip_idx = set()
+        for item in list1:
+            for idx, item2 in enumerate(list2):
+                if idx in skip_idx:
+                    continue
+                if self._order_insensitive_compare(item, item2):
+                    skip_idx.add(idx)
+                    break
+            else:
+                return False
+        return True
+
     def view_entity_page(self, ent):
         return flask.render_template(
             self.view_template,
             entity=ent,
-            title=gettext("pipeman.entity_view.title"),
+            title=gettext("pipeman.entity.page.view_entity.title"),
             actions=self.build_action_list(ent, False)
         )
 
@@ -82,88 +299,88 @@ class EntityController:
         form = EntityForm(new_ent, container=container)
         if form.handle_form():
             self.save_entity(new_ent)
-            flask.flash(gettext("pipeman.entity_create.success"), 'success')
+            flasht("pipeman.entity.page.create_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.entity_create.title')
+            title=gettext('pipeman.entity.page.create_component.title')
         )
 
     def edit_component_form(self, ent, container):
         form = EntityForm(ent, container=container)
         if form.handle_form():
             self.save_entity(ent)
-            flask.flash(gettext("pipeman.entity_edit.success"), 'success')
+            flasht("pipeman.entity.page.edit_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.component_edit.title")
+            title=gettext("pipeman.entity.page.edit_component.title")
         )
 
     def remove_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
-            flask.flash(gettext("pipeman.entity_remove.success"), 'success')
+            flasht("pipeman.entity.page.remove_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_remove.confirmation"),
-            title=gettext("pipeman.entity_remove.title")
+            instructions=gettext("pipeman.entity.page.remove_component.instructions"),
+            title=gettext("pipeman.entity.page.remove_component.title")
         )
 
     def restore_component_form(self, ent, container):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
-            flask.flash(gettext("pipeman.entity_restore.success"), 'success')
+            flasht("pipeman.entity.page.restore_component.success", 'success')
             return flask.redirect(container.view_link())
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_restore.confirmation"),
-            title=gettext("pipeman.entity_restore.title")
+            instructions=gettext("pipeman.entity.page.restore_component.instructions"),
+            title=gettext("pipeman.entity.page.restore_component.title")
         )
 
     def edit_entity_form(self, ent):
         form = EntityForm(ent)
         if form.handle_form():
             self.save_entity(ent)
-            flask.flash(gettext("pipeman.entity_edit.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.db_id))
+            flasht("pipeman.entity.page.edit_entity.success", 'success')
+            return flask.redirect(flask.url_for("core.view_entity", obj_type=ent.entity_type, obj_id=ent.container_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext("pipeman.entity_edit.title")
+            title=gettext("pipeman.entity.page.edit_entity.title")
         )
 
     def remove_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.remove_entity(ent)
-            flask.flash(gettext("pipeman.entity_remove.success"), 'success')
+            flasht("pipeman.entity.page.remove_entity.success", 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_remove.confirmation"),
-            title=gettext("pipeman.entity_remove.title")
+            instructions=gettext("pipeman.entity.page.remove_entity.instructions"),
+            title=gettext("pipeman.entity.page.remove_entity.title")
         )
 
     def restore_entity_form(self, ent):
         form = ConfirmationForm()
         if form.validate_on_submit():
             self.restore_entity(ent)
-            flask.flash(gettext("pipeman.entity_restore.success"), 'success')
+            flasht("pipeman.entity.page.restore_entity.success", 'success')
             return flask.redirect(flask.url_for("core.list_entities_by_type", obj_type=ent.entity_type))
         return flask.render_template(
             "form.html",
             form=form,
-            instructions=gettext("pipeman.entity_restore.confirmation"),
-            title=gettext("pipeman.entity_restore.title")
+            instructions=gettext("pipeman.entity.page.restore_entity.instructions"),
+            title=gettext("pipeman.entity.page.restore_entity.title")
         )
 
     def create_entity_form(self, entity_type):
@@ -171,19 +388,19 @@ class EntityController:
         form = EntityForm(new_ent)
         if form.handle_form():
             self.save_entity(new_ent)
-            flask.flash(gettext("pipeman.entity_create.success"), 'success')
-            return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.db_id))
+            flasht("pipeman.entity.page.create_entity.success", 'success')
+            return flask.redirect(flask.url_for("core.view_entity", obj_type=entity_type, obj_id=new_ent.container_id))
         return flask.render_template(
             self.edit_template,
             form=form,
-            title=gettext('pipeman.entity_create.title')
+            title=gettext('pipeman.entity.page.create_entity.title')
         )
 
-    def has_access(self, entity_type, op):
-        return entity_access(entity_type, op)
+    def has_access(self, entity_type, op, log_access_failures: bool = False):
+        return entity_access(entity_type, op, log_access_failures)
 
-    def has_specific_access(self, entity, op):
-        return specific_entity_access(entity, op)
+    def has_specific_access(self, entity, op, log_access_failures: bool = False):
+        return specific_entity_access(entity, op, log_access_failures)
 
     def _entity_iterator(self, query, short_list: bool = True):
         for ent in query:
@@ -204,11 +421,11 @@ class EntityController:
 
     def _entity_query(self, entity_type, session):
         q = session.query(orm.Entity).filter_by(entity_type=entity_type)
-        for filter in self._base_filters():
+        for filter in self.base_filters():
             q = q.filter(filter)
         return q.order_by(orm.Entity.id)
 
-    def _base_filters(self):
+    def base_filters(self):
         filters = []
         if not flask_login.current_user.has_permission("organization.manage_any"):
             filters.append(sa.or_(
@@ -222,13 +439,13 @@ class EntityController:
         if self.has_access(entity_type, "create"):
             links.append((
                 flask.url_for("core.create_entity", obj_type=entity_type),
-                gettext("pipeman.create_entity.link")
+                gettext("pipeman.entity.page.create_entity.link")
             ))
         return flask.render_template(
             "data_table.html",
             table=self._list_entities_table(entity_type),
             side_links=links,
-            title=gettext("pipeman.entity_list.title")
+            title=gettext("pipeman.entity.page.list_entities.title")
         )
 
     def list_entities_ajax(self, entity_type):
@@ -236,7 +453,7 @@ class EntityController:
         return table.ajax_response()
 
     def _list_entities_table(self, entity_type):
-        filters = self._base_filters()
+        filters = self.base_filters()
         dq = DataQuery(orm.Entity, entity_type=entity_type, extra_filters=filters)
         dt = DataTable(
             table_id="entity_list",
@@ -244,35 +461,40 @@ class EntityController:
             ajax_route=flask.url_for("core.list_entities_by_type_ajax", obj_type=entity_type),
             default_order=[("id", "asc")]
         )
-        dt.add_column(DatabaseColumn("id", gettext("pipeman.entity.id"), allow_order=True))
+        dt.add_column(DatabaseColumn("id", gettext("pipeman.label.entity.id"), allow_order=True))
         dt.add_column(DisplayNameColumn())
         dt.add_column(ActionListColumn(action_callback=functools.partial(self.build_action_list, short_list=True)))
         return dt
 
     def remove_entity(self, entity):
+        self._log.notice(f"Deprecating entity {entity.container_id}")
         with self.db as session:
-            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
             ent.is_deprecated = True
             session.commit()
 
     def restore_entity(self, entity):
+        self._log.notice(f"Restoring entity {entity.container_id}")
         with self.db as session:
-            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
+            ent = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
             ent.is_deprecated = False
             session.commit()
 
     def load_entity(self, entity_type, entity_id, revision_no=None):
+        self._log.debug(f"Loading entity {entity_type}.{entity_id}.{revision_no or '-'}")
         with self.db as session:
             if entity_type is None:
                 e = session.query(orm.Entity).filter_by(id=entity_id).first()
-                entity_type = e.entity_type if e else None
             else:
                 e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
             if not e:
                 raise EntityNotFoundError(entity_id)
-            entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
-            x = self.reg.new_entity(
-                entity_type,
+            return self._load_entity_from_orm(e, revision_no)
+
+    def _load_entity_from_orm(self, e, revision_no=None):
+        entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()
+        return self.reg.new_entity(
+                e.entity_type,
                 field_values=json.loads(entity_data.data) if entity_data else {},
                 display_names=json.loads(e.display_names) if e.display_names else None,
                 db_id=e.id,
@@ -280,32 +502,44 @@ class EntityController:
                 is_deprecated=e.is_deprecated,
                 org_id=e.organization_id,
                 parent_id=e.parent_id,
-                parent_type=e.parent_type
+                parent_type=e.parent_type,
+                guid=e.guid
             )
-            return x
 
-    def save_entity(self, entity):
+    def save_entity(self, entity: Entity):
+        self._log.info(f"Saving entity {entity.container_id}")
         with self.db as session:
-            if entity.db_id is not None:
-                e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.db_id).first()
-                e.modified_date = datetime.datetime.now()
+            if entity.guid:
+                check_query = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid)
+                if entity.parent_id and entity.parent_type:
+                    check_query = check_query.filter_by(parent_id=entity.parent_id, parent_type=entity.parent_type)
+                check = check_query.first()
+                if check and (entity.container_id is None or not entity.container_id == check.id):
+                    self._log.error("Entity GUID already exists [%s], found [%s;%s;%s;%s] while inserting [%s;%s;%s;%s]",
+                                    entity.guid,
+                                    check.id, check.entity_type, check.parent_id, check.parent_type,
+                                    entity.container_id, entity.entity_type, entity.parent_id, entity.parent_type)
+                    raise UserInputError("pipeman.entity.error.guid_already_exists")
+            if entity.container_id is not None:
+                e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
                 e.display_names = json.dumps(entity.display_names())
-                e.organization_id = int(entity.organization_id) or None
+                e.organization_id = int(entity.organization_id) if entity.organization_id else None
                 e.parent_id = entity.parent_id if entity.parent_id else None
                 e.parent_type = entity.parent_type if entity.parent_type else None
+                e.guid = entity.guid if entity.guid else None
             else:
                 e = orm.Entity(
                     entity_type=entity.entity_type,
-                    modified_date=datetime.datetime.now(),
-                    created_date=datetime.datetime.now(),
                     display_names=json.dumps(entity.display_names()),
-                    organization_id=int(entity.organization_id) or None,
+                    organization_id=int(entity.organization_id) if entity.organization_id else None,
                     parent_id=entity.parent_id,
-                    parent_type=entity.parent_type
+                    parent_type=entity.parent_type,
+                    created_by=flask_login.current_user.user_id,
+                    guid=entity.guid
                 )
                 session.add(e)
             session.commit()
-            entity.db_id = e.id
+            entity.container_id = e.id
             retries = 5
             while retries > 0:
                 retries -= 1
@@ -316,7 +550,7 @@ class EntityController:
                         entity_id=e.id,
                         revision_no=next_rev,
                         data=json.dumps(entity.values()),
-                        created_date=datetime.datetime.now()
+                        created_by=flask_login.current_user.user_id
                     )
                     session.add(ed)
                     session.commit()
@@ -337,57 +571,54 @@ class EntityForm(SecureBaseForm):
         controls = {
             "_name": TranslatableField(
                 wtf.StringField,
-                label=DelayedTranslationString("pipeman.entity_form.display_name"),
+                label=DelayedTranslationString("pipeman.common.display_name"),
                 default=self.entity.display_names()
             ),
+            "_guid": wtf.StringField(
+                label=DelayedTranslationString("pipeman.label.entity.guid"),
+                description=DelayedTranslationString("pipeman.label.entity.guid.help"),
+                default=self.entity.guid if self.entity.guid else "",
+            ),
             "_org": wtf.SelectField(
-                label=DelayedTranslationString("pipeman.entity.organization"),
+                label=DelayedTranslationString("pipeman.label.entity.organization_name"),
                 choices=self.ocontroller.list_organizations(),
                 coerce=int,
                 default=self.entity.organization_id if self.entity.organization_id else "",
-                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
-                validators=[wtfv.InputRequired(message=DelayedTranslationString("pipeman.fields.required"))]
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
+                validators=[wtfv.InputRequired(message=DelayedTranslationString("pipeman.error.required_field"))]
             ),
         }
         self.container = container
         if entity.is_component and container is None:
             controls["_dataset"] = wtf.SelectField(
-                label=DelayedTranslationString("pipeman.entity.dataset"),
+                label=DelayedTranslationString("pipeman.label.entity.dataset"),
                 choices=self.dcontroller.list_datasets_for_component(),
                 default=self.entity.parent_id if self.entity.parent_id else "",
-                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.general.empty_select")),
+                widget=Select2Widget(placeholder=DelayedTranslationString("pipeman.common.placeholder")),
                 validators=[wtfv.InputRequired(
-                    message=DelayedTranslationString("pipeman.fields.required")
+                    message=DelayedTranslationString("pipeman.error.required_field")
                 )]
             )
         controls.update(self.entity.controls())
-        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.general.submit"))
+        controls["_submit"] = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
         super().__init__(controls, *args, **kwargs)
         self.process()
 
     def handle_form(self):
-        if flask.request.method == "POST":
-            self.process(flask.request.form)
-            if self.validate():
-                d = self.data
-                self.entity.process_form_data(d)
-                for key in d["_name"]:
-                    self.entity.set_display_name(key, d["_name"][key])
-                if self.container:
-                    self.entity.parent_id = self.container.container_id
-                    self.entity.parent_type = self.container.container_type
-                elif self.entity.is_component and "_dataset" in d and d["_dataset"]:
-                    self.entity.parent_id = d["_dataset"]
-                    self.entity.parent_type = "dataset"
-                self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
-                return True
-            else:
-                for key in self.errors:
-                    for m in self.errors[key]:
-                        flask.flash(gettext("pipeman.entity.form_error").format(
-                            field=self._fields[key].label.text,
-                            error=m
-                        ), "error")
+        if self.validate_on_submit():
+            d = self.data
+            self.entity.process_form_data(d)
+            for key in d["_name"]:
+                self.entity.set_display_name(key, d["_name"][key])
+            self.entity.guid = d["_guid"] or None
+            if self.container:
+                self.entity.parent_id = self.container.container_id
+                self.entity.parent_type = self.container.container_type
+            elif self.entity.is_component and "_dataset" in d and d["_dataset"]:
+                self.entity.parent_id = d["_dataset"]
+                self.entity.parent_type = "dataset"
+            self.entity.organization_id = d["_org"] if not d["_org"] == "" else None
+            return True
         return False
 
     def validate(self, extra_validators=None):

@@ -13,6 +13,7 @@ class TranslatableStringFinder:
             re.compile(r'DelayedTranslationString\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
             re.compile(r'FormValueError\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
             re.compile(r'ValidationResult\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
+            re.compile(r'flasht\([ \t\r\n]{0,}[\'"]([A-Za-z_\.-]*?)[\'"]'),
             re.compile(r'\.add_action\([ \t\r\n]{0,}[\'"]([A-Za-z_\.]*?)[\'"]')
         ]
         self._jinja_res = [
@@ -20,7 +21,7 @@ class TranslatableStringFinder:
             re.compile(r'\{\{[ ]{0,}"([A-Za-z_\.-]*?)"[ ]{0,}\|[ ]{0,}gettext[ ]{0,}\}\}')
         ]
 
-    def search_directory(self, directory: str, recursive: bool = True):
+    def search_directory(self, directory: str, recursive: bool = True, with_origin: bool = False):
         results = set()
         search = [directory] if isinstance(directory, str) else list(directory)
         while search:
@@ -29,9 +30,9 @@ class TranslatableStringFinder:
                 continue
             for file in os.scandir(directory):
                 if file.name.endswith(".py"):
-                    results.update(self.search_in_python_file(file.path))
+                    results.update(self.search_in_python_file(file.path, with_origin))
                 elif file.name.endswith(".html") or file.name.endswith(".xml"):
-                    results.update(self.search_in_jinja_template(file.path))
+                    results.update(self.search_in_jinja_template(file.path, with_origin))
                 elif recursive and file.is_dir() and file.name not in [".", ".."]:
                     search.append(file.path)
         return results
@@ -51,22 +52,22 @@ class TranslatableStringFinder:
                 results.update(contents.keys())
         return results
 
-    def search_in_jinja_template(self, template_file: str):
+    def search_in_jinja_template(self, template_file: str, with_origin: bool = False):
         results = set()
         with open(template_file, "r", encoding="utf-8") as h:
             contents = h.read()
             for regex in self._jinja_res:
                 for result in regex.findall(contents):
-                    results.add(result)
+                    results.add(result if not with_origin else (result, template_file))
         return results
 
 
-    def search_in_python_file(self, py_file: str):
+    def search_in_python_file(self, py_file: str, with_origin: bool = False):
         results = set()
         with open(py_file, "r", encoding="utf-8") as h:
             contents = h.read()
             for regex in self._py_res:
                 for result in regex.findall(contents):
-                    results.add(result)
+                    results.add(result if not with_origin else (result, py_file))
         return results
 

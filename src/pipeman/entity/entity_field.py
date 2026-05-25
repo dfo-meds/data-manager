@@ -1,12 +1,14 @@
-from pipeman.entity.fields import ChoiceField, HtmlContentField, Keyword
+from pipeman.entity.fields import ChoiceField, HtmlContentField, Keyword, Field
 from pipeman.entity.controller import EntityController
-from pipeman.entity.entity import FieldContainer
-from pipeman.util.flask import EntitySelectField
+from pipeman.entity.entity import FieldContainer, Entity
+from pipeman.util.flask import EntitySelectField, DynamicFormField, TabbedFieldFormWidget
 from autoinject import injector
-from pipeman.i18n import gettext, MultiLanguageLink, MultiLanguageString
+from pipeman.i18n import gettext, MultiLanguageLink, MultiLanguageString, DelayedTranslationString
 import typing as t
 import flask
 import markupsafe
+import zrlog
+import wtforms as wtf
 
 
 class EntityRefMixin:
@@ -16,13 +18,14 @@ class EntityRefMixin:
         keyword_display_field = self.config("keyword_config", "display_field", default=None)
         keyword_machine_field = self.config("keyword_config", "machine_name_field", default=None)
         for ent in self.data():
-            keywords.append(Keyword(
-                ent.container_id,
-                ent.data(keyword_machine_field) if keyword_machine_field else None,
-                ent.data(keyword_display_field) if keyword_display_field else ent.display_names(),
-                self.build_thesaurus(ent),
-                self.keyword_mode()
-            ))
+            if ent is not None:
+                keywords.append(Keyword(
+                    ent.container_id,
+                    ent.data(keyword_machine_field) if keyword_machine_field else None,
+                    ent.data(keyword_display_field) if keyword_display_field else ent.display_names(),
+                    self.build_thesaurus(ent),
+                    self.keyword_mode()
+                ))
         return keywords
 
     def related_entities(self):
@@ -49,38 +52,167 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
         self.field_config["repeatable"] = True
 
     def is_empty(self):
-        for x in self._component_list():
-            return False
+        for x, _, _ in self.component_list():
+            if not x.is_deprecated:
+                return False
         return True
 
     def display(self):
         return markupsafe.Markup(self._build_html_content())
 
     def data(self, **kwargs):
-        for c, _, _ in self._component_list():
+        _data = []
+        for c, _, _ in self.component_list():
             if c.is_deprecated:
                 continue
             ent = self.ec.load_entity(c.entity_type, c.id)
             if ent:
-                yield ent
+                _data.append(ent)
+        return _data
 
     def _build_html_content(self):
         create_link = None
         if not self.parent_id:
-            return gettext("pipeman.component.add_later")
+            return gettext("pipeman.entity.message.add_components_after_creation")
         if self.parent_id and self.ec.has_access(self.field_config["entity_type"], "create"):
             # TODO: dataset access to edit??
             create_link = flask.url_for("core.create_component", obj_type=self.field_config["entity_type"], parent_id=self.parent_id, parent_type=self.parent_type)
+        # TODO: improve this template to use tables and rows instead
         return flask.render_template(
             "component_ref.html",
             create_link=create_link,
-            entities=self._component_list()
+            entities=self.component_list()
         )
 
-    def _component_list(self):
+    def component_list(self):
         if not self.parent_id:
             return
         return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)
+
+    def set_from_external(self, external_value, external_container_setter: t.Callable):
+        if not self.parent_id:
+            raise ValueError("Parent object must be saved before a new entity can be added.")
+        if isinstance(external_value, (list, tuple)):
+            for obj in external_value:
+                self.ec.create_or_update_entity(
+                    obj,
+                    external_container_setter,
+                    self.field_config["entity_type"],
+                    self.parent_id,
+                    self.parent_type
+                )
+        else:
+            self.ec.create_or_update_entity(
+                external_value,
+                external_container_setter,
+                self.field_config["entity_type"],
+                self.parent_id,
+                self.parent_type
+            )
+
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("ComponentReference field not implemented yet")
+
+
+class InlineEntityReferenceField(EntityRefMixin, Field):
+
+    DATA_TYPE = "inline_entity_ref"
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # no bueno
+        #self.field_config['repeatable'] = False
+        self.field_config['multilingual'] = False
+
+    def _control_class(self):
+        return InlineEntityField
+
+    def validators(self):
+        return []
+
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        return False
+
+    def _extra_wtf_arguments(self) -> dict:
+        args = {
+            "entity_type": self.field_config["entity_type"],
+            "original_data": self.value,
+            'parent_is_repeatable': self.is_repeatable(),
+            'allow_js_controls': self.allow_javascript_controls() and not self.is_repeatable()
+        }
+        return args
+
+    def _format_for_ui(self, val):
+        ent = self._process_value(val)
+        if ent:
+            code = '<table cellpadding="0" cellspacing="0" border="0" class="inline-entity-info property-list">'
+            for display, value, errors, error_level in ent.display_values():
+                if error_level == 'error':
+                    code += f'<tr class="property_error"><th>{display}</th><td>{value}</td></th></tr>'
+                elif error_level == 'warning':
+                    code += f'<tr class="property_warning"><th>{display}</th><td>{value}</td></th></tr>'
+                else:
+                    code += f'<tr><th>{display}</th><td>{value}</td></th></tr>'
+            code += '</table>'
+            return markupsafe.Markup(code)
+
+    def _process_value(self, val, **kwargs) -> Entity | None:
+        if val is None or val == '':
+            return None
+        new_entity = self.ec.reg.new_entity(
+            self.field_config["entity_type"],
+            guid=val['guid'] if val and 'guid' in val else '',
+            parent_type="_field" if not self.is_repeatable() else "_field_repeatable",
+            field_values=val
+        )
+        return new_entity
+
+    def serialize(self, val):
+        export = super().serialize(val)
+        if isinstance(export, list):
+            return [x for x in export if x is not None]
+        return export
+
+    def _serialize(self, val):
+        e = self._process_value(val)
+        if e is None or all(x.is_empty() for x in e._fields.values()):
+            return None
+        return e.values()
+
+    def set_from_external(self, external_value, external_container_setter: t.Callable):
+        if isinstance(external_value, (list, tuple)):
+            if not self.is_repeatable():
+                raise ValueError("List of items provided for non-repeatable field")
+            current_entities: list[Entity] = [
+                y for y in (self._process_value(x) for x in self.value) if y is not None
+            ] if self.value else []
+            for obj in external_value:
+                self._handle_external_data(obj, external_container_setter, current_entities)
+        else:
+            self._handle_external_data(external_value, external_container_setter)
+
+    def _handle_external_data(self, obj: dict | str, setter: t.Callable, current_entities: list[Entity] = None):
+        if isinstance(obj, str):
+            obj = {'_guid': obj}
+        new_entity = self.ec.build_entity_from_data(obj, setter, self.field_config['entity_type'], key_only=False)
+        info = new_entity.values()
+        info['_guid'] = obj['_guid'] if '_guid' in obj else None
+        if current_entities is not None:
+            if any(self.ec.compare_entity_from_data(new_entity, x) for x in current_entities):
+                return
+            current_entities.append(new_entity)
+            if self.value is None:
+                self.value = [info]
+            else:
+                self.value.append(info)
+        else:
+            self.value = info
+
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("InlineEntityReference field not implemented yet")
 
 
 class EntityReferenceField(EntityRefMixin, ChoiceField):
@@ -97,6 +229,9 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
     def _control_class(self):
         return EntitySelectField
 
+    def _update_from_keyword(self, keyword: str, keyword_dictionary: str) -> bool:
+        return False
+
     def label(self) -> t.Union[str, MultiLanguageString]:
         return super().label()
         """""
@@ -110,7 +245,8 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
     def _extra_wtf_arguments(self) -> dict:
         args = {
             "entity_types": self.field_config["entity_type"],
-            "allow_multiple": self.is_repeatable()
+            "allow_multiple": self.is_repeatable(),
+            "allow_select2": self.allow_javascript_controls()
         }
         if "min_chars_to_search" in self.field_config and self.field_config["min_chars_to_search"]:
             args["min_chars_to_search"] = int(self.field_config["min_chars_to_search"])
@@ -123,13 +259,64 @@ class EntityReferenceField(EntityRefMixin, ChoiceField):
         return MultiLanguageLink(flask.url_for("core.view_entity", obj_type=entity.entity_type, obj_id=entity.container_id), entity.display_names())
 
     def _process_value(self, val, **kwargs):
+        if val is None or val == '':
+            return None
         try:
             ent_id, rev_no = EntitySelectField.parse_entity_option(val, False)
             return self.ec.load_entity(None, ent_id, rev_no)
         except ValueError:
+            zrlog.get_logger("pipeman.entity_field").warning(f"Requested entity {val} does not exist")
             return None
 
     def sanitize_form_input(self, val):
         if self.is_repeatable() and isinstance(val, list) and len(val) == 1 and isinstance(val[0], list):
             return val[0]
         return val
+
+    def set_from_external(self, external_value, external_container_setter: t.Callable):
+        if isinstance(external_value, (list, tuple)):
+            if not self.is_repeatable():
+                raise ValueError("Multiple entities specified for a non-repeatable field")
+            existing = set(self.value) if self.value else set()
+            for obj in external_value:
+                ent = self.ec.create_or_update_entity(
+                    obj,
+                    external_container_setter,
+                    self.field_config["entity_type"]
+                )
+                existing.add(ent.container_id)
+            self.value = list(existing)
+        else:
+            ent = self.ec.create_or_update_entity(
+                external_value,
+                external_container_setter,
+                self.field_config["entity_type"]
+            )
+            self.value = ent.container_id
+
+    def _handle_raw(self, raw_value):
+        raise NotImplementedError("EntityReference field not implemented yet")
+
+
+class InlineEntityField(DynamicFormField):
+
+    ec: EntityController = None
+
+    @injector.construct
+    def __init__(self, entity_type, original_data=None, parent_is_repeatable: bool = False, allow_js_controls: bool = True, **kwargs):
+        self._blank_entity = self.ec.reg.new_entity(entity_type,
+                                                    parent_type='_field' if not parent_is_repeatable else "_field_repeatable",
+                                                    field_values=original_data or {})
+        self.entity_type = entity_type
+        if 'widget' not in kwargs:
+            if allow_js_controls:
+                kwargs['widget'] = TabbedFieldFormWidget()
+        controls = {
+            "_guid": wtf.StringField(
+                label=DelayedTranslationString("pipeman.label.entity.guid"),
+                description=DelayedTranslationString("pipeman.label.entity.guid.help"),
+                default=original_data['_guid'] if original_data and '_guid' in original_data else ''
+            ),
+        }
+        controls.update(self._blank_entity.controls())
+        super().__init__(controls, **kwargs)

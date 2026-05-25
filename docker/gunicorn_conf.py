@@ -1,8 +1,19 @@
 from __future__ import print_function
 
-import json
 import multiprocessing
 import os
+
+from prometheus_client.multiprocess import mark_process_dead
+
+
+def child_exit(server, worker):
+    mark_process_dead(worker.pid)
+
+
+def worker_exit(server, worker):
+    from pipeman.db import on_gunicorn_worker_exit
+    on_gunicorn_worker_exit()
+
 
 # Load defaults from environment
 workers_per_core_str = int(os.getenv("WORKERS_PER_CORE", 2))
@@ -18,7 +29,7 @@ port = os.getenv("PORT", "80")
 bind_env = os.getenv("BIND", None)
 errorlog = os.getenv("ERROR_LOG", "-")
 accesslog = os.getenv("ACCESS_LOG", None)
-loglevel = os.getenv("LOG_LEVEL", "info")
+loglevel = os.getenv("LOG_LEVEL", "INFO")
 enable_stdio_inheritance = os.getenv("ENABLE_STDIO_INHERITANCE", "1") == "1"
 
 # Set use_bind
@@ -38,7 +49,7 @@ else:
 assert workers > 0
 assert worker_class in ('sync', 'eventlet', 'gevent', 'tornado', 'gthread')
 
-if os.getenv("DUMP_GUNICORN_CONFIG", "1") == "1":
+if os.getenv("DUMP_GUNICORN_CONFIG", "0") == "1":
     # For debugging and testing
     log_data = {
         "loglevel": loglevel,

@@ -1,0 +1,4 @@
+{{requested_by}} has requested "{{dataset_name}}" be activated. This
+action can be approved by you.
+
+{{view_link}}

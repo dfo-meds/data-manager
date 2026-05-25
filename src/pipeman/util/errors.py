@@ -3,15 +3,11 @@ from autoinject import injector
 
 
 class PipemanError(Exception):
-
     pass
 
 
 class TranslatableError(PipemanError):
 
-    tm: TranslationManager = None
-
-    @injector.construct
     def __init__(self, error_str_key, *subs, **kwargs):
         super().__init__(DelayedTranslationString(error_str_key, None, *subs, **kwargs))
 
@@ -68,4 +64,26 @@ class DataStoreNotFoundError(PipemanError):
 
 
 class PipemanConfigurationError(PipemanError):
+    pass
+
+
+class APIInputError(PipemanError):
+    pass
+
+
+class _WrapperError(PipemanError):
+
+    def __init__(self, msg="", ex=None):
+        super().__init__(msg)
+
+
+class RecoverableError(_WrapperError):
+    pass
+
+
+class UnrecoverableError(_WrapperError):
+    pass
+
+
+class TranslationNotAvailableYet(RecoverableError):
     pass

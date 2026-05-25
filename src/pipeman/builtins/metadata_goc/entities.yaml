@@ -1,6 +1,7 @@
 goc_publishing_section:
   display:
-    en: GoC Publishing Sections
+    en: GoC Publishing Section
+    fr: Section de pulications de GdC
   validation:
     required:
       - section_name
@@ -11,14 +12,70 @@ goc_publishing_section:
       multilingual: yes
       label:
         en: Section Name
+        fr: Nom de la section
+      description:
+        en: Enter the name of the group within the department which is publishing the data.
+        fr: Entrez le nom du groupe au sein du service qui publie les données.
+      order: 10
+      unique:
+        - publisher
+      json_api:
+        mapping: section_name
     publisher:
       data_type: entity_ref
       label:
         en: Publisher
+        fr: Éditeur
+      description:
+        en: Select the department or agency which is publishing the data.
+        fr: Sélectionnez le ministère ou l'agence qui publie les données.
       entity_type: goc_publishing_org
+      order: 0
+      json_api:
+        mapping: publisher
+resource:
+  fields:
+    goc_content_type:
+      data_type: vocabulary
+      vocabulary_name: goc_content_types
+      label:
+        en: GC Content Type
+        fr: GC Type de contenu
+      description:
+        en: Select the content type that best describes this resource.
+        fr: Sélectionnez le type de contenu qui décrit le mieux cette ressource.
+      order: 80
+      json_api:
+        mapping: goc_content_type
+    goc_formats:
+      data_type: vocabulary
+      vocabulary_name: goc_content_formats
+      repeatable: yes
+      label:
+        en: GC Content Format
+        fr: GC Format de contenu
+      description:
+        en: Select the format(s) that best describe this resource.
+        fr: Sélectionnez le format de contenu qui décrit le mieux cette ressource.
+      order: 90
+      json_api:
+        mapping: goc_formats
+    goc_languages:
+      data_type: text
+      repeatable: yes
+      label:
+        en: Content Language
+        fr: Langue du contenu
+      description:
+        en: Enter the language(s) that this resource supports, using the ISO 639-2/T 3-letter language codes, or leave blank if there are no supported languages.
+        fr: Entrez la ou les langues prises en charge par cette ressource, en utilisant les codes de langue à 3 lettres ISO 639-2/T, ou laissez vide si aucune langue n'est prise en charge.
+      order: 100
+      json_api:
+        mapping: goc_languages
 goc_publishing_org:
   display:
     en: GoC Publishers
+    fr: Éditeurs de GdC
   validation:
     required:
       - publisher_name
@@ -29,7 +86,23 @@ goc_publishing_org:
       multilingual: yes
       label:
         en: Publisher Name
+        fr: Nom de l'éditeur
+      description:
+        en: Enter the full formal name of the department
+        fr: Entrez le nom officiel complet du département
+      order: 0
+      unique: yes
+      json_api:
+        mapping: publisher_name
     publisher_code:
       data_type: text
       label:
         en: Publisher Code
+        fr: Code de l'éditeur
+      description:
+        en: Enter the appropriate code for the department
+        fr: Entrez le code approprié pour le département
+      order: 10
+      unique: yes
+      json_api:
+        mapping: publisher_code
