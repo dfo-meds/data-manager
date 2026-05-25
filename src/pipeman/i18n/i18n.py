@@ -2,7 +2,7 @@ from copy import deepcopy
 from autoinject import injector
 import markupsafe
 import zirconium as zr
-
+import typing as t
 
 @injector.injectable_global
 class LanguageDetector:
@@ -70,14 +70,17 @@ class BaseTranslatableString:
             return self._render_str(**kwargs).format(*self.format_args, **self.format_kwargs)
         return self._render_str(**kwargs)
 
-    def copy(self):
+    def copy(self) -> t.Self:
         raise NotImplementedError
 
     def _render_str(self, **kwargs) -> str:
         raise NotImplementedError
 
     def format(self, *args, **kwargs):
-        return BaseTranslatableString(*self.format_args, *args, **self.format_kwargs, **{k: kwargs[k] for k in kwargs if k not in self.format_kwargs})
+        x = self.copy()
+        x.format_args = (*x.format_args, *args)
+        x.format_kwargs.update(**kwargs)
+        return x
 
 
 class DelayedTranslationString(BaseTranslatableString):
