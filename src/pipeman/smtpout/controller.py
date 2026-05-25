@@ -73,11 +73,11 @@ class EmailController:
 
     def _get_template_content(self, name, lang, kwargs) -> tuple[str, str, str]:
         message_txt = self._render_template_content(name, lang, "txt", kwargs)
-        message_html = self._render_template_content(name, lang, "html", kwargs)
+        message_html = self._render_template_content(name, lang, "html", kwargs, missing_ok = True)
         subject = self._render_template_content(name + ".subject", lang, "txt", kwargs).strip("\r\n\t ")
         return subject or f"{name}", message_txt, message_html
 
-    def _render_template_content(self, name, lang, extension, kwargs) -> str:
+    def _render_template_content(self, name, lang, extension, kwargs, missing_ok: bool = False) -> str:
         file_name_options = [
             f"{name}.{lang}.{extension}",
             f"{name}.{extension}"
@@ -86,7 +86,10 @@ class EmailController:
             template = self._email_jinja_env.select_template(file_name_options)
             return template.render(**kwargs)
         except jinja2.TemplatesNotFound:
-            self._log.exception(f"Missing template")
+            if missing_ok:
+                self._log.info(f"Missing templates [%s]", file_name_options)
+            else:
+                self._log.exception(f"Missing templates [%s]", file_name_options)
             return ''
 
     def send_email(self, to_emails, subject: str, message_txt: str = None, message_html: str = None, cc_emails = None, bcc_emails = None, immediate: bool = False) -> bool:
