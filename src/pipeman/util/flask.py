@@ -1,4 +1,5 @@
 import markupsafe
+import sqlalchemy.orm
 import wtforms
 import wtforms as wtf
 from pipeman.i18n import TranslationManager, DelayedTranslationString, MultiLanguageString
@@ -1063,6 +1064,7 @@ class DataQuery:
             query = self._order_query(query, data_table)
             query = self._paginate_query(query, data_table)
             for row in query:
+                session.expunge(row)
                 if self._wrapper_func:
                     yield self._wrapper_func(row)
                 else:
@@ -1102,7 +1104,7 @@ class DataQuery:
                 return query.filter(sa.or_(*filters))
         return query
 
-    def _base_query(self, session):
+    def _base_query(self, session: sqlalchemy.orm.Session):
         query = session.query(self.orm_entity)
         if self._filters:
             query = query.filter_by(**self._filters)
