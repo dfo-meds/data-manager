@@ -5,7 +5,7 @@ receive_send_item:
       fr: Élément d'envoi (défaut)
     steps:
       - split_send_files
-    enabled: yes
+    enabled: true
 send_file:
   basic:
     label:
@@ -13,7 +13,7 @@ send_file:
       fr: Téléchargement ficher (défaut)
     steps:
       - handle_file_upload
-    enabled: yes
+    enabled: true
 send_email:
   default:
     label:
@@ -21,7 +21,7 @@ send_email:
       fr: Envoyer email (défaut)
     steps:
       - actual_send_email
-    enabled: yes
+    enabled: true
 dataset_publication:
     direct_publish:
         label:
@@ -29,7 +29,7 @@ dataset_publication:
           fr: Publication directe
         steps:
           - publish_dataset
-        enabled: yes
+        enabled: true
         permission: workflow.publish.direct
     super_user_publish:
       label:
@@ -46,7 +46,7 @@ dataset_activation:
         steps:
           - flag_dataset_for_review
           - activate_dataset
-        enabled: yes
+        enabled: true
         permission: workflow.activate.direct
     super_user_activation:
       label:
@@ -79,4 +79,4 @@ text_translation:
         - set_translation
       cleanup:
         - remove_in_translation_flag
-      enabled: yes
+      enabled: true

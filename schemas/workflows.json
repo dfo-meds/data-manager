@@ -1,0 +1,56 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/workflows",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "dataset_publication": {
+      "$ref": "#/$defs/workflow"
+    },
+    "dataset_activation": {
+      "$ref": "#/$defs/workflow"
+    },
+    "receive_send_item": {
+      "$ref": "#/$defs/workflow"
+    },
+    "send_file": {
+      "$ref": "#/$defs/workflow"
+    },
+    "send_email": {
+      "$ref": "#/$defs/workflow"
+    },
+    "text_translation": {
+      "$ref": "#/$defs/workflow"
+    },
+    "additionalProperties": false
+  },
+  "$defs": {
+    "workflow": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "object",
+              "properties": {
+                "en": {"type":  "string"},
+                "fr": {"type":  "string"},
+                "und": {"type":  "string"}
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {"type":  "string", "pattern": "^[A-Za-z0-9_]*$"}
+            },
+            "cleanup": {
+              "type": "array",
+              "items": {"type":  "string", "pattern": "^[A-Za-z0-9_]*$"}
+            },
+            "permission": { "type": "string", "pattern": "^[A-Za-z0-9_.]*$" },
+            "enabled": { "type": "boolean" }
+          }
+        }
+      }
+    }
+  }
+}

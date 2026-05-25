@@ -1,13 +1,13 @@
 dataset_publication:
   direct_publish:
-    enabled: no
+    enabled: false
   super_user_publish:
-    enabled: no
+    enabled: false
   cnodc_publish:
     label:
       en: CNODC Standard
       fr: Standard de CNDOC
-    enabled: yes
+    enabled: true
     steps:
       - lead_publishing_notify
       - lead_approval
@@ -45,14 +45,14 @@ dataset_publication:
       - erddap_notify_live
       - autopush_notify
     permission: workflow.activate_and_publish
-    enabled: yes
+    enabled: true
 dataset_activation:
   direct_activation:
-    enabled: no
+    enabled: false
   super_user_activation:
-    enabled: no
+    enabled: false
   activate_and_publish:
-    enabled: no
+    enabled: false
   cnodc_activation:
     label:
       en: CNODC Standard
@@ -64,7 +64,7 @@ dataset_activation:
       - activate_dataset
     cleanup:
       - return_to_draft
-    enabled: yes
+    enabled: true
   cnodc_activate_and_publish:
     label:
       en: CNODC Direct Activation & Publication
@@ -75,6 +75,6 @@ dataset_activation:
       - activate_dataset
       - trigger_publication
     permission: workflow.activate_and_publish
-    enabled: yes
+    enabled: false
     cleanup:
       - return_to_draft
