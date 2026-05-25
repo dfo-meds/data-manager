@@ -4,11 +4,12 @@ import netCDF4._netCDF4
 import numpy
 import requests
 
+from pipeman.entity.entity_field import EntityReferenceField
 from pipeman.util.flask import ActionList
 from pipeman.vocab import VocabularyTermController
 from pipeman.dataset.dataset import Dataset
 from pipeman.util import load_object
-from pipeman.entity.fields import Field, VocabularyTerm
+from pipeman.entity.fields import Field, VocabularyTerm, TextField
 from pipeman.entity import EntityController
 from pipeman.entity.entity import Entity, FieldContainer
 from pipeman.i18n import TranslationManager
@@ -486,13 +487,25 @@ def _key_value_processor(attrs: dict, target_name: str, field: Field, config: di
             attrs[key] = val
 
 
-def _licenses_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):
-    license_texts = []
-    for uc in field.data():
-        if uc['plain_text']:
-            license_texts.append(uc["plain_text"])
+def _licenses_processor(attrs: dict, target_name: str, field: EntityReferenceField, config: dict, fc: FieldContainer):
+    license_texts_en = []
+    license_texts_fr = []
+    for uc in field.related_entities():
+        desc: TextField = uc.get_field("description")
+        if desc.value :
+            if 'en' in desc.value:
+                license_texts_en.append(desc.value['en'])
+            if 'fr' in desc.value:
+                license_texts_fr.append(desc.value['fr'])
+            if 'und' in desc.value:
+                license_texts_en.append(desc.value['und'])
+                license_texts_fr.append(desc.value['und'])
     sep = "\n-----\n" if "sep" not in config else config["sep"]
-    attrs[target_name] = sep.join(license_texts)
+    attrs[target_name] = sep.join(license_texts_en)
+    if license_texts_fr:
+        attrs[f"{target_name}_fr"] = sep.join(license_texts_fr)
+    else:
+        attrs[f"{target_name}_fr"] = ""
 
 
 def _ref_system_processor(attrs: dict, target_name: str, field: Field, config: dict, fc: FieldContainer):

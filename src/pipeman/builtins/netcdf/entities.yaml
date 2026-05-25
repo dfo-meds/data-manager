@@ -1,15 +1,3 @@
-use_constraint:
-  fields:
-    plain_text:
-      data_type: multitext
-      label:
-        en: Plain text
-        fr: Texte brut
-      description:
-        en: This text is used where the full ISO record cannot be used (e.g. in NetCDF files)
-        fr: Ce texte est utilisé lorsque l'enregistrement ISO complet ne peut pas être utilisé (par exemple dans les fichiers NetCDF)
-      json_api:
-        mapping: plain_text
 contact:
   fields:
     short_name:
