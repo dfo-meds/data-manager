@@ -661,7 +661,7 @@ use_constraint:
       fr: Gouvernement du Canada - Non classifié (2019)
     description:
       en: This information is not considered classified or protected
-      fr:
+      fr: Cette information n'est pas considérée comme classifiée ou protégée
     reference:
       - goc_security_directive_2019
       - goc_security_levels_2024
