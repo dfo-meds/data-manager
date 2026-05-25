@@ -41,7 +41,7 @@ def start_publication(step, context, dc: DatasetController = None):
     if not dataset:
         step.output.append(f"Invalid dataset ID [{context['dataset_id']}]")
         return ItemResult.FAILURE
-    step.output.append(f"result: {dc.activate_dataset(dataset, with_messages=False)}")
+    step.output.append(f"result: {dc.publish_dataset(dataset, with_messages=False)}")
     return ItemResult.SUCCESS
 
 
