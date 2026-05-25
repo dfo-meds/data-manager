@@ -106,7 +106,7 @@ def send_dataset_action_email(step: WorkflowStep, context: dict, emails: EmailCo
         'view_link': flask.url_for('core.view_item', item_id=step.item.id, _external=True),
         'approve_link': flask.url_for('core.approve_item', item_id=step.item.id, _external=True),
         'cancel_link': flask.url_for('core.cancel_item', item_id=step.item.id, _external=True),
-        'requested_by': step.item.created_by_user.display
+        'requested_by': step.item.created_by_user.display if step.item.created_by is not None else '$$cron$$'
     }
     for lang_pref in by_lang_pref:
         emails.send_template(
