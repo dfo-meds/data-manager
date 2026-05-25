@@ -477,7 +477,7 @@ class DatasetController:
                 object_type='dataset'
             )
 
-    def activate_dataset(self, dataset) -> str:
+    def activate_dataset(self, dataset, with_messages: bool = True) -> str:
         self.log.info(f"Activating dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_activation",
@@ -490,12 +490,13 @@ class DatasetController:
             },
             dataset.dataset_id
         )
-        if status == "COMPLETE":
-            flasht("pipeman.dataset.message.activated", "success")
-        elif status == "FAILURE":
-            flasht("pipeman.dataset.error.during_activation", "error")
-        else:
-            flasht("pipeman.dataset.message.activation_in_progress", "success")
+        if with_messages:
+            if status == "COMPLETE":
+                flasht("pipeman.dataset.message.activated", "success")
+            elif status == "FAILURE":
+                flasht("pipeman.dataset.error.during_activation", "error")
+            else:
+                flasht("pipeman.dataset.message.activation_in_progress", "success")
         return status
 
     def can_publish(self, dataset):
@@ -514,7 +515,7 @@ class DatasetController:
                 object_type='dataset'
             )
 
-    def publish_dataset(self, dataset) -> str:
+    def publish_dataset(self, dataset, with_messages: bool = True) -> str:
         self.log.info(f"Publishing dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_publication",
@@ -526,12 +527,13 @@ class DatasetController:
             },
             dataset.dataset_id
         )
-        if status == "COMPLETE":
-            flasht("pipeman.dataset.message.published", "success")
-        elif status == "FAILURE":
-            flasht("pipeman.dataset.error.during_publication", "error")
-        else:
-            flasht("pipeman.dataset.message.publication_in_progress", "success")
+        if with_messages:
+            if status == "COMPLETE":
+                flasht("pipeman.dataset.message.published", "success")
+            elif status == "FAILURE":
+                flasht("pipeman.dataset.error.during_publication", "error")
+            else:
+                flasht("pipeman.dataset.message.publication_in_progress", "success")
         return status
 
     def generate_metadata_content(self, dataset, profile_name, format_name, environment="live"):
