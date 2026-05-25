@@ -7,6 +7,7 @@ dataset_publication:
     label:
       en: CNODC Standard
       fr: Standard de CNDOC
+    enabled: yes
     steps:
       - lead_publishing_notify
       - lead_approval
@@ -25,30 +26,32 @@ dataset_publication:
       - erddap_iso19115_metadata_upload_live
       - erddap_metadata_upload_live
       - erddap_notify_live
-    cnodc_direct_publish:
-      label:
-        en: CNODC Direct Publication
-        fr: Publication directe de CNDOC
-      steps:
-        - interrupt_live_flow
-        - iso19115_metadata_upload_staging
-        - iso19139_metadata_upload_staging
-        - erddap_iso19115_metadata_upload_staging
-        - erddap_metadata_upload_staging
-        - erddap_notify_staging
-        - publish_dataset
-        - iso19115_metadata_upload_live
-        - iso19139_metadata_upload_live
-        - erddap_iso19115_metadata_upload_live
-        - erddap_metadata_upload_live
-        - erddap_notify_live
-        - autopush_notify
-      permission: workflow.activate_and_publish
-      enabled: yes
+  cnodc_direct_publish:
+    label:
+      en: CNODC Direct Publication
+      fr: Publication directe de CNDOC
+    steps:
+      - interrupt_live_flow
+      - iso19115_metadata_upload_staging
+      - iso19139_metadata_upload_staging
+      - erddap_iso19115_metadata_upload_staging
+      - erddap_metadata_upload_staging
+      - erddap_notify_staging
+      - publish_dataset
+      - iso19115_metadata_upload_live
+      - iso19139_metadata_upload_live
+      - erddap_iso19115_metadata_upload_live
+      - erddap_metadata_upload_live
+      - erddap_notify_live
+      - autopush_notify
+    permission: workflow.activate_and_publish
+    enabled: yes
 dataset_activation:
   direct_activation:
     enabled: no
   super_user_activation:
+    enabled: no
+  activate_and_publish:
     enabled: no
   cnodc_activation:
     label:
@@ -61,6 +64,7 @@ dataset_activation:
       - activate_dataset
     cleanup:
       - return_to_draft
+    enabled: yes
   cnodc_activate_and_publish:
     label:
       en: CNODC Direct Activation & Publication

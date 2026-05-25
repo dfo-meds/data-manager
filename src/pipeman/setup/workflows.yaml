@@ -44,6 +44,7 @@ dataset_activation:
           en: Direct Activation
           fr: Activation directe
         steps:
+          - flag_dataset_for_review
           - activate_dataset
         enabled: yes
         permission: workflow.activate.direct
@@ -62,10 +63,10 @@ dataset_activation:
         en: Direct Activation & Publication
         fr: Activation et publication directe
       steps:
+        - flag_dataset_for_review
         - activate_dataset
         - trigger_publication
       permission: workflow.activate_and_publish
-      enabled: yes
       cleanup:
         - return_to_draft
 text_translation:
