@@ -1104,7 +1104,7 @@ class DataQuery:
         return query
 
     def _base_query(self, session: sqlalchemy.orm.Session):
-        query = session.query(self.orm_entity)
+        query = session.query(self.orm_entity).populate_existing()
         if self._filters:
             query = query.filter_by(**self._filters)
         if self._extra_filters:
