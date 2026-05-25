@@ -130,7 +130,7 @@ class WorkflowController:
                 context=json.dumps(workflow_context),
                 step_list=json.dumps(self.reg.step_list(workflow_type, workflow_name)),
                 created_date=datetime.datetime.now(),
-                created_by=flask_login.current_user.user_id,
+                created_by=flask_login.current_user.user_id if flask_login.current_user else None,
                 completed_index=0,
                 status="IN_PROGRESS"
             )
