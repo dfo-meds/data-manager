@@ -103,9 +103,9 @@ class DelayedTranslationString(BaseTranslatableString):
 
 class MultiLanguageString(BaseTranslatableString):
 
-    def __init__(self, language_map: dict, *args, **kwargs):
+    def __init__(self, language_map: dict | str, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.language_map = language_map
+        self.language_map = language_map if isinstance(language_map, dict) else {"und": language_map}
 
     def __bool__(self):
         return any(self.language_map[x] for x in self.language_map)
