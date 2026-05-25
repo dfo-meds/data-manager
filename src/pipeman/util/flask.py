@@ -1064,7 +1064,6 @@ class DataQuery:
             query = self._order_query(query, data_table)
             query = self._paginate_query(query, data_table)
             for row in query:
-                session.expunge(row)
                 if self._wrapper_func:
                     yield self._wrapper_func(row)
                 else:
