@@ -75,6 +75,6 @@ dataset_activation:
       - activate_dataset
       - trigger_publication
     permission: workflow.activate_and_publish
-    enabled: false
+    enabled: true
     cleanup:
       - return_to_draft
