@@ -1,0 +1,52 @@
+{
+  "$id": "https://cnodc-cndoc.azure.cloud-nuage.dfo-mpo.gc.ca/metadb/schemas/metadata",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "patternProperties": {
+    "^[a-z_]*$": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z_]*$": {
+              "type": "object",
+              "patternProperties": {
+                "^description$": {"$ref":  "#/$defs/label"}
+              },
+              "properties": {
+                "repeatable": {"type":  "boolean"},
+                "multilingual": {"type":  "boolean"},
+                "min_chars_to_search": {"type":  "integer"},
+                "data_type": {"type":  "string"},
+                "entity_type": {"type":  "string"},
+                "vocabulary_name": {"type":  "string"},
+                "label": {"$ref":  "#/$defs/label"},
+                "order": {"type":  "integer"},
+                "json_api": {
+                  "type": "object",
+                  "properties": {
+                    "mapping": {"type":  "string"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "display": {
+          "$ref": "#/$defs/label"
+        },
+        "order": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "label": {
+      "en": {"type":  "string"},
+      "fr": {"type":  "string"},
+      "und": {"type":  "string"}
+    }
+  }
+}

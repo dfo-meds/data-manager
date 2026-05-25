@@ -37,7 +37,7 @@ metadata_info:
       description:
         en: If the metadata is published under one or more permanent URLs, select them here.
         fr: Si les métadonnées sont publiées sous une ou plusieurs URL permanentes, sélectionnez-les ici.
-      repeatable: yes
+      repeatable: true
       min_chars_to_search: 2
       json_api:
         mapping: canon_urls
@@ -55,7 +55,7 @@ metadata_info:
         mapping: parent_metadata
     alt_metadata:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: citation
       order: 1010
       label:
@@ -68,7 +68,7 @@ metadata_info:
         mapping: alt_metadata
     metadata_standards:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: citation
       order: 2000
       label:
@@ -81,7 +81,7 @@ metadata_info:
         mapping: metadata_standards
     metadata_profiles:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: citation
       order: 2010
       label:
@@ -107,7 +107,7 @@ metadata_info:
     other_locales:
       data_type: entity_ref
       order: 110
-      repeatable: yes
+      repeatable: true
       entity_type: locale
       label:
         en: Other Locales
@@ -139,7 +139,7 @@ metadata_info:
         en: Select any use constraints that apply to the metadata record itself.
         fr: Sélectionnez les contraintes d'utilisation qui s'appliquent à l'enregistrement de métadonnées lui-même.
       order: 30
-      repeatable: yes
+      repeatable: true
       json_api:
         mapping: metadata_licenses
 data_info:
@@ -153,7 +153,7 @@ data_info:
         en: Enter a unique and descritive title for the dataset.
         fr: Entrez un titre unique et descriptif pour le jeu de données.
       order: 0
-      multilingual: yes
+      multilingual: true
       netcdf:
         mapping: title
       json_api:
@@ -181,7 +181,7 @@ data_info:
       description:
         en: If you wish to provide additional information about the unique identifier, enter it here.
         fr: Si vous souhaitez fournir des informations supplémentaires sur l'identifiant unique, saisissez-les ici.
-      multilingual: yes
+      multilingual: true
       order: 510
       json_api:
         mapping: dataset_id_desc
@@ -263,7 +263,7 @@ data_info:
         en: Provide a summary of the dataset.
         fr: Fournir un résumé de l'ensemble de données.
       order: 10
-      multilingual: yes
+      multilingual: true
       netcdf:
         mapping: summary
       json_api:
@@ -281,7 +281,7 @@ data_info:
       description:
         en: Select any contacts who should be associated with the dataset itself.
         fr: Sélectionnez tous les contacts qui doivent être associés à l'ensemble de données lui-même.
-      repeatable: yes
+      repeatable: true
       order: 10000000
       netcdf:
         mapping:
@@ -301,7 +301,7 @@ data_info:
         en: Select any usage constraints that apply to the dataset.
         fr: Sélectionnez les contraintes d'utilisation qui s'appliquent à l'ensemble de données.
       order: 50
-      repeatable: yes
+      repeatable: true
       netcdf:
         mapping: license
         processor: licenses
@@ -318,7 +318,7 @@ data_more_info:
         en: Describe the purpose in creating the dataset and making it available.
         fr: Décrire le but de la création de l'ensemble de données et de sa mise à disposition.
       order: 20
-      multilingual: yes
+      multilingual: true
       json_api:
         mapping: purpose
     credit:
@@ -330,7 +330,7 @@ data_more_info:
         en: Provide any acknowledgements (e.g. funding sources, contributions, etc).
         fr: Fournissez des remerciements (par exemple, sources de financement, contributions, etc.).
       order: 30
-      multilingual: yes
+      multilingual: true
       netcdf:
         mapping: acknowledgement
       iso_yaml:
@@ -371,7 +371,7 @@ data_more_info:
       description:
         en: If you would like to add more details on the processing level, enter them here.
         fr: Si vous souhaitez ajouter plus de détails sur le niveau de traitement, entrez-les ici.
-      multilingual: yes
+      multilingual: true
       order: 1010
       json_api:
         mapping: processing_description
@@ -395,7 +395,7 @@ data_more_info:
       description:
         en: Provide more information about the processing environment.
         fr: Fournir plus d'informations sur l'environnement de traitement.
-      multilingual: yes
+      multilingual: true
       order: 2000
       json_api:
         mapping: processing_environment
@@ -407,7 +407,7 @@ data_more_info:
       description:
         en: Provide additional information for the public here.
         fr: Fournir des informations supplémentaires pour le public ici.
-      multilingual: yes
+      multilingual: true
       order: 2010
       netcdf:
         mapping: comment
@@ -418,7 +418,7 @@ keywords:
     topic_category:
       data_type: vocabulary
       vocabulary_name: iso19115_md_topic_category_code
-      repeatable: yes
+      repeatable: true
       label:
         en: Topic Category
         fr: Catégorie de sujet
@@ -657,7 +657,7 @@ references:
     # that the user can configure first to indicate the scope.
     missions:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: mission
       order: 100
       label:
@@ -670,7 +670,7 @@ references:
         mapping: missions
     platforms:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: platform
       order: 105
       label:
@@ -683,7 +683,7 @@ references:
         mapping: platforms
     instruments:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: instrument
       order: 110
       label:
@@ -696,7 +696,7 @@ references:
         mapping: instruments
     additional_docs:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: citation
       order: 40
       label:
@@ -709,7 +709,7 @@ references:
         mapping: additional_docs
     graphics:
       data_type: entity_ref
-      repeatable: yes
+      repeatable: true
       entity_type: graphic
       order: 1000
       label:
@@ -742,7 +742,7 @@ technical:
       description:
         en: Select any additional locales that are present within the dataset.
         fr: Sélectionnez les paramètres régionaux supplémentaires présents dans l'ensemble de données.
-      repeatable: yes
+      repeatable: true
       json_api:
         mapping: data_extra_locales
     status:
@@ -755,7 +755,7 @@ technical:
       description:
         en: Select the most appropriate option(s) that describe the status of this dataset.
         fr: Sélectionnez la ou les options les plus appropriées décrivant l'état de cet ensemble de données.
-      repeatable: yes
+      repeatable: true
       iso_yaml:
         mapping:
           - identification
@@ -772,7 +772,7 @@ technical:
       description:
         en: Select the most appropriate option(s) that describe this dataset.
         fr: Sélectionnez la ou les options les plus appropriées décrivant cet ensemble de données.
-      repeatable: yes
+      repeatable: true
       iso_yaml:
         mapping:
           - spatial
@@ -816,7 +816,7 @@ publishing:
       description:
         en: Add one entry for each method of distributing the data via online methods.
         fr: Ajoutez une entrée pour chaque méthode de distribution des données via des méthodes en ligne.
-      repeatable: yes
+      repeatable: true
       json_api:
         mapping: distributors
 
