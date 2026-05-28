@@ -22,7 +22,7 @@ from pipeman.i18n import gettext, format_datetime, DelayedTranslationString
 from pipeman.util.flask import DataQuery, DataTable, DatabaseColumn, CustomDisplayColumn, ActionListColumn
 from flask_wtf.file import FileField
 from .workflow import WorkflowRegistry
-from .steps import ItemResult, StepStatus, ItemNextAction
+from .steps import ItemResult, StepStatus, ItemNextAction, WorkflowStep
 from pipeman.util.cron import CronThread, UniqueTaskThreadManager
 import functools
 
@@ -179,8 +179,16 @@ class WorkflowController:
                 return flask.abort(404)
             if not self._has_access(item, "decide"):
                 return flask.abort(403)
+            try:
+                step, steps = self._build_next_step(item)
+            except StepNotFoundError:
+                return flask.abort(500)
             item_url = flask.url_for("core.view_item", item_id=item_id)
             base_key = "pipeman.workflow.page.continue" if decision else 'pipeman.workflow.page.cancel'
+            if step is not None and 'instructions_key' in step.item_config and step.item_config['instructions_key']:
+                instructions = markupsafe.Markup(f"{markupsafe.escape(gettext(base_key + '.instructions'))}<br />{gettext(step.item_config['instructions_key'])}")
+            else:
+                instructions = gettext(base_key + '.instructions')
             form = WorkflowItemForm()
             if form.validate_on_submit():
                 if self._make_decision(item, session, decision, form):
@@ -189,7 +197,7 @@ class WorkflowController:
             return flask.render_template(
                 "form.html",
                 form=form,
-                instructions=gettext(f"{base_key}.instructions"),
+                instructions=instructions,
                 title=gettext(f"{base_key}.title"),
                 back=item_url
             )
@@ -464,8 +472,8 @@ class WorkflowController:
         if st is None or not st.halt.is_set():
             self._start_next_step(item, session, steps, ctx)
 
-    def _build_next_step(self, item, steps=None, ctx=None):
-        steps = steps or json.loads(item.step_list)
+    def _build_next_step(self, item, steps=None, ctx=None) -> tuple[WorkflowStep | None, list | None]:
+        steps: list = steps or json.loads(item.step_list)
         next_index = item.completed_index
         if next_index >= len(steps):
             ctx = self._build_context(item, ctx)

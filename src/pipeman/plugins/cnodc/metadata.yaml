@@ -1,5 +1,25 @@
 internal_info:
   fields:
+    cnodc_storage_label:
+      data_type: text
+      label:
+        en: Storage Tag
+        fr: Étiquette de stockage
+      description:
+        en: The tag used to identify this dataset in storage metadata.
+        fr: L'étiquette utilisé pour identifier ce jeu de données dans les métadonnées de stockage.
+      json_api:
+        mapping: cnodc_storage_label
+    cnodc_embargo_period:
+      data_type: text
+      label:
+        en: Embargo Period
+        fr: Période d'embargo
+      description:
+        en: The amount of time that must pass after being collected before this dataset can be released (e.g. "2 months").
+        fr: La durée qui doit s'écouler après la collecte avant que cet ensemble de données puisse être publié (par exemple « 2 mois »).
+      json_api:
+        mapping: cnodc_embargo_period
     internal_notes:
       data_type: multitext
       label:

@@ -1,19 +1,23 @@
 from datetime import datetime
 
 import zirconium as zr
+import typing as t
 
 import markupsafe
 from autoinject import injector
+
 from pipeman.util import deep_update, load_object
 from pipeman.entity import FieldContainer
 from pipeman.entity.entity import CustomValidator, RecommendedFieldValidator, RequiredFieldValidator
 from pipeman.db import BaseObjectRegistry
-from pipeman.i18n import MultiLanguageString, gettext, MultiLanguageLink
+from pipeman.i18n import MultiLanguageString, gettext, MultiLanguageLink, DelayedTranslationString
 import copy
 from pipeman.workflow import WorkflowRegistry
 import logging
 import flask
 import yaml
+
+
 
 
 @injector.injectable_global
@@ -140,6 +144,14 @@ class MetadataRegistry:
             (x, MultiLanguageString(self._profiles[x]["display"]))
             for x in self._profiles
         ]
+
+    def canonical_urls(self, dataset: Dataset, format_: str | None = None) -> t.Iterable[dict]:
+        for profile in dataset.profiles:
+            if profile not in dataset.profiles:
+                continue
+            if 'canon_urls' in self._profiles[profile] and self._profiles[profile]:
+                for canon_url_loader in self._profiles[profile]:
+                    yield from load_object(canon_url_loader)(dataset, format_)
 
     def profile_label(self, profile_name):
         if profile_name in self._profiles:
@@ -298,7 +310,10 @@ class Dataset(FieldContainer):
         self.extras = extras or {}
         self.users = users
 
-    def list_profiles(self):
+    def canonical_urls(self, format: str | None = None) -> list[dict]:
+        return [x for x in self.mreg.canonical_urls(self, format)]
+
+    def list_profiles(self) -> t.Iterable[tuple[str, bool]]:
         for x in self.profiles:
             yield x, x in self.base_profiles
 
@@ -373,14 +388,54 @@ class Dataset(FieldContainer):
         text = gettext("pipeman.label.dataset.activation_chain_link")
         return markupsafe.Markup(f"<a href='{link}'>{markupsafe.escape(text)}</a>")
 
+    def is_collection(self) -> bool:
+        return 'is_collection' in self.extras and self.extras['is_collection']
+
+    def is_collection_display(self):
+        return DelayedTranslationString("pipeman.common.yes" if self.is_collection() else "pipeman.common.no")
+
+    def parent_dataset_display(self) -> markupsafe.Markup | str | DelayedTranslationString:
+        pid = self.parent_dataset_id()
+
+        if pid is None:
+            return DelayedTranslationString("pipeman.common.na")
+
+        else:
+            # we don't normally need this, so we'll only import it if we really need to
+            from pipeman.dataset import DatasetController
+            @injector.inject
+            def _get_dc(parent_id: int, dc : DatasetController = None):
+                return dc.dataset_link(parent_id)
+            return _get_dc(pid)
+
+    def parent_dataset(self) -> t.Self | None:
+        pid = self.parent_dataset_id()
+
+        if pid is None:
+            return None
+
+        else:
+            # we don't normally need this, so we'll only import it if we really need to
+            from pipeman.dataset import DatasetController
+            @injector.inject
+            def _get_dc(parent_id: int, dc: DatasetController = None):
+                return dc.load_dataset(parent_id)
+
+            return _get_dc(pid)
+
+    def parent_dataset_id(self) -> int | None:
+        return self.extras['parent_dataset_id'] if 'parent_dataset_id' in self.extras else None
+
     def properties(self):
         props = [
+            ('pipeman.label.dataset.guid', self.guid()),  # gettext('pipeman.label.dataset.guid')
+            ('pipeman.label.dataset.authority', self.naming_authority()),  # gettext('pipeman.label.dataset.authority')
+            ('pipeman.label.dataset.security_level', self.security_level_display()), # gettext('pipeman.label.dataset.security_level')
             ('pipeman.label.dataset.status', self.status_display()), # gettext('pipeman.label.dataset.status')
             ('pipeman.label.dataset.activation_workflow', self.act_workflow_display()), # gettext('pipeman.label.dataset.activation_workflow')
             ('pipeman.label.dataset.publication_workflow', self.pub_workflow_display()),  # gettext('pipeman.label.dataset.publication_workflow')
-            ('pipeman.label.dataset.security_level', self.security_level_display()),  #gettext('pipeman.label.dataset.security_level')
-            ('pipeman.label.dataset.guid', self.guid()),  # gettext('pipeman.label.dataset.guid')
-            ('pipeman.label.dataset.authority', self.naming_authority()), # gettext('pipeman.label.dataset.authority')
+            ('pipeman.label.dataset.is_collection', self.is_collection()),  # gettext("pipeman.label.dataset.is_collection")
+            ('pipeman.label.dataset.parent_dataset_id', self.parent_dataset_display()),  # gettext("pipeman.label.dataset.parent_dataset_id
         ]
         if 'activated_item_id' in self.extras and self.extras['activated_item_id']:
             props.append((

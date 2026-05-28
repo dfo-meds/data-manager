@@ -7,6 +7,9 @@
       "type": "object",
       "properties": {
         "label": {"$ref":  "shared.json#/$defs/label"},
+        "instruction_key": {
+          "type": "string"
+        },
         "step_type": {
           "type": "string"
         },

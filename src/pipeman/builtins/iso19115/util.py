@@ -1,3 +1,7 @@
+import itertools
+
+from pipeman.dataset import DatasetController
+from pipeman.dataset.dataset import Dataset
 from pipeman.db import Database, orm
 from pipeman.entity import Entity
 from pipeman.entity.entity import ValidationResult, combine_object_path
@@ -5,6 +9,9 @@ from pipeman.entity.keywords import KeywordGroup
 import functools
 
 from autoinject import injector
+
+from pipeman.util.errors import DatasetNotFoundError
+
 
 def validate_use_constraint(uc, object_path, profile, memo):
     errors = []
@@ -145,7 +152,8 @@ def get_platform_instruments(platform, db: Database = None):
             if instrument['mounted_on'].container_id == platform.container_id:
                 yield instrument
 
-def preprocess_metadata(dataset, **kwargs):
+@injector.inject
+def preprocess_metadata(dataset: Dataset, dc: DatasetController = None, **kwargs):
     locale_mapping = {}
     def_loc = dataset.data("default_locale")
     default_locale = def_loc['a2_language'] if def_loc else "en"
@@ -184,7 +192,7 @@ def preprocess_metadata(dataset, **kwargs):
         }
         acq_info.append(dataset_wide_info)
     refs = {}
-    return {
+    extra_data = {
         "acquisition_info": acq_info,
         "responsibilities": [
             {
@@ -224,5 +232,54 @@ def preprocess_metadata(dataset, **kwargs):
         'check_instrument': functools.partial(_has_type_been_rendered, refs, 'instrument'),
         'check_mission': functools.partial(_has_type_been_rendered, refs, 'mission'),
         'clean_id': _clean_xml_id,
-        'get_platform_instruments': get_platform_instruments
+        'get_platform_instruments': get_platform_instruments,
+        'associated_resources': [
+            x for x in dataset['associated_resources']
+        ],
+        'parent_metadata': dataset['parent_metadata'].data() if dataset['parent_metadata'] else None,
+        'canon_urls': [
+            x for x in itertools.chain(
+                dataset.canonical_urls(),
+                dataset['canon_urls'].data() if dataset['canon_urls'] else []
+            )
+        ],
     }
+
+    if dataset.parent_dataset_id() is not None and extra_data['parent_metadata'] is None:
+        try:
+            parent_ds = dc.load_dataset(dataset.parent_dataset_id(), 'pub')
+            parent_canon_urls = parent_ds.canonical_urls(format='iso19115')
+            if parent_canon_urls:
+                extra_data['parent_metadata'] = {
+                    "title": dataset.data("title"),
+                    'resource': parent_canon_urls[0]
+                }
+        except DatasetNotFoundError:
+            ...
+
+    if dataset.is_collection():
+        extra_data['metadata_scope_code'] = 'aggregate'
+        for child_ds in dc.find_child_datasets(dataset.dataset_id):
+            ass_res = {
+                'data_citation': {
+                    "title": child_ds.data("title"),
+                    "publication_date": child_ds["publication_date"],
+                    "revision_date": child_ds["revision_date"],
+                    "creation_date": child_ds["creation_date"],
+                    "id_code": child_ds["dataset_id_code"],
+                    "id_system": child_ds["dataset_id_system"],
+                    "id_description": child_ds["dataset_id_desc"],
+                    "responsibles": child_ds["responsibles"],
+                    'resource': child_ds['info_link']
+                },
+                'association_type': 'isComposedOf',
+                'initiative_types': ['collection'],
+            }
+            child_canon_urls = child_ds.canonical_urls(format='iso19115')
+            if child_canon_urls:
+                ass_res['metadata_citation'] = {
+                    'resource': child_canon_urls[0]
+                }
+            extra_data['associated_resources'].append(ass_res)
+
+    return extra_data

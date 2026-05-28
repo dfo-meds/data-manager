@@ -215,7 +215,7 @@ class FieldContainer:
         return str(self)
 
     @cache
-    def data(self, key, **kwargs):
+    def data(self, key: str, **kwargs) -> t.Any:
         if key in self._derived_fields:
             try:
                 return load_object(self._derived_fields[key]['cb'])(self)

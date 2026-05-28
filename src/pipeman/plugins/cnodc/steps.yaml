@@ -3,6 +3,7 @@ lead_approval:
     en: Program Lead Approval
     fr: Approbation du responsable du programme
   step_type: gate
+  instruction_key: "cnodc.approvals.program_lead"
   require_permission: approvals.program_lead
   access_check: "pipeman.dataset.dataset_gate_step_access"
 lead_publishing_notify:
@@ -21,12 +22,22 @@ coordinator_approval:
     fr: Approbation du coordonnateur régional
   step_type: gate
   require_permission: approvals.coordinator
+  instruction_key: "cnodc.approvals.coordinator"
+  access_check: "pipeman.dataset.dataset_gate_step_access"
+pub_coord_approval_activate:
+  label:
+    en: Publishing Coordinator Approval
+    fr: Approbation du coordinateur de publication
+  step_type: gate
+  instruction_key: "cnodc.approvals.pub_coord_activate"
+  require_permission: approvals.publishing_coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
 pub_coord_approval:
   label:
     en: Publishing Coordinator Approval
     fr: Approbation du coordinateur de publication
   step_type: gate
+  instruction_key: "cnodc.approvals.pub_coord"
   require_permission: approvals.publishing_coordinator
   access_check: "pipeman.dataset.dataset_gate_step_access"
 pub_coord_activation_notify:
@@ -65,6 +76,7 @@ sysadmin_approval:
     en: System Administrator Approval
     fr: Approbation de l'administrateur système
   step_type: gate
+  instruction_key: "cnodc.approvals.sysadmin"
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
 sysadmin_publishing_notify:
@@ -77,6 +89,12 @@ sysadmin_publishing_notify:
   send_groups:
     - sysadmin
   limit_to_assigned: false
+set_cnodc_canon_url:
+  label:
+    en: Set Canonical Metadata Link
+    fr: Définir le lien méta canonique
+  step_type: action
+  action: pipeman.plugins.cnodc.workflow.set_canonical_metadata_link
 erddap_iso19115_metadata_upload_live:
   label:
     en: ERDDAP Metadata Upload (Live)

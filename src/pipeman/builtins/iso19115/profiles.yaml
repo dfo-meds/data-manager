@@ -71,6 +71,7 @@ iso19115:
     missions:
     platforms:
     instruments:
+    associated_resources:
   formatters:
     iso19115xml:
       label:

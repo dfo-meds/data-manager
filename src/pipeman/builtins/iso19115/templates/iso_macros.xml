@@ -73,6 +73,32 @@
 </cit:CI_OnlineResource>
 {% endmacro %}
 
+
+  {% macro render_associated_resource(resource) %}
+  <mri:MD_AssociatedResource>
+    {% if resource['data_citation'] %}
+    <mri:name>
+      {{ render_citation(resource['data_citation']) }}
+    </mri:name>
+    {% endif %}
+    <mri:associationType>
+      <mri:DS_AssociationTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#DS_AssociationTypeCode" codeListValue="{{xml_quote(resource['association_type'])}}"/>
+    </mri:associationType>
+    {% if resource['initiative_types'] %}
+    {% for code in resource['initiative_types'] %}
+    <mri:initiativeType>
+      <mri:DS_InitiativeTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#DS_InitiativeTypeCode" codeListValue="{{xml_quote(code)}}"/>
+    </mri:initiativeType>
+    {% endfor %}
+    {% endif %}
+    {% if resource['metadata_citation'] %}
+    <mri:metadataReference>
+      {{ render_citation(resource['metadata_citation']) }}
+    </mri:metadataReference>
+    {% endif %}
+  </mri:MD_AssociatedResource>
+  {% endmacro %}
+
   {% macro render_distance(value, unit) %}
   <gco:Distance uom="{{xml_quote(unit)}}">{{xml_escape(value)}}</gco:Distance>
   {% endmacro %}

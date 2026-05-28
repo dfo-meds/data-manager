@@ -42,7 +42,7 @@
       <gco:CharacterString>CAN/CGSB-171.100-2009</gco:CharacterString>
   </gmd:metadataStandardVersion>
   <gmd:dataSetURI>
-    <gco:CharacterString>ca.gc.dfo-mpo.cnodc-cndoc/{{xml_escape(dataset.guid())}}</gco:CharacterString>
+    <gco:CharacterString>{xml_escape(dataset.naming_authority())/{{xml_escape(dataset.guid())}}</gco:CharacterString>
   </gmd:dataSetURI>
   {% if dataset['other_locales'] %}
   {% for locale in dataset['other_locales'] %}

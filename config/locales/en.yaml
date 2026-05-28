@@ -112,6 +112,9 @@ pipeman.common.placeholder: None
 pipeman.common.submit: Submit
 pipeman.common.unknown: Unknown
 pipeman.common.yes: 'Yes'
+pipeman.label.dataset.no_parent_dataset: "None"
+pipeman.label.dataset.is_collection: "Is Collection"
+pipeman.label.dataset.parent_dataset: "Parent Collection"
 pipeman.core.error.metadata_generation_error: An error occurred generated the metadata
   file
 pipeman.core.page.welcome.title: Welcome
@@ -402,3 +405,35 @@ pipeman.dataset.page.copy_dataset.success: "The dataset has been copied"
 pipeman.label.dataset.guid.help: "A globally unique identifier for this dataset. Cannot be changed once published. Leave blank for a random identifier to be generated."
 pipeman.label.dataset.authority: "Identifier Authority"
 pipeman.label.dataset.authority.help: "The authority who issued the unique identifier. Leave blank to use the CNODC's authority."
+pipeman.error.is_collection_and_is_child: "A collection cannot be child of another collection"
+
+cnodc.approvals.program_lead: |-
+  <p>By approving the publication of this dataset, you agree that you have verified the following:</p>
+  <ul>
+  <li>that the metadata has been completed as best possible and meet all required standards</li>
+  <li>that the data and metadata are appropriate for publication by the CNODC</li>
+  <li>that the permission of the data owner has been obtained</li>
+  <li>that any necessary access restrictions, hold back periods, or confidentiality requirements are clearly documented</li>
+  </ul>
+cnodc.approvals.pub_coord: |-
+  <p>By approving the publication of this dataset, you agree that you have verified the following:</p>
+  <ul>
+  <li>that the owner and trustee of the data has approved the on-boarding and/or publication of this data</li>
+  <li>that the license selected is appropriate for the publication of this data</li>
+  <li>that the data and metadata meets the required standards</li>
+  <li>that any necessary access restrictions, hold back periods, or confidentiality requirements are clearly documented</li>
+  <li>that any necessary data management plans, roles, responsibilities, funding, and governance concerns are agreed to</li>
+  <li>that any other organizational requirements for the CNODC have been met</li>
+  </ul>
+cnodc.approvals.pub_coord_activate: |-
+  <p>By approving the activation of this dataset, you agree that you have verified the following:</p>
+  <ul>
+  <li>that the dataset is within the scope of the CNODC and, if relevant, the selected unit</li>
+  <li>that the chosen security level and workflows are appropriate</li>
+  </ul>
+cnodc.approvals.sysadmin: |-
+  <p>By approving the publication of this dataset, you agree that you have verified the following:</p>
+  <ul>
+  <li>that the technical details of this dataset are correct and will not cause issues in the production environment</li>
+  <li>that the CNODC has sufficient storage capacity to store this data</li>
+  </ul>

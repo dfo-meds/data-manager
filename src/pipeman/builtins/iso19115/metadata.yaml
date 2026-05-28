@@ -142,6 +142,19 @@ metadata_info:
       repeatable: true
       json_api:
         mapping: metadata_licenses
+    associated_resources:
+      data_type: inline_entity_ref
+      entity_type: associated_resource
+      label:
+        en: Associated Resources
+        fr: Ressource associée
+      description:
+        en: Enter the details of any associated resources. Note that members of a collection are automatically associated with their parent.
+        fr: Entrez les détails de toutes les ressources associées. Notez que les membres d'une collection sont automatiquement associés à leur parent.
+      order: 90
+      repeatable: true
+      json_api:
+        mapping: associated_resources
 data_info:
   fields:
     title:

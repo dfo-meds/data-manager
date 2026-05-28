@@ -1,8 +1,9 @@
 import markupsafe
+import sqlalchemy.orm
 from autoinject import injector
 from pipeman.db.db import Database, SessionWrapper
 import pipeman.db.orm as orm
-from pipeman.util.errors import DatasetNotFoundError, APIInputError
+from pipeman.util.errors import DatasetNotFoundError, APIInputError, PipemanError
 from .dataset import MetadataRegistry
 import json
 import datetime
@@ -29,6 +30,8 @@ import uuid
 from pipeman.util.metrics import BlockTimer, time_function
 import zirconium as zr
 import typing as t
+
+from ..entity import FieldContainer
 
 
 def is_empty(x):
@@ -171,6 +174,14 @@ class DatasetController:
             dsn = json.loads(ds.display_names) if ds.display_names else {}
             yield ds, MultiLanguageString(dsn), self._build_action_list(ds, True)
 
+    def dataset_label(self, dataset_id: int) -> MultiLanguageString | str:
+        ds = self.load_dataset(dataset_id)
+        return ds.label()
+
+    def dataset_link(self, dataset_id: int) -> markupsafe.Markup:
+        ds = self.load_dataset(dataset_id)
+        return markupsafe.Markup(f'<a href="{flask.url_for("base.view_dataset", dataset_id=dataset_id)}">{ds.label()}</a>')
+
     def list_datasets_for_component(self):
         with self.db as session:
             ds_list = []
@@ -180,14 +191,25 @@ class DatasetController:
                 ds_list.append((ds.id, MultiLanguageString(dsn)))
             return ds_list
 
-    def _dataset_query(self, session, op="view"):
-        q = session.query(orm.Dataset)
-        for filter in self._base_filters(op):
-            q = q.filter(filter)
-        return q.order_by(orm.Dataset.id)
+    def list_valid_parent_datasets(self):
+        with self.db as session:
+            q = self._dataset_query(session, "view", False, False)
+            q = q.filter(orm.Dataset.is_collection == True).filter(orm.Dataset.status == 'ACTIVE')
+            return [
+                (dataset.id, MultiLanguageString(json.loads(dataset.display_names) if dataset.display_names else {"und": dataset.guid}))
+                for dataset in q
+            ]
 
-    def _base_filters(self, op="view"):
-        if not flask_login.current_user.has_permission("datasets.view.deprecated"):
+    def _dataset_query(self, session: SessionWrapper, op="view", allow_deprecated: bool = True, include_order: bool = True):
+        q = session.query(orm.Dataset)
+        for filter in self._base_filters(op, allow_deprecated):
+            q = q.filter(filter)
+        if include_order:
+            return q.order_by(orm.Dataset.id)
+        return q
+
+    def _base_filters(self, op="view", allow_deprecated: bool = True):
+        if not (allow_deprecated and flask_login.current_user.has_permission("datasets.view.deprecated")):
             yield orm.Dataset.is_deprecated == False
         if flask_login.current_user.has_permission(f"datasets.{op}.all"):
             pass
@@ -461,15 +483,49 @@ class DatasetController:
                                      title=gettext("pipeman.dataset.page.activate_dataset.title"),
                                      back=flask.url_for("core.view_dataset", dataset_id=dataset.dataset_id))
 
-    def can_activate(self, dataset):
-        if hasattr(dataset, "dataset_id"):
+    def _is_parent_active(self, parent_id: int) -> bool:
+        pds = self.load_dataset(parent_id)
+        return pds.status() == 'ACTIVE'
+
+    def _is_parent_published(self, parent_id: int) -> bool:
+        try:
+            pds = self.load_dataset(parent_id, "pub")
+            return pds.status() == "ACTIVE"
+        except DatasetNotFoundError:
+            return False
+
+    def find_child_datasets(self, parent_id: int) -> t.Iterable[Dataset]:
+        with self.db as session:
+            for row in (
+                session.query(Dataset)
+                .filter(orm.Dataset.parent_dataset_id == parent_id)
+                .filter(orm.Dataset.status == "ACTIVE")
+                .filter(orm.Dataset.is_deprecated == False)
+            ):
+                try:
+                    yield self.load_dataset(row.id, "pub")
+                except DatasetNotFoundError:
+                    ...
+
+    def can_activate(self, dataset: Dataset | orm.Dataset) -> bool:
+        # this is if we call it with a FieldContainer object
+        if isinstance(dataset, Dataset):
+            # Parent dataset must be active
+            pid = dataset.parent_dataset_id()
+            if pid is not None and not self._is_parent_active(pid):
+                return False
             return not self.workflow.check_exists(
                 "dataset_activation",
                 dataset.extras["act_workflow"],
                 object_id=dataset.dataset_id,
                 object_type='dataset'
             )
+
+        # this is if we call it without
         else:
+            pid = dataset.parent_dataset_id
+            if pid is not None and not self._is_parent_active(pid):
+                return False
             return not self.workflow.check_exists(
                 "dataset_activation",
                 dataset.act_workflow,
@@ -499,8 +555,11 @@ class DatasetController:
                 flasht("pipeman.dataset.message.activation_in_progress", "success")
         return status
 
-    def can_publish(self, dataset):
-        if hasattr(dataset, "dataset_id"):
+    def can_publish(self, dataset: Dataset | orm.Dataset) -> bool:
+        if isinstance(dataset, Dataset):
+            pid = dataset.parent_dataset_id()
+            if pid is not None and not self._is_parent_published(pid):
+                return False
             return not self.workflow.check_exists(
                 "dataset_publication",
                 dataset.extras["pub_workflow"],
@@ -508,6 +567,9 @@ class DatasetController:
                 object_type='dataset'
             )
         else:
+            pid = dataset.parent_dataset_id
+            if pid is not None and not self._is_parent_published(pid):
+                return False
             return not self.workflow.check_exists(
                 "dataset_publication",
                 dataset.pub_workflow,
@@ -634,7 +696,9 @@ class DatasetController:
                     "pub_date": ds_data.published_date if ds_data else None,
                     "metadata_modified_date": ds_data.modified_date if ds_data else ds.created_date,
                     "activated_item_id": ds.activated_item_id,
-                    "approval_item_id": ds_data.approval_item_id if ds_data else None
+                    "approval_item_id": ds_data.approval_item_id if ds_data else None,
+                    "parent_dataset_id": ds.parent_dataset_id,
+                    "is_collection": ds.is_collection,
                 },
                 users=[u.id for u in ds.users]
             )
@@ -642,6 +706,8 @@ class DatasetController:
     def save_dataset(self, dataset, force_new: bool = False, save_metadata: bool = False):
         with self.db as session:
             ds = None
+            if dataset.is_collection() and dataset.parent_dataset_id() is not None:
+                raise PipemanError("Cannot have something be a collection and a child of a collection")
             name = "pipeman_dataset_save_dataset_update" if dataset.dataset_id else "pipeman_dataset_save_dataset_insert"
             desc = "Time to update an existing dataset" if dataset.dataset_id else "Time to insert an existing dataset"
             with BlockTimer(name, desc):
@@ -714,7 +780,6 @@ class DatasetController:
                 setattr(ds, keyword, dataset.extras[keyword])
         return ds
 
-
     @time_function("pipeman_dataset_save_metadata", "Time to save metadata to the database")
     def save_metadata(self, dataset):
         self.log.info(f"Saving metadata for dataset {dataset.dataset_id}")
@@ -785,6 +850,8 @@ class DatasetBuilder:
                 pub_workflow=self._get_publication_workflow(data),
                 act_workflow=self._get_activation_workflow(data),
                 security_level=self._get_security_level(data),
+                is_collection=self._is_collection(data),
+                parent_dataset_id=self._get_parent_id(data),
                 status="DRAFT",
             )
             self.session.add(raw)
@@ -807,6 +874,22 @@ class DatasetBuilder:
             if results['errors']:
                 raise ValueError('\n'.join(results['errors']))
         return t.cast(Dataset, ds), bool(data.get('autostart', False))
+
+    def _get_parent_id(self, data: dict) -> int | None:
+        if 'parent_collection_guid' in data and data['parent_collection_guid']:
+            parent_ds = self.controller.load_dataset_by_guid(
+                data['parent_collection_guid'],
+                data['parent_collection_authority'] if 'parent_collection_authority' in data else None
+            )
+            return parent_ds.dataset_id
+        return None
+
+    def _is_collection(self, data: dict) -> bool:
+        if 'is_collection' in data and data['is_collection']:
+            if 'parent_collection_guid' in data and data['parent_collection_guid']:
+                raise APIInputError(f"Cannot make an object a collection and a child of a collection")
+            return True
+        return False
 
     def _get_metadata(self, data: dict):
         if 'metadata' in data and data['metadata']:
@@ -897,6 +980,7 @@ class DatasetForm(PipemanFlaskForm):
     reg: MetadataRegistry = None
     wreg: WorkflowRegistry = None
     ocontroller: OrganizationController = None
+    dcontroller: DatasetController = None
 
     names = TranslatableField(
         wtf.StringField,
@@ -959,6 +1043,17 @@ class DatasetForm(PipemanFlaskForm):
         ]
     )
 
+    is_collection = wtf.BooleanField(
+        DelayedTranslationString("pipeman.label.dataset.is_collection")
+    )
+
+    parent_dataset_id: wtf.SelectField = wtf.SelectField(
+        DelayedTranslationString("pipeman.label.dataset.parent_dataset"),
+        choices=[],
+        coerce=int,
+        widget=Select2Widget(allow_multiple=True, placeholder=DelayedTranslationString("pipeman.common.placeholder"))
+    )
+
     assigned_users = wtf.SelectMultipleField(
         DelayedTranslationString("pipeman.label.dataset.assigned_users"),
         choices=[],
@@ -980,6 +1075,10 @@ class DatasetForm(PipemanFlaskForm):
 
     submit = wtf.SubmitField(DelayedTranslationString("pipeman.common.submit"))
 
+    def validate_is_collection(self, form: t.Self, field: wtf.BooleanField):
+        if field.data and form.parent_dataset_id.data != "":
+            raise wtf.ValidationError(DelayedTranslationString("pipeman.error.is_collection_and_is_child"))
+
     @injector.construct
     def __init__(self, *args, dataset=None, **kwargs):
         self.dataset = None
@@ -994,13 +1093,19 @@ class DatasetForm(PipemanFlaskForm):
                 "organization": dataset.organization_id,
                 "assigned_users": dataset.users or [],
                 'guid': dataset.extras['guid'] if 'guid' in dataset.extras else '',
-                'authority': dataset.extras['authority'] if 'authority' in dataset.extras else ''
+                'authority': dataset.extras['authority'] if 'authority' in dataset.extras else '',
+                'is_collection': dataset.extras['is_collection'] if 'is_collection' in dataset.extras else False,
+                'parent_dataset_id': dataset.extras['parent_dataset_id'] if 'parent_dataset_id' in dataset.extras else None
             })
         super().__init__(*args, **kwargs)
         self.organization.choices = self.ocontroller.list_organizations()
         self.profiles.choices = self.reg.profiles_for_select()
         self.act_workflow.choices = [x for x in self.wreg.list_workflows("dataset_activation", flask_login.current_user)]
         self.pub_workflow.choices = [x for x in self.wreg.list_workflows("dataset_publication", flask_login.current_user)]
+        self.parent_dataset_id.choices = [
+            ("", DelayedTranslationString("pipeman.label.dataset.no_parent_dataset"))
+            *self.dcontroller.list_valid_parent_datasets()
+        ]
         self.security_level.choices = self.reg.security_labels_for_select()
         self.assigned_users.choices = user_list()
 
@@ -1017,6 +1122,8 @@ class DatasetForm(PipemanFlaskForm):
             self.dataset.organization_id = self.organization.data
             self.dataset.extras["authority"] = self.authority.data
             self.dataset.extras["guid"] = self.guid.data
+            self.dataset.extras["is_collection"] = self.is_collection.data
+            self.dataset.extras["parent_dataset_id"] = self.parent_dataset_id.data
             return self.dataset
         else:
             return self.reg.build_dataset(
@@ -1030,6 +1137,8 @@ class DatasetForm(PipemanFlaskForm):
                     "status": "DRAFT",
                     "guid": self.guid.data,
                     "authority": self.authority.data,
+                    "is_collection": self.is_collection.data,
+                    "parent_dataset_id": self.parent_dataset_id.data,
                 },
                 users=self.assigned_users.data
             )

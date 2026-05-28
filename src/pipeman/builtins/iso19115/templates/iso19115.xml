@@ -40,15 +40,19 @@
   <mdb:defaultLocale>
     {{iso.render_locale(dataset['default_locale'], True)}}
   </mdb:defaultLocale>
-  {% if not is_empty(dataset['parent_metadata']) %}
+  {% if parent_metadata %}
   <mdb:parentMetadata>
-    {{ iso.render_citation(dataset['parent_metadata']) }}
+    {{ iso.render_citation(parent_metadata) }}
   </mdb:parentMetadata>
   {% endif %}
   <mdb:metadataScope>
     <mdb:MD_MetadataScope>
       <mdb:resourceScope>
+        {% if metadata_scope_code %}
+        <mcc:MD_ScopeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="{{xml_quote(metadata_scope_code)}}" />
+        {% else %}
         <mcc:MD_ScopeCode codeList="http://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="dataset" />
+        {% endif %}
       </mdb:resourceScope>
     </mdb:MD_MetadataScope>
   </mdb:metadataScope>
@@ -90,8 +94,8 @@
   </mdb:otherLocale>
   {% endfor %}
   {% endif %}
-  {% if not is_empty(dataset['canon_urls']) %}
-  {% for meta_url in dataset['canon_urls'] %}
+  {% if canon_urls %}
+  {% for meta_url in canon_urls %}
   <mdb:metadataLinkage>
     {{ iso.render_resource(meta_url) }}
   </mdb:metadataLinkage>
@@ -209,7 +213,13 @@
       </mri:resourceConstraints>
       {% endfor %}
       {% endif %}
-      {# <!-- associatedResource --> #}
+      {% if associated_resources %}
+      {% for child in associated_resources %}
+      <mri:associatedResource>
+        {{ iso.render_associated_resource(child) }}
+      </mri:associatedResource>
+      {% endfor %}
+      {% endif %}
       {% if not is_empty(dataset['dataset_locale']) %}
       <mri:defaultLocale>
         {{iso.render_locale(dataset['dataset_locale'])}}

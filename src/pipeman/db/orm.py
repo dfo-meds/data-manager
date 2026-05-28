@@ -271,7 +271,9 @@ class Dataset(_BaseModel, _AuditableModel, Base):
     security_level = sa.Column(sa.String(255), nullable=False)
     guid = sa.Column(sa.String(255), nullable=False)
     authority = sa.Column(sa.String(255), nullable=True, default=None)
+    is_collection = sa.Column(sa.Boolean, nullable=False, default=False)
     activated_item_id = sa.Column(sa.ForeignKey("workflow_item.id"), nullable=True)
+    parent_dataset_id = sa.Column(sa.ForeignKey("dataset.id"), nullable=True)
 
     attachments = orm.relationship("Attachment", back_populates="dataset")
     organization = orm.relationship("Organization", back_populates="datasets")

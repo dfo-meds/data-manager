@@ -3,7 +3,7 @@ from pipeman.util.errors import StepNotFoundError, StepConfigurationError, Workf
 from autoinject import injector
 from pipeman.i18n import MultiLanguageString
 from pipeman.db import BaseObjectRegistry
-from .steps import DefaultStepFactory
+from .steps import DefaultStepFactory, WorkflowStep
 
 
 @injector.injectable_global
@@ -66,7 +66,7 @@ class WorkflowRegistry:
         key = f"{category_name}__{workflow_name}"
         return MultiLanguageString(self._workflows[key]['label'] if key in self._workflows else {"und": key})
 
-    def construct_step(self, step_name):
+    def construct_step(self, step_name) -> WorkflowStep:
         if step_name not in self._steps:
             raise StepNotFoundError(step_name)
         step_config = self._steps[step_name]

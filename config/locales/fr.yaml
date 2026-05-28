@@ -1,7 +1,42 @@
-pipeman.label.user.language_preference: Preferred Language # TODO
-pipeman.auth.message.email_send_success: An email has been sent to the user with their password # TODO
-pipeman.label.witem.type.send_email: Send Email # TODO
+pipeman.label.user.language_preference: Langue préférée
+pipeman.auth.message.email_send_success: Un e-mail a été envoyé à l'utilisateur avec son mot de passe
+pipeman.label.witem.type.send_email: Envoyer e-mail
+pipeman.label.dataset.no_parent_dataset: "Aucune"
+pipeman.label.dataset.is_collection: "Est une collection"
+pipeman.label.dataset.parent_dataset: "Collection parente"
+cnodc.approvals.program_lead: |- 
+  <p>En approuvant la publication de ce jeu de données, vous acceptez d'avoir vérifié ce qui suit :</p>
+  <ul>
+  <li>que les métadonnées ont été complétées du mieux possible et respectent toutes les normes requises</li>
+  <li>que les données et les métadonnées sont appropriées pour la publication par le CNDOC</li>
+  <li>que l'autorisation du propriétaire des données a été obtenue</li>
+  <li>que toutes les restrictions d'accès nécessaires, les périodes de mise en attente ou les exigences de confidentialité sont clairement documentées</li>
+  </ul>
+cnodc.approvals.pub_coord: |- 
+  <p>En approuvant la publication de ce jeu de données, vous acceptez d'avoir vérifié ce qui suit :</p>
+  <ul>
+  <li>que le jeu de données relève du champ d'application du CNDOC</li>
+  <li>que le propriétaire et le fiduciaire des données ont approuvé l'intégration et/ou la publication de ces données</li>
+  <li>que la licence choisie est appropriée pour la publication de ces données</li>
+  <li>que les données et les métadonnées respectent les normes requises</li>
+  <li>que toutes les restrictions d'accès nécessaires, périodes de réserve ou exigences de confidentialité sont clairement documentées</li>
+  <li>que tous les plans de gestion des données nécessaires, rôles, responsabilités, financements et questions de gouvernance sont convenus</li>
+  <li>que toutes les autres exigences organisationnelles pour le CNDOC ont été respectées</li>
+  </ul>
+cnodc.approvals.pub_coord_activate: |-
+  <p>En approuvant l'activation de ce jeu de données, vous acceptez d'avoir vérifié ce qui suit :</p>
+  <ul>
+  <li>que l'ensemble de données relève du champ d'application du CNDOC et, le cas échéant, de l'unité sélectionnée</li>
+  <li>que le niveau de sécurité choisi et les flux de travail sont appropriés</li>
+  </ul>
+cnodc.approvals.sysadmin: |- 
+  <p>En approuvant la publication de ce jeu de données, vous acceptez d'avoir vérifié ce qui suit :</p>
+  <ul>
+  <li>que les détails techniques de cet ensemble de données sont corrects et ne causeront pas de problèmes dans l'environnement de production</li>
+  <li>que le CNODC dispose d'une capacité de stockage suffisante pour stocker ces données</li>
+  </ul>
 
+pipeman.error.is_collection_and_is_child: "Une collection ne peut pas être enfant d'une autre collection"
 datatable.decimal: ","
 datatable.thousands: " "
 pipeman.mtrans.error.unicode_error: "Erreur de décodage UTF-8 : assurez-vous que votre fichier est codé en UTF-8"

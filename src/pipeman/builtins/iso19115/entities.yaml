@@ -1,3 +1,24 @@
+associated_resource:
+  display:
+    en: Associated Resource
+    fr:
+  validation:
+    required:
+      - association_type
+  fields:
+    data_citation:
+      type: entity_ref
+      entity_type: citation
+    metadata_citation:
+      type: entity_ref
+      entity_type: citation
+    association_type:
+      type: vocabulary
+      vocabulary_name: iso19115_ds_association_type_code
+    initiative_types:
+      type: vocabulary
+      vocabulary_name: iso19115_ds_initiative_type_code
+
 mission:
   display:
     en: Mission
