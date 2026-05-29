@@ -42,7 +42,7 @@ RUN dos2unix /usr/local/bin/pipeman
 
 COPY src/pipeman/ app/pipeman/
 COPY alembic/ app/alembic
-copy config/ app/config
+COPY config/ app/config
 COPY docker/config/ app/docker/config
 COPY static/ app/static
 COPY templates app/templates
