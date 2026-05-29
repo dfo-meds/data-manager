@@ -87,3 +87,14 @@ references:
     en: References
     fr: Références
   order: 80
+
+internal_info:
+  display:
+    en: Internal
+    fr: Internes
+  order: 50000
+  description:
+    en: This field is for internal reference only.
+    fr: Ce champ est pour référence interne seulement.
+
+

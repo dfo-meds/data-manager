@@ -101,3 +101,148 @@ cnodc_instrument_types:
       display:
         en: Dissolved Oxygen Optode
         fr: Optode d'oxygène dissous
+
+cnodc_storage_types:
+  display:
+    en: CNODC - Storage Types
+    fr: CNDOC - Types de stockage
+  uri:
+  terms:
+    azure_blob_premium:
+      display:
+        en: Azure Blob (Premium)
+    azure_blob_hot:
+      display:
+        en: Azure Blob (Hot)
+    azure_blob_cool:
+      display:
+        en: Azure Blob (Cool)
+    azure_blob_cold:
+      display:
+        en: Azure Blob (Cold)
+    azure_blob_archival:
+      display:
+        en: Azure Blob (Archival)
+    azure_file_v1_hot:
+      display:
+        en: Azure File Share (v1 Hot)
+    azure_file_v1_cool:
+      display:
+        en: Azure File Share (v1 Cool)
+    azure_file_v1_to:
+      display:
+        en: Azure File Share (v1 Optimized)
+    azure_file_v2_ssd:
+      display:
+        en: Azure File Share (v2 SSD)
+    azure_file_v2_hdd:
+      display:
+        en: Azure File Share (v2 HDD)
+    dfo_shared_drive:
+      display:
+        en: Shared Drive (DFO)
+        fr: Lecteur partagé (MPO)
+    external_hard_drive:
+      display:
+        en: External Hard Drive
+        fr: Disque dur externe
+    other:
+      display:
+        en: Other
+        fr: Autre
+
+
+cnodc_role_code:
+  display:
+    en: CNODC - Internal Roles
+    fr: CNDOC - Rôles internes
+  uri:
+  terms:
+    owner:
+      display:
+        en: Data Owner
+        fr: Propriétaire des données
+      description:
+        en: A person or organization who owns the data and can make decisions about it.
+        fr: Une personne ou une organisation qui possède les données et peut prendre des décisions à leur sujet.
+    trustee:
+      display:
+        en: Data Trustee
+        fr: Fiduciaire des données
+      description:
+        en: A person or organization who is ultimately responsible for the dataset.
+        fr: Une personne ou une organisation qui est en dernier ressort responsable du jeu de données.
+    steward:
+      display:
+        en: Data Steward
+        fr: Gestionnaire de données
+      description:
+        en: A person who is responsible for the day-to-day management of the data and can be contacted if there are issues with the data.
+        fr: Une personne responsable de la gestion quotidienne des données et qui peut être contactée en cas de problèmes avec les données.
+    cnodc_lead:
+      display:
+        en: CNODC Lead
+        fr: Responsable de CNDOC
+      description:
+        en: A person at the CNODC who is responsible for the dataset.
+        fr: Une personne au CNDOC qui est responsable du jeu de données.
+    expert:
+      display:
+        en: Expert
+        fr: Expert(e)
+      description:
+        en: A person who can provide support for the data in some form but doesn't fit another role.
+        fr: Une personne qui peut fournir un soutien pour les données sous une certaine forme mais qui ne correspond à aucun autre rôle.
+
+cnodc_compression_types:
+  display:
+    en: CNODC - Compression Types
+    fr: CNDOC - Types de compression
+  uri:
+  terms:
+    none:
+      display:
+        en: None
+        fr: Aucun
+    gzip:
+      display:
+        und: Gzip
+
+cnodc_production_units:
+  display:
+    en: CNODC - Production Units
+    fr: CNDOC - Unitées de production
+  uri:
+  terms:
+    national:
+      display:
+        en: National
+        fr: National
+    newfoundland:
+      display:
+        en: Newfoundland and Labrador
+        fr: Terre Neuve et Labrador
+    maritimes:
+      display:
+        en: Maritimes
+        fr: Maritimes
+    gulf:
+      display:
+        en: Gulf
+        fr: Golfe
+    quebec:
+      display:
+        en: Québec
+        fr: Québec
+    ontario:
+      display:
+        en: Ontario
+        fr: Ontario
+    arctic:
+      display:
+        en: Arctic
+        fr: Arctique
+    pacific:
+      display:
+        en: Pacific
+        fr: Pacifique

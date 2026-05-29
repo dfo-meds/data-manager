@@ -6,6 +6,11 @@
     "^[a-z_]*$": {
       "type": "object",
       "additionalProperties": false,
+      "patternProperties": {
+        "^description$": {
+          "$ref": "shared.json#/$defs/label"
+        }
+      },
       "properties": {
         "fields": {
           "type": "object",

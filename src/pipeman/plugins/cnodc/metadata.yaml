@@ -1,7 +1,105 @@
 internal_info:
   fields:
+    cnodc_production_units:
+      data_type: vocabulary
+      vocabulary_name: cnodc_units
+      label:
+        en: Responsible Unit
+        fr: Unité responsable
+      description:
+        en: Select the unit who is responsible for managing this data.
+        fr: Sélectionnez l'unité qui est responsable de la gestion de ces données.
+      order: 10
+      repeatable: yes
+      json_api:
+        mapping: cnodc_production_units
+    cnodc_cost_centre:
+      data_type: vocabulary
+      vocabulary_name: cnodc_units
+      order: 20
+      label:
+        en: Cost Centre
+        fr: Centre de coûts
+      description:
+        en: Select the unit who is responsible for paying for the data storage.
+        fr: Sélectionnez l'unité qui est responsable du paiement du stockage des données.
+      json_api:
+        mapping: cnodc_cost_centre
+    cnodc_responsibles:
+      data_type: inline_entity_ref
+      entity_type: cnodc_responsible_party
+      order: 30
+      label:
+        en: Internal Contacts
+        fr: Contacts internes
+      description:
+        en: Select any individuals who are responsible for this data or who are a key contact for it.
+        fr: Sélectionnez toutes les personnes qui sont responsables de ces données ou qui en sont un contact clé.
+      repeatable: yes
+      json_api:
+        mapping: cnodc_responsibles
+    data_volume:
+      data_type: multitext
+      order: 50
+      label:
+        en: Storage Volume
+        fr: Volume de stockage
+      description:
+        en: Information on how much storage volume is used by this dataset (or an estimate of it).
+        fr: Informations sur le volume de stockage utilisé par cet ensemble de données (ou une estimation de celui-ci).
+      json_api:
+        mapping: data_volume
+    cnodc_partnerships:
+      data_type: multitext
+      multilingual: true
+      order: 60
+      label:
+        en: Partners
+        fr: Partenaires
+      description:
+        en: Enter notes on any external partnerships, Memorandums of Understanding, etc that are relevant to this dataset.
+        fr: Saisissez des notes sur tous les partenariats externes, protocoles d'accord, etc., qui sont pertinents pour cet ensemble de données.
+      json_api:
+        mapping: cnodc_partnerships
+    cnodc_regulations:
+      data_type: multitext
+      multilingual: true
+      order: 70
+      label:
+        en: Regulatory Documents
+        fr: Documents réglementaires
+      description:
+        en: Enter notes on any laws, regulations, mandates, or other agreements relevant to this dataset.
+        fr: Saisissez des notes sur les lois, règlements, mandats ou autres accords pertinents à ce jeu de données.
+      json_api:
+        mapping: cnodc_regulations
+    cnodc_security_rules:
+      data_type: multitext
+      multilingual: true
+      order: 55
+      label:
+        en: Security Rules
+        fr: Règles de sécurité
+      description:
+        en: Enter any details on how the data must be handled or managed. This field is internal only and will not be published.
+        fr: Saisissez tous les détails sur la manière dont les données doivent être traitées ou gérées. Ce champ est uniquement interne et ne sera pas publié.
+      json_api:
+        mapping: cnodc_security_rules
+    cnodc_quality_control:
+      data_type: multitext
+      multilingual: true
+      order: 57
+      label:
+        en: Quality Control
+        fr: Contrôle de qualité
+      description:
+        en: Enter notes on the quality control process followed for this dataset.
+        fr: Saisissez des notes sur le processus de contrôle de qualité suivi pour cet ensemble de données.
+      json_api:
+        mapping: quality_control
     cnodc_storage_label:
       data_type: text
+      order: 51
       label:
         en: Storage Tag
         fr: Étiquette de stockage
@@ -12,6 +110,7 @@ internal_info:
         mapping: cnodc_storage_label
     cnodc_embargo_period:
       data_type: text
+      order: 52
       label:
         en: Embargo Period
         fr: Période d'embargo
@@ -22,6 +121,7 @@ internal_info:
         mapping: cnodc_embargo_period
     internal_notes:
       data_type: multitext
+      order: 900
       label:
         en: Internal Notes
         fr: Notes internes
@@ -31,21 +131,31 @@ internal_info:
       multilingual: yes
       json_api:
         mapping: internal_notes
+    detailed_storage_locations:
+      data_type: inline_entity_ref
+      entity_type: cnodc_storage_location
+      order: 700
+      label:
+        en: Related Files
+        fr: Fichiers liés
+      description:
+        en: Describe specific paths and additional storage information
+        fr: Décrire des chemins spécifiques et des informations de stockage supplémentaires
+      repeatable: yes
+      json_api:
+        mapping: detailed_storage_locations
     file_storage_location:
       data_type: multitext
+      order: 910
       label:
         en: Storage Location
         fr: Emplacement de stockage
       description:
-        en: Describe where the data is located. This field is for interal reference only.
-        fr: Décrivez où se trouvent les données. Ce champ est pour référence interne seulement.
+        en: Describe where the data is located.
+        fr: Décrivez où se trouvent les données.
       multilingual: yes
       json_api:
         mapping: file_storage_location
-  display:
-    en: Internal
-    fr: Internes
-  order: 50000
 publishing:
   fields:
     via_meds_request_form:

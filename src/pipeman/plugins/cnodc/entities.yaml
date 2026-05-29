@@ -171,3 +171,102 @@ platform:
       order: 1040
       json_api:
         mapping: other_identifiers
+
+cnodc_responsible_party:
+  display:
+    en: Responsible Party (CNODC Internal)
+    fr: Partie responsable (Interne au CNDOC)
+  is_component: yes
+  hidden: yes
+  validation:
+    - cnodc_role
+    - contact
+  fields:
+    cnodc_role:
+      data_type: vocabulary
+      vocabulary_name: cnodc_role_code
+      label:
+        en: Role
+        fr: Rôle
+      description:
+        en: Select the role most appropriate for this contact.
+        fr: Sélectionnez le rôle le plus approprié pour ce contact.
+      order: 10
+      json_api:
+        mapping: cnodc_role
+    contact:
+      data_type: entity_ref
+      entity_type: contact
+      label:
+        en: Contact
+        fr: Contact
+      order: 5
+      json_api:
+        mapping: contact
+
+
+cnodc_storage_location:
+  display:
+    en: Storage Location
+    fr: Emplacement de stockage
+  is_component: yes
+  hidden: yes
+  validation:
+  fields:
+    file_path:
+      data_type: text
+      order: 0
+      label:
+        en: File Path
+        fr: Chemin de fichier
+      description:
+        en: Enter the path to the file. If the file is on an external drive, include an identifier for the drive.
+        fr: Entrez le chemin vers le fichier. Si le fichier se trouve sur un disque externe, incluez un identifiant pour le disque.
+    storage_type:
+      data_type: vocabulary
+      vocabulary_name: cnodc_storage_types
+      order: 10
+      label:
+        en: Storage Type
+        fr: Type de stockage
+      description:
+        en: Select the type of storage used for this file.
+        fr: Sélectionnez le type de stockage utilisé pour ce fichier.
+    file_size:
+      data_type: integer
+      order: 20
+      label:
+        en: File Size
+        fr: Taille du fichier
+      description:
+        en: Enter the file size, in bytes.
+        fr: Entrez la taille du fichier, en octets.
+    compression_type:
+      data_type: vocabulary
+      vocabulary_name: cnodc_compression_types
+      order: 30
+      label:
+        en: Compression Type
+        fr: Type de compression
+      description:
+        en: Select the appropriate compression type, if relevant.
+        fr: Sélectionnez le type de compression approprié, le cas échéant.
+    created_date:
+      data_type: datetime
+      order: 40
+      label:
+        en: Creation Date
+        fr: Date de création
+      description:
+        en: Enter the date the file was created.
+        fr: Entrez la date de création du fichier.
+    notes:
+      data_type: multittext
+      order: 60
+      label:
+        en: Notes
+        fr: Notes
+      description:
+        en: Enter any additional notes about the file.
+        fr: Entrez toutes notes supplémentaires concernant le fichier.
+
