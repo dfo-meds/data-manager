@@ -634,21 +634,24 @@ class CFVocabularyManager:
             "https://docs.unidata.ucar.edu/udunits/current/udunits2-prefixes.xml",
         ]
         for link in links:
-            resp = requests.get(link)
-            tree = ET.fromstring(resp.text)
-            for prefix in tree.findall("prefix"):
-                name = prefix.find("name").text
-                value = prefix.find("value").text
-                symbol = prefix.find("symbol").text
-                terms[symbol] = {
-                    "display": {
-                        "und": name,
-                    },
-                    "description": {
-                        "en": f"Multiplied by {value}",
-                        "fr": f"Multiplié par {value}"
+            try:
+                resp = requests.get(link)
+                tree = ET.fromstring(resp.text)
+                for prefix in tree.findall("prefix"):
+                    name = prefix.find("name").text
+                    value = prefix.find("value").text
+                    symbol = prefix.find("symbol").text
+                    terms[symbol] = {
+                        "display": {
+                            "und": name,
+                        },
+                        "description": {
+                            "en": f"Multiplied by {value}",
+                            "fr": f"Multiplié par {value}"
+                        }
                     }
-                }
+            except Exception as ex:
+                self.log.exception(ex)
         self.log.info(f"Found {len(terms)} udunit prefixes")
         self.vtc.save_terms_from_dict("udunit_prefixes", terms)
 
@@ -662,30 +665,33 @@ class CFVocabularyManager:
         ]
         terms = {}
         for link in links:
-            resp = requests.get(link)
-            tree = ET.fromstring(resp.text)
-            for unit in tree.findall("unit"):
-                n = unit.find("name")
-                if n is None:
-                    n = unit.find("aliases").find("name")
-                name = n.find("singular").text
-                desc = unit.find("definition").text
-                sym = unit.find("symbol")
-                if sym is None:
-                    sym = unit.find("aliases").find("symbol")
-                symbol = sym.text if sym is not None else name
-                if symbol in terms and terms[symbol]["description"]["en"] != desc:
-                    logging.getLogger("pipeman.netcdf").warning(f"Duplicate unit name detected: {symbol}")
-                    continue
+            try:
+                resp = requests.get(link)
+                tree = ET.fromstring(resp.text)
+                for unit in tree.findall("unit"):
+                    n = unit.find("name")
+                    if n is None:
+                        n = unit.find("aliases").find("name")
+                    name = n.find("singular").text
+                    desc = unit.find("definition").text
+                    sym = unit.find("symbol")
+                    if sym is None:
+                        sym = unit.find("aliases").find("symbol")
+                    symbol = sym.text if sym is not None else name
+                    if symbol in terms and terms[symbol]["description"]["en"] != desc:
+                        logging.getLogger("pipeman.netcdf").warning(f"Duplicate unit name detected: {symbol}")
+                        continue
 
-                terms[symbol] = {
-                    "display": {
-                        "und": f"{name} [{symbol}]" if symbol != name else name,
-                    },
-                    "description": {
-                        "en": desc,
+                    terms[symbol] = {
+                        "display": {
+                            "und": f"{name} [{symbol}]" if symbol != name else name,
+                        },
+                        "description": {
+                            "en": desc,
+                        }
                     }
-                }
+            except Exception as ex:
+                self.log.exception(ex)
         self.log.info(f"Found {len(terms)} udunit units")
         self.vtc.save_terms_from_dict("udunit_units", terms)
 
