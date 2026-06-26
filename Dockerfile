@@ -5,6 +5,8 @@ FROM python:3.14.3-slim-trixie
 # Get the required libraries to compile psycopg
 RUN apt-get update
 RUN apt-get install libpq-dev build-essential dumb-init dos2unix -y
+RUN apt-get install --reinstall ca-certificates
+RUN update-ca-certificates
 
 WORKDIR /srv/metadb
 
