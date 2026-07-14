@@ -9,8 +9,8 @@ from urllib3.exceptions import ConnectTimeoutError
 from pipeman.util.errors import recoverable_batch_step, RecoverableError
 
 
-@injector.inject
 @recoverable_batch_step
+@injector.inject
 def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
     log = zrlog.get_logger("pipeman.cnodc")
     erddap_cluster = step.item_config["erddap_cluster"]

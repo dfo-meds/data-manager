@@ -28,8 +28,8 @@ def _generate_file_path(step, pname, fname, ext, ds, pdate, cfg: zr.ApplicationC
     return path_pattern
 
 
-@injector.inject
 @recoverable_batch_step
+@injector.inject
 def upload_metadata(step, context, dc: DatasetController = None, uc: UploadController = None):
     ds = dc.load_dataset(context['dataset_id'], context["revision_no"])
     pname = step.item_config['profile_name']
