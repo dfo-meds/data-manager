@@ -288,6 +288,8 @@ def core_init_app(system, app: flask.Flask, config, prom_metrics: PromMetrics = 
             gor.check_all()
         except Exception as ex:
             zrlog.get_logger("pipeman.teardown").exception("Error while refreshing object registry")
+        import gc
+        gc.collect()
 
 
     # Add the menu items and self_url() function to every template

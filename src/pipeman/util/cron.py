@@ -181,10 +181,12 @@ class CronDaemon:
             signal.signal(getattr(signal, sig_name), self._exit_signal_handler)
 
     def run_forever(self):
+        import gc
         self._setup()
         try:
             while not self.halt.is_set():
                 self._inner_loop()
+                gc.collect()
                 self.halt.wait(1)
         finally:
             self.log.debug("Cleaning up...")
