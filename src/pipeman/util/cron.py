@@ -42,7 +42,7 @@ class UniqueTaskThreadManager:
 
     def is_full(self) -> bool:
         self.reap()
-        return (self._max_threads - len(self._executing)) > 0
+        return (self._max_threads - len(self._executing)) <= 0
 
     def job_state(self, name: str):
         if name in self._executing:
