@@ -594,6 +594,8 @@ class WorkflowCronThread(CronThread):
         self._lock_time: float = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
         self._finish_delay_time = self.cfg.as_float(("pipeman", "workflow", "max_exit_delay_time_seconds"), default=5)
         self._last_reset = None
+        if self._max_threads <= 0:
+            self._max_threads = 5
         self._tasks = UniqueTaskThreadManager(app, self.halt, self._max_threads)
         self._log = zrlog.get_logger("dmd.workflow_cron")
 
@@ -608,11 +610,13 @@ class WorkflowCronThread(CronThread):
         self._tasks.wait_for_all(self._finish_delay_time)
 
     def _check_for_jobs(self):
+        self._log.debug("Checking for new jobs")
         with self.db as session:
-            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
+            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE").all():
                 if self.halt.is_set():
                     break
                 if self._tasks.is_full():
+                    self._log.debug("Task manager already full")
                     break
                 self._log.debug(f"queuing job {item.id}")
                 item.status = "BATCH_IN_PROGRESS"
