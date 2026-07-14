@@ -4,8 +4,13 @@ from autoinject import injector
 import requests
 import base64
 
+from urllib3.exceptions import ConnectTimeoutError
+
+from pipeman.util.errors import recoverable_batch_step, RecoverableError
+
 
 @injector.inject
+@recoverable_batch_step
 def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
     log = zrlog.get_logger("pipeman.cnodc")
     erddap_cluster = step.item_config["erddap_cluster"]
@@ -41,6 +46,8 @@ def notify_erddaputil_http(step, context, cfg: zr.ApplicationConfig = None):
             else:
                 step.output.append(j["message"])
         resp.raise_for_status()
+    except (requests.exceptions.Timeout, requests.exceptions.ConnectionError, TimeoutError, ConnectTimeoutError, ConnectionError) as ex:
+        raise RecoverableError(str(ex)) from ex
     except Exception as ex:
         log.notice(f"Request to POST {notify_endpoint} failed, body: [{body}]")
         raise ex

@@ -1,5 +1,8 @@
+import logging
+
 from pipeman.i18n import TranslationManager, DelayedTranslationString
 from autoinject import injector
+import typing as t
 
 
 class PipemanError(Exception):
@@ -87,3 +90,15 @@ class UnrecoverableError(_WrapperError):
 
 class TranslationNotAvailableYet(RecoverableError):
     pass
+
+
+def recoverable_batch_step(cb: t.Callable) -> t.Callable:
+    def _wrapper(step, context, *args, **kwargs):
+        try:
+            return cb(step, context, *args, **kwargs)
+        except RecoverableError as e:
+            step.output.append(str(e))
+            logging.getLogger("pipeman.batch_errors").exception("attempting to recover from exception: %s [%s]", str(e), step.item.id)
+            from pipeman.workflow.steps import ItemResult
+            return ItemResult.BATCH_DELAY
+    return _wrapper

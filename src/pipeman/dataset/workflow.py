@@ -2,6 +2,7 @@ import flask
 from autoinject import injector
 from pipeman.db import Database
 import pipeman.db.orm as orm
+from pipeman.util.errors import recoverable_batch_step
 from pipeman.workflow import ItemResult
 import datetime
 import zrlog
@@ -93,6 +94,7 @@ def return_to_draft(step, context, db: Database = None):
 
 
 @injector.inject
+@recoverable_batch_step
 def send_dataset_action_email(step: WorkflowStep, context: dict, emails: EmailController, dc: DatasetController):
     by_lang_pref = _email_list_for_step(step, context)
     if 'revision_no' in context:

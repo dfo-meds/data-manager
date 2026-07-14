@@ -1,4 +1,7 @@
 import flask
+import requests
+from azure.core.exceptions import AzureError
+from urllib3.exceptions import ConnectTimeoutError
 
 from pipeman.db import Database
 import pipeman.db.orm as orm
@@ -10,6 +13,8 @@ import pathlib
 import uuid
 import shutil
 from urllib.parse import urlparse
+
+from pipeman.util.errors import RecoverableError
 
 
 @injector.injectable_global
@@ -130,18 +135,23 @@ class UploadController:
         self.log.info(f"Uploading file to {file_path} [client: asb]")
 
         # Actually upload the file
-        blob_client = client.upload_blob(
-            name=file_path,
-            data=content,
-            metadata=metadata,
-            #length=length,
-            overwrite=True,
-            content_settings=ContentSettings(
-                content_type=content_type,
-                content_encoding=content_encoding,
-            ),
-            standard_blob_tier=storage_tier
-        )
+        try:
+            blob_client = client.upload_blob(
+                name=file_path,
+                data=content,
+                metadata=metadata,
+                #length=length,
+                overwrite=True,
+                content_settings=ContentSettings(
+                    content_type=content_type,
+                    content_encoding=content_encoding,
+                ),
+                standard_blob_tier=storage_tier
+            )
+        except AzureError as ex:
+            if ex.inner_exception is not None and isinstance(ex.inner_exception, (requests.exceptions.Timeout, requests.exceptions.ConnectionError, ConnectTimeoutError, ConnectionError, TimeoutError)):
+                raise RecoverableError(str(ex)) from ex
+            raise
         return blob_client.url
 
     def _download_from_file_share(self, storage_config, file_path: str):
@@ -203,33 +213,39 @@ class UploadController:
         if length == 0:
             length = None
 
-        # Recursively make the parent directories (if there are any)
-        path_parts = file_path.lstrip('/').split("/")
-        dir_client = None
-        for i in range(0, len(path_parts) - 1):
-            if dir_client is None:
-                dir_client = client.get_directory_client(path_parts[i])
-            else:
-                dir_client = dir_client.get_subdirectory_client(path_parts[i])
-            if not dir_client.exists():
-                dir_client.create_directory()
 
-        self.log.info(f"Uploading file to {file_path} [client: asf]")
+        try:
+            # Recursively make the parent directories (if there are any)
+            path_parts = file_path.lstrip('/').split("/")
+            dir_client = None
+            for i in range(0, len(path_parts) - 1):
+                if dir_client is None:
+                    dir_client = client.get_directory_client(path_parts[i])
+                else:
+                    dir_client = dir_client.get_subdirectory_client(path_parts[i])
+                if not dir_client.exists():
+                    dir_client.create_directory()
 
-        # Actually do the file upload
-        file_client = client.get_file_client(file_path)
-        # Length is not properly calculated yet, results in truncation. Don't use it.
-        file_client.upload_file(
-            data=content,
+            self.log.info(f"Uploading file to {file_path} [client: asf]")
+            # Actually do the file upload
+            file_client = client.get_file_client(file_path)
+            # Length is not properly calculated yet, results in truncation. Don't use it.
+            file_client.upload_file(
+                data=content,
 
-        )
+            )
 
-        # Set metadata
-        file_client.set_http_headers(content_settings=ContentSettings(
-            content_type=content_type,
-            content_encoding=content_encoding
-        ))
-        file_client.set_file_metadata(metadata)
+            # Set metadata
+            file_client.set_http_headers(content_settings=ContentSettings(
+                content_type=content_type,
+                content_encoding=content_encoding
+            ))
+            file_client.set_file_metadata(metadata)
+
+        except AzureError as ex:
+            if ex.inner_exception is not None and isinstance(ex.inner_exception, (requests.exceptions.Timeout, requests.exceptions.ConnectionError, ConnectTimeoutError, ConnectionError, TimeoutError)):
+                raise RecoverableError(str(ex)) from ex
+            raise
         return file_client.url
 
     def _safe_recursive_mkdir(self, lowest_dir, root):
