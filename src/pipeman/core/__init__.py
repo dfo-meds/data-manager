@@ -46,16 +46,16 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
         keep_entity_days = cfg.as_int(("pipeman", "retain_entity_revisions_days"), default=365)
         if keep_entity_days > 0:
             zrlog.get_logger("pipeman.entity").notice(f"Pruning unused entity versions older than {keep_entity_days}")
-            dt = datetime.datetime.now() - datetime.timedelta(days=keep_entity_days)
+            dt = datetime.datetime.now().astimezone() - datetime.timedelta(days=keep_entity_days)
             remove_revisions = []
             for ent in session.query(orm.Entity):
                 latest_rev = ent.latest_revision()
                 for rev in ent.data:
                     if latest_rev.revision_no == rev.revision_no:
                         continue
-                    if rev.modified_date >= dt:
+                    if rev.modified_date.astimezone() >= dt:
                         continue
-                    remove_revisions.append(rev.id)
+                    #remove_revisions.append(rev.id)
                 if st and st.halt.is_set():
                     break
             for chunk in _chunks(remove_revisions):

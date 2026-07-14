@@ -224,6 +224,12 @@ class WorkflowController:
             title=gettext("pipeman.workflow.page.list_items.title")
         )
 
+    def report_workflow_items(self):
+        with self.db as session:
+            for item in session.query(orm.WorkflowItem).all():
+                print(item.id, item.status, item.locked_by, item.locked_since, item.step_list, item.completed_index, item.step_output, item.context)
+
+
     def list_workflow_items_ajax(self, active_only: bool = True):
         return self._item_table(active_only).ajax_response()
 
@@ -621,20 +627,24 @@ class WorkflowCronThread(CronThread):
 
     def _reset_delayed_jobs(self, gate_time_minutes: float):
         with self.db as session:
+            self._log.debug("Releasing delayed items")
             q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'BATCH_DELAY').values({
                 'status': 'BATCH_EXECUTE'
             })
-            session.execute(q)
+            r = session.execute(q)
             session.commit()
+            self._log.debug("%s delayed items released", r.rowcount)
             if self.halt.is_set():
                 return
             gate = datetime.datetime.now() - datetime.timedelta(minutes=gate_time_minutes)
+            self._log.debug("Resetting items older than %s", gate)
             q = (
                     sa.update(orm.WorkflowItem)
                     .where(orm.WorkflowItem.status == 'BATCH_IN_PROGRESS')
                     .where(orm.WorkflowItem.locked_since < gate)
                     .values({'status': 'BATCH_EXECUTE', 'locked_since': None})
             )
-            session.execute(q)
+            res = session.execute(q)
             session.commit()
+            self._log.debug(f"%s items reset", res.rowcount)
             self._last_reset = time.monotonic()

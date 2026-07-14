@@ -3,6 +3,8 @@ import pathlib
 import click
 import yaml
 from autoinject import injector
+
+from pipeman.db import Database
 from pipeman.org import OrganizationController
 from pipeman.workflow import WorkflowController
 from pipeman.util import System
@@ -69,6 +71,12 @@ def cron():
 @click.group
 def report():
     pass
+
+@report.command
+@injector.inject
+def workflow_items(wfc: WorkflowController):
+    wfc.report_workflow_items()
+
 
 @report.command
 @click.argument('output_file')
