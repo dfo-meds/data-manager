@@ -1,5 +1,7 @@
 import flask_login
 import flask
+import zrlog
+
 import pipeman.util.flask
 import flask_wtf.file as fwf
 import json
@@ -579,21 +581,24 @@ class WorkflowCronThread(CronThread):
     @injector.construct
     def __init__(self, app):
         super().__init__(app)
-        self._sleep_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_sleep_seconds"), default=5)
+        self._sleep_interval: float = self.cfg.as_float(("pipeman", "workflow", "task_thread_sleep_seconds"), default=5)
         self._reset_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_reset_sleep_seconds"), default=300)
+        self._reset_all_on_boot = self.cfg.as_bool(("pipeman", "workflow", "task_thread_reset_all_on_boot"), default=True)
         self._max_threads = self.cfg.as_int(("pipeman", "workflow", "max_sub_threads"), default=5)
-        self._lock_time = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
+        self._lock_time: float = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
         self._finish_delay_time = self.cfg.as_float(("pipeman", "workflow", "max_exit_delay_time_seconds"), default=5)
         self._last_reset = None
         self._tasks = UniqueTaskThreadManager(app, self.halt, self._max_threads)
+        self._log = zrlog.get_logger("dmd.workflow_cron")
 
     def _run(self):
+        self._reset_delayed_jobs(0 if self._reset_all_on_boot else self._lock_time)
         while not self.halt.is_set():
-            if self._last_reset is None or (time.monotonic() - self._last_reset) > self._reset_interval:
-                self._reset_delayed_jobs()
+            if (time.monotonic() - self._last_reset) > self._reset_interval:
+                self._reset_delayed_jobs(self._lock_time)
             self._check_for_jobs()
             self._tasks.sow()
-            self.halt.wait(self._sleep_interval)
+            time.sleep(self._sleep_interval)
         self._tasks.wait_for_all(self._finish_delay_time)
 
     def _check_for_jobs(self):
@@ -601,6 +606,9 @@ class WorkflowCronThread(CronThread):
             for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE"):
                 if self.halt.is_set():
                     break
+                if self._tasks.is_full():
+                    break
+                self._log.debug(f"queuing job {item.id}")
                 item.status = "BATCH_IN_PROGRESS"
                 item.locked_since = datetime.datetime.now()
                 session.commit()
@@ -611,7 +619,7 @@ class WorkflowCronThread(CronThread):
     def _handle_batch_job(self, st, item_id, wc: WorkflowController=None):
         wc.batch_process(st, item_id)
 
-    def _reset_delayed_jobs(self):
+    def _reset_delayed_jobs(self, gate_time_minutes: float):
         with self.db as session:
             q = sa.update(orm.WorkflowItem).where(orm.WorkflowItem.status == 'BATCH_DELAY').values({
                 'status': 'BATCH_EXECUTE'
@@ -620,7 +628,7 @@ class WorkflowCronThread(CronThread):
             session.commit()
             if self.halt.is_set():
                 return
-            gate = datetime.datetime.now() - datetime.timedelta(minutes=self._lock_time)
+            gate = datetime.datetime.now() - datetime.timedelta(minutes=gate_time_minutes)
             q = (
                     sa.update(orm.WorkflowItem)
                     .where(orm.WorkflowItem.status == 'BATCH_IN_PROGRESS')
@@ -629,3 +637,4 @@ class WorkflowCronThread(CronThread):
             )
             session.execute(q)
             session.commit()
+            self._last_reset = time.monotonic()

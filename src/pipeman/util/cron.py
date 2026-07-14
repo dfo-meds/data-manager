@@ -4,6 +4,7 @@ import signal
 from pipeman.db import DatabasePool
 from pipeman.util import System
 import flask
+import typing as t
 import threading
 import zirconium as zr
 import zrlog
@@ -25,16 +26,23 @@ class UniqueTaskThreadManager:
         self._app = app
         self.halt = halt_event
         self._max_threads: int = max_threads
-        self._queued: dict[str, callable] = {}
+        self._queued: dict[str, t.Callable] = {}
         self._queued_names: list[str] = []
         self._executing: dict[str, TaskThread] = {}
+        self._log = zrlog.get_logger("dmd.uttm")
 
     def execute(self, name, callback):
         self.reap()
         if name in self._executing or name in self._queued_names:
+            self._log.info("skipping task [%s], already queued", name)
             return
+        self._log.info("queuing task [%s] to call %s", name, callback)
         self._queued[name] = callback
         self._queued_names.append(name)
+
+    def is_full(self) -> bool:
+        self.reap()
+        return (self._max_threads - len(self._executing)) > 0
 
     def job_state(self, name: str):
         if name in self._executing:
@@ -45,15 +53,20 @@ class UniqueTaskThreadManager:
 
     def sow(self):
         self.reap()
-        sow_count = min(len(self._queued_names), self._max_threads - len(self._executing))
+        if not self._queued_names:
+            self._log.debug("No tasks to queue")
+            return
+        sow_count = self._max_threads - len(self._executing)
         if sow_count > 0:
             for i in range(0, sow_count):
-                self._sow(self._queued_names[i])
+                self._sow(self._queued_names.pop(i))
                 if self.halt.is_set():
                     break
-            self._queued_names = self._queued_names[sow_count:]
+        else:
+            self._log.debug("Already at cap")
 
     def _sow(self, key: str):
+        self._log.debug("Starting job %s", key)
         t = TaskThread(self._app, self.halt, self._queued[key])
         t.start()
         del self._queued[key]
@@ -61,8 +74,10 @@ class UniqueTaskThreadManager:
     def reap(self):
         for k in self._executing:
             if self._executing[k] and self._executing[k].is_alive():
+                self._log.trace("%s is still alive", k)
                 continue
             else:
+                self._log.debug("Clearing job for %s", k)
                 del self._executing[k]
 
     def active_threads(self):
