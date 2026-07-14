@@ -57,11 +57,11 @@ class UniqueTaskThreadManager:
             self._log.debug("No tasks to queue")
             return
         sow_count = self._max_threads - len(self._executing)
-        if sow_count > 0:
-            for i in range(0, sow_count):
-                self._sow(self._queued_names.pop(i))
-                if self.halt.is_set():
-                    break
+        while sow_count > 0 and self._queued_names:
+            self._sow(self._queued_names.pop(0))
+            sow_count -= 1
+            if self.halt.is_set():
+                break
         else:
             self._log.debug("Already at cap")
 
@@ -134,7 +134,7 @@ class CronThread(threading.Thread):
 
 class PeriodicJob:
 
-    def __init__(self, name: str, callback: callable, delay_seconds: int, off_peak_only: bool = False):
+    def __init__(self, name: str, callback: t.Callable, delay_seconds: int, off_peak_only: bool = False):
         self.name = name
         self.last_executed = None
         self.callback = callback
@@ -176,11 +176,13 @@ class CronDaemon:
         self._max_cleanup_time = self.config.as_int(("pipeman", "daemon", "max_cleanup_time_seconds"), default=5)
         self._tasks = UniqueTaskThreadManager(self._app, self.halt, self._max_scheduled_tasks)
 
-    def register_cron_thread(self, cls: type, constructor: callable = None):
+    def register_cron_thread(self, cls: type, constructor: t.Callable = None):
         self._cron_thread_classes[cls] = constructor or cls
 
-    def register_periodic_job(self, name: str, callback: callable, seconds: int = 0, minutes: int = 0, hours: int = 0, days: int = 0, off_peak_only: bool = False):
-        self._periodic_jobs[name] = PeriodicJob(callback, seconds + (minutes * 60) + (hours * 3600) + (days * 3600 * 24), off_peak_only)
+    def register_periodic_job(self, name: str, callback: t.Callable, seconds: int = 0, minutes: int = 0, hours: int = 0, days: int = 0, off_peak_only: bool = False):
+        self._periodic_jobs[name] = PeriodicJob(
+            name, callback, seconds + (minutes * 60) + (hours * 3600) + (days * 3600 * 24), off_peak_only
+        )
 
     def _exit_signal_handler(self, signum, frame):
         self.log.debug(f"Received signal {signum}, attempting to halt")
@@ -230,6 +232,7 @@ class CronDaemon:
                 self._start_thread(k)
         for k in self._periodic_jobs:
             self._periodic_jobs[k].check_and_execute(self._tasks, now, is_peak)
+        self._tasks.sow()
         self.system.fire("cron", self)
         self.system.fire("cron.after", self)
 

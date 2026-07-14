@@ -91,11 +91,18 @@ def _register_cron_jobs(cron):
     cron.register_periodic_job("cleanup_translations", _cleanup_old_requests, days=1)
 
 
-@injector.inject
-def _process_trans_requests(st=None, te: "pipeman.i18n.workflow.TranslationEngine" = None):
-    te.do_translations(st)
+
+def _process_trans_requests(st=None):
+    from pipeman.i18n.workflow import TranslationEngine
+    @injector.inject
+    def _inner(te: TranslationEngine = None):
+        te.do_translations(st)
+    _inner()
 
 
-@injector.inject
-def _cleanup_old_requests(st=None, te: "pipeman.i18n.workflow.TranslationEngine" = None):
-    te.cleanup_requests(st)
+def _cleanup_old_requests(st=None):
+    from pipeman.i18n.workflow import TranslationEngine
+    @injector.inject
+    def _inner(te: TranslationEngine = None):
+        te.cleanup_requests(st)
+    _inner()

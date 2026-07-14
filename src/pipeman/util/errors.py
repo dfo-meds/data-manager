@@ -1,6 +1,5 @@
 import logging
 
-from pipeman.i18n import TranslationManager, DelayedTranslationString
 from autoinject import injector
 import typing as t
 
@@ -12,14 +11,18 @@ class PipemanError(Exception):
 class TranslatableError(PipemanError):
 
     def __init__(self, error_str_key, *subs, **kwargs):
+        from pipeman.i18n.i18n import DelayedTranslationString
         super().__init__(DelayedTranslationString(error_str_key, None, *subs, **kwargs))
 
 
 class FormValueError(ValueError, PipemanError):
 
     def __init__(self, error_str):
+        from pipeman.i18n.i18n import DelayedTranslationString
         super(ValueError, self).__init__(DelayedTranslationString(error_str))
 
+
+from pipeman.i18n.i18n import TranslationManager
 
 class MetadataError(PipemanError):
 
