@@ -106,6 +106,7 @@ class Database:
         if self._session is None:
             self._log.debug("Opening session")
             self._session = orm.Session(self.db_pool.get_engine())
+            self._session.expire_on_commit = False
             self._transaction_stack = [self._session.begin()]
         else:
             self._log.debug("Begining nested session")
