@@ -32,8 +32,7 @@ import typing as t
 
 
 def is_empty(x):
-    return x is None or x == '' or not x
-
+    return x is None or x == '' or x is False
 
 @injector.injectable
 class DatasetController:
