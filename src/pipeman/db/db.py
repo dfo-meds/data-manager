@@ -1,4 +1,6 @@
 """Provides a wrapper class around the SQLAlchemy engine that makes it easier to use."""
+import functools
+
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import zirconium as zr
@@ -6,8 +8,23 @@ from autoinject import injector
 import zrlog
 import gc
 
-from .orm import Base
+from sqlalchemy.exc import DisconnectionError, TimeoutError
 
+from .orm import Base
+import typing as t
+
+from ..util.errors import RecoverableError
+
+
+def wrap_orm_errors(cb: t.Callable) -> t.Callable:
+
+    @functools.wraps(cb)
+    def _inner(*args, **kwargs):
+        try:
+            return cb(*args, **kwargs)
+        except (TimeoutError, DisconnectionError) as e:
+            raise RecoverableError(str(e)) from e
+    return _inner
 
 class SessionWrapper:
     """Wrapper for a session to allow users to call methods on either the transaction or session object.
@@ -30,18 +47,25 @@ class SessionWrapper:
     def __getattr__(self, item):
         """Implement. __getattr___() by delegating to the transaction if possible, and then the session."""
         if hasattr(self._transaction, item):
-            return getattr(self._transaction, item)
+            x = getattr(self._transaction, item)
         else:
-            return getattr(self._session, item)
+            x = getattr(self._session, item)
+        if callable(x):
+            return wrap_orm_errors(x)
+        else:
+            return x
 
+    @wrap_orm_errors
     def commit(self):
         """Override commit() by passing it to the Database to handle."""
         self._transaction = self.db.commit_last_tx()
 
+    @wrap_orm_errors
     def rollback(self):
         """Override rollback() by passing it to the Database to handle."""
         self._transaction = self.db.rollback_last_txt()
 
+    @wrap_orm_errors
     def execute(self, statement, *args, **kwargs):
         """Pass execute() directly to the session."""
         return self._session.execute(statement, *args, **kwargs)
@@ -93,6 +117,7 @@ class Database:
         self._is_closed = False
         self._log = zrlog.get_logger("pipeman.db")
 
+    @wrap_orm_errors
     def __enter__(self) -> SessionWrapper:
         """Implement __enter__().
         Create a new session if none exists, then starts a new transaction (even
@@ -160,6 +185,7 @@ class Database:
             self._session.remove()
             self._session = None
 
+    @wrap_orm_errors
     def commit_last_tx(self) -> orm.SessionTransaction:
         """Commit the most recent transaction, close it, and start a new one."""
         if self._transaction_stack:
@@ -171,6 +197,7 @@ class Database:
                 self._transaction_stack.append(self._session.begin())
             return self._transaction_stack[-1]
 
+    @wrap_orm_errors
     def rollback_last_tx(self) -> orm.SessionTransaction:
         """Rollback the most recent transaction, close it, and start a new one."""
         if self._transaction_stack:
@@ -182,6 +209,7 @@ class Database:
                 self._transaction_stack.append(self._session.begin())
             return self._transaction_stack[-1]
 
+    @wrap_orm_errors
     def create_database(self, recreate: bool = False):
         """Create the database.
         Parameters

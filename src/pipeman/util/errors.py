@@ -5,12 +5,12 @@ import typing as t
 
 
 class PipemanError(Exception):
-    pass
+    ...
 
 
 class TranslatableError(PipemanError):
 
-    def __init__(self, error_str_key, *subs, **kwargs):
+    def __init__(self, error_str_key, *subs, is_transient: bool = False, **kwargs):
         from pipeman.i18n.i18n import DelayedTranslationString
         super().__init__(DelayedTranslationString(error_str_key, None, *subs, **kwargs))
 
@@ -30,7 +30,7 @@ class MetadataError(PipemanError):
 
     @injector.construct
     def __init__(self, error_str_key, field_name):
-        super.__init__(f"{self.tm.get_text(error_str_key)}: {field_name}")
+        super().__init__(f"{self.tm.get_text(error_str_key)}: {field_name}")
 
 
 class UserInputError(TranslatableError):

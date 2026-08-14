@@ -6,6 +6,8 @@ from enum import Enum
 import pipeman.db.orm as orm
 import typing as t
 
+from pipeman.util.errors import RecoverableError, recoverable_batch_step
+
 
 # gettext('pipeman.label.witem.step.in-progress')
 # gettext('pipeman.label.witem.step.failure')
@@ -162,6 +164,10 @@ class WorkflowStep:
             if res is False:
                 return ItemResult.FAILURE
             return res
+        except RecoverableError as ex:
+            self._log.exception(f"Error while executing step function {self.step_name}: {str(call_me)}")
+            self.output.append(f"Error calling {self.step_name}: {str(call_me)}: {str(ex)}")
+            return ItemResult.BATCH_DELAY
         except Exception as ex:
             self._log.exception(f"Error while executing step function {self.step_name}: {str(call_me)}")
             self.output.append(f"Error calling {self.step_name}: {str(call_me)}: {str(ex)}")
@@ -224,6 +230,9 @@ class WorkflowAsynchronousStep(WorkflowDelayedStep):
             if res is False:
                 res = ItemResult.FAILURE
             return self._execute_wrapper(self._post_hook, context, res)
+        except RecoverableError as e:
+            self._log.exception("Error executing async step")
+            return ItemResult.ASYNC_DELAY
         except Exception as ex:
             self._log.exception("Error executing async step")
             return ItemResult.FAILURE
