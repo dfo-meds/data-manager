@@ -183,15 +183,14 @@ class ChoiceField(Field):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._values = None
+        self._values: list[tuple[str, str | DelayedTranslationString | MultiLanguageString]] | None = None
         self._use_default_repeatable = False
 
     def _control_class(self) -> t.Callable:
         return wtf.SelectMultipleField if "repeatable" in self.field_config and self.field_config["repeatable"] else wtf.SelectField
 
     def _extra_wtf_arguments(self) -> dict:
-        from pipeman.entity import Entity
-        args = {
+        args: dict[str, t.Any] = {
             "choices": self.choices,
             "coerce": str,
             "widget": Select2Widget(
@@ -237,13 +236,13 @@ class ChoiceField(Field):
         short, long = self._find_choice(raw_value)
         return short
 
-    def choices(self):
+    def choices(self) -> list[tuple[str, str | DelayedTranslationString | MultiLanguageString]]:
         if self._values is None:
             self._values = self._build_choices()
-        return self._values
+        return self._values or []
 
-    def _build_choices(self) -> list[tuple[str, str]]:
-        v = [("", DelayedTranslationString("pipeman.common.placeholder"))]
+    def _build_choices(self) -> list[tuple[str, str | DelayedTranslationString | MultiLanguageString]]:
+        v: list[tuple[str, DelayedTranslationString | MultiLanguageString | str]] = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         for x in self.field_config["values"]:
             disp = self.field_config["values"][x]
             if isinstance(disp, dict):
@@ -494,11 +493,12 @@ class VocabularyReferenceField(ChoiceField):
         return MultiLanguageLink(link, {"und": txt}, new_tab=True)
 
     def _build_choices(self):
-        values = [("", DelayedTranslationString("pipeman.common.placeholder"))]
+        values: list[tuple[str, DelayedTranslationString | MultiLanguageString]] = [("", DelayedTranslationString("pipeman.common.placeholder"))]
         with self.db as session:
             for term in session.query(orm.VocabularyTerm).filter_by(vocabulary_name=self.field_config['vocabulary_name']):
                 dns = json.loads(term.display_names)
-                dns['und'] = term.short_name
+                if "und" not in dns or not dns["und"]:
+                    dns['und'] = term.short_name
                 values.append((term.short_name, MultiLanguageString(dns)))
         return values
 
@@ -537,7 +537,7 @@ class KeyValueForm(wtf.Form):
 
 class VocabularyTerm:
 
-    def __init__(self, term_key=None, term_label=None):
+    def __init__(self, term_key: str | None = None, term_label: MultiLanguageString | None = None):
         self._short_name = term_key
         self._display = term_label
 
@@ -545,13 +545,15 @@ class VocabularyTerm:
         return self._short_name is not None
 
     def short_name(self):
-        return self._short_name
+        return self._short_name or ""
 
-    def display(self):
-        return MultiLanguageString(json.loads(self._display)) if self._display else ""
+    def long_name(self):
+        return self._display or ""
 
     def __getitem__(self, key):
-        if key == "short_name":
+        if key in ("short_name", "short"):
             return self.short_name()
-        if key == "display":
-            return self.display()
+        elif key in ("long_name", "long", "display"):
+            return self.long_name()
+        else:
+            raise KeyError(key)

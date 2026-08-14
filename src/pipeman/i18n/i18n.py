@@ -65,7 +65,7 @@ class BaseTranslatableString:
     def __call__(self, **kwargs):
         return self.render(**kwargs)
 
-    def render(self, **kwargs):
+    def render(self, **kwargs) -> str:
         if self.format_args or self.format_kwargs:
             return self._render_str(**kwargs).format(*self.format_args, **self.format_kwargs)
         return self._render_str(**kwargs)
