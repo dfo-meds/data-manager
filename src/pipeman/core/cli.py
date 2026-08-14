@@ -16,10 +16,15 @@ import asyncio
 import csv
 
 
-@click.command
+@click.group
+def datasets(): ...
+
+
+@datasets.command
 @injector.inject
 def republish(ds_controller: DatasetController):
     ds_controller.republish()
+
 
 @click.group
 def org():
