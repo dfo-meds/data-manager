@@ -54,9 +54,13 @@ class DatasetController:
         with self.db as session:
             q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
             for dataset in q:
-                ds = self.load_dataset(dataset.id, "pub")
-                result = self.publish_dataset(ds, with_messages=False, auto_approve=True)
-                print(f"{dataset.display_name("en")}: {result}")
+                ds_data = dataset.latest_published_revision()
+                if ds_data is not None:
+                    ds = self.load_dataset(dataset.id, ds_data.revision_no)
+                    result = self.publish_dataset(ds, with_messages=False, auto_approve=True)
+                    print(f"{dataset.display_name("en")}: {result}")
+                else:
+                    print(f"{dataset.display_name("en")}: not published")
 
     def metadata_format_exists(self, profile_name, format_name):
         return self.reg.metadata_format_exists(profile_name, format_name)
