@@ -171,6 +171,9 @@ class Database:
             self._log.info(f"Database object used after cleanup called")
             self._close()
 
+    def close(self):
+        self._close()
+
     def __cleanup__(self):
         self._close()
         self._is_closed = True
