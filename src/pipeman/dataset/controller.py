@@ -54,8 +54,7 @@ class DatasetController:
         with self.db as session:
             q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
             for dataset in q:
-                pub = dataset.latest_published_revision()
-                ds = self.load_dataset(dataset.dataset_id, pub.revision_no)
+                ds = self.load_dataset(dataset.id, "pub")
                 result = self.publish_dataset(ds, with_messages=False, auto_approve=True)
                 print(f"{dataset.display_name("en")}: {result}")
 
