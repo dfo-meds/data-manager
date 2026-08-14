@@ -138,7 +138,7 @@ class Database:
         if not self._transaction_stack:
             if self._session:
                 self._log.debug("Closing session")
-                self._session.close()
+                self._session.remove()
                 self._session = None
             else:
                 self._log.info(f"Database session not set")
@@ -157,7 +157,7 @@ class Database:
             del self._transaction_stack[-1]
         if self._session:
             self._log.debug("Closing database session")
-            self._session.close()
+            self._session.remove()
             self._session = None
 
     def commit_last_tx(self) -> orm.SessionTransaction:
