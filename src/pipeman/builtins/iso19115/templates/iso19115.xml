@@ -223,10 +223,10 @@
       {% endfor %}
       {% endif %}
       {% if not is_empty(dataset['environment_desc']) %}
-      <mri:environmentDescription>{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
+      <mri:environmentDescription xsi:type="lan:PT_FreeText_PropertyType">{{ iso.render_text(dataset['environment_desc']) }}</mri:environmentDescription>
       {% endif %}
       {% if not is_empty(dataset['supplemental']) %}
-      <mri:supplementalInformation>{{ iso.render_text(dataset['supplemental']) }}</mri:supplementalInformation>
+      <mri:supplementalInformation xsi:type="lan:PT_FreeText_PropertyType">{{ iso.render_text(dataset['supplemental']) }}</mri:supplementalInformation>
       {% endif %}
     </mri:MD_DataIdentification>
   </mdb:identificationInfo>
