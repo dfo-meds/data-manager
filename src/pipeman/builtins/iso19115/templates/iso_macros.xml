@@ -719,11 +719,16 @@
         <gex:minimumValue>
           <gco:Real>{{xml_escape(extent['vertical_min'])}}</gco:Real>
         </gex:minimumValue>
+        {% else %}
+        <gex:minimumValue gco:nilReason="not provided" />
         {% endif %}
         {% if not is_empty(extent['vertical_max']) %}
         <gex:maximumValue>
           <gco:Real>{{xml_escape(extent['vertical_max'])}}</gco:Real>
         </gex:maximumValue>
+        {% else %}
+        <gex:maximumValue gco:nilReason="not provided" />
+        {% endif %}
         {% endif %}
         {% if not is_empty(extent['vertical_ref_system']) %}
         <gex:verticalCRSId>
