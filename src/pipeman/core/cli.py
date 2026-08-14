@@ -21,9 +21,10 @@ def datasets(): ...
 
 
 @datasets.command
+@click.option("--dataset", default=-1, type=int)
 @injector.inject
-def republish(ds_controller: DatasetController):
-    ds_controller.republish()
+def republish(dataset: int, ds_controller: DatasetController):
+    ds_controller.republish(dataset)
 
 
 @click.group

@@ -50,9 +50,11 @@ class DatasetController:
         self.meta_template = meta_edit_template
         self.log = zrlog.get_logger("pipeman.dataset")
 
-    def republish(self):
+    def republish(self, dataset_id: int):
         with self.db as session:
             q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
+            if dataset_id > 0:
+                q = q.filter(orm.Dataset.id == dataset_id)
             for dataset in q:
                 ds_data = dataset.latest_published_revision()
                 if ds_data is not None:
