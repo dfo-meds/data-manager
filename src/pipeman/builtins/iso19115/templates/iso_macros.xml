@@ -729,7 +729,6 @@
         {% else %}
         <gex:maximumValue gco:nilReason="not provided" />
         {% endif %}
-        {% endif %}
         {% if not is_empty(extent['vertical_ref_system']) %}
         <gex:verticalCRSId>
           {{ render_ref_system(extent['vertical_ref_system']) }}
