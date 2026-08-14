@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<mac:MI_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<mdb:MD_Metadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://standards.iso.org/iso/19115/-3/mdb/2.0 https://schemas.isotc211.org/19115/-3/mdb/2.0/mdb.xsd"
   xmlns:gml="http://www.opengis.net/gml/3.2"
   xmlns:mpc="http://standards.iso.org/iso/19115/-3/mpc/1.0"
@@ -270,4 +270,4 @@
   </mdb:acquisitionInfo>
   {% endfor %}
   {% endif %}
-</mac:MI_Metadata>
+</mdb:MD_Metadata>
