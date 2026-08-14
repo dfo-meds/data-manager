@@ -71,8 +71,8 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
         keep_old_pub_dataset_days = cfg.as_int(("pipeman", "retain_oldpub_dataset_revisions_days"), default=-1)
         if keep_dataset_days > 0 or keep_old_pub_dataset_days > 0:
             zrlog.get_logger("pipeman.dataset").notice(f"Pruning unused dataset versions older than {keep_dataset_days} and previous published datasets older than {keep_old_pub_dataset_days}")
-            unpub_gate = None if keep_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_dataset_days)
-            oldpub_gate = None if keep_old_pub_dataset_days < 0 else datetime.datetime.now() - datetime.timedelta(days=keep_old_pub_dataset_days)
+            unpub_gate = None if keep_dataset_days < 0 else datetime.datetime.now().astimezone() - datetime.timedelta(days=keep_dataset_days)
+            oldpub_gate = None if keep_old_pub_dataset_days < 0 else datetime.datetime.now().astimezone() - datetime.timedelta(days=keep_old_pub_dataset_days)
             remove_dataset_editions = []
             remove_workflow_items = []
             remove_attachments = []
