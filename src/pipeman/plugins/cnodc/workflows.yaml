@@ -9,6 +9,7 @@ dataset_publication:
       fr: Standard de CNDOC
     enabled: true
     steps:
+      - interrupt_live_flow
       - lead_publishing_notify
       - lead_approval
       - pub_coord_publishing_notify

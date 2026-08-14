@@ -424,28 +424,31 @@ class WorkflowController:
         self._handle_step_result(step, result, item, session, steps, ctx)
 
     def _handle_step_result(self, step, result, item, session, steps, ctx, st = None):
-        if step.output:
-            outputs = json.loads(item.step_output) if item.step_output else {}
-            if str(item.completed_index) in outputs:
-                outputs[str(item.completed_index)].extend([str(x) for x in step.output])
-            else:
-                outputs[str(item.completed_index)] = [str(x) for x in step.output]
-            item.step_output = json.dumps(outputs)
-        item_status, next_step = ItemResult.get_item_status_after_step(result)
-        item.status = item_status.value
-        if next_step == ItemNextAction.CONTINUE:
-            item.completed_index += 1
-            item.context = json.dumps(ctx)
-            session.commit()
-            if st is None or not st.halt.is_set():
-                self._start_next_step(item, session, steps, ctx)
-        elif next_step == ItemNextAction.FAILURE:
-            item.context = json.dumps(ctx)
-            session.commit()
-            self._handle_cleanup(item, session, steps, ctx, item.status, st=st)
+        if result is ItemResult.AUTO_APPROVE:
+            self._make_decision(item, session, True, None, True)
         else:
-            item.context = json.dumps(ctx)
-            session.commit()
+            if step.output:
+                outputs = json.loads(item.step_output) if item.step_output else {}
+                if str(item.completed_index) in outputs:
+                    outputs[str(item.completed_index)].extend([str(x) for x in step.output])
+                else:
+                    outputs[str(item.completed_index)] = [str(x) for x in step.output]
+                item.step_output = json.dumps(outputs)
+            item_status, next_step = ItemResult.get_item_status_after_step(result)
+            item.status = item_status.value
+            if next_step == ItemNextAction.CONTINUE:
+                item.completed_index += 1
+                item.context = json.dumps(ctx)
+                session.commit()
+                if st is None or not st.halt.is_set():
+                    self._start_next_step(item, session, steps, ctx)
+            elif next_step == ItemNextAction.FAILURE:
+                item.context = json.dumps(ctx)
+                session.commit()
+                self._handle_cleanup(item, session, steps, ctx, item.status, st=st)
+            else:
+                item.context = json.dumps(ctx)
+                session.commit()
 
     def _handle_cleanup(self, item, session, steps, ctx, end_state, st = None):
         if '_in_cleanup' in ctx and ctx['_in_cleanup'] and (st is None or not st.halt.is_set()):
@@ -516,13 +519,13 @@ class WorkflowController:
             item.locked_since = None
             session.commit()
 
-    def _make_decision(self, item, session, decision: bool, form=None):
+    def _make_decision(self, item, session, decision: bool, form=None, auto_approved: bool = False):
         step, steps = self._build_next_step(item)
         if step is None:
             session.commit()
-            return
+            return False
         att_id = None
-        if form.file_submission.data:
+        if form is not None and form.file_submission.data:
             att_id = self.attachments.create_attachment(
                 form.file_submission.data,
                 f"witem{item.id}",
@@ -535,7 +538,7 @@ class WorkflowController:
         dec = orm.WorkflowDecision(
             workflow_item_id=item.id,
             step_name=step.step_name,
-            decider_id=flask_login.current_user.get_id(),
+            decider_id="_auto_approver_" if auto_approved else flask.current_user.get_id(),
             decision=decision,
             decision_date=datetime.datetime.now(),
             comments=form.comments.data if form else "",

@@ -8,13 +8,18 @@ from pipeman.db import Database
 from pipeman.org import OrganizationController
 from pipeman.workflow import WorkflowController
 from pipeman.util import System
-from pipeman.dataset import MetadataRegistry
+from pipeman.dataset import MetadataRegistry, DatasetController
 from pipeman.vocab import VocabularyTermController, VocabularyRegistry
 from pipeman.entity import EntityRegistry
 from pipeman.workflow import WorkflowRegistry
 import asyncio
 import csv
 
+
+@click.command
+@injector.inject
+def republish(ds_controller: DatasetController):
+    ds_controller.republish()
 
 @click.group
 def org():

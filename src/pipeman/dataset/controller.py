@@ -50,6 +50,15 @@ class DatasetController:
         self.meta_template = meta_edit_template
         self.log = zrlog.get_logger("pipeman.dataset")
 
+    def republish(self):
+        with self.db as session:
+            q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
+            for dataset in q:
+                pub = dataset.latest_published_revision()
+                ds = self.load_dataset(dataset.dataset_id, pub.revision_no)
+                result = self.publish_dataset(ds, with_messages=False, auto_approve=True)
+                print(f"{dataset.display_name("en")}: {result}")
+
     def metadata_format_exists(self, profile_name, format_name):
         return self.reg.metadata_format_exists(profile_name, format_name)
 
@@ -514,7 +523,7 @@ class DatasetController:
                 object_type='dataset'
             )
 
-    def publish_dataset(self, dataset, with_messages: bool = True) -> str:
+    def publish_dataset(self, dataset: Dataset, with_messages: bool = True, auto_approve: bool = False) -> str:
         self.log.info(f"Publishing dataset {dataset.dataset_id}")
         status, _ = self.workflow.start_workflow(
             "dataset_publication",
@@ -522,7 +531,8 @@ class DatasetController:
             {
                 "dataset_id": dataset.dataset_id,
                 "metadata_id": dataset.metadata_id,
-                "revision_no": dataset.revision_no
+                "revision_no": dataset.revision_no,
+                "auto_approve": auto_approve,
             },
             dataset.dataset_id
         )

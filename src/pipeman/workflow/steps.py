@@ -68,6 +68,7 @@ class ItemResult(Enum):
     REMOTE_EXECUTE_REQUIRED = "remote_required"
     BATCH_DELAY = "batch_delay"
     ASYNC_DELAY = "async_delay"
+    AUTO_APPROVE = "auto_approve"
 
     @staticmethod
     def interpret_result(res):
@@ -98,6 +99,8 @@ class ItemResult(Enum):
             return StepStatus.ASYNC_DELAY, ItemNextAction.NO_ACTION
         elif res == ItemResult.ASYNC_EXECUTE:
             return StepStatus.ASYNC_EXECUTE, ItemNextAction.NO_ACTION
+        elif res == ItemResult.AUTO_APPROVE:
+            return StepStatus.IN_PROGRESS, ItemNextAction.AUTO_APPROVE
 
 
 class ItemNextAction:
@@ -105,6 +108,7 @@ class ItemNextAction:
     CONTINUE = 0
     NO_ACTION = 1
     FAILURE = 2
+    AUTO_APPROVE = 3
 
 
 class WorkflowStep:
@@ -272,6 +276,12 @@ class WorkflowGateStep(WorkflowDelayedStep):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs, execute_response=ItemResult.DECISION_REQUIRED)
+
+    def _execute(self, context: dict) -> ItemResult:
+        if "auto_approve" in context and context["auto_approve"]:
+            return ItemResult.AUTO_APPROVE
+        else:
+            return super()._execute(context)
 
     def complete(self, decision: bool, context: dict) -> ItemResult:
         res = ItemResult.SUCCESS if decision else ItemResult.CANCELLED
