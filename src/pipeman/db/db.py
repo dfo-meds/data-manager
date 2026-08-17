@@ -86,7 +86,7 @@ class Database:
     def __init__(self):
         """Implement __init__()."""
         self._session = None
-        self._transaction_stack = []
+        self._transaction_stack: list[orm.SessionTransaction] = []
         self._is_closed = False
         self.engine = None
         self._log = zrlog.get_logger("pipeman.db")
@@ -166,7 +166,8 @@ class Database:
     def _close(self):
         while self._transaction_stack:
             self._log.debug("Autorolling back transaction")
-            self._transaction_stack[-1].rollback()
+            if self._transaction_stack[-1].is_active:
+                self._transaction_stack[-1].rollback()
             del self._transaction_stack[-1]
         if self._session:
             self._log.debug("Closing database session")
