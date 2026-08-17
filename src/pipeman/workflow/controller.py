@@ -517,7 +517,6 @@ class WorkflowController:
                 self._handle_step_result(step, result, item, session, steps, ctx, st=st)
                 item.locked_since = None
             session.commit()
-            session.expunge(item)
 
     def _make_decision(self, item, session, decision: bool, form=None, auto_approved: bool = False):
         step, steps = self._build_next_step(item)
