@@ -185,7 +185,8 @@ class Database:
     def commit_last_tx(self) -> orm.SessionTransaction:
         """Commit the most recent transaction, close it, and start a new one."""
         if self._transaction_stack:
-            self._transaction_stack[-1].commit()
+            if self._transaction_stack[-1].is_active:
+                self._transaction_stack[-1].commit()
             del self._transaction_stack[-1]
             if self._transaction_stack:
                 self._transaction_stack.append(self._session.begin_nested())
@@ -197,7 +198,8 @@ class Database:
     def rollback_last_tx(self) -> orm.SessionTransaction:
         """Rollback the most recent transaction, close it, and start a new one."""
         if self._transaction_stack:
-            self._transaction_stack[-1].rollback()
+            if self._transaction_stack[-1].is_active:
+                self._transaction_stack[-1].rollback()
             del self._transaction_stack[-1]
             if self._transaction_stack:
                 self._transaction_stack.append(self._session.begin_nested())
