@@ -66,9 +66,8 @@ class UniqueTaskThreadManager:
 
     def _sow(self, key: str):
         self._log.debug("Starting job %s", key)
-        t = TaskThread(self._app, self.halt, self._queued[key])
+        t = TaskThread(self._app, self.halt, self._queued.pop(key))
         t.start()
-        del self._queued[key]
 
     def reap(self):
         for k in self._executing:
