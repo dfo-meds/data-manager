@@ -510,13 +510,12 @@ class WorkflowController:
                 self._log.warning(f"Item ID {item_id} requested but not found")
                 return
             step, steps = self._build_next_step(item)
-            if step is None:
-                session.commit()
-                return
-            ctx = self._build_context(item)
-            result = step.batch(ctx)
-            self._handle_step_result(step, result, item, session, steps, ctx, st=st)
-            item.locked_since = None
+            if step is not None:
+                self._log.info("Batching processing item %s", item_id)
+                ctx = self._build_context(item)
+                result = step.batch(ctx)
+                self._handle_step_result(step, result, item, session, steps, ctx, st=st)
+                item.locked_since = None
             session.commit()
             session.expunge(item)
 

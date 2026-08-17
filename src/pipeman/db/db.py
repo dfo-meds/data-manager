@@ -90,6 +90,12 @@ class Database:
         self._is_closed = False
         self.engine = None
         self._log = zrlog.get_logger("pipeman.db")
+        self._maker = None
+
+    def get_maker(self) -> orm.sessionmaker:
+        if self._maker is None:
+            self._maker = orm.sessionmaker(bind=self.get_engine())
+        return self._maker
 
     def get_engine(self):
         if self.engine is None:
@@ -110,8 +116,7 @@ class Database:
         """
         if self._session is None:
             self._log.debug("Opening session")
-            self._session = orm.Session(self.get_engine())
-            self._session.expire_on_commit = False
+            self._session = self.get_maker()()
             self._transaction_stack = [self._session.begin()]
         else:
             self._log.debug("Begining nested session")
@@ -167,6 +172,9 @@ class Database:
             self._log.debug("Closing database session")
             self._session.close()
             self._session = None
+        if self._maker:
+            self._maker.close_all()
+            self._maker= None
         if self.engine is not None:
             self._log.debug("Closing database connection pool")
             self.engine.dispose()
