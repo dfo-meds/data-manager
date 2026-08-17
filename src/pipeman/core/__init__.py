@@ -59,7 +59,6 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
                     #remove_revisions.append(rev.id)
                 if st and st.halt.is_set():
                     break
-                session.expunge(ent)
             for chunk in _chunks(remove_revisions):
                 if st and st.halt.is_set():
                     break
@@ -97,7 +96,6 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
                     remove_dataset_editions.append(rev.id)
                 if st and st.halt.is_set():
                     break
-                session.expunge(ds)
             for chunk in _chunks(remove_dataset_editions, 100):
                 if st and st.halt.is_set():
                     break
