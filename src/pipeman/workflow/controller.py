@@ -625,7 +625,6 @@ class WorkflowCronThread(CronThread):
                 item.locked_since = datetime.datetime.now()
                 session.commit()
                 item_id = int(item.id)
-                session.expunge(item)
                 self._tasks.execute(f'workflow_item{item_id}',
                                     functools.partial(self._handle_batch_job, item_id=item_id))
 
