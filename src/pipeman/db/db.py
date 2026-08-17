@@ -116,11 +116,10 @@ class Database:
         """
         if self._session is None:
             self._session = self.get_maker()()
-        else:
-            try:
-                self._transaction_stack.append(self._session.begin())
-            except InvalidRequestError:
-                self._transaction_stack.append(self._session.begin_nested())
+        try:
+            self._transaction_stack.append(self._session.begin())
+        except InvalidRequestError:
+            self._transaction_stack.append(self._session.begin_nested())
         return SessionWrapper(self, self._session, self._transaction_stack[-1])
 
     def __exit__(self, exc_type, exc_val, exc_tb):
