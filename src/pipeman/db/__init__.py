@@ -1,8 +1,8 @@
-from .db import Database, DatabasePool
+from .db import Database
 from .obj_registry import BaseObjectRegistry
 from autoinject import injector as _injector
 
 
 @_injector.inject
-def on_gunicorn_worker_exit(db_pool: DatabasePool = None):
-    db_pool.close()
+def on_gunicorn_worker_exit(db: Database):
+    db.close()

@@ -59,6 +59,7 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
                     #remove_revisions.append(rev.id)
                 if st and st.halt.is_set():
                     break
+                session.expunge(ent)
             for chunk in _chunks(remove_revisions):
                 if st and st.halt.is_set():
                     break
@@ -96,19 +97,20 @@ def _do_cleanup(st = None, db: Database = None, cfg: zr.ApplicationConfig = None
                     remove_dataset_editions.append(rev.id)
                 if st and st.halt.is_set():
                     break
-            for chunk in _chunks(remove_dataset_editions, 1000):
+                session.expunge(ds)
+            for chunk in _chunks(remove_dataset_editions, 100):
                 if st and st.halt.is_set():
                     break
                 q = sa.delete(orm.MetadataEdition).where(orm.MetadataEdition.id.in_(chunk))
                 session.execute(q)
                 session.commit()
-            for chunk in _chunks(remove_attachments, 1000):
+            for chunk in _chunks(remove_attachments, 100):
                 if st and st.halt.is_set():
                     break
                 q = sa.delete(orm.Attachment).where(orm.Attachment.id.in_(chunk))
                 session.execute(q)
                 session.commit()
-            for chunk in _chunks(remove_workflow_items, 1000):
+            for chunk in _chunks(remove_workflow_items, 100):
                 if st and st.halt.is_set():
                     break
                 q = sa.delete(orm.WorkflowDecision).where(orm.WorkflowDecision.workflow_item_id.in_(chunk))

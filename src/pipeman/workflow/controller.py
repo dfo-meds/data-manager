@@ -518,6 +518,7 @@ class WorkflowController:
             self._handle_step_result(step, result, item, session, steps, ctx, st=st)
             item.locked_since = None
             session.commit()
+            session.expunge(item)
 
     def _make_decision(self, item, session, decision: bool, form=None, auto_approved: bool = False):
         step, steps = self._build_next_step(item)
@@ -593,12 +594,12 @@ class WorkflowCronThread(CronThread):
         self._sleep_interval: float = self.cfg.as_float(("pipeman", "workflow", "task_thread_sleep_seconds"), default=5)
         self._reset_interval = self.cfg.as_float(("pipeman", "workflow", "task_thread_reset_sleep_seconds"), default=300)
         self._reset_all_on_boot = self.cfg.as_bool(("pipeman", "workflow", "task_thread_reset_all_on_boot"), default=True)
-        self._max_threads = self.cfg.as_int(("pipeman", "workflow", "max_sub_threads"), default=5)
+        self._max_threads = self.cfg.as_int(("pipeman", "workflow", "max_sub_threads"), default=3)
         self._lock_time: float = self.cfg.as_float(("pipeman", "workflow", "task_lock_time_minutes"), default=30)  # minutes
         self._finish_delay_time = self.cfg.as_float(("pipeman", "workflow", "max_exit_delay_time_seconds"), default=5)
         self._last_reset = None
         if self._max_threads <= 0:
-            self._max_threads = 5
+            self._max_threads = 3
         self._tasks = UniqueTaskThreadManager(app, self.halt, self._max_threads)
         self._log = zrlog.get_logger("dmd.workflow_cron")
 
@@ -625,8 +626,10 @@ class WorkflowCronThread(CronThread):
                 item.status = "BATCH_IN_PROGRESS"
                 item.locked_since = datetime.datetime.now()
                 session.commit()
-                self._tasks.execute(f'workflow_item{item.id}',
-                                    functools.partial(self._handle_batch_job, item_id=item.id))
+                item_id = int(item.id)
+                session.expunge(item)
+                self._tasks.execute(f'workflow_item{item_id}',
+                                    functools.partial(self._handle_batch_job, item_id=item_id))
 
     @injector.inject
     def _handle_batch_job(self, st, item_id, wc: WorkflowController=None):

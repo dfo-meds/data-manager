@@ -71,33 +71,6 @@ class SessionWrapper:
         return self._session.execute(statement, *args, **kwargs)
 
 
-@injector.injectable_global
-class DatabasePool:
-
-    config: zr.ApplicationConfig = None
-
-    @injector.construct
-    def __init__(self):
-        self.engine = None
-        self._log = zrlog.get_logger("pipeman.db_pool")
-
-    def get_engine(self):
-        if self.engine is None:
-            self._log.debug(f"Opening database connection pool")
-            self.engine = sa.engine_from_config(self.config["database"], prefix="")
-        return self.engine
-
-    def __cleanup__(self):
-        self.close()
-
-    def close(self):
-        if self.engine is not None:
-            self._log.debug("Closing database connection pool")
-            self.engine.dispose()
-            del self.engine
-            self.engine = None
-
-
 @injector.injectable
 class Database:
     """Represents the database that the application is connected to.
@@ -107,7 +80,7 @@ class Database:
     connection_string: CONNECTION_STRING
     """
 
-    db_pool: DatabasePool = None
+    config: zr.ApplicationConfig = None
 
     @injector.construct
     def __init__(self):
@@ -115,7 +88,14 @@ class Database:
         self._session = None
         self._transaction_stack = []
         self._is_closed = False
+        self.engine = None
         self._log = zrlog.get_logger("pipeman.db")
+
+    def get_engine(self):
+        if self.engine is None:
+            self._log.debug(f"Opening database connection pool")
+            self.engine = sa.engine_from_config(self.config["database"], prefix="")
+        return self.engine
 
     @wrap_orm_errors
     def __enter__(self) -> SessionWrapper:
@@ -130,7 +110,7 @@ class Database:
         """
         if self._session is None:
             self._log.debug("Opening session")
-            self._session = orm.Session(self.db_pool.get_engine())
+            self._session = orm.Session(self.get_engine())
             self._session.expire_on_commit = False
             self._transaction_stack = [self._session.begin()]
         else:
@@ -187,6 +167,10 @@ class Database:
             self._log.debug("Closing database session")
             self._session.remove()
             self._session = None
+        if self.engine is not None:
+            self._log.debug("Closing database connection pool")
+            self.engine.dispose()
+            self.engine = None
 
     @wrap_orm_errors
     def commit_last_tx(self) -> orm.SessionTransaction:

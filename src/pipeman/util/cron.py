@@ -1,7 +1,6 @@
 import datetime
 import signal
 
-from pipeman.db import DatabasePool
 from pipeman.util import System
 import flask
 import typing as t
@@ -260,7 +259,7 @@ class CronDaemon:
         self._cron_threads[k].start()
 
     @injector.inject
-    def _cleanup(self, db_pool: DatabasePool = None):
+    def _cleanup(self):
         self.system.fire("cron.stop.before", self)
         cleanup_start = time.monotonic()
         self.halt.set()
@@ -286,4 +285,3 @@ class CronDaemon:
                 self.log.notice("All threads completed, exiting")
         self.system.fire("cron.stop", self)
         self.system.fire("cron.stop.after", self)
-        db_pool.close()
