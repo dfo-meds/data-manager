@@ -283,12 +283,11 @@ def core_init_app(system, app: flask.Flask, config, prom_metrics: PromMetrics = 
 
     @app.teardown_request
     @injector.inject
-    def refresh_object_registry(exc, gor: GlobalObjectRegistry = None, db: Database = None):
+    def refresh_object_registry(exc, gor: GlobalObjectRegistry = None):
         try:
             gor.check_all()
         except Exception as ex:
             zrlog.get_logger("pipeman.teardown").exception("Error while refreshing object registry")
-        db.close()
         import gc
         gc.collect()
 
