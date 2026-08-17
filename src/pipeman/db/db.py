@@ -8,7 +8,7 @@ from autoinject import injector
 import zrlog
 import gc
 
-from sqlalchemy.exc import DisconnectionError, TimeoutError
+from sqlalchemy.exc import DisconnectionError, TimeoutError, InvalidRequestError
 
 from .orm import Base
 import typing as t
@@ -115,12 +115,12 @@ class Database:
             An instance of SessionWrapper that wraps both the session and transaction object.
         """
         if self._session is None:
-            self._log.debug("Opening session")
             self._session = self.get_maker()()
-            self._transaction_stack = [self._session.begin()]
         else:
-            self._log.debug("Begining nested session")
-            self._transaction_stack.append(self._session.begin_nested())
+            try:
+                self._transaction_stack.append(self._session.begin())
+            except InvalidRequestError:
+                self._transaction_stack.append(self._session.begin_nested())
         return SessionWrapper(self, self._session, self._transaction_stack[-1])
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -190,10 +190,11 @@ class Database:
             if self._transaction_stack[-1].is_active:
                 self._transaction_stack[-1].commit()
             del self._transaction_stack[-1]
-            if self._transaction_stack:
-                self._transaction_stack.append(self._session.begin_nested())
-            else:
+            try:
                 self._transaction_stack.append(self._session.begin())
+            except InvalidRequestError:
+                self._transaction_stack.append(self._session.begin_nested())
+
             return self._transaction_stack[-1]
 
     @wrap_orm_errors
@@ -203,10 +204,10 @@ class Database:
             if self._transaction_stack[-1].is_active:
                 self._transaction_stack[-1].rollback()
             del self._transaction_stack[-1]
-            if self._transaction_stack:
-                self._transaction_stack.append(self._session.begin_nested())
-            else:
+            try:
                 self._transaction_stack.append(self._session.begin())
+            except InvalidRequestError:
+                self._transaction_stack.append(self._session.begin_nested())
             return self._transaction_stack[-1]
 
     @wrap_orm_errors
