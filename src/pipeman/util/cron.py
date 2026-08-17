@@ -13,8 +13,6 @@ from autoinject import injector
 import enum
 
 
-DEBUG_MEMORY = 1
-
 class TaskState(enum.Enum):
 
     EXECUTING = 2
@@ -43,8 +41,7 @@ class UniqueTaskThreadManager:
         self._queued_names.append(name)
 
     def is_full(self) -> bool:
-        self.reap()
-        return (self._max_threads - len(self._executing)) <= 0
+        return (self._max_threads - len(self._executing) - len(self._queued_names)) <= 0
 
     def job_state(self, name: str):
         if name in self._executing:
@@ -166,9 +163,6 @@ class CronDaemon:
 
     @injector.construct
     def __init__(self):
-        if DEBUG_MEMORY:
-            import tracemalloc
-            tracemalloc.start()
         self._app = self.system.main_app
         self.halt = threading.Event()
         self._cron_threads: dict[str, CronThread] = {}
@@ -206,23 +200,11 @@ class CronDaemon:
     def run_forever(self):
         import gc
         self._setup()
-        last_time = time.monotonic()
-        last_snapshot = None
         try:
             while not self.halt.is_set():
                 self._inner_loop()
                 gc.collect()
                 self.halt.wait(1)
-                delay = time.monotonic() - last_time
-                if delay > 10:
-                    if DEBUG_MEMORY:
-                        snapshot = tracemalloc.take_snapshot()
-                        if last_snapshot is not None:
-                            top_stats = snapshot.compare_to(snapshot)
-                            for stat in top_stats[:10]:
-                                print(stat)
-                        last_snapshot = snapshot
-                    last_time = time.monotonic()
         finally:
             self.log.debug("Cleaning up...")
             self._cleanup()
