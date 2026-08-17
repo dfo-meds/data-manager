@@ -120,6 +120,7 @@ class CronThread(threading.Thread):
     def startup(self):
         pass
 
+    @injector.as_thread_run
     def run(self):
         with self.app.app_context():
             self._run()
