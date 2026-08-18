@@ -70,6 +70,29 @@ sysadmin_approval:
   step_type: gate
   require_permission: approvals.sysadmin
   access_check: "pipeman.dataset.dataset_gate_step_access"
+notify_all_complete:
+  label:
+    en: Notify On Completion (Admins)
+    fr: Avertir que c'est terminé (administrateur)
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - sysadmin
+    - pub_coord
+  limit_to_assigned: false
+  skip_on_autopublish: false
+notify_assigned_complete:
+  label:
+    en: Notify On Completion (Assigned)
+    fr: Avertir que c'est terminé (assignée)
+  step_type: batch
+  action: pipeman.dataset.workflow.send_dataset_action_email
+  email_template: item_approval
+  send_groups:
+    - tech_lead
+  limit_to_assigned: true
+  skip_on_autopublish: true
 sysadmin_publishing_notify:
   label:
     en: Notify System Administrators

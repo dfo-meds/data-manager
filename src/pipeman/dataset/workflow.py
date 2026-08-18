@@ -96,7 +96,7 @@ def return_to_draft(step, context, db: Database = None):
 @recoverable_batch_step
 @injector.inject
 def send_dataset_action_email(step: WorkflowStep, context: dict, emails: EmailController, dc: DatasetController):
-    if context.get("skip_on_autopublish", False) and context.get("auto_approve", False):
+    if step.item_config.get("skip_on_autopublish", False) and context.get("auto_approve", False):
         return None
     by_lang_pref = _email_list_for_step(step, context)
     if 'revision_no' in context:

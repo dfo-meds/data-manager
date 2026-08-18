@@ -27,6 +27,8 @@ dataset_publication:
       - erddap_iso19115_metadata_upload_live
       - erddap_metadata_upload_live
       - erddap_notify_live
+      - notify_all_complete
+      - notify_assigned_complete
   cnodc_direct_publish:
     label:
       en: CNODC Direct Publication
