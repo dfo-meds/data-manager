@@ -107,6 +107,7 @@ def send_dataset_action_email(step: WorkflowStep, context: dict, emails: EmailCo
         'dataset_id': context['dataset_id'],
         'revision_no': context['revision_no'] if 'revision_no' in context else 'N/A',
         'dataset_name': dataset.label(),
+        'dataset_link': flask.url_for("core.view_dataset", dataset_id=context["dataset_id"], _external=True),
         'view_link': flask.url_for('core.view_item', item_id=step.item.id, _external=True),
         'approve_link': flask.url_for('core.approve_item', item_id=step.item.id, _external=True),
         'cancel_link': flask.url_for('core.cancel_item', item_id=step.item.id, _external=True),

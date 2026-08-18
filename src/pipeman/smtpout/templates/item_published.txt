@@ -1,0 +1,3 @@
+The publication of "{{dataset_name}}" is complete.
+
+Dataset: {{dataset_link}}

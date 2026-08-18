@@ -1,1 +1,3 @@
 {{requested_by}} has automatically published the dataset "{{dataset_name}}".
+
+Dataset: {{dataset_link}}
