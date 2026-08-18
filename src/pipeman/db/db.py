@@ -94,7 +94,7 @@ class Database:
 
     def get_maker(self) -> orm.sessionmaker:
         if self._maker is None:
-            self._maker = orm.sessionmaker(bind=self.get_engine())
+            self._maker = orm.sessionmaker(bind=self.get_engine(), expire_on_commit=False)
         return self._maker
 
     def get_engine(self):
