@@ -425,9 +425,11 @@ class WorkflowController:
 
     def _handle_step_result(self, step, result, item, session, steps, ctx, st = None):
         if result is ItemResult.AUTO_APPROVE:
+            self._log.debug("Auto-approving step for %s", item.id)
             self._make_decision(item, session, True, None, True)
         else:
             if step.output:
+                self._log.debug("Updating output for %s", item.id)
                 outputs = json.loads(item.step_output) if item.step_output else {}
                 if str(item.completed_index) in outputs:
                     outputs[str(item.completed_index)].extend([str(x) for x in step.output])
@@ -437,30 +439,36 @@ class WorkflowController:
             item_status, next_step = ItemResult.get_item_status_after_step(result)
             item.status = item_status.value
             if next_step == ItemNextAction.CONTINUE:
+                self._log.debug("Continuing to next step for %s", item.id)
                 item.completed_index += 1
                 item.context = json.dumps(ctx)
                 session.commit()
                 if st is None or not st.halt.is_set():
                     self._start_next_step(item, session, steps, ctx)
             elif next_step == ItemNextAction.FAILURE:
+                self._log.debug("Step failure for %s", item.id)
                 item.context = json.dumps(ctx)
                 session.commit()
                 self._handle_cleanup(item, session, steps, ctx, item.status, st=st)
             else:
+                self._log.debug("No action [%s] for %s", next_step, item.id)
                 item.context = json.dumps(ctx)
                 session.commit()
 
     def _handle_cleanup(self, item, session, steps, ctx, end_state, st = None):
         if '_in_cleanup' in ctx and ctx['_in_cleanup'] and (st is None or not st.halt.is_set()):
+            self._log.debug("Continuing cleanup for %s", item.id)
             self._start_next_step(item, session, steps, ctx)
             return
-        cleanup_steps = None
         try:
             cleanup_steps = self.reg.cleanup_step_list(item.workflow_type, item.workflow_name)
         except WorkflowNotFoundError as ex:
+            self._log.warning("No workflow found for %s", item.id)
             return
         if not cleanup_steps:
+            self._log.debug("No cleanup steps for %s", item.id)
             return
+        self._log.debug("Cleaning up %s", item.id)
         next_index = len(steps)
         steps.extend(cleanup_steps)
         # Remember the original state so we can set it when we finish
@@ -479,6 +487,7 @@ class WorkflowController:
         steps = steps or json.loads(item.step_list)
         next_index = item.completed_index
         if next_index >= len(steps):
+            self._log.debug("Workflow for %s is complete", item.id)
             ctx = self._build_context(item, ctx)
             if '_cleanup_set_state' in ctx and ctx['_cleanup_set_state']:
                 item.status = ctx['_cleanup_set_state']
@@ -487,18 +496,23 @@ class WorkflowController:
             return None, None
         step = self.reg.construct_step(steps[next_index])
         step.set_item(item)
+        self._log.debug("Next step for %s is %s", item.id, step)
         return step, steps
 
     def _start_next_step(self, item, session, steps=None, ctx=None):
         try:
             step, steps = self._build_next_step(item, steps, ctx)
             if step is None:
+                self._log.debug("No next step for %s, probably finished", item.id)
                 session.commit()
-                return
-            ctx = self._build_context(item, ctx)
-            result = step.execute(ctx)
-            self._handle_step_result(step, result, item, session, steps, ctx)
+            else:
+                ctx = self._build_context(item, ctx)
+                self._log.debug("Executing %s for item %s", step, item.id)
+                result = step.execute(ctx)
+                self._log.debug("Execution result for %s is %s", item.id, result)
+                self._handle_step_result(step, result, item, session, steps, ctx)
         except StepNotFoundError as ex:
+            self._log.exception("Missing step for %s", item.id)
             item.status = StepStatus.FAILURE.value
             item.step_output = f"StepNotFound: {str(ex)}"
             session.commit()
@@ -506,25 +520,30 @@ class WorkflowController:
     def batch_process(self, st, item_id):
         with self.db as session:
             item = session.query(orm.WorkflowItem).filter_by(id=item_id).first()
-            if not item:
-                self._log.warning(f"Item ID {item_id} requested but not found")
-                return
-            step, steps = self._build_next_step(item)
-            if step is not None:
-                self._log.info("Batching processing item %s", item_id)
-                ctx = self._build_context(item)
-                result = step.batch(ctx)
-                self._handle_step_result(step, result, item, session, steps, ctx, st=st)
-                item.locked_since = None
-            session.commit()
+            if item:
+                step, steps = self._build_next_step(item)
+                if step is not None:
+                    self._log.info("Batching processing item %s [%s]", item_id, step)
+                    ctx = self._build_context(item)
+                    result = step.batch(ctx)
+                    self._log.info("Batch process result for item %s is %s", item_id, result)
+                    self._handle_step_result(step, result, item, session, steps, ctx, st=st)
+                    item.locked_since = None
+                    session.commit()
+                else:
+                    self._log.warning("Could not build next step for %s", item_id)
+            else:
+                self._log.warning("Item ID %s requested but not found", item_id)
 
     def _make_decision(self, item, session, decision: bool, form=None, auto_approved: bool = False):
         step, steps = self._build_next_step(item)
         if step is None:
+            self._log.warning("No next step for %s while making a decision", item.id)
             session.commit()
             return False
         att_id = None
         if form is not None and form.file_submission.data:
+            self._log.debug("Saving upload")
             att_id = self.attachments.create_attachment(
                 form.file_submission.data,
                 f"witem{item.id}",
@@ -534,6 +553,7 @@ class WorkflowController:
             if att_id is None:
                 flasht("pipeman.workflow.error.file_upload_error", "error")
                 return False
+        self._log.debug("Saving workflow decision item")
         dec = orm.WorkflowDecision(
             workflow_item_id=item.id,
             step_name=step.step_name,
@@ -546,6 +566,7 @@ class WorkflowController:
         session.add(dec)
         ctx = self._build_context(item)
         result = step.complete(decision, ctx)
+        self._log.debug("Result of completing gate step %s for %s is %s", step, item.id, result)
         self._handle_step_result(step, result, item, session, steps, ctx)
         session.commit()
         return True
