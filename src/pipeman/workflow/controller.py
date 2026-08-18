@@ -310,11 +310,11 @@ class WorkflowController:
             allow_order=True,
             formatter=format_datetime
         ))
-        dt.add_column(CustomDisplayColumn(
-            "object_link",
-            gettext("pipeman.label.witem.object_link"),
-            self._format_object_link
-        ))
+        #dt.add_column(CustomDisplayColumn(
+        #    "object_link",
+        #    gettext("pipeman.label.witem.object_link"),
+        #    self._format_object_link
+        #))
         dt.add_column(ActionListColumn(
             action_callback=self._build_action_list
         ))
