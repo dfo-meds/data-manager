@@ -15,6 +15,7 @@ lead_publishing_notify:
   send_groups:
     - tech_lead
   limit_to_assigned: true
+  skip_on_autopublish: true
 coordinator_approval:
   label:
     en: Regional Coordinator Approval
@@ -39,6 +40,7 @@ pub_coord_activation_notify:
   send_groups:
     - pub_coord
   limit_to_assigned: false
+  skip_on_autopublish: true
 autopush_notify:
   label:
     en: Notifcation - Automatic Push
@@ -60,6 +62,7 @@ pub_coord_publishing_notify:
   send_groups:
     - pub_coord
   limit_to_assigned: false
+  skip_on_autopublish: true
 sysadmin_approval:
   label:
     en: System Administrator Approval
@@ -77,6 +80,7 @@ sysadmin_publishing_notify:
   send_groups:
     - sysadmin
   limit_to_assigned: false
+  skip_on_autopublish: true
 erddap_iso19115_metadata_upload_live:
   label:
     en: ERDDAP Metadata Upload (Live)

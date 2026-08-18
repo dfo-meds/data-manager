@@ -29,6 +29,9 @@
         "limit_to_assigned": {
           "type": "boolean"
         },
+        "skip_on_autopublish": {
+          "type": "boolean"
+        },
         "profile_name":  {
           "type": "string"
         },
