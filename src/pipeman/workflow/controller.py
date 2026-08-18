@@ -635,7 +635,7 @@ class WorkflowCronThread(CronThread):
     def _check_for_jobs(self):
         self._log.debug("Checking for new jobs")
         with self.db as session:
-            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE").all():
+            for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE").order_by(orm.WorkflowItem.created_date).all():
                 if self.halt.is_set():
                     self._log.debug("Halt flag is set")
                     break
