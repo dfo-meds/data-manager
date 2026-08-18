@@ -616,6 +616,7 @@ class WorkflowCronThread(CronThread):
         with self.db as session:
             for item in session.query(orm.WorkflowItem).filter_by(status="BATCH_EXECUTE").all():
                 if self.halt.is_set():
+                    self._log.debug("Halt flag is set")
                     break
                 if self._tasks.is_full():
                     self._log.debug("Task manager already full")
@@ -623,8 +624,8 @@ class WorkflowCronThread(CronThread):
                 self._log.debug(f"queuing job {item.id}")
                 item.status = "BATCH_IN_PROGRESS"
                 item.locked_since = datetime.datetime.now()
-                session.commit()
                 item_id = int(item.id)
+                session.commit()
                 self._tasks.execute(f'workflow_item{item_id}',
                                     functools.partial(self._handle_batch_job, item_id=item_id))
 
@@ -643,7 +644,7 @@ class WorkflowCronThread(CronThread):
             self._log.debug("%s delayed items released", r.rowcount)
             if self.halt.is_set():
                 return
-            gate = datetime.datetime.now() - datetime.timedelta(minutes=gate_time_minutes)
+            gate = datetime.datetime.now().astimezone() - datetime.timedelta(minutes=gate_time_minutes)
             self._log.debug("Resetting items older than %s", gate)
             q = (
                     sa.update(orm.WorkflowItem)
