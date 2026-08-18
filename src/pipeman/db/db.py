@@ -58,12 +58,12 @@ class SessionWrapper:
     @wrap_orm_errors
     def commit(self):
         """Override commit() by passing it to the Database to handle."""
-        self._transaction = self.db.commit_last_tx()
+        self._session.commit()
 
     @wrap_orm_errors
     def rollback(self):
         """Override rollback() by passing it to the Database to handle."""
-        self._transaction = self.db.rollback_last_txt()
+        self._session.rollback()
 
     @wrap_orm_errors
     def execute(self, statement, *args, **kwargs):
@@ -91,6 +91,7 @@ class Database:
         self.engine = None
         self._log = zrlog.get_logger("pipeman.db")
         self._maker = None
+        self._sessions: list[orm.Session] = []
 
     def get_maker(self) -> orm.sessionmaker:
         if self._maker is None:
@@ -114,6 +115,8 @@ class Database:
         SessionWrapper
             An instance of SessionWrapper that wraps both the session and transaction object.
         """
+        self._sessions.append(self.get_maker()())
+        return SessionWrapper(self, self._sessions[-1], None)
         if self._session is None:
             self._session = self.get_maker()()
         try:
@@ -134,6 +137,15 @@ class Database:
             Exception traceback
         If there is an error, the transaction is rolled back, otherwise it is committed.
         """
+        if self._sessions:
+            if self._sessions[-1].in_transaction():
+                if exc_type:
+                    self._sessions[-1].commit()
+                else:
+                    self._sessions[-1].rollback()
+            self._sessions[-1].close()
+            del self._sessions[-1]
+        return
         if self._transaction_stack:
             if exc_type:
                 self._log.debug("Automatic rollback")
@@ -176,6 +188,17 @@ class Database:
             self._log.exception("Error while clearing transaction stack")
         finally:
             self._transaction_stack.clear()
+
+        try:
+            while self._sessions:
+                if self._sessions[-1].in_transaction():
+                    self._sessions[-1].rollback()
+                self._sessions[-1].close()
+                del self._sessions[-1]
+        except Exception:
+            self._log.exception("Error while clearing session stack")
+        finally:
+            self._sessions.clear()
         try:
             if self._session:
                 self._log.debug("Closing database session")
