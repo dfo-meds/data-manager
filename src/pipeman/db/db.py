@@ -165,24 +165,34 @@ class Database:
         self._is_closed = True
 
     def _close(self):
-        if self._session and self._session._transaction:
-            while self._transaction_stack:
-                self._log.debug("Autorolling back transaction")
-                if self._transaction_stack[-1].is_active:
-                    self._transaction_stack[-1].rollback()
-                del self._transaction_stack[-1]
-        else:
+        try:
+            if self._session and self._session._transaction:
+                while self._transaction_stack:
+                    self._log.debug("Autorolling back transaction")
+                    if self._transaction_stack[-1].is_active:
+                        self._transaction_stack[-1].rollback()
+                    del self._transaction_stack[-1]
+        except Exception:
+            self._log.exception("Error while clearing transaction stack")
+        finally:
             self._transaction_stack.clear()
-        if self._session:
-            self._log.debug("Closing database session")
-            self._session.close()
+        try:
+            if self._session:
+                self._log.debug("Closing database session")
+                self._session.close()
+        except Exception:
+            self._log.exception("Error while clearing session")
+        finally:
             self._session = None
         if self._maker:
-            self._maker.close_all()
-            self._maker= None
-        if self.engine is not None:
-            self._log.debug("Closing database connection pool")
-            self.engine.dispose()
+            self._maker = None
+        try:
+            if self.engine is not None:
+                self._log.debug("Closing database connection pool")
+                self.engine.dispose()
+        except Exception:
+            self._log.exception("Error while closing database engine")
+        finally:
             self.engine = None
 
     @wrap_orm_errors
