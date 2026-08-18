@@ -6,6 +6,7 @@ from autoinject import injector
 
 from pipeman.db import Database
 from pipeman.org import OrganizationController
+from pipeman.smtpout import EmailController
 from pipeman.workflow import WorkflowController
 from pipeman.util import System
 from pipeman.dataset import MetadataRegistry, DatasetController
@@ -77,6 +78,22 @@ def cron():
     from pipeman.util.cron import CronDaemon
     daemon = CronDaemon()
     daemon.run_forever()
+
+@click.group
+def test():
+    pass
+
+@test.command
+@injector.inject
+def email(email: EmailController = None):
+    email.send_email(
+        email.admin_emails,
+        "test",
+        "test",
+        "<p><strong>test</strong></p>",
+        immediate=True
+    )
+
 
 
 @click.group
