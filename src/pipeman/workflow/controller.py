@@ -344,7 +344,7 @@ class WorkflowController:
                 continue
             yield ItemDisplayWrapper(item), self._build_action_list(item, True)
 
-    def _has_access(self, item, mode, log_access_failure: bool = False):
+    def _has_access(self, item: orm.WorkflowItem, mode, log_access_failure: bool = False):
         step, steps = None, None
         try:
             step, steps = self._build_next_step(item)
@@ -362,7 +362,7 @@ class WorkflowController:
             return False
         ctx = json.loads(item.context)
         if mode == 'view':
-            if step.allow_view(ctx):
+            if item.status == "DECISION_REQUIRED" and step.allow_view(ctx):
                 return True
             else:
                 if log_access_failure:
@@ -377,7 +377,7 @@ class WorkflowController:
                 return False
         else:
             if log_access_failure:
-                self._log.warning(f"Unrecognized acces mode {mode}")
+                self._log.warning(f"Unrecognized access mode {mode}")
         return False
 
     def cleanup_old_items(self, st = None):
