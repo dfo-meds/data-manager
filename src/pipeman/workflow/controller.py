@@ -362,14 +362,14 @@ class WorkflowController:
             return False
         ctx = json.loads(item.context)
         if mode == 'view':
-            if item.status == "DECISION_REQUIRED" and step.allow_view(ctx):
+            if step.allow_view(ctx):
                 return True
             else:
                 if log_access_failure:
                     self._log.warning(f"View access to {item.id} denied")
                 return False
         elif mode == 'decide':
-            if step.allow_decision(ctx):
+            if item.status == "DECISION_REQUIRED" and step.allow_decision(ctx):
                 return True
             else:
                 if log_access_failure:
