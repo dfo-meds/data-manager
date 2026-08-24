@@ -33,7 +33,7 @@ def _hotfix_glider_gzip_suffix():
                                 raise TypeError("expecting dict")
                             if "url" not in web_link:
                                 raise ValueError("missing url key")
-                            web_link["url"] = web_link["url"] + ".gz"
+                            web_link["url"]["und"] = web_link["url"]["und"] + ".gz"
                             ec.save_entity(distributor)
                             print(f"updated entity {distributor.container_id} for {dataset.id}")
     _call_me()
