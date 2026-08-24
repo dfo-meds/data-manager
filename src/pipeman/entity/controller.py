@@ -480,16 +480,22 @@ class EntityController:
             ent.is_deprecated = False
             session.commit()
 
-    def load_entity(self, entity_type, entity_id, revision_no=None):
+    def load_entity(self, entity_type, entity_id, revision_no=None, session=None):
         self._log.debug(f"Loading entity {entity_type}.{entity_id}.{revision_no or '-'}")
-        with self.db as session:
-            if entity_type is None:
-                e = session.query(orm.Entity).filter_by(id=entity_id).first()
-            else:
-                e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
-            if not e:
-                raise EntityNotFoundError(entity_id)
-            return self._load_entity_from_orm(e, revision_no)
+        if session is None:
+            with self.db as session:
+                return self._load_entity(entity_type, entity_id, revision_no, session)
+        else:
+            return self._load_entity(entity_type, entity_id, revision_no, session)
+
+    def _load_entity(self, entity_type, entity_id, revision_no, session):
+        if entity_type is None:
+            e = session.query(orm.Entity).filter_by(id=entity_id).first()
+        else:
+            e = session.query(orm.Entity).filter_by(entity_type=entity_type, id=entity_id).first()
+        if not e:
+            raise EntityNotFoundError(entity_id)
+        return self._load_entity_from_orm(e, revision_no)
 
     def _load_entity_from_orm(self, e, revision_no=None):
         entity_data = e.specific_revision(revision_no) if revision_no else e.latest_revision()

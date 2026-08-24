@@ -25,7 +25,7 @@ def _hotfix_glider_gzip_suffix():
                 if ds_data is not None:
                     ds = dc.load_dataset(dataset.id, ds_data.revision_no, session)
                     distributors: ComponentReferenceField = ds.get_field("distributors")
-                    for distributor in distributors.data():
+                    for distributor in distributors.data(session=session):
                         if distributor.guid == "distribute_openglider":
                             web_link_field: InlineEntityReferenceField = distributor.get_field("primary_web_link")
                             web_link = web_link_field.value
