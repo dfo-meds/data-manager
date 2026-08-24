@@ -506,58 +506,64 @@ class EntityController:
                 guid=e.guid
             )
 
-    def save_entity(self, entity: Entity):
+    def save_entity(self, entity: Entity, session=None):
         self._log.info(f"Saving entity {entity.container_id}")
-        with self.db as session:
-            if entity.guid:
-                check_query = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid)
-                if entity.parent_id and entity.parent_type:
-                    check_query = check_query.filter_by(parent_id=entity.parent_id, parent_type=entity.parent_type)
-                check = check_query.first()
-                if check and (entity.container_id is None or not entity.container_id == check.id):
-                    self._log.error("Entity GUID already exists [%s], found [%s;%s;%s;%s] while inserting [%s;%s;%s;%s]",
-                                    entity.guid,
-                                    check.id, check.entity_type, check.parent_id, check.parent_type,
-                                    entity.container_id, entity.entity_type, entity.parent_id, entity.parent_type)
-                    raise UserInputError("pipeman.entity.error.guid_already_exists")
-            if entity.container_id is not None:
-                e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
-                e.display_names = json.dumps(entity.display_names())
-                e.organization_id = int(entity.organization_id) if entity.organization_id else None
-                e.parent_id = entity.parent_id if entity.parent_id else None
-                e.parent_type = entity.parent_type if entity.parent_type else None
-                e.guid = entity.guid if entity.guid else None
-            else:
-                e = orm.Entity(
-                    entity_type=entity.entity_type,
-                    display_names=json.dumps(entity.display_names()),
-                    organization_id=int(entity.organization_id) if entity.organization_id else None,
-                    parent_id=entity.parent_id,
-                    parent_type=entity.parent_type,
-                    created_by=flask_login.current_user.user_id,
-                    guid=entity.guid
+        if session is None:
+            with self.db as session:
+                self._save_entity(entity, session)
+        else:
+            self._save_entity(entity, session)
+
+    def _save_entity(self, entity: Entity, session):
+        if entity.guid:
+            check_query = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, guid=entity.guid)
+            if entity.parent_id and entity.parent_type:
+                check_query = check_query.filter_by(parent_id=entity.parent_id, parent_type=entity.parent_type)
+            check = check_query.first()
+            if check and (entity.container_id is None or not entity.container_id == check.id):
+                self._log.error("Entity GUID already exists [%s], found [%s;%s;%s;%s] while inserting [%s;%s;%s;%s]",
+                                entity.guid,
+                                check.id, check.entity_type, check.parent_id, check.parent_type,
+                                entity.container_id, entity.entity_type, entity.parent_id, entity.parent_type)
+                raise UserInputError("pipeman.entity.error.guid_already_exists")
+        if entity.container_id is not None:
+            e = session.query(orm.Entity).filter_by(entity_type=entity.entity_type, id=entity.container_id).first()
+            e.display_names = json.dumps(entity.display_names())
+            e.organization_id = int(entity.organization_id) if entity.organization_id else None
+            e.parent_id = entity.parent_id if entity.parent_id else None
+            e.parent_type = entity.parent_type if entity.parent_type else None
+            e.guid = entity.guid if entity.guid else None
+        else:
+            e = orm.Entity(
+                entity_type=entity.entity_type,
+                display_names=json.dumps(entity.display_names()),
+                organization_id=int(entity.organization_id) if entity.organization_id else None,
+                parent_id=entity.parent_id,
+                parent_type=entity.parent_type,
+                created_by=flask_login.current_user.user_id,
+                guid=entity.guid
+            )
+            session.add(e)
+        session.commit()
+        entity.container_id = e.id
+        retries = 5
+        while retries > 0:
+            retries -= 1
+            try:
+                rev_nos = [ed.revision_no for ed in session.query(orm.EntityData).filter_by(entity_id=e.id)]
+                next_rev = 1 if not rev_nos else max(rev_nos) + 1
+                ed = orm.EntityData(
+                    entity_id=e.id,
+                    revision_no=next_rev,
+                    data=json.dumps(entity.values()),
+                    created_by=flask_login.current_user.user_id
                 )
-                session.add(e)
-            session.commit()
-            entity.container_id = e.id
-            retries = 5
-            while retries > 0:
-                retries -= 1
-                try:
-                    rev_nos = [ed.revision_no for ed in session.query(orm.EntityData).filter_by(entity_id=e.id)]
-                    next_rev = 1 if not rev_nos else max(rev_nos) + 1
-                    ed = orm.EntityData(
-                        entity_id=e.id,
-                        revision_no=next_rev,
-                        data=json.dumps(entity.values()),
-                        created_by=flask_login.current_user.user_id
-                    )
-                    session.add(ed)
-                    session.commit()
-                    break
-                # Trap an error in case two people try to insert at the same time
-                except IntegrityError:
-                    continue
+                session.add(ed)
+                session.commit()
+                break
+            # Trap an error in case two people try to insert at the same time
+            except IntegrityError:
+                continue
 
 
 class EntityForm(SecureBaseForm):

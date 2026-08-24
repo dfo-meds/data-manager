@@ -33,8 +33,13 @@ def _hotfix_glider_gzip_suffix():
                                 raise TypeError("expecting dict")
                             if "url" not in web_link:
                                 raise ValueError("missing url key")
-                            web_link["url"]["und"] = web_link["url"]["und"] + ".gz"
-                            ec.save_entity(distributor)
+                            if web_link["url"]["und"].endswith(".gz.gz"):
+                                web_link["url"]["und"] = web_link["url"]["und"][:-3]
+                            elif not web_link["url"]["und"].endswith(".gz"):
+                                web_link["url"]["und"] = web_link["url"]["und"] + ".gz"
+                            else:
+                                continue
+                            ec.save_entity(distributor, session)
                             print(f"updated entity {distributor.container_id} for {dataset.id}")
     _call_me()
 
