@@ -75,10 +75,12 @@ def _hotfix_glider_sensor_serials():
                     ds = dc.load_dataset(dataset.id, ds_data.revision_no)
                     instruments: EntityReferenceField = ds.get_field("instruments")
                     if instruments is None or instruments.value is None:
+                        print("no value for instruments")
                         continue
                     if not isinstance(instruments.value, list):
                         raise TypeError("expecting list")
                     if not any(x in instruments.value or str(x) in instruments.value for x in serial_no_replacements):
+                        print("no replacements found")
                         continue
                     new_value = []
                     for instrument_id in instruments.value:
@@ -91,6 +93,7 @@ def _hotfix_glider_sensor_serials():
                     instruments.value = new_value
                     dc.save_metadata(ds)
                     dc.publish_dataset(dc.load_dataset(dataset.id), False, True)
+                    print(f"republished {dataset.id}")
     _call_me()
 
 
@@ -104,7 +107,7 @@ def hotfix(hotfix_name: str):
     if hotfix_name not in hotfix_map:
         print(f"No hotfix named {hotfix_name}")
         exit(1)
-    user_in = input(f"Are you sure you want to apply hotfix {hotfix_name}? y/n")
+    user_in = input(f"Are you sure you want to apply hotfix {hotfix_name} [y/n]: ")
     if user_in.lower() == "y":
         hotfix_map[hotfix_name]()
         print("Complete")
