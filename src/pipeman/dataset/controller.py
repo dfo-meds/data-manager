@@ -608,23 +608,29 @@ class DatasetController:
             if ds:
                 return self._build_dataset(ds, ds.latest_revision())
 
-    def load_dataset(self, dataset_id, revision_no=None):
+    def load_dataset(self, dataset_id, revision_no=None, session=None):
         self.log.debug(f"Loading dataset {dataset_id}-{revision_no if revision_no else '_latest_'}")
-        with self.db as session:
-            with BlockTimer("pipeman_dataset_load_dataset_object", "Time to load a dataset object"):
-                ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
-            if not ds:
-                raise DatasetNotFoundError(dataset_id)
-            with BlockTimer("pipeman_dataset_load_dataset_revision", "Time to load the revision of the dataset object"):
-                if revision_no == "pub":
-                    ds_data = ds.latest_published_revision()
-                elif revision_no:
-                    ds_data = ds.specific_revision(revision_no)
-                else:
-                    ds_data = ds.latest_revision()
-            if revision_no and not ds_data:
-                raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
-            return self._build_dataset(ds, ds_data)
+        if session is None:
+            with self.db as session:
+                return self._load_dataset(dataset_id, revision_no, session)
+        else:
+            return self._load_dataset(dataset_id, revision_no, session)
+
+    def _load_dataset(self, dataset_id, revision_no, session):
+        with BlockTimer("pipeman_dataset_load_dataset_object", "Time to load a dataset object"):
+            ds = session.query(orm.Dataset).filter_by(id=dataset_id).first()
+        if not ds:
+            raise DatasetNotFoundError(dataset_id)
+        with BlockTimer("pipeman_dataset_load_dataset_revision", "Time to load the revision of the dataset object"):
+            if revision_no == "pub":
+                ds_data = ds.latest_published_revision()
+            elif revision_no:
+                ds_data = ds.specific_revision(revision_no)
+            else:
+                ds_data = ds.latest_revision()
+        if revision_no and not ds_data:
+            raise DatasetNotFoundError(f"{dataset_id}#{revision_no}")
+        return self._build_dataset(ds, ds_data)
 
     def _build_dataset(self, ds, ds_data):
         with BlockTimer("pipeman_dataset_load_dataset_build", "Time to build a dataset object itself"):

@@ -20,10 +20,10 @@ def _hotfix_glider_gzip_suffix():
     def _call_me(dc: DatasetController = None, ec: EntityController = None):
         with dc.db as session:
             q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
-            for dataset in q:
+            for dataset in q.all():
                 ds_data = dataset.latest_published_revision()
                 if ds_data is not None:
-                    ds = dc.load_dataset(dataset.id, ds_data.revision_no)
+                    ds = dc.load_dataset(dataset.id, ds_data.revision_no, session)
                     distributors: ComponentReferenceField = ds.get_field("distributors")
                     for distributor in distributors.data():
                         if distributor.guid == "distribute_openglider":
@@ -74,7 +74,7 @@ def _hotfix_glider_sensor_serials():
     def _call_me(dc: DatasetController = None):
         with dc.db as session:
             q = session.query(orm.Dataset).filter(orm.Dataset.is_deprecated == False)
-            for dataset in q:
+            for dataset in q.all():
                 ds_data = dataset.latest_published_revision()
                 if ds_data is not None:
                     ds = dc.load_dataset(dataset.id, ds_data.revision_no)

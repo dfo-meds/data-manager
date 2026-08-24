@@ -510,9 +510,9 @@ class EntityController:
         self._log.info(f"Saving entity {entity.container_id}")
         if session is None:
             with self.db as session:
-                self._save_entity(entity, session)
+                return self._save_entity(entity, session)
         else:
-            self._save_entity(entity, session)
+            return self._save_entity(entity, session)
 
     def _save_entity(self, entity: Entity, session):
         if entity.guid:
