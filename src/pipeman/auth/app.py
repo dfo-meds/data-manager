@@ -105,6 +105,7 @@ def edit_user(user_id, duc: DatabaseUserController = None):
     return duc.edit_user_form(user_id)
 
 
+
 @users.i18n_route("/users/<int:user_id>/reset", methods=['GET', 'POST'])
 @require_permission("auth_db.reset")
 @injector.inject

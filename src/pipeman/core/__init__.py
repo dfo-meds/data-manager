@@ -21,6 +21,7 @@ def init(system):
     system.register_cli("pipeman.core.cli", "core")
     system.register_cli("pipeman.core.cli", "test")
     system.register_cli("pipeman.core.cli", "datasets")
+    system.register_cli("pipeman.core.hotfixes", "hotfix")
     system.register_blueprint("pipeman.core.app", "base")
     system.register_blueprint("pipeman.core.app", "core")
     system.on_app_init(core_init_app)

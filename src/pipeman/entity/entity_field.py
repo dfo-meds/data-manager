@@ -60,7 +60,7 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
     def display(self):
         return markupsafe.Markup(self._build_html_content())
 
-    def data(self, **kwargs):
+    def data(self, **kwargs) -> list[Entity]:
         _data = []
         for c, _, _ in self.component_list():
             if c.is_deprecated:
