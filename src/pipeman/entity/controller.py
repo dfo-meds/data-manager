@@ -413,11 +413,17 @@ class EntityController:
             query = self._entity_query(entity_type, session)
             return self._entity_iterator(query)
 
-    def list_components(self, entity_type, parent_id, parent_type):
-        with self.db as session:
-            query = self._entity_query(entity_type, session)
-            query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
-            return self._entity_iterator(query, True)
+    def list_components(self, entity_type, parent_id, parent_type, session=None):
+        if session is None:
+            with self.db as session:
+                return self._list_components(entity_type, parent_id, parent_type, session)
+        else:
+            return self._list_components(entity_type, parent_id, parent_type, session)
+
+    def _list_components(self, entity_type, parent_id, parent_type, session=None):
+        query = self._entity_query(entity_type, session)
+        query = query.filter_by(parent_id=parent_id, parent_type=parent_type)
+        return self._entity_iterator(query, True)
 
     def _entity_query(self, entity_type, session):
         q = session.query(orm.Entity).filter_by(entity_type=entity_type)

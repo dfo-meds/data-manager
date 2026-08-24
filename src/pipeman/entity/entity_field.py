@@ -62,10 +62,10 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
 
     def data(self, **kwargs) -> list[Entity]:
         _data = []
-        for c, _, _ in self.component_list():
+        for c, _, _ in self.component_list(session=kwargs.get("session", None)):
             if c.is_deprecated:
                 continue
-            ent = self.ec.load_entity(c.entity_type, c.id)
+            ent = self.ec.load_entity(c.entity_type, c.id, session=kwargs.get("session", None))
             if ent:
                 _data.append(ent)
         return _data
@@ -84,10 +84,10 @@ class ComponentReferenceField(EntityRefMixin, HtmlContentField):
             entities=self.component_list()
         )
 
-    def component_list(self):
+    def component_list(self, session=None):
         if not self.parent_id:
             return
-        return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type)
+        return self.ec.list_components(self.field_config["entity_type"], self.parent_id, self.parent_type, session=session)
 
     def set_from_external(self, external_value, external_container_setter: t.Callable):
         if not self.parent_id:
