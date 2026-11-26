@@ -165,7 +165,7 @@ class MetadataRegistry:
             if isinstance(formatter['preprocess'], str):
                 yield load_object(formatter['preprocess'])
             else:
-                for x in formatter['proeprocess']:
+                for x in formatter['preprocess']:
                     yield load_object(x)
 
     def metadata_formats(self, profile_name):
