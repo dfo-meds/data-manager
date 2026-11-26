@@ -114,10 +114,12 @@
             <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js" integrity="sha512-2FAQqknslN8pS8aF3mK9Iiene7xFUawTM2h/aloIG4tkbXbzTlUimIfZvt6gLNTJbknJ4jwBKGWIQ4uq0DIPeA==" crossorigin="anonymous"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='field_list.js')}}"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='jqueryui/jquery-ui.min.js')}}"></script>
+            <script type="text/javascript" src="/static/maintenance.js"></script>
             <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='sesstimeout.js')}}"></script>
         {% endblock %}
         {% block customScripts %}
         <script type="text/javascript" nonce="{{csp_nonce('script-src')}}">
+            load_maintenance("dmd", "{{language}}");
 
             let overflow_error = '{{'pipeman.error.html_js_overflow' | gettext}}';
             let underflow_error = '{{'pipeman.error.html_js_underflow' | gettext}}';
@@ -270,6 +272,8 @@
                         {% endif %}
                     {% endwith %}
                     <h1>{{title}}</h1>
+                    <div id="maintenance" style="display: none;"></div>
+                    <div id="maintenance_dmd" style="display: none;"></div>
                     <div class="inner_content">
                         <div class="main_content">
                             {% block content %}
